@@ -1,4 +1,4 @@
-Si estas leyendo esto, felicidades, pudiste copiar el repositorio! :)
+Si estas leyendo esto en tu compu, felicidades, pudiste copiar el repositorio! :)
 
 El proyecto inicial está estructurado de la siguiente manera:
 
