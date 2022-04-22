@@ -2,8 +2,7 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 
 
-class Registrarse(qtw.QMainWindow):
-    # hacemos el init
+class RegistrarEs(qtw.QWidget):
    def __init__(self):
       super().__init__()
 
@@ -28,7 +27,8 @@ class Registrarse(qtw.QMainWindow):
       entry6.setEchoMode(qtw.QLineEdit.EchoMode.Password)
       entry7.setEchoMode(qtw.QLineEdit.EchoMode.Password)
 
-      button=qtw.QPushButton("Registrarse")
+      self.submit=qtw.QPushButton("Registrarse")
+      self.button2=qtw.QPushButton("¿Ya estás registrado? Inicia sesión")
 
       widgets = (label1, label2, label3, label4, label5, label6, label7,
          entry1, entry2, entry3, entry4, entry5, entry6, entry7)
@@ -41,9 +41,7 @@ class Registrarse(qtw.QMainWindow):
          widgets[i].setFixedWidth(120)
          layout.addWidget(widgets[i], i-5, 1)
 
-      layout.addWidget(button, 14, 0, 1, 0)
-      widget = qtw.QWidget()
-      widget.setLayout(layout)
+      layout.addWidget(self.submit, 14, 0, 1, 0)
+      layout.addWidget(self.button2, 15, 0, 1, 0)
 
-      self.setCentralWidget(widget)
-      self.resize(300, 300)
+      self.setLayout(layout)
