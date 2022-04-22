@@ -39,9 +39,10 @@ class RegistrarEs(ui.registroUI_es.RegistrarEs):
 class MainWindow(qtw.QMainWindow):
     def __init__(self):
         super().__init__()
-        lang=Lang()
+        lang=ui.langUI.Lenguaje()
         self.setCentralWidget(lang)
-        lang.button1.clicked.connect(self.setCentralWidget(IngresarEs))
+        lang.button1.clicked.connect(lambda:self.setCentralWidget(ui.IngresarUI_en))
+
 if __name__ == "__main__":
 
     window = MainWindow()
