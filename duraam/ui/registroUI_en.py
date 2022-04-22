@@ -2,20 +2,20 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 
 
-class RegistrarEs(qtw.QWidget):
+class RegistrarEn(qtw.QWidget):
    def __init__(self):
       super().__init__()
 
-      title = qtw.QLabel("Registrarse")
+      title = qtw.QLabel("Register")
       title.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
 
-      label1 = qtw.QLabel("Nombre: ")
-      label2 = qtw.QLabel("Apellido: ")
+      label1 = qtw.QLabel("Forename: ")
+      label2 = qtw.QLabel("Surname: ")
       label3 = qtw.QLabel("DNI: ")
-      label4 = qtw.QLabel("Usuario: ")
-      label5 = qtw.QLabel("Email: ")
-      label6 = qtw.QLabel("Contraseña: ")
-      label7 = qtw.QLabel("Repetir contraseña: ")
+      label4 = qtw.QLabel("Username: ")
+      label5 = qtw.QLabel("Mail: ")
+      label6 = qtw.QLabel("Password: ")
+      label7 = qtw.QLabel("Confirm Password: ")
 
       entry1 = qtw.QLineEdit()
       entry2 = qtw.QLineEdit()
@@ -27,8 +27,8 @@ class RegistrarEs(qtw.QWidget):
       entry6.setEchoMode(qtw.QLineEdit.EchoMode.Password)
       entry7.setEchoMode(qtw.QLineEdit.EchoMode.Password)
 
-      self.submit=qtw.QPushButton("Registrarse")
-      self.button1=qtw.QPushButton("¿Ya estás registrado? Inicia sesión")
+      self.submit=qtw.QPushButton("Register")
+      self.button1=qtw.QPushButton("¿Already registered? Log In")
 
       widgets = (label1, label2, label3, label4, label5, label6, label7,
          entry1, entry2, entry3, entry4, entry5, entry6, entry7)
