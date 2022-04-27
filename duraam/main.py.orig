@@ -11,6 +11,13 @@ import ui.registroUI_en
 class MainWindow(qtw.QMainWindow):
     def __init__(self):
         super().__init__()
+<<<<<<< HEAD
+        lang=Lang()
+        self.setCentralWidget(lang)
+        lang.button1.clicked.connect(self.setCentralWidget(IngresarEs))
+
+if __name__ == "__main__":
+=======
 
         # Creamos la colección de pantallas
         stack=qtw.QStackedWidget()
@@ -40,8 +47,9 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(stack)
 
 
-    app = qtw.QApplication(sys.argv)
 if __name__ == "__main__":
+    app = qtw.QApplication(sys.argv)
+>>>>>>> f80877a5ae9963f16f4d668f8c7738a8cd2f8a6e
     window = MainWindow()
     window.show()
     app.exec()
