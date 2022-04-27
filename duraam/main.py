@@ -26,7 +26,7 @@ class MainWindow(qtw.QMainWindow):
         for i in [self.lang,self.ingresarEs,self.ingresarEn,self.registrarEs,self.registrarEn]:
             stack.addWidget(i)
 
-        # Añadimos la funcionalidad a los botones
+        # Añadimos la funcionalidad a los botones: hacemos que cambien las distintas pantallas del 
         self.lang.button1.clicked.connect(lambda:stack.setCurrentIndex(1))
         self.lang.button2.clicked.connect(lambda:stack.setCurrentIndex(2))
         self.ingresarEs.button1.clicked.connect(lambda:stack.setCurrentIndex(3))
@@ -40,7 +40,8 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(stack)
 
 
-    app = qtw.QApplication(sys.argv)
+app = qtw.QApplication(sys.argv)
+
 if __name__ == "__main__":
     window = MainWindow()
     window.show()
