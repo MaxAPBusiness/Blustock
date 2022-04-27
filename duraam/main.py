@@ -42,8 +42,8 @@ class MainWindow(qtw.QMainWindow):
         lang=Lang()
         self.setCentralWidget(lang)
         lang.button1.clicked.connect(self.setCentralWidget(IngresarEs))
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec()
