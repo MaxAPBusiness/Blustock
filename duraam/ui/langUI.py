@@ -1,5 +1,6 @@
 import PyQt6.QtWidgets as qtw
 
+
 class Lenguaje(qtw.QWidget):
     def __init__(self):
         super().__init__()
