@@ -13,7 +13,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1280, 1024)
-        MainWindow.setMinimumSize(QtCore.QSize(1280, 1024))
+        MainWindow.setMinimumSize(QtCore.QSize(800, 550))
         MainWindow.setMaximumSize(QtCore.QSize(1280, 1024))
         font = QtGui.QFont()
         font.setFamily("Work Sans")
