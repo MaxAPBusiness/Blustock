@@ -94,15 +94,15 @@ class Ui_MainWindow(object):
         self.label_43.setFont(font)
         self.label_43.setStyleSheet("font-weight: bold;")
         self.label_43.setObjectName("label_43")
-        self.lineEdit_36 = QtWidgets.QLineEdit(self.page_5)
-        self.lineEdit_36.setGeometry(QtCore.QRect(645, 315, 181, 41))
+        self.spinbox = QtWidgets.QSpinBox(self.page_5)
+        self.spinbox.setGeometry(QtCore.QRect(645, 315, 181, 41))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
         font.setBold(False)
         font.setWeight(50)
-        self.lineEdit_36.setFont(font)
-        self.lineEdit_36.setStyleSheet("\n"
+        self.spinbox.setFont(font)
+        self.spinbox.setStyleSheet("\n"
 "    background-color: rgb(186, 201, 255);\n"
 "    border-style: outset;\n"
 "    border-width: 2px;\n"
@@ -111,8 +111,7 @@ class Ui_MainWindow(object):
 "    min-width: 10em;\n"
 "    padding: 6px;\n"
 "")
-        self.lineEdit_36.setText("")
-        self.lineEdit_36.setObjectName("lineEdit_36")
+        self.spinbox.setObjectName("spinbox")
         self.label_46 = QtWidgets.QLabel(self.page_5)
         self.label_46.setGeometry(QtCore.QRect(575, 170, 201, 61))
         font = QtGui.QFont()
@@ -197,15 +196,15 @@ class Ui_MainWindow(object):
         self.label_45.setFont(font)
         self.label_45.setStyleSheet("font-weight: bold;")
         self.label_45.setObjectName("label_45")
-        self.lineEdit_37 = QtWidgets.QLineEdit(self.page_6)
-        self.lineEdit_37.setGeometry(QtCore.QRect(645, 315, 181, 41))
+        self.spinbox2 = QtWidgets.QSpinBox(self.page_6)
+        self.spinbox2.setGeometry(QtCore.QRect(645, 315, 181, 41))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
         font.setBold(False)
         font.setWeight(50)
-        self.lineEdit_37.setFont(font)
-        self.lineEdit_37.setStyleSheet("\n"
+        self.spinbox2.setFont(font)
+        self.spinbox2.setStyleSheet("\n"
 "    background-color: rgb(186, 201, 255);\n"
 "    border-style: outset;\n"
 "    border-width: 2px;\n"
@@ -214,8 +213,7 @@ class Ui_MainWindow(object):
 "    min-width: 10em;\n"
 "    padding: 6px;\n"
 "")
-        self.lineEdit_37.setText("")
-        self.lineEdit_37.setObjectName("lineEdit_37")
+        self.spinbox2.setObjectName("spinbox2")
         self.label_47 = QtWidgets.QLabel(self.page_6)
         self.label_47.setGeometry(QtCore.QRect(525, 385, 101, 21))
         font = QtGui.QFont()
@@ -390,22 +388,22 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.page)
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setObjectName("page_2")
-        self.lineEdit_18 = QtWidgets.QLineEdit(self.page_2)
-        self.lineEdit_18.setGeometry(QtCore.QRect(665, 295, 181, 41))
+        self.spinbox4 = QtWidgets.QSpinBox(self.page_2)
+        self.spinbox4.setGeometry(QtCore.QRect(665, 295, 181, 41))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
         font.setBold(False)
         font.setWeight(50)
-        self.lineEdit_18.setFont(font)
-        self.lineEdit_18.setStyleSheet("    background-color: rgb(186, 201, 255);\n"
+        self.spinbox4.setFont(font)
+        self.spinbox4.setStyleSheet("    background-color: rgb(186, 201, 255);\n"
 "    border-style: outset;\n"
 "    border-width: 2px;\n"
 "    border-radius: 10px;\n"
 "    border-color: rgb(150, 175, 255) ;\n"
 "    min-width: 10em;\n"
 "    padding: 6px;")
-        self.lineEdit_18.setObjectName("lineEdit_18")
+        self.spinbox4.setObjectName("spinbox4")
         self.lineEdit_13 = QtWidgets.QLineEdit(self.page_2)
         self.lineEdit_13.setGeometry(QtCore.QRect(665, 175, 181, 41))
         font = QtGui.QFont()
@@ -640,22 +638,22 @@ class Ui_MainWindow(object):
         self.label_9.setFont(font)
         self.label_9.setStyleSheet("")
         self.label_9.setObjectName("label_9")
-        self.lineEdit_8 = QtWidgets.QLineEdit(self.page)
-        self.lineEdit_8.setGeometry(QtCore.QRect(660, 295, 181, 41))
+        self.spinbox3 = QtWidgets.QSpinBox(self.page)
+        self.spinbox3.setGeometry(QtCore.QRect(660, 295, 181, 41))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
         font.setBold(False)
         font.setWeight(50)
-        self.lineEdit_8.setFont(font)
-        self.lineEdit_8.setStyleSheet("    background-color: rgb(186, 201, 255);\n"
+        self.spinbox3.setFont(font)
+        self.spinbox3.setStyleSheet("    background-color: rgb(186, 201, 255);\n"
 "    border-style: outset;\n"
 "    border-width: 2px;\n"
 "    border-radius: 10px;\n"
 "    border-color: rgb(150, 175, 255) ;\n"
 "    min-width: 10em;\n"
 "    padding: 6px;")
-        self.lineEdit_8.setObjectName("lineEdit_8")
+        self.spinbox3.setObjectName("spinbox3")
         self.pushButton_2 = QtWidgets.QPushButton(self.page)
         self.pushButton_2.setGeometry(QtCore.QRect(600, 540, 121, 41))
         font = QtGui.QFont()
