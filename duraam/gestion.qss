@@ -19,7 +19,7 @@
 }
 
 #tabla{
-    max-width:1116px;
+    max-width:725px;
     height:175px;
     max-height: 700px;
 }
@@ -41,6 +41,5 @@
   }
 
 #entry{
-  
     max-width: 90px;
 }
