@@ -3,8 +3,8 @@
 }
 #fondo{
     background-color:#0d43d4;
-    max-width:1116px;
-    max-height:100px;
+    width:1116px;
+    height:100px;
     border:solid;
     border-width: 2px;
     border-color:#0d43d4;
@@ -19,9 +19,9 @@
 }
 
 #tabla{
-    max-width:725px;
+    width:1000px;
     height:175px;
-    max-height: 700px;
+    height: 700px;
 }
 #actualizar{
   padding: 5px;
