@@ -1,0 +1,27 @@
+# Este es el código inicial - Una ventana que permite que el usuario realize un CRUD de la base de datos.
+# Primero, se realizan las importaciones necesarias.
+# Luego se hace la conexión a la base de datos. Si el primero no funciona, intenta la segunda opción. Luego se crea el cursor.
+Funcion global:
+# mostrarMensaje: muestra un mensaje en la pantalla. Los argumentos son:
+# - title: funciona como el título del mensaje y también se usa para identificar el tipo de mensaje. Los tipos son:
+# - - Error: muestra un error.
+# - - Advertencia: muestra una advertencia en la pantalla.
+# - - Aviso / Information: muestra información al usuario.
+# - - Pregunta: le pregunta algo al usuario. En este caso, también cambian los botones en relación al resto. Por último devuelve la respuesta del usuario.
+# - msg: el mensaje principal que se muestra.
+# - info: la información adicional del mensaje.
+clases:
+# Main window: Ventana principal. Contiene:
+# - la barra superior, que por el momento tiene solo el logo (el ícono y el nombre de la app)
+# - una tabla que muestra todos los datos de la tabla herramientas y un boton para mostrar los datos nuevamentee si se modifican.
+# - botones para agregar, editar y eliminar filas de la tabla de la base de datos.
+# - botones para ordenar los elementos en orden alfabético según su nombre, grupo o subgrupo.
+# - una barra de búsqueda.
+# Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
+
+# Editar: funciona como un widget que se usa como ventana de edición e inserción de filas a la base de datos y a la ui.
+# Esta ventana contiene un formulario para llenar datos de la tabla. 
+# Al enviar el formulario, los datos se insertan/modifican en la tabla de la base de datos y en la ui.
+
+
+
