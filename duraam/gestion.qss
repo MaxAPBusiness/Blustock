@@ -4,24 +4,28 @@
 #fondo{
     background-color:#0d43d4;
     width:1116px;
-    height:100px;
+    height:120px;
+    max-height:120px;
     border:solid;
     border-width: 2px;
     border-color:#0d43d4;
     
-    
+}
+#icono{
+    margin:20px 0px 20px 20px
 }
 #titulo{
     color:white;
-    font-size:40px;  
+    font-size:60px;  
     font-family:'Bebas Neue';
-    
+    margin-top:5px;
 }
 
 #tabla{
     width:1000px;
-    height:175px;
     height: 700px;
+    max-width:1000px;
+    max-height: 700px;
 }
 #actualizar{
   padding: 5px;
@@ -40,6 +44,7 @@
       border-radius: 10px;
   }
 
-#entry{
-    max-width: 90px;
+#buscar{
+    width:150px;
+    max-width: 150px;
 }
