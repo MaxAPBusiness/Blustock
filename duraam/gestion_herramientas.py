@@ -7,7 +7,7 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
-#Se hace la conexión. Si el primero no funciona, intenta la segunda opción.
+# Se hace la conexión. Si el primero no funciona, intenta la segunda opción.
 try:
     con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 except:
@@ -61,6 +61,7 @@ def mostrarMensaje(title, msg, info):
 # - una tabla que muestra todos los datos de la tabla herramientas y un boton para mostrar los datos nuevamentee si se modifican.
 # - botones para agregar, editar y eliminar campos de la base de datos.
 # - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
+# - una barra de búsqueda.
 # Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
 class MainWindow(qtw.QMainWindow):
     # Se hace el init en donde se inicializan todos los elementos. 

@@ -1,4 +1,4 @@
-# Este es el código inicial - Una ventana que permite que el usuario realize un CRUD de la base de datos.
+# Este es el código inicial - Una ventana que permite que el usuario realize un CRUD de la base de datos de herramientas.
 # Primero, se realizan las importaciones necesarias.
 # Luego se hace la conexión a la base de datos. Si el primero no funciona, intenta la segunda opción. Luego se crea el cursor.
 Funcion global:
