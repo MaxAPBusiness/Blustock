@@ -1,8 +1,17 @@
 import sys
 import PyQt6.QtWidgets as qtw
-import gestion_herramientas
+import PyQt6.QtCore as qtc
+import PyQt6.QtGui as qtg
+import sqlite3 as db
 import os
+from gestion_herramientas import GestionHerramientas, mostrarMensaje
+try:
+    con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
+except:
+    os.chdir("../../..")
+    con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 
+cur=con.cursor()
 
 # Creamos la ventana principal
 class MainWindow(qtw.QMainWindow):
@@ -12,7 +21,7 @@ class MainWindow(qtw.QMainWindow):
 
         # Creamos la colección de pantallas
         stack = qtw.QStackedWidget()
-        self.herramientas=gestion_herramientas.GestionHerramientas()
+        self.herramientas=GestionHerramientas()
 
         # Añadimos las pantallas a la colección
         for i in [self.herramientas]:
