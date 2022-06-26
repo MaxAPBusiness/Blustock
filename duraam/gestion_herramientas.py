@@ -11,9 +11,11 @@ import os
 try:
     con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 except:
-    os.chdir("../../..")
-    con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-
+    try:
+        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
+        con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
+    except:
+        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
 # Se crea el cursor.
 cur = con.cursor()
 
