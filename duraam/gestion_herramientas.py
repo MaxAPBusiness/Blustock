@@ -65,17 +65,11 @@ def mostrarMensaje(title, msg, info):
 # - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
 # - una barra de búsqueda.
 # Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
-class MainWindow(qtw.QMainWindow):
+class GestionHerramientas(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QMainWindow.
         super().__init__()
-
-        # Se crea el widget central, que vamos a personalizar y establecer como el central de la ventana.
-        self.widgetCentral = qtw.QWidget()
-
-        # Cambia el tamaño de la ventana a 1280x1024.
-        self.resize(1280, 1024)
 
         # Se crea el fondo de la barra superior
         self.fondo = qtw.QWidget()
@@ -133,7 +127,7 @@ class MainWindow(qtw.QMainWindow):
         self.agregar = qtw.QPushButton("Agregar")
         self.agregar.setObjectName("agregar")
         self.agregar.clicked.connect(
-            lambda: self.editar('agregar'))
+            lambda: self.modificarLinea('agregar'))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
@@ -150,12 +144,7 @@ class MainWindow(qtw.QMainWindow):
         layout.addWidget(self.tabla, 4, 1, 1, 9)
         layout.setSpacing(0)
         # Se le da el layout al widget central
-        self.widgetCentral.setLayout(layout)
-        # Esto no funciona, ignorenlo :(
-        self.widgetCentral.setSizePolicy(
-            qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
-        # Hace que el widget central de la MainWindow sea el widget personalizado que hicimos.
-        self.setCentralWidget(self.widgetCentral)
+        self.setLayout(layout)
 
         # Se crea este atributo para que exista en la pantalla y no se generen errores al abrir la ventana de edición. Explicado más adelante.
         self.edita = None
@@ -165,9 +154,8 @@ class MainWindow(qtw.QMainWindow):
     # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
     # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
     # Identica a la de editar pero no viene con datos por defecto.
-    def editar(self, tipo):
+    def modificarLinea(self, tipo):
         # Se hace una referencia a la clase Editar. Esto lo hacemos porque las clases no reconocen las funciones y clases definidas fuera de la propia clase.
-        global Editar
 
         # Se obtiene la posición del boton clickeado: 
         # primero se obtiene cual fue último widget clickeado (en este caso el boton)
@@ -175,19 +163,53 @@ class MainWindow(qtw.QMainWindow):
         # luego se obtiene la posicion del boton.
         posicion = self.tabla.indexAt(botonClickeado.pos())
 
+        layoutEditar = qtw.QGridLayout()
+
+        self.entry1 = qtw.QLineEdit()
+        self.entry2 = qtw.QSpinBox()
+        self.entry3 = qtw.QSpinBox()
+        self.entry4 = qtw.QSpinBox()
+        self.entry5 = qtw.QLineEdit()
+        self.entry6 = qtw.QLineEdit()
+
+        self.edita = qtw.QWidget()
+
+        for i in range(1, len(self.campos)):
+            label = qtw.QLabel(self.campos[i])
+            layoutEditar.addWidget(label, i, 0)
+        datos = []
         # Si el tipo es editar, se crea la pantalla de editar.
         if tipo == 'editar':
             # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
-            datos = []
+            
             # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
             for cell in range(0, 9):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
-            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren.
-            self.edita = Editar(self.campos, datos)
-        # Si no, se creará la pantalla de crear.
-        else:
-            self.edita = Editar(self.campos, None)
-        # Se muestra la nueva pantalla.
+            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
+            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
+                # Se les añade a los entries sus valores por defecto.
+            self.entry1.setText(datos[1])
+            self.entry2.setValue(int(datos[2]))
+            self.entry3.setValue(int(datos[3]))
+            self.entry4.setValue(int(datos[4]))
+            self.entry5.setText(datos[5])
+            self.entry6.setText(datos[6])
+
+            # Se añaden los widgets al layout.
+        layoutEditar.addWidget(self.entry1, 1, 1)
+        layoutEditar.addWidget(self.entry2, 2, 1)
+        layoutEditar.addWidget(self.entry3, 3, 1)
+        layoutEditar.addWidget(self.entry4, 4, 1)
+        layoutEditar.addWidget(self.entry5, 5, 1)
+        layoutEditar.addWidget(self.entry6, 6, 1)
+
+            # Se crea el boton de confirmar, y se le da la función de confirmarr.
+        confirmar = qtw.QPushButton("Confirmar")
+        confirmar.clicked.connect(lambda: self.confirmarr(datos))
+        layoutEditar.addWidget(confirmar, 7, 0, 1, 2)
+
+            # Se le da el layout a la ventana.
+        self.edita.setLayout(layoutEditar)
         self.edita.show()
 
     # Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
@@ -246,7 +268,7 @@ class MainWindow(qtw.QMainWindow):
             
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
             botonEditar = qtw.QPushButton("Editar")
-            botonEditar.clicked.connect(lambda: self.editar('editar'))
+            botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
@@ -280,67 +302,10 @@ class MainWindow(qtw.QMainWindow):
         # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
         if self.edita:
             self.edita.close()
-
-
-# Clase editar: funciona como un widget que se usa para la ventana de edición e inserción de filas a la base de datos y a la ui.
-# Esta ventana contiene un formulario para llenar datos de la tabla. 
-# Al enviar el formulario, los datos se insertan/modifican en la tabla de la base de datos y en la ui.
-# Parámetros:
-# campos: una lista que se usará para hacer los labels del formulario.
-# datos: los datos por defecto que tendrán los entries.
-class Editar(qtw.QWidget):
-    def __init__(self, campos, datos):
-        super().__init__()
-        #Se crea el layout, los entrys por separado y los labels a través de un bucle.
-        layout = qtw.QGridLayout()
-        self.entry1 = qtw.QLineEdit()
-        self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QSpinBox()
-        self.entry4 = qtw.QSpinBox()
-        self.entry5 = qtw.QLineEdit()
-        self.entry6 = qtw.QLineEdit()
-        # Por cada campo, se crea un label con su texto correspondiente.
-        for i in range(1, len(campos)):
-            label = qtw.QLabel(campos[i])
-            layout.addWidget(label, i, 0)
-        
-        # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
-        if datos:
-            label = qtw.QLabel(campos[0])
-            label2 = qtw.QLabel(str(datos[0]))
-            layout.addWidget(label, 0, 0)
-            layout.addWidget(label2, 0, 1)
-
-            # Se les añade a los entries sus valores por defecto.
-            self.entry1.setText(datos[1])
-            self.entry2.setValue(int(datos[2]))
-            self.entry3.setValue(int(datos[3]))
-            self.entry4.setValue(int(datos[4]))
-            self.entry5.setText(datos[5])
-            self.entry6.setText(datos[6])
-
-        # Se añaden los widgets al layout.
-        layout.addWidget(self.entry1, 1, 1)
-        layout.addWidget(self.entry2, 2, 1)
-        layout.addWidget(self.entry3, 3, 1)
-        layout.addWidget(self.entry4, 4, 1)
-        layout.addWidget(self.entry5, 5, 1)
-        layout.addWidget(self.entry6, 6, 1)
-
-        # Se crea el boton de confirmar, y se le da la función de confirmarr.
-        confirmar = qtw.QPushButton("Confirmar")
-        confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layout.addWidget(confirmar, 7, 0, 1, 2)
-
-        # Se le da el layout a la ventana.
-        self.setLayout(layout)
-
-    # Función confirmarr: se editan/insertan los datos en la tabla de la base de datos y se muestra la información de que la operación se realizó correctamente.
-    # Luego se muestran los cambios en la tabla de la ui.
+    
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-        global window
 
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
@@ -365,22 +330,8 @@ class Editar(qtw.QWidget):
 
             mostrarMensaje("Information", "Aviso",
                            "Se ha ingresado una herramienta.")
-        # Se refresca la tabla de la ui.
-        window.mostrarDatos()
+        self.mostrarDatos()
 
 
-# No se asusten, esto es convención de python. Es para que no haya errores de modularización.
-if __name__ == '__main__':
-    # Se crea la app.
-    app = qtw.QApplication(sys.argv)
-    # Se crea la ventana principal.
-    window = MainWindow()
 
-    # Se le dan los estilos a la ventana. Todos los cambios de estilo están acá.
-    with open(f"{os.path.abspath(os.getcwd())}/duraam/gestion.qss", 'r') as css:
-        window.setStyleSheet(css.read())
 
-    # Se muestra la ventana.
-    window.show()
-    # Se ejecuta la app. 
-    app.exec()
