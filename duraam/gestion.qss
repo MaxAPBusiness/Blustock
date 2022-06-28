@@ -1,50 +1,78 @@
+*{
+    font-family: "Roboto", "Arial", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#tabla{
+    border-width:5px;
+    border-color: black;
+    margin-left: 10px;
+}
+
+#cabecera{
+    background-color:#0d43d4;
+}
+
+#titulo{
+    margin:10px;
+    font-family: "Bebas Neue";
+    font-size: 36px;
+    font-weight: 400;
+}
 #QRadioButton{
     margin-left: 2px;
 }
-#fondo{
-    background-color:#0d43d4;
-    width:1116px;
-    height:120px;
-    max-height:120px;
-    border:solid;
-    border-width: 2px;
-    border-color:#0d43d4;
-    
-}
+
 #icono{
-    margin:20px 0px 20px 20px
+    margin:20px 0px 20px 30px
 }
-#titulo{
+#header-label{
     color:white;
     font-size:60px;  
     font-family:'Bebas Neue';
-    margin-top:5px;
+    margin:0 0 0 5px;
 }
 
 #tabla{
     width:1000px;
     height: 700px;
-    max-width:1000px;
+    max-width:780px;
     max-height: 700px;
 }
-#actualizar{
-  padding: 5px;
-  max-width: 90px;
-    border:solid;
-    border-width: 2px;
-    border-color:#0d43d4;
-    border-radius: 10px;
-}
+
 #agregar{
+    background-color:#0d43d4; 
     padding: 5px;
-    max-width: 90px;
-      border:solid;
-      border-width: 2px;
-      border-color:#0d43d4;
-      border-radius: 10px;
+    width: 125px;
+    max-width: 125px;
+    color:white;
+    border-radius: 15px;
+    font-size: 24px;
+    font-family: "Bebas Neue";
+    margin: 10px;
   }
 
+#agregar::hover, #editar::hover, #eliminar::hover{
+    background-color:rgb(20,20,200);
+}
+
+#editar, #eliminar{
+    background-color:#0d43d4; 
+    border-radius: 5px;
+    color: white;
+    font-weight: 800;
+    height:30PX;
+}
+
+QRadioButton::indicator#gestion{
+    color:transparent;
+    border: 1px solid transparent;
+}
+
 #buscar{
+    font-family: Arial;
     width:150px;
     max-width: 150px;
+    margin: 10px;
 }

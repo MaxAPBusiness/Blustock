@@ -6,19 +6,11 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
-from mostrarMensaje import mostrarMensaje
-# Se hace la conexión. Si el primero no funciona, intenta la segunda opción.
-try:
-    con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-except:
-    try:
-        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
-        con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-    except:
-        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
-# Se crea el cursor.
-cur = con.cursor()
+from mostrar_mensaje import mostrarMensaje
 
+os.chdir(f"{os.path.abspath(__file__)}/../../..")
+con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
+cur=con.cursor()
 
 # Ventana principal: contiene:
 # - la barra superior, que por el momento tiene solo el logo (el ícono y el nombre de la app)
@@ -27,7 +19,7 @@ cur = con.cursor()
 # - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
 # - una barra de búsqueda.
 # Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
-class GestionHerramientas(qtw.QWidget):
+class GestionHerramientas1(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QMainWindow.
@@ -229,7 +221,7 @@ class GestionHerramientas(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
             
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton("Editar")
+            botonEditar = qtw.QPushButton("UwU")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             self.tabla.setCellWidget(i, 7, botonEditar)
 

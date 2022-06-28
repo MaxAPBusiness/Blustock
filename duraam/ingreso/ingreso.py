@@ -1,6 +1,4 @@
 from PyQt6 import QtWidgets as qtw
-from PyQt6 import QtCore as qtc
-from PyQt6 import QtGui as qtg
 from ui import Ui_MainWindow
 import sqlite3 as db
 import os

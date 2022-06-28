@@ -6,19 +6,11 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
-from mostrarMensaje import mostrarMensaje
-# Se hace la conexión. Si el primero no funciona, intenta la segunda opción.
-try:
-    con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-except:
-    try:
-        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
-        con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-    except:
-        os.chdir(f"{os.path.abspath(os.getcwd())}/Documents/Duraam")
-# Se crea el cursor.
-cur = con.cursor()
+from mostrar_mensaje import mostrarMensaje
 
+os.chdir(f"{os.path.abspath(__file__)}/../../..")
+con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
+cur=con.cursor()
 
 # Ventana principal: contiene:
 # - la barra superior, que por el momento tiene solo el logo (el ícono y el nombre de la app)
@@ -27,33 +19,21 @@ cur = con.cursor()
 # - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
 # - una barra de búsqueda.
 # Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
-class GestionHerramientas1(qtw.QWidget):
+class GestionHerramientas(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QMainWindow.
         super().__init__()
 
-        # Se crea el fondo de la barra superior
-        self.fondo = qtw.QWidget()
-        self.fondo.setObjectName("fondo")
-
-        # Se crea un pixmap (algo que guarda una imagen para ponerla en la pantalla), se le da el ícono y se crea el label que tendra la imagen.
-        pixmap = qtg.QPixmap(
-            f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png")
-        label1 = qtw.QLabel("")
-        label1.setPixmap(pixmap)
-        # Esto le da un id a los elementos para poder personalizarlos luego con el archivo .qss.
-        label1.setObjectName("icono")
-
-        # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
-        self.titulo = qtw.QLabel("DURAAM")
+        self.titulo=qtw.QLabel("Gestión de Herramientas")
         self.titulo.setObjectName("titulo")
-
         # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
         # Se establece el número de columnas que va a tener.
         self.tabla.setColumnCount(9)
+        self.tabla.setColumnWidth(7, 35)
+        self.tabla.setColumnWidth(8, 35)
         # Se crean los títulos de la tabla y se introducen en esta.
         self.campos = ["ID", "Descripción", "En condiciones",
                        "En reparación", "De baja", "Grupo", "SubGrupo", "", ""]
@@ -63,48 +43,42 @@ class GestionHerramientas1(qtw.QWidget):
         # Se muestran los datos en la tabla.
         self.mostrarDatos()
 
-        # Se crean 3 botones de radio y un label para dar contexto.
-        self.label2= qtw.QLabel("Ordenar por: ")
-        self.radio1 = qtw.QRadioButton("Nombre")
-        self.radio2 = qtw.QRadioButton("Grupo")
-        self.radio3 = qtw.QRadioButton("Subgrupo")
-        # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Grupo"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Subgrupo"))
-
         # Se crea una barra de buscador.
         self.buscar = qtw.QLineEdit()
         self.buscar.setObjectName("buscar")
         # Se le da la función de buscar los datos introducidos.
         self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
-
-        # Se crea el boton de actualizar los campos mostrados en la tabla, por si algún cambio no se hizo bien.
-        self.actualizar = qtw.QPushButton("actualizar")
-        self.actualizar.setObjectName("actualizar")
-        self.actualizar.clicked.connect(
-            lambda: self.mostrarDatos())
+        # Se crean 3 botones de radio y un label para dar contexto.
+        self.label2= qtw.QLabel("Ordenar por: ")
+        self.radio1 = qtw.QRadioButton("Nombre")
+        self.radio2 = qtw.QRadioButton("Grupo")
+        self.radio3 = qtw.QRadioButton("Subgrupo")
+        self.radio1.setObjectName("Radio1")
+        self.radio2.setObjectName("Radio2")
+        self.radio3.setObjectName("Radio3")
+        # Se le da a los botones de radio la función de mostrar datos en un orden específico.
+        self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
+        self.radio2.toggled.connect(lambda: self.mostrarDatos("Grupo"))
+        self.radio3.toggled.connect(lambda: self.mostrarDatos("Subgrupo"))
 
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
         self.agregar.setObjectName("agregar")
         self.agregar.clicked.connect(
             lambda: self.modificarLinea('agregar'))
+        self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
-        layout.addWidget(self.fondo, 1, 1, 1, 9)
-        layout.addWidget(label1, 1, 1)
-        layout.addWidget(self.titulo, 1, 2)
-        layout.addWidget(self.label2, 3, 2)
-        layout.addWidget(self.radio1, 3, 3)
-        layout.addWidget(self.radio2, 3, 4)
-        layout.addWidget(self.radio3, 3, 5)
-        layout.addWidget(self.buscar, 3, 1)
-        layout.addWidget(self.actualizar, 2, 1)
-        layout.addWidget(self.agregar, 5, 1)
-        layout.addWidget(self.tabla, 4, 1, 1, 9)
-        layout.setSpacing(0)
+        layout.addWidget(self.titulo, 0, 1)
+        layout.addWidget(self.buscar, 1, 1)
+        layout.addWidget(self.label2, 1, 2)
+        layout.addWidget(self.radio1, 1, 3)
+        layout.addWidget(self.radio2, 1, 4)
+        layout.addWidget(self.radio3, 1, 5)
+        layout.addWidget(self.tabla, 2, 1, 1, 9)
+        layout.addWidget(self.agregar, 3, 1)
+
         # Se le da el layout al widget central
         self.setLayout(layout)
 
@@ -227,15 +201,24 @@ class GestionHerramientas1(qtw.QWidget):
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
             for j in range(len(query[i])):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
-            
+            self.tabla.setRowHeight(i, 35)
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton("UwU")
+            botonEditar = qtw.QPushButton()
+            botonEditar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
+            botonEditar.setIconSize(qtc.QSize(25, 25))
+            botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
+            botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton("Eliminar")
+            botonEliminar = qtw.QPushButton()
+            botonEliminar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 8, botonEliminar)
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
