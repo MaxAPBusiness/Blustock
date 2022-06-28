@@ -27,7 +27,7 @@ cur = con.cursor()
 # - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
 # - una barra de búsqueda.
 # Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
-class GestionHerramientas(qtw.QWidget):
+class GestionHerramientas1(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QMainWindow.
@@ -229,7 +229,7 @@ class GestionHerramientas(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
             
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton("Editar")
+            botonEditar = qtw.QPushButton("UwU")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
