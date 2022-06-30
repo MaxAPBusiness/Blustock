@@ -3,8 +3,7 @@
 import sqlite3 as db
 import os
 
-os.chdir(f"{os.path.abspath(__file__)}/../..")
-
+os.chdir(f"{os.path.abspath(__file__)}/../../..")
 # Función crearBBDD: se conecta a la base de datos y crea las tablas
 def crearBBDD():
     # Se conecta a la base de datos

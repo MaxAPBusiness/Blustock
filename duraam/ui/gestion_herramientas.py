@@ -165,7 +165,7 @@ class GestionHerramientas(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
 
             self.tabla.setRowHeight(i, 35)
-            
+
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
             botonEditar = qtw.QPushButton()
             botonEditar.setIcon(qtg.QIcon(
@@ -246,7 +246,6 @@ class GestionHerramientas(qtw.QWidget):
             self.entry5.setText(datos[5])
             self.entry6.setText(datos[6])
             self.edita.setWindowTitle("Editar")
-            self.entry0.maximum
 
         # Se añaden los entries al layout.
         entries=[self.entry0, self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]

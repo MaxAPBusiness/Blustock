@@ -37,8 +37,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Herramienta", "Alumno", "Fecha", "Cantidad", 
-"tipo", "Turno de Pañol", "", ""]      
+        self.campos = ["ID", "Herramienta", "Alumno", "Fecha", "Cantidad", 
+                        "Tipo", "Turno de Pañol", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -123,17 +123,18 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(6): 
+            for i in range(7): 
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
-            SELECT H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTO_HERRAMIENTAS AS M, HERRAMIENTAS AS H, ALUMNOS AS A
+            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
             WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID
             AND (H.DESC_LARGA LIKE ? 
             OR A.NOMBRE_APELLIDO LIKE ? 
+            OR M.ID LIKE ?
             OR M.FECHA LIKE ? 
             OR M.CANTIDAD LIKE ? 
             OR M.TIPO LIKE ? 
@@ -141,33 +142,33 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Herramienta":
             cur.execute("""
-            SELECT H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTO_HERRAMIENTAS AS M, HERRAMIENTAS AS H, ALUMNOS AS A
+            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
             WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY H.DESC_LARGA
             """)
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Alumno":
             cur.execute("""
-            SELECT H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTO_HERRAMIENTAS AS M, HERRAMIENTAS AS H, ALUMNOS AS A
+            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
             WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY A.NOMBRE_APELLIDO
             """)
         # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Fecha":
             cur.execute("""
-            SELECT H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTO_HERRAMIENTAS AS M, HERRAMIENTAS AS H, ALUMNOS AS A
+            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
             WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY M.FECHA
             """)
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute("""
-            SELECT H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTO_HERRAMIENTAS AS M, HERRAMIENTAS AS H, ALUMNOS AS A
+            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
             WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID
             """)
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
@@ -183,7 +184,6 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         for i in range(len(query)):
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
             for j in range(len(query[i])):
-
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
 
             self.tabla.setRowHeight(i, 35)
@@ -196,7 +196,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 6, botonEditar)
+            self.tabla.setCellWidget(i, 7, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
@@ -206,7 +206,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 7, botonEliminar)
+            self.tabla.setCellWidget(i, 8, botonEliminar)
 
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
@@ -217,31 +217,28 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Se crea el widget que va a funcionar como ventana.
         self.edita = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
-        self.edita.setWindowTitle("Agregar Herramienta")
+        self.edita.setWindowTitle("Agregar Movimiento De Herramienta")
         self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
         # Se crea el layout.
         layoutEditar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
-        for i in range(len(self.campos)):
+        for i in range(1, len(self.campos)):
             label = qtw.QLabel(self.campos[i])
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+            layoutEditar.addWidget(label, i-1, 0)
         
         # Crea los entries.
-        self.entry0 = qtw.QSpinBox()
         self.entry1 = qtw.QLineEdit()
-        self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QSpinBox()
+        self.entry2 = qtw.QLineEdit()
+        self.entry3 = qtw.QLineEdit()
         self.entry4 = qtw.QSpinBox()
         self.entry5 = qtw.QLineEdit()
-        self.entry6 = qtw.QLineEdit()
+        self.entry6 = qtw.QSpinBox()
 
-        self.entry0.setMaximum(9999)
-        self.entry2.setMaximum(9999)
-        self.entry3.setMaximum(9999)
         self.entry4.setMaximum(9999)
+        self.entry6.setMaximum(9999)
 
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -255,22 +252,21 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             
             # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, 9):
+            for cell in range(0, len(self.campos)):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
-            self.entry0.setValue(int(datos[0]))
             self.entry1.setText(datos[1])
-            self.entry2.setValue(int(datos[2]))
-            self.entry3.setValue(int(datos[3]))
+            self.entry2.setText(datos[2])
+            self.entry3.setText(datos[3])
             self.entry4.setValue(int(datos[4]))
             self.entry5.setText(datos[5])
-            self.entry6.setText(datos[6])
+            self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry0, self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
+        entries=[self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutEditar.addWidget(entries[i], i, 1)
@@ -292,38 +288,81 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
+        cur.execute("""
+        SELECT ID
+        FROM HERRAMIENTAS
+        WHERE DESC_LARGA=? 
+        LIMIT 1""", (self.entry1.text(),))
+
+        herramienta=cur.fetchall()
+
+        if not herramienta:
+            mostrarMensaje("Error", "Error", 
+            "La herramienta no esta ingresada. Por favor, verifique que la herramienta ingresada es correcta.")
+            return
+        
+        cur.execute("""
+        SELECT ID
+        FROM ALUMNOS
+        WHERE NOMBRE_APELLIDO=?
+        LIMIT 1
+        """, (self.entry2.text(),))
+
+        alumno=cur.fetchall()
+
+        if not alumno:
+            mostrarMensaje("Error", "Error", 
+            "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
+            return
+        
+        cur.execute("""
+        SELECT ID
+        FROM TURNO_PANOL
+        WHERE ID=?
+        LIMIT 1
+        """, (self.entry6.value(),))
+
+        turnoPanol=cur.fetchall()
+
+        if not turnoPanol:
+            mostrarMensaje("Error", "Error", 
+            "El turno no está registrado. Por favor, verifique que el turno registrado es correcto.")
+            return
+            
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
-            try:
-                # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("""
-                UPDATE HERRAMIENTAS 
-                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?,ID_GRUPO=?,ID_SUBGRUPO=? WHERE ID=?""", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), self.entry3.value(
-                    ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
-                ))
-                con.commit()
-                # Se muestra el mensaje exitoso.
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado la herramienta.")           
-            except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
-                return
+            # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
+            cur.execute("""
+            UPDATE MOVIMIENTOS_HERRAMIENTAS
+            SET ID_HERRAMIENTA=?,
+            ID_ALUMNO=?,
+            FECHA=?,
+            CANTIDAD=?,
+            TIPO=?,
+            ID_TURNO_PANOL=?
+            WHERE ID=?
+            """, (
+                herramienta[0][0], alumno[0][0], self.entry3.text(
+                ), self.entry4.text(), self.entry5.text(), turnoPanol[0][0], datos[0],
+            ))
+
+            con.commit()
+            # Se muestra el mensaje exitoso.
+            mostrarMensaje("Information", "Aviso",
+                        "Se ha actualizado el movimiento.")           
+
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
-            try:
-                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), 
-                    self.entry3.value(), self.entry4.value(), self.entry5.text(), 
-                    self.entry6.text(),
-                ))
-                con.commit()
+            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?)", (
+                herramienta[0][0], alumno[0][0], self.entry3.text(
+                ), self.entry4.text(), self.entry5.text(), turnoPanol[0][0],
+            ))
+            con.commit()
 
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado una herramienta.")
-            except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-                return
+            mostrarMensaje("Information", "Aviso",
+                        "Se ha ingresado una herramienta.")
+            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+            return
         
         #Se refrescan los datos.
         self.mostrarDatos()
@@ -339,7 +378,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
+            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
             con.commit()
 
             #elimina la fila de la tabla de la ui.

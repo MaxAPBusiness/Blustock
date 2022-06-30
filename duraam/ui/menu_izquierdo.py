@@ -18,9 +18,12 @@ class MenuIzquierdo(qtw.QToolBar):
         self.gestion2=qtw.QRadioButton('Gestión de Herramientas viejo')
         self.gestion1.setObjectName("gestion")
         self.gestion2.setObjectName("gestion")
+
         self.addWidget(titulo)
         self.addWidget(self.gestion1)
         self.addWidget(self.gestion2)
+
         self.gestion1.toggle()
+        
         with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/menu_izquierdo.qss", "r") as qss:
             self.setStyleSheet(qss.read())

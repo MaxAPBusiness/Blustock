@@ -21,6 +21,7 @@ import os
 
 # Importamos las pantallas y el codigo de BD
 from db.db import crearBBDD
+from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
 from ui.gestion_herramientas import GestionHerramientas
 from ui.gestion_herramientas2 import GestionHerramientas1
 from ui.cabecera import Cabecera
@@ -49,12 +50,13 @@ class MainWindow(qtw.QMainWindow):
 
         self.herramientas=GestionHerramientas()
         self.prueba=GestionHerramientas1()
+        self.movimientos=GestionMovimientosHerramientas()
         
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
         self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, menuIzquierdo)
 
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.prueba]:
+        for i in [self.herramientas, self.movimientos]:
             stack.addWidget(i)
         
         menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
