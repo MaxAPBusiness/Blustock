@@ -1,51 +1,73 @@
-# Este es el código inicial - Una ventana que permite que el usuario realize un CRUD de la base de datos.
-# Se realizan las importaciones necesarias.
-import sys
+# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
+#                          la tabla de la base de datos; una barra de buscador; botones para 
+#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
+#                          herramientas; botones para editar y eliminar los datos; un botón
+#                          para agregar herramientas. 
+#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+
+# Se importan las librerías.
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
+
+# Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
 
+# Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 cur=con.cursor()
 
-# Ventana principal: contiene:
-# - la barra superior, que por el momento tiene solo el logo (el ícono y el nombre de la app)
-# - una tabla que muestra todos los datos de la tabla herramientas y un boton para mostrar los datos nuevamentee si se modifican.
-# - botones para agregar, editar y eliminar campos de la base de datos.
-# - botones para ordenar los elementos en orden alfabético segun su nombre, grupo o subgrupo.
-# - una barra de búsqueda.
-# Esta ventana hereda sus valores de una QMainWindow, funcionando como una ventana principal personalizada.
+
+# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class GestionHerramientas(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
-        # Se inicializa la clase QMainWindow.
+        # Se inicializa la clase QWidget.
         super().__init__()
 
-        self.titulo=qtw.QLabel("Gestión de Herramientas")
+        # Se crea el título.
+        self.titulo=qtw.QLabel("GESTIÓN DE HERRAMIENTAS")
         self.titulo.setObjectName("titulo")
+
         # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
-        # Se establece el número de columnas que va a tener.
-        self.tabla.setColumnCount(9)
-        self.tabla.setColumnWidth(7, 35)
-        self.tabla.setColumnWidth(8, 35)
-        # Se crean los títulos de la tabla y se introducen en esta.
+
+        # Se crean los títulos de las columnas de la tabla y se introducen en esta.
         self.campos = ["ID", "Descripción", "En condiciones",
-                       "En reparación", "De baja", "Grupo", "SubGrupo", "", ""]
+                       "En reparación", "De baja", "Grupo", "SubGrupo", "", ""]      
+                                
+        # Se establece el número de columnas que va a tener. 
+        self.tabla.setColumnCount(len(self.campos))
+        # Se introducen los títulos en la tabla.
         self.tabla.setHorizontalHeaderLabels(self.campos)
+
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
-        # Se muestran los datos en la tabla.
+        # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
+        self.tabla.setColumnWidth(7, 35)
+        self.tabla.setColumnWidth(8, 35)
+
+        # Se muestran los datos.
         self.mostrarDatos()
 
-        # Se crea una barra de buscador.
+        # Se crea una barra de búsqueda
         self.buscar = qtw.QLineEdit()
         self.buscar.setObjectName("buscar")
+        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
+        self.buscar.setClearButtonEnabled(True)
+        # Se le pone el texto por defecto a la barra de búsqueda
+        self.buscar.setPlaceholderText("Buscar...")
+        # Se importa el ícono de lupa para la barra.
+        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        # Se crea un label que va a contener el ícono.
+        icono=qtw.QLabel()
+        icono.setObjectName("lupa")
+        icono.setPixmap(lupa)
+
         # Se le da la función de buscar los datos introducidos.
         self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
@@ -64,14 +86,17 @@ class GestionHerramientas(qtw.QWidget):
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
         self.agregar.setObjectName("agregar")
+        # Se le da la función.
         self.agregar.clicked.connect(
             lambda: self.modificarLinea('agregar'))
+        # Cuando el cursor pasa por el botón, cambia de forma.
         self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
         layout.addWidget(self.titulo, 0, 1)
         layout.addWidget(self.buscar, 1, 1)
+        layout.addWidget(icono,1,1)
         layout.addWidget(self.label2, 1, 2)
         layout.addWidget(self.radio1, 1, 3)
         layout.addWidget(self.radio2, 1, 4)
@@ -85,70 +110,7 @@ class GestionHerramientas(qtw.QWidget):
         # Se crea este atributo para que exista en la pantalla y no se generen errores al abrir la ventana de edición. Explicado más adelante.
         self.edita = None
 
-    # Función editar: muestra un mensaje con un formulario que permite editar los elementos de la tabla.
-    # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
-    # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
-    # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
-    # Identica a la de editar pero no viene con datos por defecto.
-    def modificarLinea(self, tipo):
-        # Se hace una referencia a la clase Editar. Esto lo hacemos porque las clases no reconocen las funciones y clases definidas fuera de la propia clase.
-
-        # Se obtiene la posición del boton clickeado: 
-        # primero se obtiene cual fue último widget clickeado (en este caso el boton)
-        botonClickeado = qtw.QApplication.focusWidget()
-        # luego se obtiene la posicion del boton.
-        posicion = self.tabla.indexAt(botonClickeado.pos())
-
-        layoutEditar = qtw.QGridLayout()
-
-        self.entry1 = qtw.QLineEdit()
-        self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QSpinBox()
-        self.entry4 = qtw.QSpinBox()
-        self.entry5 = qtw.QLineEdit()
-        self.entry6 = qtw.QLineEdit()
-
-        self.edita = qtw.QWidget()
-
-        for i in range(1, len(self.campos)):
-            label = qtw.QLabel(self.campos[i])
-            layoutEditar.addWidget(label, i, 0)
-        datos = []
-        # Si el tipo es editar, se crea la pantalla de editar.
-        if tipo == 'editar':
-            # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
-            
-            # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, 9):
-                datos.append(posicion.sibling(posicion.row(), cell).data())
-            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
-            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
-                # Se les añade a los entries sus valores por defecto.
-            self.entry1.setText(datos[1])
-            self.entry2.setValue(int(datos[2]))
-            self.entry3.setValue(int(datos[3]))
-            self.entry4.setValue(int(datos[4]))
-            self.entry5.setText(datos[5])
-            self.entry6.setText(datos[6])
-
-            # Se añaden los widgets al layout.
-        layoutEditar.addWidget(self.entry1, 1, 1)
-        layoutEditar.addWidget(self.entry2, 2, 1)
-        layoutEditar.addWidget(self.entry3, 3, 1)
-        layoutEditar.addWidget(self.entry4, 4, 1)
-        layoutEditar.addWidget(self.entry5, 5, 1)
-        layoutEditar.addWidget(self.entry6, 6, 1)
-
-            # Se crea el boton de confirmar, y se le da la función de confirmarr.
-        confirmar = qtw.QPushButton("Confirmar")
-        confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, 7, 0, 1, 2)
-
-            # Se le da el layout a la ventana.
-        self.edita.setLayout(layoutEditar)
-        self.edita.show()
-
-    # Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
+# Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
     # - consulta: muestra los datos de forma distinta según el tipo de consulta. Es opcional y, si no se introduce, su valor por defecto es normal. Valores:
     # - - Normal: valor por defecto. Muestra todos los datos de la tabla de la base de datos.
     # - - Buscar: Busca en la tabla de la base de datos las filas que contengan lo buscado.
@@ -201,7 +163,9 @@ class GestionHerramientas(qtw.QWidget):
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
             for j in range(len(query[i])):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
+
             self.tabla.setRowHeight(i, 35)
+            
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
             botonEditar = qtw.QPushButton()
             botonEditar.setIcon(qtg.QIcon(
@@ -216,10 +180,132 @@ class GestionHerramientas(qtw.QWidget):
             botonEliminar = qtw.QPushButton()
             botonEliminar.setIcon(qtg.QIcon(
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setIconSize(qtc.QSize(22, 22))
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 8, botonEliminar)
+
+    # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
+    # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
+    # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
+    # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
+    # # Identica a la de editar pero no viene con datos por defecto.
+    def modificarLinea(self, tipo):
+        # Se crea el widget que va a funcionar como ventana.
+        self.edita = qtw.QWidget()
+        # Se le da el título a la ventana, que por defecto es agregar.
+        self.edita.setWindowTitle("Agregar Herramienta")
+        self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+
+        # Se crea el layout.
+        layoutEditar = qtw.QGridLayout()
+
+        # Inserta un label por cada campo.
+        for i in range(len(self.campos)):
+            label = qtw.QLabel(self.campos[i])
+            label.setObjectName("modificar-label")
+            layoutEditar.addWidget(label, i, 0)
+        
+        # Crea los entries.
+        self.entry0 = qtw.QSpinBox()
+        self.entry1 = qtw.QLineEdit()
+        self.entry2 = qtw.QSpinBox()
+        self.entry3 = qtw.QSpinBox()
+        self.entry4 = qtw.QSpinBox()
+        self.entry5 = qtw.QLineEdit()
+        self.entry6 = qtw.QLineEdit()
+
+        self.entry0.setMaximum(9999)
+        self.entry2.setMaximum(9999)
+        self.entry3.setMaximum(9999)
+        self.entry4.setMaximum(9999)
+
+        # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
+        datos = []
+
+        # Si el tipo es editar, se crea la pantalla de editar.
+        if tipo == 'editar':
+            # Se obtiene la posición del boton clickeado: 
+            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            
+            # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
+            for cell in range(0, 9):
+                datos.append(posicion.sibling(posicion.row(), cell).data())
+            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
+            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
+            # Se les añade a los entries sus valores por defecto.
+            self.entry0.setValue(int(datos[0]))
+            self.entry1.setText(datos[1])
+            self.entry2.setValue(int(datos[2]))
+            self.entry3.setValue(int(datos[3]))
+            self.entry4.setValue(int(datos[4]))
+            self.entry5.setText(datos[5])
+            self.entry6.setText(datos[6])
+            self.edita.setWindowTitle("Editar")
+            self.entry0.maximum
+
+        # Se añaden los entries al layout.
+        entries=[self.entry0, self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
+        for i in range(len(entries)):
+            entries[i].setObjectName("modificar-entry")
+            layoutEditar.addWidget(entries[i], i, 1)
+
+        # Se crea el boton de confirmar, y se le da la función de confirmarr.
+        confirmar = qtw.QPushButton("Confirmar")
+        confirmar.setObjectName("confirmar")
+        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        confirmar.clicked.connect(lambda: self.confirmarr(datos))
+        layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+
+        # Se le da el layout a la ventana.
+        self.edita.setLayout(layoutEditar)
+        # Se muestra la ventana
+        self.edita.show()
+
+    # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
+    def confirmarr(self, datos):
+        # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
+        global mostrarMensaje
+
+        # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
+        if datos:
+            try:
+                # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
+                cur.execute("""
+                UPDATE HERRAMIENTAS 
+                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?,ID_GRUPO=?,ID_SUBGRUPO=? WHERE ID=?""", (
+                    self.entry0.value(), self.entry1.text(), self.entry2.value(), self.entry3.value(
+                    ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
+                ))
+                con.commit()
+                # Se muestra el mensaje exitoso.
+                mostrarMensaje("Information", "Aviso",
+                            "Se ha actualizado la herramienta.")           
+            except:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
+                return
+        # Si no, se inserta la fila en la tabla de la base de datos.
+        else:
+            try:
+                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", (
+                    self.entry0.value(), self.entry1.text(), self.entry2.value(), 
+                    self.entry3.value(), self.entry4.value(), self.entry5.text(), 
+                    self.entry6.text(),
+                ))
+                con.commit()
+
+                mostrarMensaje("Information", "Aviso",
+                            "Se ha ingresado una herramienta.")
+            except:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                return
+        
+        #Se refrescan los datos.
+        self.mostrarDatos()
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
@@ -247,35 +333,6 @@ class GestionHerramientas(qtw.QWidget):
         # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
         if self.edita:
             self.edita.close()
-    
-    def confirmarr(self, datos):
-        # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
-        global mostrarMensaje
-
-        # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
-        if datos:
-            # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-            cur.execute("""
-            UPDATE HERRAMIENTAS 
-            SET DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?,ID_GRUPO=?,ID_SUBGRUPO=? WHERE ID=?""", (
-                self.entry1.text(), self.entry2.value(), self.entry3.value(
-                ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
-            ))
-            con.commit()
-            # Se muestra el mensaje exitoso.
-            mostrarMensaje("Information", "Aviso",
-                           "Se ha actualizado la herramienta.")
-        else:
-            # Se inserta la fila en la tabla de la base de datos.
-            cur.execute("INSERT INTO HERRAMIENTAS VALUES(NULL, ?, ?, ?, ?, ?, ?) ", (
-                self.entry1.text(), self.entry2.value(), self.entry3.value(
-                ), self.entry4.value(), self.entry5.text(), self.entry6.text(),
-            ))
-            con.commit()
-
-            mostrarMensaje("Information", "Aviso",
-                           "Se ha ingresado una herramienta.")
-        self.mostrarDatos()
 
 
 

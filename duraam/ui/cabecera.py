@@ -1,3 +1,4 @@
+# Importamos las librerías
 import PyQt6.QtWidgets as qtw
 import os
 import PyQt6.QtGui as qtg
@@ -5,6 +6,7 @@ import PyQt6.QtGui as qtg
 class Cabecera(qtw.QToolBar):
     def __init__(self):
         super().__init__()
+
         self.setFloatable(False)
         self.setMovable(False)
 
@@ -18,5 +20,9 @@ class Cabecera(qtw.QToolBar):
 
         self.headerLabel = qtw.QLabel("DURAAM")
         self.headerLabel.setObjectName("header-label")
+
         self.addWidget(icono)
         self.addWidget(self.headerLabel)
+        
+        with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/cabecera.qss", "r") as qss:
+            self.setStyleSheet(qss.read())

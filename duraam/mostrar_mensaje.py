@@ -1,5 +1,5 @@
 import PyQt6.QtWidgets as qtw
-
+import PyQt6.QtGui as qtg
 # Función mostrarMensaje: muestra un mensaje en la pantalla. Los argumentos son:
 # - title: funciona como el título del mensaje y también se usa para identificar el tipo de mensaje. Los tipos son:
 # - - Error: muestra un error.
@@ -11,14 +11,13 @@ import PyQt6.QtWidgets as qtw
 def mostrarMensaje(title, msg, info):
     # Se crea el messagebox
     window = qtw.QMessageBox()
-
     # Dependiendo del valor de title, cambia el icono y sus botones correspondientes.
     if title == "Error":
         window.setIcon(qtw.QMessageBox.Icon.Critical)
         window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
     elif title == "Advertencia" or title == "Warning":
         window.setIcon(qtw.QMessageBox.Icon.Warning)
-        window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
+        window.setStandardButtons(qtg.QIcon(qtw.QMessageBox.Icon.Warning))
     elif title == "Aviso" or title == "Information":
         window.setIcon(qtw.QMessageBox.Icon.Information)
         window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
