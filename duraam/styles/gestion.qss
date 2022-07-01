@@ -1,0 +1,90 @@
+*{
+    font-family: "Roboto", "Arial", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+#tabla{
+    border-width:5px;
+    border-color: black;
+    margin-left: 10px;
+    width:1000px;
+    height: 700px;
+    max-width:780px;
+    max-height: 700px;
+}
+
+#titulo{
+    margin:10px 10px 10px 0px;
+    font-family: "Bebas Neue";
+    font-size: 36px;
+    font-weight: 400;
+}
+
+#QRadioButton{
+    margin-left: 2px;
+}
+
+
+#agregar, #confirmar{
+    background-color:#0d43d4; 
+    color:white;
+
+    font-size: 24px;
+    font-family: "Bebas Neue";
+
+    padding: 5px;
+    margin: 10px;
+    width: 125px;
+    max-width: 125px;
+    border-radius: 15px;
+  }
+
+#agregar::hover, 
+#editar::hover, 
+#eliminar::hover,
+#confirmar::hover{
+    background-color:rgb(20,20,200);
+}
+
+#editar, #eliminar{
+    background-color:#0d43d4; 
+    border-radius: 5px;
+    color: white;
+    font-weight: 800;
+    height:30PX;
+}
+
+#buscar{
+    width:250px;
+    max-width: 250px;
+    height:30px;
+    background-color: rgb(186, 201, 255);
+    margin: 10px;
+    border-radius:10px;
+    border-style:hidden;
+    padding-left:30px;
+}
+
+#lupa{
+    max-width: 26px;
+    margin-left:15px;
+}
+
+#modificar-label{
+    font-size:16px;
+    margin:10px;
+    font-weight:400;
+}
+
+#modificar-entry{
+    font-weight: 400;
+    background-color: rgb(186, 201, 255);
+    margin: 10px;
+    border-radius:10px;
+    border-style:hidden;
+    height:30px;
+    width:200px;
+    max-width: 200px;
+}
