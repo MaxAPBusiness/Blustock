@@ -23,7 +23,9 @@ CREATE TABLE  IF NOT EXISTS HERRAMIENTAS(
 /*Crea la tabla de profesores con los campos id (PK) y nombre y apellido*/
 CREATE TABLE IF NOT EXISTS  PROFESORES(
     ID INTEGER PRIMARY KEY,
-    NOMB_APELLIDO VARCHAR(100) NOT NULL
+    DNI INTEGER UNIQUE NOT NULL,
+    NOMBRE_APELLIDO VARCHAR(50) NOT NULL,
+    EMAIL VARCHAR(100)
 );
 
 /*Crea la tabla de alumnos con los campos id (PK), fecha, alumno, nombre y apellido y email*/

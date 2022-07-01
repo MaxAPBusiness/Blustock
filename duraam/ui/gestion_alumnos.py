@@ -37,7 +37,7 @@ class GestionAlumnos(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "DNI", "Nombre y apeliido",
+        self.campos = ["ID", "DNI", "Nombre_Apellido",
                        "EMAIL", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
@@ -48,8 +48,10 @@ class GestionAlumnos(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
-        self.tabla.setColumnWidth(7, 35)
-        self.tabla.setColumnWidth(8, 35)
+        self.tabla.setColumnWidth(2, 120)
+        self.tabla.setColumnWidth(3, 200)
+        self.tabla.setColumnWidth(4, 35)
+        self.tabla.setColumnWidth(5, 35)
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -212,7 +214,7 @@ class GestionAlumnos(qtw.QWidget):
 
         
         self.entry1.setMaximum(9999)
-        self.entry2.setMaximum(9999)
+        self.entry2.setMaximum(99999999)
        
 
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
@@ -269,7 +271,7 @@ class GestionAlumnos(qtw.QWidget):
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE ALUMNOS
-                SET ID=?, NOMBRE_APELLIDO=?, DNI=?, EMAIL=?
+                SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
                 where ID=?
                 """, (
                     self.entry1.value(), self.entry2.value(), self.entry3.text(
@@ -299,6 +301,7 @@ class GestionAlumnos(qtw.QWidget):
         
         #Se refrescan los datos.
         self.mostrarDatos()
+        self.edita.close()
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
@@ -319,10 +322,3 @@ class GestionAlumnos(qtw.QWidget):
             i = self.tabla.indexAt(boton.pos())
             self.tabla.removeRow(i.row())
 
-    # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
-    # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
-    def closeEvent(self, event):
-        # Si hay una ventana de edición abierta, la cierra. 
-        # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
-        if self.edita:
-            self.edita.close()

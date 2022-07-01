@@ -37,7 +37,7 @@ class GestionProfesores(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID","Nombre y apeliido","", ""]      
+        self.campos = ["ID","DNI","Nombre_Apellido", "Email","", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -47,8 +47,11 @@ class GestionProfesores(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
-        self.tabla.setColumnWidth(2, 35)
-        self.tabla.setColumnWidth(3, 35)
+        self.tabla.setColumnWidth(2, 120)
+        self.tabla.setColumnWidth(3, 200)
+        self.tabla.setColumnWidth(4, 35)
+        self.tabla.setColumnWidth(5, 35)
+
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -121,12 +124,18 @@ class GestionProfesores(qtw.QWidget):
             cur.execute("""
             SELECT * FROM PROFESORES
             WHERE ID LIKE ? 
-            OR NOMB_APELIIDO LIKE ?  
+            OR ID LIKE ?
+            OR NOMBRE_APELIIDO LIKE ?  
+            OR EMAIL LIKE ?
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM PROFESORES ORDER BY NOMB_APELLIDO')
+            cur.execute('SELECT * FROM PROFESORES ORDER BY NOMBRE_APELLIDO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
+        elif consulta=="DNI":
+            cur.execute('SELECT * FROM PROFESORES ORDER BY DNI')
+        elif consulta=="Email":
+            cur.execute('SELECT * FROM PROFESORES ORDER BY EMAIL')
         elif consulta=="Normal":
             cur.execute('SELECT * FROM PROFESORES')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
@@ -155,7 +164,7 @@ class GestionProfesores(qtw.QWidget):
             botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 2, botonEditar)
+            self.tabla.setCellWidget(i, 4, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
@@ -165,7 +174,7 @@ class GestionProfesores(qtw.QWidget):
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 3, botonEliminar)
+            self.tabla.setCellWidget(i, 5, botonEliminar)
 
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
@@ -191,12 +200,12 @@ class GestionProfesores(qtw.QWidget):
         # Crea los entries.
         
         self.entry1 = qtw.QSpinBox()
-        self.entry2 = qtw.QLineEdit()
-        
-
+        self.entry2 = qtw.QSpinBox()
+        self.entry3 = qtw.QLineEdit()
+        self.entry4 = qtw.QLineEdit()
         
         self.entry1.setMaximum(9999)
-       
+        self.entry2.setMaximum(99999999)
 
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -210,19 +219,21 @@ class GestionProfesores(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             
             # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, 2):
+            for cell in range(0, 4):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
             
             self.entry1.setValue(int(datos[0]))
-            self.entry2.setText(datos[1])
+            self.entry2.setValue(int(datos[1]))
+            self.entry3.setText(datos[2])
+            self.entry4.setText(datos[3])
             
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2]
+        entries=[self.entry1, self.entry2, self.entry3, self.entry4]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutEditar.addWidget(entries[i], i, 1)
@@ -250,23 +261,25 @@ class GestionProfesores(qtw.QWidget):
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE PROFESORES
-                SET ID=?, NOMB_APELLIDO=?
+                SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
                 where id =?
                 """, (
-                    self.entry1.value(), self.entry2.text(), datos[0],
+                    self.entry1.value(), self.entry2.value(), self.entry3.text(
+                    ), self.entry4.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado el Profesor.")           
+                            "Se ha actualizado el profesor.")           
             except:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
                 return
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO PROFESORES VALUES(?,?) ", (
-                     self.entry1.value(), self.entry2.text(),
+                cur.execute("INSERT INTO PROFESORES VALUES(?,?,?,?) ", (
+                    self.entry1.value(), self.entry2.value(), 
+                    self.entry3.text(), self.entry4.text(), 
                 ))
                 con.commit()
 

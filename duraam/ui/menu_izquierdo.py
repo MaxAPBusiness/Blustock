@@ -15,7 +15,7 @@ class MenuIzquierdo(qtw.QToolBar):
         titulo=qtw.QLabel("Gestiones: ")
         titulo.setObjectName("gestiones-titulo")
         self.gestion1=qtw.QRadioButton('GESTIÓN DE HERRAMIENTAS')
-        self.gestion2=qtw.QRadioButton('Gestión de Herramientas viejo')
+        self.gestion2=qtw.QRadioButton('GESTIÓN DE MOVIMIENTOS')
         self.gestion3=qtw.QRadioButton('GESTIÓN DE TURNOS')
         self.gestion4=qtw.QRadioButton('GESTIÓN DE ALUMNOS')
         self.gestion5=qtw.QRadioButton('GESTIÓN DE PROFESORES')

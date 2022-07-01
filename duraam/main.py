@@ -23,7 +23,6 @@ import os
 from db.db import crearBBDD
 from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
 from ui.gestion_herramientas import GestionHerramientas
-from ui.gestion_herramientas2 import GestionHerramientas1
 from ui.gestion_turnos import GestionTurnos
 from ui.cabecera import Cabecera
 from ui.menu_izquierdo import MenuIzquierdo
@@ -52,7 +51,6 @@ class MainWindow(qtw.QMainWindow):
         stack = qtw.QStackedWidget()
 
         self.herramientas=GestionHerramientas()
-        self.prueba=GestionHerramientas1()
         self.movimientos=GestionMovimientosHerramientas()
         self.turnos=GestionTurnos()
         self.alumnos=GestionAlumnos()

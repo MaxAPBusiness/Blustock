@@ -272,18 +272,38 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
-        # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2,  self.entry3Dia, self.entry3Mes, self.entry3Dia, self.entry4, self.entry5, self.entry6]
-        for i in range(len(entries)):
-            entries[i].setObjectName("modificar-entry")
-            layoutEditar.addWidget(entries[i], i, 1)
+        layoutEditar.addWidget(self.entry1, 0, 1, 1, 5)
+        layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
+        layoutEditar.addWidget(self.entry3Dia, 2, 1, 1, 1)
+        layoutEditar.addWidget(qtw.QLabel("/"), 2, 2, 1, 1)
+        layoutEditar.addWidget(self.entry3Mes, 2, 3, 1, 1)
+        layoutEditar.addWidget(qtw.QLabel("/"), 2, 4, 1, 1)
+        layoutEditar.addWidget(self.entry3Año, 2, 5, 1, 1)
+        layoutEditar.addWidget(self.entry4, 3, 1, 1, 5)
+        layoutEditar.addWidget(self.entry5, 4, 1, 1, 5)
+        layoutEditar.addWidget(self.entry6, 5, 1, 1, 5)
 
+        entries=[self.entry1, self.entry2, self.entry4, self.entry5, self.entry6]
+        for i in entries:
+            i.setObjectName("modificar-entry")
+
+        self.entry3Dia.setObjectName("modificar-entryDate")
+        self.entry3Mes.setObjectName("modificar-entryDate")
+        self.entry3Año.setObjectName("modificar-entryDate")
+
+        self.entry3Dia.setMaximum(31)
+        self.entry3Mes.setMaximum(12)
+        self.entry3Año.setMaximum(2022)
+
+        self.entry3Dia.setFixedWidth(35)
+        self.entry3Mes.setFixedWidth(35)
+        self.entry3Año.setFixedWidth(50)
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutEditar.addWidget(confirmar, 6, 0, 1, 6, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
         self.edita.setLayout(layoutEditar)
@@ -336,6 +356,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             "El turno no está registrado. Por favor, verifique que el turno registrado es correcto.")
             return
             
+        fecha=f"{self.entry3Año.value()}/{self.entry3Mes.value()}/{self.entry3Dia.value()}"
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
@@ -349,8 +370,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             ID_TURNO_PANOL=?
             WHERE ID=?
             """, (
-                herramienta[0][0], alumno[0][0], self.entry3.text(
-                ), self.entry4.text(), self.entry5.text(), turnoPanol[0][0], datos[0],
+                herramienta[0][0], alumno[0][0], fecha, self.entry4.text(), self.entry5.text(), turnoPanol[0][0], datos[0],
             ))
 
             con.commit()
@@ -361,8 +381,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?)", (
-                herramienta[0][0], alumno[0][0], self.entry3.text(
-                ), self.entry4.text(), self.entry5.text(), turnoPanol[0][0],
+                herramienta[0][0], alumno[0][0], fecha, self.entry4.text(), self.entry5.text(), turnoPanol[0][0],
             ))
             con.commit()
 

@@ -78,7 +78,7 @@
     font-weight:400;
 }
 
-#modificar-entry{
+#modificar-entry, #modificar-entryDate{
     font-weight: 400;
     background-color: rgb(186, 201, 255);
     margin: 10px;
@@ -87,4 +87,8 @@
     height:30px;
     width:200px;
     max-width: 200px;
+}
+
+#modificar-entryDate{
+    max-width: 50px;
 }
