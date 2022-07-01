@@ -22,14 +22,14 @@ cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
-class GestionHerramientas(qtw.QWidget):
+class GestionAlumnos(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QWidget.
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DE HERRAMIENTAS")
+        self.titulo=qtw.QLabel("GESTIÓN DE ALUMNOS")
         self.titulo.setObjectName("titulo")
 
         # Se crea la tabla.
@@ -37,8 +37,8 @@ class GestionHerramientas(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "Descripción", "En condiciones",
-                       "En reparación", "De baja", "Grupo", "SubGrupo", "", ""]      
+        self.campos = ["ID", "DNI", "Nombre y apeliido",
+                       "EMAIL", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -94,7 +94,6 @@ class GestionHerramientas(qtw.QWidget):
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
-        
         layout.addWidget(self.titulo, 0, 1)
         layout.addWidget(self.buscar, 1, 1)
         layout.addWidget(icono,1,1)
@@ -129,29 +128,24 @@ class GestionHerramientas(qtw.QWidget):
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
-            SELECT * FROM HERRAMIENTAS 
+            SELECT * FROM ALUMNOS 
             WHERE ID LIKE ? 
-            OR DESC_LARGA LIKE ? 
-            OR CANT_CONDICIONES LIKE ? 
-            OR CANT_REPARACION LIKE ? 
-            OR CANT_BAJA LIKE ? 
-            OR ID_GRUPO LIKE ? 
-            OR ID_SUBGRUPO LIKE ?""", busqueda)
+            OR DNI LIKE ? 
+            OR NOMBRE_APELIIDO LIKE ? 
+            OR EMAIL LIKE ? 
+            """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY DESC_LARGA')
+            cur.execute('SELECT * FROM ALUMNOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Grupo":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY ID_GRUPO')
-        # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
-        elif consulta=="Subgrupo":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY ID_SUBGRUPO')
+            cur.execute('SELECT * FROM ALUMNOS ORDER BY ID_SUBGRUPO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM HERRAMIENTAS')
+            cur.execute('SELECT * FROM ALUMNOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
-            print("Error crítico: un bobi escribio la consulta mal.")
+            print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
         query = cur.fetchall()
@@ -175,7 +169,7 @@ class GestionHerramientas(qtw.QWidget):
             botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 7, botonEditar)
+            self.tabla.setCellWidget(i, 4, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
@@ -185,7 +179,7 @@ class GestionHerramientas(qtw.QWidget):
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 8, botonEliminar)
+            self.tabla.setCellWidget(i, 5, botonEliminar)
 
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
@@ -209,18 +203,17 @@ class GestionHerramientas(qtw.QWidget):
             layoutEditar.addWidget(label, i, 0)
         
         # Crea los entries.
-        self.entry0 = qtw.QSpinBox()
-        self.entry1 = qtw.QLineEdit()
+        
+        self.entry1 = qtw.QSpinBox()
         self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QSpinBox()
-        self.entry4 = qtw.QSpinBox()
-        self.entry5 = qtw.QLineEdit()
-        self.entry6 = qtw.QLineEdit()
+        self.entry3 = qtw.QLineEdit()
+        self.entry4 = qtw.QLineEdit()
+        
 
-        self.entry0.setMaximum(9999)
+        
+        self.entry1.setMaximum(9999)
         self.entry2.setMaximum(9999)
-        self.entry3.setMaximum(9999)
-        self.entry4.setMaximum(9999)
+       
 
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -234,22 +227,21 @@ class GestionHerramientas(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             
             # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, 9):
+            for cell in range(0, 6):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
-            self.entry0.setValue(int(datos[0]))
-            self.entry1.setText(datos[1])
-            self.entry2.setValue(int(datos[2]))
-            self.entry3.setValue(int(datos[3]))
-            self.entry4.setValue(int(datos[4]))
-            self.entry5.setText(datos[5])
-            self.entry6.setText(datos[6])
+            
+            self.entry1.setValue(int(datos[0]))
+            self.entry2.setValue(int(datos[1]))
+            self.entry3.setText(datos[2])
+            self.entry4.setText(datos[3])
+            
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry0, self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
+        entries=[self.entry1, self.entry2,  self.entry3, self.entry4]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutEditar.addWidget(entries[i], i, 1)
@@ -276,37 +268,37 @@ class GestionHerramientas(qtw.QWidget):
             try:
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
-                UPDATE HERRAMIENTAS 
-                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?,ID_GRUPO=?,ID_SUBGRUPO=? WHERE ID=?""", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), self.entry3.value(
-                    ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
+                UPDATE ALUMNOS
+                SET ID=?, NOMBRE_APELLIDO=?, DNI=?, EMAIL=?
+                where ID=?
+                """, (
+                    self.entry1.value(), self.entry2.value(), self.entry3.text(
+                    ), self.entry4.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado la herramienta.")           
+                            "Se ha actualizado el alumno.")           
             except:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
                 return
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), 
-                    self.entry3.value(), self.entry4.value(), self.entry5.text(), 
-                    self.entry6.text(),
+                cur.execute("INSERT INTO ALUMNOS VALUES(?, ?, ?, ?) ", (
+                     self.entry1.value(), self.entry2.value(), 
+                    self.entry3.text(), self.entry4.text(), 
                 ))
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado una herramienta.")
+                            "Se ha ingresado un alumno.")
             except:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
                 return
         
         #Se refrescan los datos.
         self.mostrarDatos()
-        self.edita.close()
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
@@ -319,7 +311,7 @@ class GestionHerramientas(qtw.QWidget):
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
+            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (idd,))
             con.commit()
 
             #elimina la fila de la tabla de la ui.
@@ -334,7 +326,3 @@ class GestionHerramientas(qtw.QWidget):
         # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
         if self.edita:
             self.edita.close()
-
-
-
-
