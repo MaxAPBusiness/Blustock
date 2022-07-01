@@ -17,14 +17,17 @@ class MenuIzquierdo(qtw.QToolBar):
         self.gestion1=qtw.QRadioButton('GESTIÓN DE HERRAMIENTAS')
         self.gestion2=qtw.QRadioButton('Gestión de Herramientas viejo')
         self.gestion3=qtw.QRadioButton('GESTIÓN DE TURNOS')
+        self.gestion4=qtw.QRadioButton('GESTIÓN DE ALUMNOS')
         self.gestion1.setObjectName("gestion")
         self.gestion2.setObjectName("gestion")
         self.gestion3.setObjectName("gestion")
+        self.gestion4.setObjectName("gestion")
 
         self.addWidget(titulo)
         self.addWidget(self.gestion1)
         self.addWidget(self.gestion2)
         self.addWidget(self.gestion3)
+        self.addWidget(self.gestion4)
 
         self.gestion1.toggle()
         

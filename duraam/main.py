@@ -27,6 +27,7 @@ from ui.gestion_herramientas2 import GestionHerramientas1
 from ui.gestion_turnos import GestionTurnos
 from ui.cabecera import Cabecera
 from ui.menu_izquierdo import MenuIzquierdo
+from ui.gestion_alumnos import GestionAlumnos
 
 # Se crea la base de datos
 crearBBDD()
@@ -53,17 +54,19 @@ class MainWindow(qtw.QMainWindow):
         self.prueba=GestionHerramientas1()
         self.movimientos=GestionMovimientosHerramientas()
         self.turnos=GestionTurnos()
+        self.alumnos=GestionAlumnos()
 
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
         self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, menuIzquierdo)
 
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.movimientos, self.turnos]:
+        for i in [self.herramientas, self.movimientos, self.turnos, self.alumnos]:
             stack.addWidget(i)
         
         menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
         menuIzquierdo.gestion2.toggled.connect(lambda:stack.setCurrentIndex(1))
         menuIzquierdo.gestion3.toggled.connect(lambda:stack.setCurrentIndex(2))
+        menuIzquierdo.gestion4.toggled.connect(lambda:stack.setCurrentIndex(3))
 
         # Añadimos la colección a la ventana
         self.setCentralWidget(stack)
