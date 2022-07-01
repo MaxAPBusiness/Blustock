@@ -19,7 +19,7 @@
 }
 
 #tabla{
-    max-width:725px;
+    max-width:800px;
     height:175px;
     max-height: 700px;
 }

@@ -53,9 +53,9 @@ class MainWindow(qtw.QMainWindow):
         self.entry.setObjectName("entry")
         tabla = qtw.QTableWidget(self)
         tabla.setObjectName("tabla")
-        tabla.setColumnCount(7)
+        tabla.setColumnCount(8)
         campos = ["#", "Descripción", "En condiciones",
-                  "En reparación", "De baja", "Grupo", "SubGrupo"]
+                  "En reparación", "De baja", "Grupo", "SubGrupo",""]
         cur.execute('SELECT * FROM HERRAMIENTAS')
         query = cur.fetchall()
         tabla.setRowCount(len(query))
@@ -80,8 +80,8 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(self.widgetCentral)
 
     def editar(self, campos, datos):
-        self.editar = Editar(campos, datos)
-        self.editar.show()
+        editar = Editar(campos, datos)
+        editar.show()
 
     def mostrarDatos(self, tabla, campos):
         cur.execute('SELECT * FROM HERRAMIENTAS')
@@ -91,8 +91,8 @@ class MainWindow(qtw.QMainWindow):
             for j in range(len(query[i])):
                 tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
             botonUwU = qtw.QPushButton("Editar")
-            botonUwU.clicked.connect(lambda: self.editar(campos, i))
-            tabla.setCellWidget(i, 8, botonUwU)
+            botonUwU.clicked.connect(lambda: self.editar(campos, query[i]))
+            tabla.setCellWidget(i, 7, botonUwU)
 
 
 class Editar(qtw.QWidget):
@@ -101,13 +101,16 @@ class Editar(qtw.QWidget):
         layout = qtw.QGridLayout()
         if datos:
             label = qtw.QLabel(campos[0])
-            label2 = qtw.QLabel(datos[0])
+            label2 = qtw.QLabel(str(datos[0]))
             layout.addWidget(label, 0, 0)
             layout.addWidget(label2, 0, 1)
             self.entry1 = qtw.QLineEdit(datos[1])
-            self.entry2 = qtw.QSpinBox(datos[2])
-            self.entry3 = qtw.QSpinBox(datos[3])
-            self.entry4 = qtw.QSpinBox(datos[4])
+            self.entry2 = qtw.QSpinBox()
+            self.entry3 = qtw.QSpinBox()
+            self.entry4 = qtw.QSpinBox()
+            self.entry2.setValue(datos[2])
+            self.entry3.setValue(datos[2])
+            self.entry4.setValue(datos[2])
             self.entry5 = qtw.QLineEdit(datos[5])
             self.entry6 = qtw.QLineEdit(datos[6])
         else:
@@ -142,6 +145,9 @@ class Editar(qtw.QWidget):
                 ), self.entry4.value(), self.entry5.text(), self.entry1.text(), datos[0],
             ))
             con.commit()
+            mostrarMensaje("Information", "Aviso",
+                           "Se han modificado los datos.")
+            
         else:
             cur.execute("INSERT INTO HERRAMIENTAS VALUES(NULL, ?, ?, ?, ?, ?, ?) ", (
                 self.entry1.text(), self.entry2.value(), self.entry3.value(
