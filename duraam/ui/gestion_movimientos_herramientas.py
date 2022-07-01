@@ -232,7 +232,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Crea los entries.
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
-        self.entry3 = qtw.QLineEdit()
+        self.entry3Dia = qtw.QSpinBox()
+        self.entry3Mes = qtw.QSpinBox()
+        self.entry3Año = qtw.QSpinBox()
         self.entry4 = qtw.QSpinBox()
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QSpinBox()
@@ -254,19 +256,24 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
             for cell in range(0, len(self.campos)):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
+            
+
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
             self.entry1.setText(datos[1])
             self.entry2.setText(datos[2])
-            self.entry3.setText(datos[3])
+            fecha=datos[3].split("/")
+            self.entry3Dia.setValue(int(fecha[2]))
+            self.entry3Mes.setValue(int(fecha[1]))
+            self.entry3Año.setValue(int(fecha[0]))
             self.entry4.setValue(int(datos[4]))
             self.entry5.setText(datos[5])
             self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
+        entries=[self.entry1, self.entry2,  self.entry3Dia, self.entry3Mes, self.entry3Dia, self.entry4, self.entry5, self.entry6]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutEditar.addWidget(entries[i], i, 1)

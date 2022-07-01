@@ -24,6 +24,7 @@ from db.db import crearBBDD
 from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
 from ui.gestion_herramientas import GestionHerramientas
 from ui.gestion_herramientas2 import GestionHerramientas1
+from ui.gestion_turnos import GestionTurnos
 from ui.cabecera import Cabecera
 from ui.menu_izquierdo import MenuIzquierdo
 
@@ -51,21 +52,23 @@ class MainWindow(qtw.QMainWindow):
         self.herramientas=GestionHerramientas()
         self.prueba=GestionHerramientas1()
         self.movimientos=GestionMovimientosHerramientas()
-        
+        self.turnos=GestionTurnos()
+
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
         self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, menuIzquierdo)
 
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.movimientos]:
+        for i in [self.herramientas, self.movimientos, self.turnos]:
             stack.addWidget(i)
         
         menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
         menuIzquierdo.gestion2.toggled.connect(lambda:stack.setCurrentIndex(1))
+        menuIzquierdo.gestion3.toggled.connect(lambda:stack.setCurrentIndex(2))
 
         # Añadimos la colección a la ventana
         self.setCentralWidget(stack)
         stack.setSizePolicy(
-            qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
+            qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,7 @@
-<<<<<<< HEAD
-wCREATE TABLE IF NOT EXISTS ALUMNOS(
-=======
+
 /*Crea la tabla de alumnos con los campos id (PK), DNI, nombre, apellido e email*/
 CREATE TABLE IF NOT EXISTS ALUMNOS(
->>>>>>> 57b4e0c25902bdbbb8765107194af8b4f10543f3
+
     ID INTEGER PRIMARY KEY,
     DNI INTEGER UNIQUE NOT NULL,
     NOMBRE_APELLIDO VARCHAR(50) NOT NULL,
