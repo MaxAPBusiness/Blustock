@@ -72,6 +72,10 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(stack)
         stack.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
+    
+    def closeEvent(self, event):
+        global app
+        app.closeAllWindows()
 
 
 if __name__ == "__main__":

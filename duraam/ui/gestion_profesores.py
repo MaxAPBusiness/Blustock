@@ -37,7 +37,7 @@ class GestionProfesores(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID","DNI","Nombre_Apellido", "Email","", ""]      
+        self.campos = ["ID","DNI","Nombre y Apellido", "Email","", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -75,9 +75,13 @@ class GestionProfesores(qtw.QWidget):
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
+        self.radio2 = qtw.QRadioButton("DNI")
         self.radio1.setObjectName("Radio1")
+        self.radio2.setObjectName("Radio2")
+
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
         self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
+        self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
 
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
@@ -95,6 +99,7 @@ class GestionProfesores(qtw.QWidget):
         layout.addWidget(icono,1,1)
         layout.addWidget(self.label2, 1, 2)
         layout.addWidget(self.radio1, 1, 3)
+        layout.addWidget(self.radio2, 1, 4)
         layout.addWidget(self.tabla, 2, 1, 1, 9)
         layout.addWidget(self.agregar, 3, 1)
 
@@ -117,7 +122,7 @@ class GestionProfesores(qtw.QWidget):
             # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(7): 
+            for i in range(4): 
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
@@ -125,7 +130,7 @@ class GestionProfesores(qtw.QWidget):
             SELECT * FROM PROFESORES
             WHERE ID LIKE ? 
             OR ID LIKE ?
-            OR NOMBRE_APELIIDO LIKE ?  
+            OR NOMBRE_APELLIDO LIKE ?  
             OR EMAIL LIKE ?
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
@@ -265,21 +270,22 @@ class GestionProfesores(qtw.QWidget):
                 where id =?
                 """, (
                     self.entry1.value(), self.entry2.value(), self.entry3.text(
-                    ), self.entry4.text(), datos[0],
+                    ).upper(), self.entry4.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el profesor.")           
-            except:
+            except BaseException as e:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
+                print(e)
                 return
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO PROFESORES VALUES(?,?,?,?) ", (
+                cur.execute("INSERT INTO PROFESORES VALUES(?, ? , ?, ?) ", (
                     self.entry1.value(), self.entry2.value(), 
-                    self.entry3.text(), self.entry4.text(), 
+                    self.entry3.text().upper(), self.entry4.text(), 
                 ))
                 con.commit()
 

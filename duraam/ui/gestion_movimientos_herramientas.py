@@ -231,14 +231,33 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         
         # Crea los entries.
         self.entry1 = qtw.QLineEdit()
+        cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS")
+        sugerenciasHerramientas=[]
+        for i in cur.fetchall():
+            sugerenciasHerramientas.append(i[0])
+        cuadroSugerenciasHerramientas=qtw.QCompleter(sugerenciasHerramientas, self)
+        cuadroSugerenciasHerramientas.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry1.setCompleter(cuadroSugerenciasHerramientas)
+
         self.entry2 = qtw.QLineEdit()
+        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
+        sugerenciasAlumnos=[]
+        for i in cur.fetchall():
+            sugerenciasAlumnos.append(i[0])
+        cuadroSugerenciasAlumnos=qtw.QCompleter(sugerenciasAlumnos, self)
+        cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry2.setCompleter(cuadroSugerenciasAlumnos)
+        
         self.entry3Dia = qtw.QSpinBox()
         self.entry3Mes = qtw.QSpinBox()
         self.entry3Año = qtw.QSpinBox()
+        self.entry3Dia.setMaximum(31)
+        self.entry3Mes.setMaximum(12)
+        self.entry3Año.setMaximum(2022)
+
         self.entry4 = qtw.QSpinBox()
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QSpinBox()
-
         self.entry4.setMaximum(9999)
         self.entry6.setMaximum(9999)
 
@@ -290,14 +309,6 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry3Dia.setObjectName("modificar-entryDate")
         self.entry3Mes.setObjectName("modificar-entryDate")
         self.entry3Año.setObjectName("modificar-entryDate")
-
-        self.entry3Dia.setMaximum(31)
-        self.entry3Mes.setMaximum(12)
-        self.entry3Año.setMaximum(2022)
-
-        self.entry3Dia.setFixedWidth(35)
-        self.entry3Mes.setFixedWidth(35)
-        self.entry3Año.setFixedWidth(50)
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
@@ -319,7 +330,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         SELECT ID
         FROM HERRAMIENTAS
         WHERE DESC_LARGA=? 
-        LIMIT 1""", (self.entry1.text(),))
+        LIMIT 1""", (self.entry1.text().upper(),))
 
         herramienta=cur.fetchall()
 
@@ -333,7 +344,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         FROM ALUMNOS
         WHERE NOMBRE_APELLIDO=?
         LIMIT 1
-        """, (self.entry2.text(),))
+        """, (self.entry2.text().upper(),))
 
         alumno=cur.fetchall()
 
@@ -355,8 +366,24 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             mostrarMensaje("Error", "Error", 
             "El turno no está registrado. Por favor, verifique que el turno registrado es correcto.")
             return
-            
-        fecha=f"{self.entry3Año.value()}/{self.entry3Mes.value()}/{self.entry3Dia.value()}"
+        
+        if self.entry3Mes.value() < 10:
+            mes=f"0{self.entry1Mes.value()}"
+        else:
+            mes=self.entry3Mes.value()
+        if self.entry3Dia.value() < 10:
+            dia=f"0{self.entry1Dia.value()}"
+        else:
+            dia=self.entry3Dia.value()  
+
+        if self.entry3Año.value()<1000:
+            año=f"0{self.entry1Año.value()}"
+            for i in range(4-len(año)): 
+                año=f"0{año}"
+        else:
+            año=self.entry3Año.value()
+        fecha=f"{año}/{mes}/{dia}"
+
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
@@ -387,8 +414,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
             mostrarMensaje("Information", "Aviso",
                         "Se ha ingresado una herramienta.")
-            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-            return
+            
         
         #Se refrescan los datos.
         self.mostrarDatos()

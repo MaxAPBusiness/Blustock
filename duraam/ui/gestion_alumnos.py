@@ -37,7 +37,7 @@ class GestionAlumnos(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "DNI", "Nombre_Apellido",
+        self.campos = ["ID", "DNI", "Nombre y Apellido",
                        "EMAIL", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
@@ -75,15 +75,15 @@ class GestionAlumnos(qtw.QWidget):
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
-        self.radio2 = qtw.QRadioButton("Grupo")
-        self.radio3 = qtw.QRadioButton("Subgrupo")
+        self.radio2 = qtw.QRadioButton("DNI")
+
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
-        self.radio3.setObjectName("Radio3")
+
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
         self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Grupo"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Subgrupo"))
+        self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
+
 
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
@@ -102,7 +102,6 @@ class GestionAlumnos(qtw.QWidget):
         layout.addWidget(self.label2, 1, 2)
         layout.addWidget(self.radio1, 1, 3)
         layout.addWidget(self.radio2, 1, 4)
-        layout.addWidget(self.radio3, 1, 5)
         layout.addWidget(self.tabla, 2, 1, 1, 9)
         layout.addWidget(self.agregar, 3, 1)
 
@@ -125,7 +124,7 @@ class GestionAlumnos(qtw.QWidget):
             # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(7): 
+            for i in range(4): 
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
@@ -133,15 +132,15 @@ class GestionAlumnos(qtw.QWidget):
             SELECT * FROM ALUMNOS 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
-            OR NOMBRE_APELIIDO LIKE ? 
+            OR NOMBRE_APELLIDO LIKE ? 
             OR EMAIL LIKE ? 
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
             cur.execute('SELECT * FROM ALUMNOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="Grupo":
-            cur.execute('SELECT * FROM ALUMNOS ORDER BY ID_SUBGRUPO')
+        elif consulta=="DNI":
+            cur.execute('SELECT * FROM ALUMNOS ORDER BY DNI')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute('SELECT * FROM ALUMNOS')
@@ -211,12 +210,9 @@ class GestionAlumnos(qtw.QWidget):
         self.entry3 = qtw.QLineEdit()
         self.entry4 = qtw.QLineEdit()
         
-
-        
         self.entry1.setMaximum(9999)
         self.entry2.setMaximum(99999999)
        
-
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
 
@@ -272,24 +268,25 @@ class GestionAlumnos(qtw.QWidget):
                 cur.execute("""
                 UPDATE ALUMNOS
                 SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
-                where ID=?
+                WHERE ID=?
                 """, (
                     self.entry1.value(), self.entry2.value(), self.entry3.text(
-                    ), self.entry4.text(), datos[0],
+                    ).upper(), self.entry4.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el alumno.")           
-            except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
+            except BaseException as e:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")  
+                print(e)
                 return
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
                 cur.execute("INSERT INTO ALUMNOS VALUES(?, ?, ?, ?) ", (
                      self.entry1.value(), self.entry2.value(), 
-                    self.entry3.text(), self.entry4.text(), 
+                    self.entry3.text().upper(), self.entry4.text(), 
                 ))
                 con.commit()
 

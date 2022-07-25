@@ -277,22 +277,25 @@ class GestionHerramientas(qtw.QWidget):
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE HERRAMIENTAS 
-                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?,ID_GRUPO=?,ID_SUBGRUPO=? WHERE ID=?""", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), self.entry3.value(
+                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?, ID_GRUPO=?, 
+                ID_SUBGRUPO=?
+                WHERE ID=?""", (
+                    self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), self.entry3.value(
                     ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado la herramienta.")           
-            except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")        
+            except BaseException as e:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                print(e)        
                 return
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
                 cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", (
-                    self.entry0.value(), self.entry1.text(), self.entry2.value(), 
+                    self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), 
                     self.entry3.value(), self.entry4.value(), self.entry5.text(), 
                     self.entry6.text(),
                 ))

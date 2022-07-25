@@ -2,6 +2,7 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
+import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
@@ -28,7 +29,8 @@ class GestionTurnos(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "Fecha", "ID Alumno", "Horario Ingreso", "Horario Egreso", "Porfesor Ingreso", "Profesor Egreso", "", ""]    
+        self.campos = ["ID", "Fecha", "Alumno", "Horario Ingreso", "Horario Egreso", "Profesor Ingreso", 
+        "Profesor Egreso", "", ""]    
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -118,43 +120,76 @@ class GestionTurnos(qtw.QWidget):
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
-            SELECT T.ID, T.FECHA, T.ID_ALUMNO, T.HORA_INGRESO, T.HORA_EGRESO, T.PROF_INGRESO, T.PROF_EGRESO 
-            FROM PROFESORES P, ALUMNOS A, TURNO_PANOL T
-            WHERE T.ID_ALUMNO = A.ID AND T.PROF_INGRESO = P.NOMB_APELLIDO AND T.PROF_EGRESO = P.NOMB_APELLIDO
-            AND (T.ID LIKE ? 
-            OR T.FECHA LIKE ? 
-            OR T.ID_ALUMNO LIKE ?
-            OR T.HORA_INGRESO ? 
-            OR T.HORA_EGRESO LIKE ? 
-            OR T.PROF_INGRESO ? 
-            OR T.PROF_EGRESO LIKE ?)""", busqueda)
+            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
+            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
+            FROM TURNO_PANOL TURNO
+            JOIN ALUMNOS ALUMNO
+            ON TURNO.ID_ALUMNO = ALUMNO.ID
+            JOIN PROFESORES PROF_ING
+            ON TURNO.PROF_INGRESO = PROF_ING.ID
+            JOIN PROFESORES PROF_EGR
+            ON TURNO.PROF_EGRESO = PROF_EGR.ID
+            WHERE TURNO.ID LIKE ? 
+            OR TURNO.FECHA LIKE ? 
+            OR ALUMNO.NOMBRE_APELLIDO LIKE ?
+            OR TURNO.HORA_INGRESO LIKE ? 
+            OR TURNO.HORA_EGRESO LIKE ? 
+            OR PROF_ING.NOMBRE_APELLIDO LIKE ? 
+            OR PROF_EGR.NOMBRE_APELLIDO LIKE ?""", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="ID":
             cur.execute("""
-            SELECT T.ID, T.FECHA, T.ID_ALUMNO, T.HORA_INGRESO, T.HORA_EGRESO, T.PROF_INGRESO, T.PROF_EGRESO 
-            FROM PROFESORES P, ALUMNOS A, TURNO_PANOL T
-            WHERE T.ID_ALUMNO = A.ID AND T.PROF_INGRESO = P.NOMB_APELLIDO AND T.PROF_EGRESO = P.NOMB_APELLIDO ORDER BY T.ID
+            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
+            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
+            FROM TURNO_PANOL TURNO
+            JOIN ALUMNOS ALUMNO
+            ON TURNO.ID_ALUMNO = ALUMNO.ID
+            JOIN PROFESORES PROF_ING
+            ON TURNO.PROF_INGRESO = PROF_ING.ID
+            JOIN PROFESORES PROF_EGR
+            ON TURNO.PROF_EGRESO = PROF_EGR.ID
+            ORDER BY TURNO.ID
             """)
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Alumno":
             cur.execute("""
-            SELECT T.ID, T.FECHA, T.ID_ALUMNO, T.HORA_INGRESO, T.HORA_EGRESO, T.PROF_INGRESO, T.PROF_EGRESO 
-            FROM PROFESORES P, ALUMNOS A, TURNO_PANOL T
-            WHERE T.ID_ALUMNO = A.ID AND T.PROF_INGRESO = P.NOMB_APELLIDO AND T.PROF_EGRESO = P.NOMB_APELLIDO ORDER BY T.ID_ALUMNO
+            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
+            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
+            FROM TURNO_PANOL TURNO
+            JOIN ALUMNOS ALUMNO
+            ON TURNO.ID_ALUMNO = ALUMNO.ID
+            JOIN PROFESORES PROF_ING
+            ON TURNO.PROF_INGRESO = PROF_ING.ID
+            JOIN PROFESORES PROF_EGR
+            ON TURNO.PROF_EGRESO = PROF_EGR.ID
+            ORDER BY ALUMNO.NOMBRE_APELLIDO
             """)
         # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Fecha":
             cur.execute("""
-            SELECT T.ID, T.FECHA, T.ID_ALUMNO, T.HORA_INGRESO, T.HORA_EGRESO, T.PROF_INGRESO, T.PROF_EGRESO 
-            FROM PROFESORES P, ALUMNOS A, TURNO_PANOL T
-            WHERE T.ID_ALUMNO = A.ID AND T.PROF_INGRESO = P.NOMB_APELLIDO AND T.PROF_EGRESO = P.NOMB_APELLIDO ORDER BY T.FECHA
+            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
+            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
+            FROM TURNO_PANOL TURNO
+            JOIN ALUMNOS ALUMNO
+            ON TURNO.ID_ALUMNO = ALUMNO.ID
+            JOIN PROFESORES PROF_ING
+            ON TURNO.PROF_INGRESO = PROF_ING.ID
+            JOIN PROFESORES PROF_EGR
+            ON TURNO.PROF_EGRESO = PROF_EGR.ID
+            ORDER BY TURNO.FECHA
             """)
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute("""
-            SELECT T.ID, T.FECHA, T.ID_ALUMNO, T.HORA_INGRESO, T.HORA_EGRESO, T.PROF_INGRESO, T.PROF_EGRESO 
-            FROM PROFESORES P, ALUMNOS A, TURNO_PANOL T
-            WHERE T.ID_ALUMNO = A.ID AND T.PROF_INGRESO = P.NOMB_APELLIDO AND T.PROF_EGRESO = P.NOMB_APELLIDO
+            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
+            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
+            FROM TURNO_PANOL TURNO
+            JOIN ALUMNOS ALUMNO
+            ON TURNO.ID_ALUMNO = ALUMNO.ID
+            JOIN PROFESORES PROF_ING
+            ON TURNO.PROF_INGRESO = PROF_ING.ID
+            JOIN PROFESORES PROF_EGR
+            ON TURNO.PROF_EGRESO = PROF_EGR.ID
             """)
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
@@ -215,16 +250,42 @@ class GestionTurnos(qtw.QWidget):
             layoutEditar.addWidget(label, i-1, 0)
         
         # Crea los entries.
-        self.entry0 = qtw.QSpinBox()
-        self.entry1 = qtw.QLineEdit()
-        self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QLineEdit()
-        self.entry4 = qtw.QLineEdit()
+        self.entry1Dia = qtw.QSpinBox()
+        self.entry1Mes = qtw.QSpinBox()
+        self.entry1Año = qtw.QSpinBox()
+        self.entry2 = qtw.QLineEdit()
+
+        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
+        sugerenciasAlumnos=[]
+        for i in cur.fetchall():
+            sugerenciasAlumnos.append(i[0])
+        cuadroSugerenciasAlumnos=qtw.QCompleter(sugerenciasAlumnos, self)
+        cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry2.setCompleter(cuadroSugerenciasAlumnos)
+
+        self.entry3Hora = qtw.QSpinBox()
+        self.entry3Minuto = qtw.QSpinBox()
+        self.entry4Hora = qtw.QSpinBox()
+        self.entry4Minuto = qtw.QSpinBox()
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QLineEdit()
 
-        self.entry0.setMaximum(9999)
-        self.entry2.setMaximum(9999)
+        cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+        sugerenciasProfesores=[]
+        for i in cur.fetchall():
+            sugerenciasProfesores.append(i[0])
+        cuadroSugerenciasProfesores=qtw.QCompleter(sugerenciasProfesores, self)
+        cuadroSugerenciasProfesores.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry5.setCompleter(cuadroSugerenciasProfesores)
+        self.entry6.setCompleter(cuadroSugerenciasProfesores)
+
+        self.entry1Dia.setMaximum(31)
+        self.entry1Mes.setMaximum(12)
+        self.entry1Año.setMaximum(9999)
+        self.entry3Hora.setMaximum(23)
+        self.entry3Minuto.setMaximum(59)
+        self.entry4Hora.setMaximum(23)
+        self.entry4Minuto.setMaximum(59)
 
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -243,27 +304,62 @@ class GestionTurnos(qtw.QWidget):
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
-            self.entry0.setValue(int(datos[0]))
-            self.entry1.setText(datos[1])
-            self.entry2.setValue(int(datos[2]))
-            self.entry3.setText(datos[3])
-            self.entry4.setText(datos[4])
+            fecha=datos[1].split("/")
+            self.entry1Dia.setValue(int(fecha[2]))
+            self.entry1Mes.setValue(int(fecha[1]))
+            self.entry1Año.setValue(int(fecha[0]))
+            self.entry2.setText(datos[2])
+
+            ingreso=datos[3].split(":")
+            self.entry3Hora.setValue(int(ingreso[0]))
+            self.entry3Minuto.setValue(int(ingreso[1]))
+
+            egreso=datos[4].split(":")
+            self.entry4Hora.setValue(int(egreso[0]))
+            self.entry4Minuto.setValue(int(egreso[1]))
+
             self.entry5.setText(datos[5])
             self.entry6.setText(datos[6])
+
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5, self.entry6]
-        for i in range(len(entries)):
-            entries[i].setObjectName("modificar-entry")
-            layoutEditar.addWidget(entries[i], i, 1)
+        layoutEditar.addWidget(self.entry1Dia, 0, 1)
+        layoutEditar.addWidget(qtw.QLabel("/"), 0, 2)
+        layoutEditar.addWidget(self.entry1Mes, 0, 3)
+        layoutEditar.addWidget(qtw.QLabel("/"), 0, 4)
+        layoutEditar.addWidget(self.entry1Año, 0, 5)
+        self.entry1Dia.setObjectName("modificar-entryDate")
+        self.entry1Mes.setObjectName("modificar-entryDate")
+        self.entry1Año.setObjectName("modificar-entryDate")
 
+
+        layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
+        self.entry2.setObjectName("modificar-entry")
+
+        layoutEditar.addWidget(self.entry3Hora, 2, 1)
+        layoutEditar.addWidget(qtw.QLabel(":"), 2, 2)
+        layoutEditar.addWidget(self.entry3Minuto, 2, 3)
+        layoutEditar.addWidget(self.entry4Hora, 3, 1)
+        layoutEditar.addWidget(qtw.QLabel(":"), 3, 2)
+        layoutEditar.addWidget(self.entry4Minuto, 3, 3)
+
+        self.entry3Hora.setObjectName("modificar-entryDate")
+        self.entry3Minuto.setObjectName("modificar-entryDate")
+
+        self.entry4Hora.setObjectName("modificar-entryDate")
+        self.entry4Minuto.setObjectName("modificar-entryDate")
+        
+        layoutEditar.addWidget(self.entry5, 4, 1, 1, 5)
+        self.entry5.setObjectName("modificar-entry")
+        layoutEditar.addWidget(self.entry6, 5, 1, 1, 5)
+        self.entry6.setObjectName("modificar-entry")
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutEditar.addWidget(confirmar, 6, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
         self.edita.setLayout(layoutEditar)
@@ -274,13 +370,18 @@ class GestionTurnos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-            
+        try:
+            dt.datetime(year=self.entry1Año.value(), month=self.entry1Mes.value(), day=self.entry1Dia.value())
+        except ValueError:
+            mostrarMensaje("Error", "Error", "La fecha ingresada no es válida. Ingresar nuevamente.")
+            return
+
         cur.execute("""
         SELECT ID
         FROM ALUMNOS
-        WHERE ID=?
+        WHERE NOMBRE_APELLIDO=?
         LIMIT 1
-        """, (self.entry2.text(),))
+        """, (self.entry2.text().upper(),))
 
         alumno=cur.fetchall()
 
@@ -292,54 +393,111 @@ class GestionTurnos(qtw.QWidget):
         cur.execute("""
         SELECT ID
         FROM PROFESORES
-        WHERE ID=?
+        WHERE NOMBRE_APELLIDO=?
         LIMIT 1
-        """, (self.entry5.text(),))
+        """, (self.entry5.text().upper(),))
 
-        profe=cur.fetchall()
+        profeIngreso=cur.fetchall()
 
-        if not profe:
+        if not profeIngreso:
             mostrarMensaje("Error", "Error", 
-            "El profesor no está ingresado. Por favor, verifique que el profesor ingresado exista.")
+            "El profesor que autorizó el ingreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
             return
+        
+        cur.execute("""
+        SELECT ID
+        FROM PROFESORES
+        WHERE NOMBRE_APELLIDO=?
+        LIMIT 1
+        """, (self.entry6.text().upper(),))
+
+        profeEgreso=cur.fetchall()
+
+        if not profeEgreso:
+            mostrarMensaje("Error", "Error", 
+            "El profesor que autorizó el egreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
+            return
+        
+        if self.entry1Mes.value() < 10:
+            mes=f"0{self.entry1Mes.value()}"
+        else:
+            mes=self.entry1Mes.value()
+        if self.entry1Dia.value() < 10:
+            dia=f"0{self.entry1Dia.value()}"
+        else:
+            dia=self.entry1Dia.value()  
+
+        if self.entry1Año.value()<1000:
+            año=f"0{self.entry1Año.value()}"
+            for i in range(4-len(año)): 
+                año=f"0{año}"
+        else:
+            año=self.entry1Año.value()
+        fecha=f"{año}/{mes}/{dia}"
+
+        if self.entry3Hora.value()<10:
+            horaIngreso=f"0{self.entry3Hora.value()}"
+        else:
+            horaIngreso=f"{self.entry3Hora.value()}"
+        if self.entry3Minuto.value()<10:
+            minutoIngreso=f"0{self.entry3Minuto.value()}"
+        else:
+            minutoIngreso=f"{self.entry3Hora.value()}"
+
+        if self.entry4Hora.value()<10:
+            horaEgreso=f"0{self.entry4Hora.value()}"
+        else:
+            horaEgreso=f"{self.entry4Hora.value()}"
+        if self.entry4Minuto.value()<10:
+            minutoEgreso=f"0{self.entry4Minuto.value()}"
+        else:
+            minutoEgreso=f"{self.entry4Minuto.value()}"
+
+        ingreso=f"{horaIngreso}:{minutoIngreso}"
+        egreso=f"{horaEgreso}:{minutoEgreso}"
         
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-            cur.execute("""
-            UPDATE TURNO_PANOL
-            SET ID = ?
-            FECHA =?
-            ID_ALUMNO =?
-            HORA_INGRESO =?
-            HORA_EGRESO =?
-            PROF_INGRESO =?
-            PROF_EGRESO =?
-            WHERE ID=?
-            """, (
-                alumno[0][0], self.entry3.text(
-                ), self.entry4.text(), self.entry5.text(), profe[0][0], datos[0],
-            ))
+            try:
+                cur.execute("""
+                UPDATE TURNO_PANOL
+                SET FECHA = ?,
+                ID_ALUMNO = ?,
+                HORA_INGRESO = ?,
+                HORA_EGRESO = ?,
+                PROF_INGRESO = ?,
+                PROF_EGRESO = ?
+                WHERE ID = ?
+                """, (
+                    fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0], datos[0],
+                ))
 
-            con.commit()
-            # Se muestra el mensaje exitoso.
-            mostrarMensaje("Information", "Aviso",
-                        "Se ha actualizado el movimiento.")           
+                con.commit()
+                # Se muestra el mensaje exitoso.
+                mostrarMensaje("Information", "Aviso",
+                            "Se ha actualizado el movimiento.")           
 
-        # Si no, se inserta la fila en la tabla de la base de datos.
+            # Si no, se inserta la fila en la tabla de la base de datos.
+            except:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                return
         else:
-            cur.execute("INSERT INTO TURNO_PANOL VALUES(NULL,?,?,?,?,?,?)", (
-                profe[0][0], alumno[0][0], self.entry3.text(
-                ), self.entry4.text(), self.entry5.text(), profe[0][0],
-            ))
-            con.commit()
+            try:
+                cur.execute(
+                """INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)
+                """, (
+                    fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0],
+                ))
+                con.commit()
 
-            mostrarMensaje("Information", "Aviso",
-                        "Se ha ingresado un turno.")
-            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-            return
-        
+                mostrarMensaje("Information", "Aviso",
+                            "Se ha ingresado un turno.")
+            except:
+                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                return
         #Se refrescan los datos.
+        self.edita.close()
         self.mostrarDatos()
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
