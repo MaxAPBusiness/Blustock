@@ -14,7 +14,7 @@ import os
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
-
+from cursos import cursos
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
@@ -217,14 +217,7 @@ class GestionAlumnos(qtw.QWidget):
         self.entry4 = qtw.QLineEdit()
         self.entry5 = qtw.QLineEdit()
 
-        self.cursos=["1A", "1B", "1C", 
-        "2A", "2B", "2C", 
-        "3A", "3B", "3C", 
-        "4A", "4B", 
-        "5A", "5B", 
-        "6A", "6B", 
-        "7A", "7B", ]
-        cuadroSugerencias=qtw.QCompleter(self.cursos, self)
+        cuadroSugerencias=qtw.QCompleter(cursos, self)
         cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry4.setCompleter(cuadroSugerencias)
         self.entry1.setMaximum(9999)
@@ -280,7 +273,7 @@ class GestionAlumnos(qtw.QWidget):
         global mostrarMensaje
 
 
-        if self.entry4.text() not in self.cursos:
+        if self.entry4.text() not in cursos:
             mostrarMensaje("Error", "Error", 
             "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
             return

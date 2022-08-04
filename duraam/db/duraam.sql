@@ -1,7 +1,6 @@
 
 /*Crea la tabla de alumnos con los campos id (PK), DNI, nombre, apellido e email*/
 CREATE TABLE IF NOT EXISTS ALUMNOS(
-
     ID INTEGER PRIMARY KEY,
     DNI INTEGER UNIQUE NOT NULL,
     NOMBRE_APELLIDO VARCHAR(50) NOT NULL,
