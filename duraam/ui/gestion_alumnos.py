@@ -37,7 +37,7 @@ class GestionAlumnos(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "DNI", "Nombre y Apellido",
+        self.campos = ["ID", "DNI", "Nombre y Apellido", "Curso",
                        "EMAIL", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
@@ -50,8 +50,8 @@ class GestionAlumnos(qtw.QWidget):
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(2, 120)
         self.tabla.setColumnWidth(3, 200)
-        self.tabla.setColumnWidth(4, 35)
         self.tabla.setColumnWidth(5, 35)
+        self.tabla.setColumnWidth(6, 35)
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -76,13 +76,16 @@ class GestionAlumnos(qtw.QWidget):
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
         self.radio2 = qtw.QRadioButton("DNI")
+        self.radio3 = qtw.QRadioButton("Curso")
 
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
+        self.radio3.setObjectName("Radio3")
 
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
         self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
         self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
+        self.radio3.toggled.connect(lambda: self.mostrarDatos("Curso"))
 
 
         # Se crea el boton de agregar herramientas nuevas.
@@ -141,6 +144,9 @@ class GestionAlumnos(qtw.QWidget):
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="DNI":
             cur.execute('SELECT * FROM ALUMNOS ORDER BY DNI')
+        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
+        elif consulta=="Curso":
+            cur.execute('SELECT * FROM ALUMNOS ORDER BY CURSO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute('SELECT * FROM ALUMNOS')
@@ -170,17 +176,17 @@ class GestionAlumnos(qtw.QWidget):
             botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 4, botonEditar)
+            self.tabla.setCellWidget(i, 5, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
             botonEliminar.setIcon(qtg.QIcon(
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(22, 22))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 5, botonEliminar)
+            self.tabla.setCellWidget(i, 6, botonEliminar)
 
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
@@ -198,7 +204,7 @@ class GestionAlumnos(qtw.QWidget):
         layoutEditar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
-        for i in range(len(self.campos)):
+        for i in range(len(self.campos)-2):
             label = qtw.QLabel(self.campos[i])
             label.setObjectName("modificar-label")
             layoutEditar.addWidget(label, i, 0)
@@ -209,7 +215,18 @@ class GestionAlumnos(qtw.QWidget):
         self.entry2 = qtw.QSpinBox()
         self.entry3 = qtw.QLineEdit()
         self.entry4 = qtw.QLineEdit()
-        
+        self.entry5 = qtw.QLineEdit()
+
+        self.cursos=["1A", "1B", "1C", 
+        "2A", "2B", "2C", 
+        "3A", "3B", "3C", 
+        "4A", "4B", 
+        "5A", "5B", 
+        "6A", "6B", 
+        "7A", "7B", ]
+        cuadroSugerencias=qtw.QCompleter(self.cursos, self)
+        cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry4.setCompleter(cuadroSugerencias)
         self.entry1.setMaximum(9999)
         self.entry2.setMaximum(99999999)
        
@@ -235,11 +252,12 @@ class GestionAlumnos(qtw.QWidget):
             self.entry2.setValue(int(datos[1]))
             self.entry3.setText(datos[2])
             self.entry4.setText(datos[3])
+            self.entry5.setText(datos[4])
             
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2,  self.entry3, self.entry4]
+        entries=[self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutEditar.addWidget(entries[i], i, 1)
@@ -261,17 +279,22 @@ class GestionAlumnos(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
+
+        if self.entry4.text() not in self.cursos:
+            mostrarMensaje("Error", "Error", 
+            "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
+            return
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE ALUMNOS
-                SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
+                SET ID=?, DNI=?, NOMBRE_APELLIDO=?, CURSO=?, EMAIL=?
                 WHERE ID=?
                 """, (
                     self.entry1.value(), self.entry2.value(), self.entry3.text(
-                    ).upper(), self.entry4.text(), datos[0],
+                    ).upper(), self.entry4.text(), self.entry5.text(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
@@ -284,9 +307,9 @@ class GestionAlumnos(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO ALUMNOS VALUES(?, ?, ?, ?) ", (
+                cur.execute("INSERT INTO ALUMNOS VALUES(?, ?, ?, ?, ?) ", (
                      self.entry1.value(), self.entry2.value(), 
-                    self.entry3.text().upper(), self.entry4.text(), 
+                    self.entry3.text().upper(), self.entry4.text(), self.entry5.text(), 
                 ))
                 con.commit()
 

@@ -175,7 +175,7 @@ class GestionProfesores(qtw.QWidget):
             botonEliminar = qtw.QPushButton()
             botonEliminar.setIcon(qtg.QIcon(
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(22, 22))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
@@ -197,7 +197,7 @@ class GestionProfesores(qtw.QWidget):
         layoutEditar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
-        for i in range(len(self.campos)):
+        for i in range(len(self.campos)-2):
             label = qtw.QLabel(self.campos[i])
             label.setObjectName("modificar-label")
             layoutEditar.addWidget(label, i, 0)

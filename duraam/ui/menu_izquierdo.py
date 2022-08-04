@@ -14,23 +14,22 @@ class MenuIzquierdo(qtw.QToolBar):
 
         titulo=qtw.QLabel("Gestiones: ")
         titulo.setObjectName("gestiones-titulo")
+
         self.gestion1=qtw.QRadioButton('GESTIÓN DE HERRAMIENTAS')
         self.gestion2=qtw.QRadioButton('GESTIÓN DE MOVIMIENTOS')
         self.gestion3=qtw.QRadioButton('GESTIÓN DE TURNOS')
         self.gestion4=qtw.QRadioButton('GESTIÓN DE ALUMNOS')
         self.gestion5=qtw.QRadioButton('GESTIÓN DE PROFESORES')
-        self.gestion1.setObjectName("gestion")
-        self.gestion2.setObjectName("gestion")
-        self.gestion3.setObjectName("gestion")
-        self.gestion4.setObjectName("gestion")
-        self.gestion5.setObjectName("gestion")
+        self.gestion6=qtw.QRadioButton('GESTIÓN DE GRUPOS')
 
         self.addWidget(titulo)
-        self.addWidget(self.gestion1)
-        self.addWidget(self.gestion2)
-        self.addWidget(self.gestion3)
-        self.addWidget(self.gestion4)
-        self.addWidget(self.gestion5)
+
+        self.gestiones=[self.gestion1, self.gestion2, self.gestion3, self.gestion4, self.gestion5, self.gestion6]
+        
+        for i in self.gestiones:
+            i.setObjectName("gestion")
+            self.addWidget(i)
+
         self.gestion1.toggle()
         
         with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/menu_izquierdo.qss", "r") as qss:
