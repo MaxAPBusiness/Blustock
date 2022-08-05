@@ -368,11 +368,11 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             return
         
         if self.entry3Mes.value() < 10:
-            mes=f"0{self.entry1Mes.value()}"
+            mes=f"0{self.entry3Mes.value()}"
         else:
             mes=self.entry3Mes.value()
         if self.entry3Dia.value() < 10:
-            dia=f"0{self.entry1Dia.value()}"
+            dia=f"0{self.entry3Dia.value()}"
         else:
             dia=self.entry3Dia.value()  
 

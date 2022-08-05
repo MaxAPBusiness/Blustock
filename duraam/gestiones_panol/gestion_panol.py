@@ -41,6 +41,7 @@ class Inicio(qtw.QWidget):
         self.alumno=qtw.QComboBox()
         self.busquedaAlumnos()
         self.confirmar=qtw.QPushButton("confirmar")
+        self.confirmar.setObjectName("confirmar")
         layout=qtw.QGridLayout()
         layout.addWidget(titulo, 0, 0, 1, 2)
         layout.addWidget(label1, 1, 0)
