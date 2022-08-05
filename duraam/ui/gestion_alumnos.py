@@ -271,7 +271,12 @@ class GestionAlumnos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-
+        if len(self.entry3.text()) > 50:
+            mostrarMensaje("Error", "Error", "El nombre ingresado es demasiado largo. Ingresa uno más corto.")
+            return
+        elif len(self.entry5.text()) > 100:
+            mostrarMensaje("Error", "Error", "El email ingresado es demasiado largo. Ingresa uno más corto.")
+            return
 
         if self.entry4.text() not in cursos:
             mostrarMensaje("Error", "Error", 

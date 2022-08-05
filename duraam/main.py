@@ -21,14 +21,17 @@ import os
 
 # Importamos las pantallas y el codigo de BD
 from db.db import crearBBDD
+
+from ui.cabecera import Cabecera
+from ui.menu_izquierdo import MenuIzquierdo
+
 from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
 from ui.gestion_herramientas import GestionHerramientas
 from ui.gestion_turnos import GestionTurnos
-from ui.cabecera import Cabecera
-from ui.menu_izquierdo import MenuIzquierdo
 from ui.gestion_alumnos import GestionAlumnos
 from ui.gestion_profesores import GestionProfesores
 from ui.gestion_grupos import GestionGrupos
+from ui.gestion_subgrupos import GestionSubgrupos
 
 # Se crea la base de datos
 crearBBDD()
@@ -57,12 +60,13 @@ class MainWindow(qtw.QMainWindow):
         self.alumnos=GestionAlumnos()
         self.profesores=GestionProfesores()
         self.grupos=GestionGrupos()
+        self.subgrupos=GestionSubgrupos()
 
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
         self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
 
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos]:
+        for i in [self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos, self.subgrupos]:
             stack.addWidget(i)
         
         self.menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
@@ -71,6 +75,7 @@ class MainWindow(qtw.QMainWindow):
         self.menuIzquierdo.gestion4.toggled.connect(lambda:stack.setCurrentIndex(3))
         self.menuIzquierdo.gestion5.toggled.connect(lambda:stack.setCurrentIndex(4))
         self.menuIzquierdo.gestion6.toggled.connect(lambda:stack.setCurrentIndex(5))
+        self.menuIzquierdo.gestion7.toggled.connect(lambda:stack.setCurrentIndex(6))
         # Añadimos la colección a la ventana
         self.setCentralWidget(stack)
         stack.setSizePolicy(

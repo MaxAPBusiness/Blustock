@@ -223,8 +223,15 @@ class GestionHerramientas(qtw.QWidget):
         cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
         cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry5.setCompleter(cuadroSugerenciasGrupos)
+        self.entry5.editingFinished.connect(lambda:self.cargarSubgrupos(self.entry5.text()))
 
         self.entry6 = qtw.QLineEdit()
+
+        sugerenciasGrupos=[]
+        for i in cur.fetchall():
+            sugerenciasGrupos.append(i[0])
+        cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
+        cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
 
         self.entry0.setMaximum(9999)
         self.entry2.setMaximum(9999)
@@ -255,6 +262,7 @@ class GestionHerramientas(qtw.QWidget):
             self.entry4.setValue(int(datos[4]))
             self.entry5.setText(datos[5])
             self.entry6.setText(datos[6])
+            self.cargarSubgrupos(datos[5])
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
@@ -274,11 +282,24 @@ class GestionHerramientas(qtw.QWidget):
         self.edita.setLayout(layoutEditar)
         # Se muestra la ventana
         self.edita.show()
+    
+    def cargarSubgrupos(self, grupo):
+        cur.execute("SELECT ID FROM SUBGRUPOS WHERE GRUPO=?", (grupo,))
+        sugerenciasSubgrupos=[]
+        for i in cur.fetchall():
+            sugerenciasSubgrupos.append(i[0])
+        cuadroSugerenciasSubgrupos=qtw.QCompleter(sugerenciasSubgrupos, self)
+        cuadroSugerenciasSubgrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry6.setCompleter(cuadroSugerenciasSubgrupos)
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
+
+        if len(self.entry1.text()) > 100:
+            mostrarMensaje("Error", "Error", "La herramienta ingresada es demasiado larga. Ingresa una más corta.")
+            return
 
         cur.execute("""
         SELECT ID
@@ -292,14 +313,25 @@ class GestionHerramientas(qtw.QWidget):
             "El grupo no está ingresado. Por favor, verifique que el grupo ingresado es correcto.")
             return
 
+        cur.execute("""
+        SELECT ID
+        FROM SUBGRUPOS
+        WHERE ID=?""", (self.entry6.text().upper(),))
+
+        subgrupo=cur.fetchall()
+
+        if not self.entry6.text() == "" and not subgrupo:
+            mostrarMensaje("Error", "Error", 
+            "El subgrupo no está ingresado. Por favor, verifique que el grupo ingresado es correcto.")
+            return
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE HERRAMIENTAS 
-                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?, ID_GRUPO=?, 
-                ID_SUBGRUPO=?
+                SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?, GRUPO=?, 
+                SUBGRUPO=?
                 WHERE ID=?""", (
                     self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), self.entry3.value(
                     ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],

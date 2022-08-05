@@ -260,6 +260,11 @@ class GestionProfesores(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
+        if len(self.entry2.text()) > 50:
+            mostrarMensaje("Error", "Error", "El nombre ingresado es demasiado largo. Ingresa uno más corto.")
+            return
+        elif len(self.entry4.text()) > 100:
+            mostrarMensaje("Error", "Error", "El email ingresado es demasiado largo. Ingresa uno más corto.")
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
@@ -297,6 +302,7 @@ class GestionProfesores(qtw.QWidget):
         
         #Se refrescan los datos.
         self.mostrarDatos()
+        self.edita.close()
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.

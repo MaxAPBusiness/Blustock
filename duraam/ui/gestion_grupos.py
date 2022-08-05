@@ -242,6 +242,8 @@ class GestionGrupos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
+        if len(self.entry1.text()) > 40:
+            mostrarMensaje("Error", "Error", "El grupo ingresado es demasiado largo. Ingrese uno más corto.")
 
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
