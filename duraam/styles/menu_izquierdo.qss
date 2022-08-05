@@ -1,0 +1,21 @@
+#gestiones-titulo{
+    margin:10px 10px 10px 0px;
+    font-family: "Bebas Neue";
+    font-size: 36px;
+}
+
+#gestion{
+    font-size:30px;
+    font-family: "Bebas Neue";
+    padding:10px;
+}
+
+QRadioButton::indicator#gestion{
+    color:transparent;
+    border: 1px solid transparent;
+}
+
+QRadioButton::checked#gestion{
+    background-color:#0d43d4;
+    color:white;
+}

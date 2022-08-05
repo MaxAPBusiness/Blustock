@@ -18,24 +18,19 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
-
-# Importamos las pantallas y el codigo de BD
-from db.db import crearBBDD
-from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
-from ui.gestion_herramientas import GestionHerramientas
-from ui.gestion_turnos import GestionTurnos
-from ui.cabecera import Cabecera
-from ui.menu_izquierdo import MenuIzquierdo
-from ui.gestion_alumnos import GestionAlumnos
-from ui.gestion_profesores import GestionProfesores
-from ui.gestion_grupos import GestionGrupos
-
-# Se crea la base de datos
-crearBBDD()
+import datetime as dt
 
 os.chdir(f"{os.path.abspath(__file__)}/../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 cur=con.cursor()
+
+# Importamos las pantallas y el codigo de BD
+from db.db import crearBBDD
+from ui.cabecera import Cabecera
+from gestiones_panol.inicio import Inicio
+
+# Se crea la base de datos
+crearBBDD()
 
 # Creamos la ventana principal
 class MainWindow(qtw.QMainWindow):
@@ -46,39 +41,31 @@ class MainWindow(qtw.QMainWindow):
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
         cabecera=Cabecera()
         cabecera.setObjectName("cabecera")
-        self.menuIzquierdo=MenuIzquierdo()
-        
+        self.inicio=Inicio()
         # Creamos la colección de pantallas
         stack = qtw.QStackedWidget()
 
-        self.herramientas=GestionHerramientas()
-        self.movimientos=GestionMovimientosHerramientas()
-        self.turnos=GestionTurnos()
-        self.alumnos=GestionAlumnos()
-        self.profesores=GestionProfesores()
-        self.grupos=GestionGrupos()
-
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
-        self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
 
+        self.inicio.confirmar.clicked.connect(lambda:self.confirmar())
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos]:
+        for i in [self.inicio]:
             stack.addWidget(i)
-        
-        self.menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
-        self.menuIzquierdo.gestion2.toggled.connect(lambda:stack.setCurrentIndex(1))
-        self.menuIzquierdo.gestion3.toggled.connect(lambda:stack.setCurrentIndex(2))
-        self.menuIzquierdo.gestion4.toggled.connect(lambda:stack.setCurrentIndex(3))
-        self.menuIzquierdo.gestion5.toggled.connect(lambda:stack.setCurrentIndex(4))
-        self.menuIzquierdo.gestion6.toggled.connect(lambda:stack.setCurrentIndex(5))
+ 
         # Añadimos la colección a la ventana
         self.setCentralWidget(stack)
         stack.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
-    
-    def closeEvent(self, event):
-        global app
-        app.closeAllWindows()
+
+    def confirmar(self):
+        fecha=dt.date.today()
+        fecha.replace("-", "/")
+        hora=dt.datetime.now().strftime("%H:%M")
+        cur.execute("INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, NULL, ?, NULL)", (fecha, self.inicio.alumno.currentText(), hora, self.inicio.profesor.currentText()))
+        con.commit()
+        cur.execute("SELECT ID FROM TURNO_PANOL ORDER BY ID DESC LIMIT 1")
+        self.id=cur.fetchall()[0][0]
+
 
 
 if __name__ == "__main__":
