@@ -78,8 +78,8 @@ class GestionGrupos(qtw.QWidget):
         self.radio2.setObjectName("Radio2")
 
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("Asc"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Desc"))
+        self.radio1.toggled.connect(lambda: self.mostrarDatos("Ascendente"))
+        self.radio2.toggled.connect(lambda: self.mostrarDatos("Descendente"))
 
 
         # Se crea el boton de agregar herramientas nuevas.
@@ -291,18 +291,22 @@ class GestionGrupos(qtw.QWidget):
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute("SELECT GRUPO FROM HERRAMIENTAS WHERE GRUPO=?", (idd,))
             herramientas=cur.fetchall()
-            cur.execute("SELECT GRUPO FROM SUBGRUPO WHERE GRUPO=?", (idd,))
+            cur.execute("SELECT GRUPO FROM SUBGRUPOS WHERE GRUPO=?", (idd,))
             subgrupo=cur.fetchall()
             if herramientas or subgrupo:
                 resp2=mostrarMensaje('Pregunta', 'Advertencia',
-                        """
-                        Todavía hay herramientas y/o subgrupos cargados. 
-                        Eliminar el grupo eliminará también TODOS los datos en los que está ingresado.
-                        ¿Desea eliminarlo de todas formas?""")
-            cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
-            cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
-            cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
-            con.commit()
+"""
+Todavía hay herramientas y/o subgrupos cargados. 
+Eliminar el grupo eliminará también TODOS los datos en los que está ingresado.
+¿Desea eliminarlo de todas formas?
+""")
+            else:
+                resp2=True
+            if resp2:
+                cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
+                cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
+                cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
+                con.commit()
 
             #elimina la fila de la tabla de la ui.
             boton = qtw.QApplication.focusWidget()
