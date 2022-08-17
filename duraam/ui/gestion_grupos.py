@@ -289,7 +289,19 @@ class GestionGrupos(qtw.QWidget):
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute("SELECT GRUPO FROM HERRAMIENTAS WHERE GRUPO=?", (idd,))
+            herramientas=cur.fetchall()
+            cur.execute("SELECT GRUPO FROM SUBGRUPO WHERE GRUPO=?", (idd,))
+            subgrupo=cur.fetchall()
+            if herramientas or subgrupo:
+                resp2=mostrarMensaje('Pregunta', 'Advertencia',
+                        """
+                        Todavía hay herramientas y/o subgrupos cargados. 
+                        Eliminar el grupo eliminará también TODOS los datos en los que está ingresado.
+                        ¿Desea eliminarlo de todas formas?""")
             cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
+            cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
+            cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
             con.commit()
 
             #elimina la fila de la tabla de la ui.

@@ -303,6 +303,7 @@ class GestionSubgrupos(qtw.QWidget):
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
+            cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
             con.commit()
 
             #elimina la fila de la tabla de la ui.
