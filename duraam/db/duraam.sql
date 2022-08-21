@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS ALUMNOS_HISTORICOS(
 
 /*Crea la tabla de herramientas con los campos id (PK), descripción, cantidad en condiciones,
 cantidad en reparación, cantidad de baja, id de grupo e id de subgrupo.*/
-CREATE TABLE  IF NOT EXISTS HERRAMIENTAS(
+CREATE TABLE IF NOT EXISTS HERRAMIENTAS(
     ID INTEGER PRIMARY KEY,
     DESC_LARGA VARCHAR(100) NOT NULL,
     CANT_CONDICIONES INTEGER,
