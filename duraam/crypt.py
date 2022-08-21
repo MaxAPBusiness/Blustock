@@ -7,5 +7,3 @@ def encriptar(password, key = "PensaEnElColeAntesDeRobar"):
 def decriptar(password, key = "PensaEnElColeAntesDeRobar"):
     fernet = Fernet(key)
     return fernet.decrypt(password).decode()
-
- 

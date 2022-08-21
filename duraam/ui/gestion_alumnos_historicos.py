@@ -22,23 +22,25 @@ cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
-class GestionAlumnos(qtw.QWidget):
+class GestionAlumnosHistoricos(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QWidget.
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DE ALUMNOS")
+        self.titulo=qtw.QLabel("GESTIÓN DE ALUMNOS HISTÓRICOS")
         self.titulo.setObjectName("titulo")
 
+        self.subtitulo=qtw.QLabel("Pase alumnos existentes a históricos y revise los alumnos ")
+        self.subtitulo.setObjectName("subtitulo")
         # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
         self.campos = ["ID", "DNI", "Nombre y Apellido", "Curso",
-                       "EMAIL", ""]      
+                       "Fecha de Salida", "EMAIL", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -76,7 +78,7 @@ class GestionAlumnos(qtw.QWidget):
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
         self.radio2 = qtw.QRadioButton("DNI")
-        self.radio3 = qtw.QRadioButton("Curso")
+        self.radio3 = qtw.QRadioButton("Fecha de salida")
 
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
@@ -85,17 +87,17 @@ class GestionAlumnos(qtw.QWidget):
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
         self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
         self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Curso"))
+        self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
 
 
         # Se crea el boton de agregar herramientas nuevas.
-        self.agregar = qtw.QPushButton("Agregar")
-        self.agregar.setObjectName("agregar")
+        self.botonPase = qtw.QPushButton("Agregar")
+        self.botonPase.setObjectName("agregar")
         # Se le da la función.
-        self.agregar.clicked.connect(
-            lambda: self.modificarLinea('agregar'))
+        self.botonPase.clicked.connect(
+            lambda: self.paseHistorico())
         # Cuando el cursor pasa por el botón, cambia de forma.
-        self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        self.botonPase.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
@@ -106,7 +108,7 @@ class GestionAlumnos(qtw.QWidget):
         layout.addWidget(self.radio1, 1, 3)
         layout.addWidget(self.radio2, 1, 4)
         layout.addWidget(self.tabla, 2, 1, 1, 9)
-        layout.addWidget(self.agregar, 3, 1)
+        layout.addWidget(self.botonPase, 3, 1)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -132,7 +134,7 @@ class GestionAlumnos(qtw.QWidget):
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
-            SELECT * FROM ALUMNOS 
+            SELECT * FROM ALUMNOS_HISTORICOS 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
             OR NOMBRE_APELLIDO LIKE ? 
@@ -140,16 +142,16 @@ class GestionAlumnos(qtw.QWidget):
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM ALUMNOS ORDER BY NOMBRE_APELLIDO')
+            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="DNI":
-            cur.execute('SELECT * FROM ALUMNOS ORDER BY DNI')
+            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY DNI')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Curso":
-            cur.execute('SELECT * FROM ALUMNOS ORDER BY CURSO')
+            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY FECHA_SALIDA')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM ALUMNOS')
+            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
@@ -168,94 +170,53 @@ class GestionAlumnos(qtw.QWidget):
 
             self.tabla.setRowHeight(i, 35)
 
-            # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton()
-            botonEditar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
-            botonEditar.setIconSize(qtc.QSize(25, 25))
-            botonEditar.setObjectName("editar")
-            botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
-            botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 5, botonEditar)
 
-    # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
+    # Función paseHistorico: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
     # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
     # # Identica a la de editar pero no viene con datos por defecto.
-    def modificarLinea(self, tipo):
+    def paseHistorico(self):
         # Se crea el widget que va a funcionar como ventana.
-        self.edita = qtw.QWidget()
+        self.menuPase = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
-        self.edita.setWindowTitle("Agregar Alumno")
-        self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        self.menuPase.setWindowTitle("Realizar Pase Histórico Individual de Alumnos")
+        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
         # Se crea el layout.
-        layoutEditar = qtw.QGridLayout()
+        layoutMenuPase = qtw.QGridLayout()
 
-        # Inserta un label por cada campo.
-        for i in range(len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
-            label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+        titulo=qtw.QLabel("Ingresa al alumno que quieres pasar a histórico")
+        titulo.setObjectName("subtitulo")
+        label1=qtw.QLabel("Nombre del Alumno: ")
+        label2=qtw.QLabel("DNI: ")
         
-        # Crea los entries.
-        
-        self.entry1 = qtw.QSpinBox()
-        self.entry2 = qtw.QSpinBox()
-        self.entry3 = qtw.QLineEdit()
-        self.entry4 = qtw.QLineEdit()
-        self.entry5 = qtw.QLineEdit()
+        # Crea los entries. 
+        self.entry1 = qtw.QLineEdit()
+        self.entry2 = qtw.QLineEdit()
 
         cuadroSugerencias=qtw.QCompleter(cursos, self)
         cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry4.setCompleter(cuadroSugerencias)
-        self.entry1.setMaximum(9999)
-        self.entry2.setMaximum(99999999)
+        self.entry1.setCompleter(cuadroSugerencias)
        
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
 
-        # Si el tipo es editar, se crea la pantalla de editar.
-        if tipo == 'editar':
-            # Se obtiene la posición del boton clickeado: 
-            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
-            botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
-            posicion = self.tabla.indexAt(botonClickeado.pos())
-            
-            # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, 6):
-                datos.append(posicion.sibling(posicion.row(), cell).data())
-            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
-            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
-            # Se les añade a los entries sus valores por defecto.
-            
-            self.entry1.setValue(int(datos[0]))
-            self.entry2.setValue(int(datos[1]))
-            self.entry3.setText(datos[2])
-            self.entry4.setText(datos[3])
-            self.entry5.setText(datos[4])
-            
-            self.edita.setWindowTitle("Editar")
-
-        # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2,  self.entry3, self.entry4, self.entry5]
-        for i in range(len(entries)):
-            entries[i].setObjectName("modificar-entry")
-            layoutEditar.addWidget(entries[i], i, 1)
+        self.entry1.setObjectName("modificar-entry")
+        self.entry2.setObjectName("modificar-entry")
+        layoutMenuPase.addWidget(entries[i], i, 1)
 
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
-        self.edita.setLayout(layoutEditar)
+        self.menuPase.setLayout(layoutMenuPase)
         # Se muestra la ventana
-        self.edita.show()
+        self.menuPase.show()
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
@@ -279,7 +240,7 @@ class GestionAlumnos(qtw.QWidget):
             try:
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
-                UPDATE ALUMNOS
+                UPDATE ALUMNOS_HISTORICOS
                 SET ID=?, DNI=?, NOMBRE_APELLIDO=?, CURSO=?, EMAIL=?
                 WHERE ID=?
                 """, (
@@ -309,7 +270,7 @@ class GestionAlumnos(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO ALUMNOS VALUES(?, ?, ?, ?, ?) ", (
+                cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
                      self.entry1.value(), self.entry2.value(), 
                     self.entry3.text().upper(), self.entry4.text(), self.entry5.text(), 
                 ))
@@ -323,4 +284,4 @@ class GestionAlumnos(qtw.QWidget):
         
         #Se refrescan los datos.
         self.mostrarDatos()
-        self.edita.close()
+        self.menuPase.close()

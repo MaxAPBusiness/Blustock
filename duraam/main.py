@@ -22,9 +22,14 @@ import os
 # Importamos las pantallas y el codigo de BD
 from db.db import crearBBDD
 
+from crypt import encriptar, decriptar
+from mostrar_mensaje import mostrarMensaje
+
 from ui.cabecera import Cabecera
 from ui.menu_izquierdo import MenuIzquierdo
 
+from ui.iniciarSesion import IniciarSesion
+from ui.registrarse import Registrarse
 from ui.gestion_movimientos_herramientas import GestionMovimientosHerramientas
 from ui.gestion_herramientas import GestionHerramientas
 from ui.gestion_turnos import GestionTurnos
@@ -52,8 +57,10 @@ class MainWindow(qtw.QMainWindow):
         self.menuIzquierdo=MenuIzquierdo()
         
         # Creamos la colección de pantallas
-        stack = qtw.QStackedWidget()
+        self.stack = qtw.QStackedWidget()
 
+        self.iniciarSesion=IniciarSesion()
+        self.registrarse=Registrarse()
         self.herramientas=GestionHerramientas()
         self.movimientos=GestionMovimientosHerramientas()
         self.turnos=GestionTurnos()
@@ -63,27 +70,65 @@ class MainWindow(qtw.QMainWindow):
         self.subgrupos=GestionSubgrupos()
 
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
-        self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
 
         # Añadimos las pantallas a la colección
-        for i in [self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos, self.subgrupos]:
-            stack.addWidget(i)
-        
-        self.menuIzquierdo.gestion1.toggled.connect(lambda:stack.setCurrentIndex(0))
-        self.menuIzquierdo.gestion2.toggled.connect(lambda:stack.setCurrentIndex(1))
-        self.menuIzquierdo.gestion3.toggled.connect(lambda:stack.setCurrentIndex(2))
-        self.menuIzquierdo.gestion4.toggled.connect(lambda:stack.setCurrentIndex(3))
-        self.menuIzquierdo.gestion5.toggled.connect(lambda:stack.setCurrentIndex(4))
-        self.menuIzquierdo.gestion6.toggled.connect(lambda:stack.setCurrentIndex(5))
-        self.menuIzquierdo.gestion7.toggled.connect(lambda:stack.setCurrentIndex(6))
+        for i in [self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos, self.subgrupos]:
+            self.stack.addWidget(i)
+
+        self.iniciarSesion.registrarse.toggled.connect(lambda:self.stack.setCurrentIndex(1))
+        self.iniciarSesion.confirmar.toggled.connect(lambda:self.confirmarInicio())
+
+        self.registrarse.ingresar.toggled.connect(lambda:self.stack.setCurrentIndex(0))
+        self.registrarse.confirmar.toggled.connect(lambda:self.registrarse)
+
+        self.menuIzquierdo.gestion1.toggled.connect(lambda:self.stack.setCurrentIndex(2))
+        self.menuIzquierdo.gestion2.toggled.connect(lambda:self.stack.setCurrentIndex(3))
+        self.menuIzquierdo.gestion3.toggled.connect(lambda:self.stack.setCurrentIndex(4))
+        self.menuIzquierdo.gestion4.toggled.connect(lambda:self.stack.setCurrentIndex(5))
+        self.menuIzquierdo.gestion5.toggled.connect(lambda:self.stack.setCurrentIndex(6))
+        self.menuIzquierdo.gestion6.toggled.connect(lambda:self.stack.setCurrentIndex(7))
+        self.menuIzquierdo.gestion7.toggled.connect(lambda:self.stack.setCurrentIndex(8))
         # Añadimos la colección a la ventana
-        self.setCentralWidget(stack)
-        stack.setSizePolicy(
+        self.setCentralWidget(self.stack)
+        self.stack.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
     
     def closeEvent(self, event):
         global app
         app.closeAllWindows()
+    
+            
+    def confirmarInicio(self):
+        truePass = decriptar(self.iniciarSesion.entry2.text())
+
+        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=? AND CONTRASENA=?", (self.iniciarSesion.entry1.text(), truePass))
+        query=cur.fetchall()
+        if query:
+            self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
+            self.stack.setCurrentIndex(2)
+            mostrarMensaje("Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
+        else: 
+            mostrarMensaje("Advertencia", "Error",
+            "El usuario y la contraseña no coinciden. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
+    
+    def registrarse(self):
+        if self.registrarse.entry3.text() == self.registrarse.entry4.text():
+            cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?", (self.registrarse.entry2.text(),))
+            if cur.fetchall():
+                mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese los datos nuevamente.")
+                return
+
+            cur.execute("SELECT * FROM USUARIOS")
+            if cur.fetchall():
+                cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")', 
+                (self.registrarse.entry2.text(), self.registrarse.entry3.text(), self.registrarse.entry1.text(),))
+                mostrarMensaje("Aviso", "Información", 
+                "El registro se realizó correctamente. Recuerde que el administrador debe verificar su registro para que su usuario esté habilitado y pueda acceder.")
+            else:
+                cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)", 
+                (self.registrarse.entry2.text(), self.registrarse.entry3.text(), self.registrarse.entry1.text(),))
+                mostrarMensaje("Aviso", "Información", "El registro se realizó correctamente.")
+            con.commit()
 
 
 if __name__ == "__main__":
