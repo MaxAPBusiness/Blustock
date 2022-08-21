@@ -204,14 +204,14 @@ class GestionAlumnosHistoricos(qtw.QWidget):
 
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
-        layoutMenuPase.addWidget(entries[i], i, 1)
 
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutMenuPase.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+
+        layoutMenuPase.addWidget(confirmar, 3, 0)
 
         # Se le da el layout a la ventana.
         self.menuPase.setLayout(layoutMenuPase)
