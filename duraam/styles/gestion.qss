@@ -16,10 +16,12 @@
 }
 
 #titulo{
-    margin:10px 10px 10px 0px;
+    margin: 10px 0px 10px 0px;
+    padding: 10px 10px 10px 0;
     font-family: "Bebas Neue";
     font-size: 36px;
     font-weight: 400;
+    border:0px;
 }
 
 #QRadioButton{
@@ -27,7 +29,7 @@
 }
 
 
-#agregar, #confirmar{
+#agregar, #confirmar, #confirmar-grande{
     background-color:#0d43d4; 
     color:white;
 
@@ -44,7 +46,8 @@
 #agregar::hover, 
 #editar::hover, 
 #eliminar::hover,
-#confirmar::hover{
+#confirmar::hover,
+#confirmar-grande::hover{
     background-color:rgb(20,20,200);
 }
 
@@ -73,9 +76,9 @@
 }
 
 #modificar-label{
-    font-size:16px;
+    font-size:24px;
     margin:10px;
-    font-weight:400;
+    font-weight:500;
 }
 
 #modificar-entry, #modificar-entryDate{
@@ -93,3 +96,25 @@
     max-width: 50px;
 }
 
+#show::indicator{
+    border-style:hidden;
+}
+
+#boton-texto{
+    border-style:hidden;
+    font-size:24px;
+    margin:10px;
+    font-weight:400;
+    width: 400px;
+    border-radius: 10px;
+}
+
+#boton-texto::hover{
+    background-color:rgb(220, 220, 220)
+}
+#confirmar-grande{
+    height: 40px;
+    width: 145px;
+    max-width: 145px;
+    font-size: 28px;
+}

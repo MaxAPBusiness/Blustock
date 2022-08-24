@@ -37,6 +37,8 @@ from ui.gestion_alumnos import GestionAlumnos
 from ui.gestion_profesores import GestionProfesores
 from ui.gestion_grupos import GestionGrupos
 from ui.gestion_subgrupos import GestionSubgrupos
+from ui.gestion_registro_alumnos_historicos import GestionRegistroAlumnosHistoricos
+from ui.gestion_registro_profesores_historicos import GestionRegistroProfesoresHistoricos
 
 # Se crea la base de datos
 crearBBDD()
@@ -68,11 +70,16 @@ class MainWindow(qtw.QMainWindow):
         self.profesores=GestionProfesores()
         self.grupos=GestionGrupos()
         self.subgrupos=GestionSubgrupos()
+        self.alumnosHistoricos=GestionRegistroAlumnosHistoricos()
+        self.profesoresHistoricos=GestionRegistroProfesoresHistoricos()
 
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
 
         # Añadimos las pantallas a la colección
-        for i in [self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos, self.turnos, self.alumnos,self.profesores, self.grupos, self.subgrupos]:
+        pantallas=[self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos, 
+                    self.turnos, self.alumnos, self.profesores, self.grupos, self.subgrupos, 
+                    self.alumnosHistoricos, self.profesoresHistoricos]
+        for i in pantallas:
             self.stack.addWidget(i)
 
         self.iniciarSesion.registrarse.toggled.connect(lambda:self.stack.setCurrentIndex(1))
@@ -88,6 +95,8 @@ class MainWindow(qtw.QMainWindow):
         self.menuIzquierdo.gestion5.toggled.connect(lambda:self.stack.setCurrentIndex(6))
         self.menuIzquierdo.gestion6.toggled.connect(lambda:self.stack.setCurrentIndex(7))
         self.menuIzquierdo.gestion7.toggled.connect(lambda:self.stack.setCurrentIndex(8))
+        self.menuIzquierdo.gestion8.toggled.connect(lambda:self.stack.setCurrentIndex(9))
+        self.menuIzquierdo.gestion9.toggled.connect(lambda:self.stack.setCurrentIndex(10))
         # Añadimos la colección a la ventana
         self.setCentralWidget(self.stack)
         self.stack.setSizePolicy(

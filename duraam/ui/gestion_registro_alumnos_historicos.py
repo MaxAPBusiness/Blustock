@@ -11,6 +11,7 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
+import datetime as dt
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
@@ -22,14 +23,14 @@ cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
-class GestionAlumnosHistoricos(qtw.QWidget):
+class GestionRegistroAlumnosHistoricos(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QWidget.
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DE ALUMNOS HISTÓRICOS")
+        self.titulo=qtw.QLabel("GESTIÓN DEL REGISTRO DE ALUMNOS HISTÓRICOS")
         self.titulo.setObjectName("titulo")
 
         self.subtitulo=qtw.QLabel("Pase alumnos existentes a históricos y revise los alumnos ")
@@ -91,13 +92,21 @@ class GestionAlumnosHistoricos(qtw.QWidget):
 
 
         # Se crea el boton de agregar herramientas nuevas.
-        self.botonPase = qtw.QPushButton("Agregar")
-        self.botonPase.setObjectName("agregar")
+        self.botonPase = qtw.QPushButton("Pase Individual")
+        self.botonPase.setObjectName("confirmar")
         # Se le da la función.
         self.botonPase.clicked.connect(
-            lambda: self.paseHistorico())
+            lambda: self.paseHistoricoIndividual())
         # Cuando el cursor pasa por el botón, cambia de forma.
         self.botonPase.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+
+        self.botonPaseEgreso = qtw.QPushButton("Pase de Egresados")
+        self.botonPaseEgreso.setObjectName("confirmar")
+        # Se le da la función.
+        self.botonPaseEgreso.clicked.connect(
+            lambda: self.paseHistoricoGrupal())
+        # Cuando el cursor pasa por el botón, cambia de forma.
+        self.botonPaseEgreso.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
@@ -147,7 +156,7 @@ class GestionAlumnosHistoricos(qtw.QWidget):
         elif consulta=="DNI":
             cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY DNI')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="Curso":
+        elif consulta=="Fecha":
             cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY FECHA_SALIDA')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
@@ -176,15 +185,12 @@ class GestionAlumnosHistoricos(qtw.QWidget):
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
     # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
     # # Identica a la de editar pero no viene con datos por defecto.
-    def paseHistorico(self):
+    def paseHistoricoIndividual(self):
         # Se crea el widget que va a funcionar como ventana.
         self.menuPase = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
         self.menuPase.setWindowTitle("Realizar Pase Histórico Individual de Alumnos")
         self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-
-        # Se crea el layout.
-        layoutMenuPase = qtw.QGridLayout()
 
         titulo=qtw.QLabel("Ingresa al alumno que quieres pasar a histórico")
         titulo.setObjectName("subtitulo")
@@ -195,9 +201,17 @@ class GestionAlumnosHistoricos(qtw.QWidget):
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
 
-        cuadroSugerencias=qtw.QCompleter(cursos, self)
-        cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry1.setCompleter(cuadroSugerencias)
+        sugerenciasNombre=[]
+
+        cur.execute("SELECT NOMBRE FROM ALUMNOS")
+
+        for i in cur.fetchall():
+            sugerenciasNombre.append(i[0])
+            
+        cuadroSugerenciasNombre=qtw.QCompleter(sugerenciasNombre, self)
+        cuadroSugerenciasNombre.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry1.setCompleter(cuadroSugerenciasNombre)
+        self.entry1.editingFinished.connect(lambda:self.cargarDNI(self.entry1.text()))
        
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -209,79 +223,135 @@ class GestionAlumnosHistoricos(qtw.QWidget):
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        confirmar.clicked.connect(lambda: self.confirmarr(datos))
+        confirmar.clicked.connect(lambda: self.confirmarIndividual(datos))
 
-        layoutMenuPase.addWidget(confirmar, 3, 0)
+        layoutMenuPase = qtw.QGridLayout()
+        layoutMenuPase.addWidget(titulo, 0, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(label1, 1, 0)
+        layoutMenuPase.addWidget(label2, 2, 0)
+        layoutMenuPase.addWidget(self.entry1, 1, 1)
+        layoutMenuPase.addWidget(self.entry2, 2, 1)
+        layoutMenuPase.addWidget(confirmar, 3, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
         self.menuPase.setLayout(layoutMenuPase)
         # Se muestra la ventana
         self.menuPase.show()
 
+    def cargarDNI(self, nombre):
+        cur.execute("SELECT DNI FROM ALUMNOS WHERE NOMBRE_APELLIDO=?", (nombre,))
+
+        sugerenciasDNI=[]
+
+        for i in cur.fetchall():
+            sugerenciasDNI.append(i[0])
+
+        cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
+        cuadroSugerenciasDNI.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry2.setCompleter(cuadroSugerenciasDNI)
+
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
-    def confirmarr(self, datos):
-        # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
+    def confirmarIndividual(self, datos):
         global mostrarMensaje
-        if len(self.entry3.text()) > 50:
-            mostrarMensaje("Error", "Error", "El nombre ingresado es demasiado largo. Ingresa uno más corto.")
-            return
-        elif len(self.entry5.text()) > 100:
-            mostrarMensaje("Error", "Error", "El email ingresado es demasiado largo. Ingresa uno más corto.")
-            return
+        resp = mostrarMensaje("Pregunta", "Atención", 
+        "¿Está seguro que desea pasar a este alumno al registro histórico? Esto no se puede deshacer")
+        if resp:
+            cur.execute("SELECT * FROM ALUMNOS WHERE DNI=?",(self.entry2.text(),))
+            datos=cur.fetchall()
+            cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
+                    datos[0][0], datos[0][1], datos[0][2], datos[0][3],
+                    dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
+            ))
+            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0]))
 
-        if self.entry4.text() not in cursos:
-            mostrarMensaje("Error", "Error", 
-            "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
-            return
+            mostrarMensaje("Information", "Aviso",
+                        "Se ha pasado un alumno al registro histórico.")
+            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")    
+            #Se refrescan los datos.
+            self.mostrarDatos()
+            self.menuPase.close()
 
+    def paseHistoricoGrupal(self):
+        # Se crea el widget que va a funcionar como ventana.
+        self.menuPase = qtw.QWidget()
+        # Se le da el título a la ventana, que por defecto es agregar.
+        self.menuPase.setWindowTitle("Realizar Pase Histórico Grupal de Alumnos")
+        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
-        # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
-        if datos:
-            try:
-                # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("""
-                UPDATE ALUMNOS_HISTORICOS
-                SET ID=?, DNI=?, NOMBRE_APELLIDO=?, CURSO=?, EMAIL=?
-                WHERE ID=?
-                """, (
-                    self.entry1.value(), self.entry2.value(), self.entry3.text(
-                    ).upper(), self.entry4.text(), self.entry5.text(), datos[0],
-                ))
-                cur.execute("""
-                UPDATE MOVIMIENTOS_HERRAMIENTAS
-                SET ID_ALUMNO=? WHERE ID_ALUMNO=?
-                """, (
-                    self.entry1.value(), datos[0],
-                ))
-                cur.execute("""
-                UPDATE TURNO_PANOL
-                SET ID_ALUMNO=? WHERE ID_ALUMNO=?
-                """, (
-                    self.entry1.value(), datos[0],
-                ))
-                con.commit()
-                # Se muestra el mensaje exitoso.
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado el alumno.")           
-            except BaseException as e:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")  
-                print(e)
-                return
-        # Si no, se inserta la fila en la tabla de la base de datos.
-        else:
-            try:
-                cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
-                     self.entry1.value(), self.entry2.value(), 
-                    self.entry3.text().upper(), self.entry4.text(), self.entry5.text(), 
-                ))
-                con.commit()
-
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado un alumno.")
-            except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-                return
+        titulo=qtw.QLabel("Seleccione los alumnos que desea pasar\nal registro histórico como egresados.")
+        titulo.setObjectName("subtitulo")
         
-        #Se refrescan los datos.
-        self.mostrarDatos()
-        self.menuPase.close()
+        
+        # Crea los entries. 
+        self.buscar = qtw.QLineEdit()
+        self.buscar.setObjectName("buscar")
+        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
+        self.buscar.setClearButtonEnabled(True)
+        # Se le pone el texto por defecto a la barra de búsqueda
+        self.buscar.setPlaceholderText("Buscar...")
+        # Se importa el ícono de lupa para la barra.
+        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        # Se crea un label que va a contener el ícono.
+        icono=qtw.QLabel()
+        icono.setObjectName("lupa")
+        icono.setPixmap(lupa)
+
+        # Se le da la función de buscar los datos introducidos.
+        self.buscar.editingFinished.connect(lambda: self.buscarF())
+
+        self.pantallaListaAlumnos=qtw.QScrollArea()
+        self.pantallaListaAlumnos.setMaximumSize(400, 400)
+        self.layoutLista=qtw.QVBoxLayout()
+
+        for curso in ['A', 'B', 'C']:
+            label=qtw.QLabel(f"7{curso}:")
+            self.layoutLista.addWidget(label)
+            cur.execute("SELECT NOMBRE_APELLIDO, DNI FROM ALUMNOS WHERE CURSO = ?", (f'7{curso}'))
+            for i in cur.fetchall():
+                alumno=qtw.QCheckBox(f'{i[0]} DNI: {i[1]}')
+                alumno.setChecked(True)
+                self.layoutLista.addWidget(alumno)
+
+        # Se crea el boton de confirmar, y se le da la función de confirmarr.
+        confirmar = qtw.QPushButton("Confirmar")
+        confirmar.setObjectName("confirmar")
+        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        confirmar.clicked.connect(lambda: self.confirmarGrupal())
+
+        layoutMenuPase = qtw.QGridLayout()
+        layoutMenuPase.addWidget(titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(self.buscar, 1, 0)
+        layoutMenuPase.addWidget(icono,1,0)
+        layoutMenuPase.addWidget(self.pantallaListaAlumnos, 2, 0)
+        layoutMenuPase.addWidget(confirmar, 3, 0)
+        layoutMenuPase.addWidget(confirmar, 3, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+
+        # Se le da el layout a la ventana.
+        self.menuPase.setLayout(layoutMenuPase)
+        # Se muestra la ventana
+        self.menuPase.show()
+    
+    def buscarF(self):
+        for i in len(self.layoutLista.count()):
+            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
+                if self.buscar.text() not in self.layoutLista.itemAt(i).widget().text():
+                    self.layoutLista.itemAt(i).widget().hide()
+                elif self.buscar.text() in self.layoutLista.itemAt(i).widget() and self.layoutLista.itemAt(i).widget().isHidden():
+                    self.layoutLista.itemAt(i).widget().show()
+    
+    def confirmarGrupal(self):
+        for i in len(self.layoutLista.count()):
+            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
+                if self.layoutLista.itemAt(i).widget().isChecked():
+                    datalist = self.layoutLista.itemAt(i).widget().text().split(": ")
+                    dni=datalist[-1]
+                    cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (dni,))
+                    datos=cur.fetchall()
+                    cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
+                        datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
+                        dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
+                    ))
+                    cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+                    con.commit()
+
+        

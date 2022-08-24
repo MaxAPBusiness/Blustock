@@ -12,6 +12,8 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
+from crypt import showPassword
+
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
@@ -48,14 +50,14 @@ class Registrarse(qtw.QWidget):
     
         self.show1=qtw.QCheckBox()
         self.show2=qtw.QCheckBox()
-        self.show1.stateChanged.connect(lambda:self.showPassword(self.show.isChecked()))
-        self.show2.stateChanged.connect(lambda:self.showPassword(self.show.isChecked()))
-        self.showPassword(False)
+        self.show1.stateChanged.connect(lambda:showPassword([self.entry3, self.entry4], [self.show1, self.show2], self.show.isChecked()))
+        self.show2.stateChanged.connect(lambda:showPassword([self.entry3, self.entry4], [self.show1, self.show2], self.show.isChecked()))
+        showPassword([self.entry3, self.entry4], [self.show1, self.show2], False)
 
         self.confirmar=qtw.QPushButton("confirmar")
         self.confirmar.setObjectName("confirmar")
         self.ingresar=qtw.QPushButton("¿Ya estás registrado? Inicia sesión.")
-        self.ingresar.sesetObjectName("boton-texto")
+        self.ingresar.setObjectName("boton-texto")
 
         layout=qtw.QGridLayout()
         layout.addWidget(titulo, 0, 0, 1, 3)
@@ -72,14 +74,3 @@ class Registrarse(qtw.QWidget):
         layout.addWidget(self.confirmar, 3, 1, 1, 3)
         self.setLayout(layout)
     
-    def showPassword(self, checked):
-        if checked:
-            self.entry3.setEchoMode(qtw.QLineEdit.EchoMode.Normal)
-            self.entry4.setEchoMode(qtw.QLineEdit.EchoMode.Normal)
-            self.show1.setIcon(qtg.QIcon("../images/hide.png"))
-            self.show2.setIcon(qtg.QIcon("../images/hide.png"))
-        else:
-            self.entry3.setEchoMode(qtw.QLineEdit.EchoMode.Password)
-            self.entry4.setEchoMode(qtw.QLineEdit.EchoMode.Password)
-            self.show1.setIcon(qtg.QIcon("../images/mostrar.png"))
-            self.show2.setIcon(qtg.QIcon("../images/mostrar.png"))

@@ -12,6 +12,8 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
+from crypt import showPassword
+
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
@@ -27,43 +29,46 @@ class IniciarSesion(qtw.QWidget):
 
         # Se crea el título.
         titulo=qtw.QLabel("""
-        Bienvenido al sistema de gestión de bases de datos del pañol!
-        Inicia sesión
+  Bienvenido al sistema de gestión de bases de datos del pañol!
+  Inicia sesión
         """)
         titulo.setObjectName("titulo") 
+        titulo.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
 
         label1=qtw.QLabel("Usuario: ")
         label2=qtw.QLabel("Contraseña: ")
 
+        label1.setObjectName("modificar-label")
+        label2.setObjectName("modificar-label")
+
         self.entry1=qtw.QLineEdit()
         self.entry2=qtw.QLineEdit()
 
-        self.entry1.setObjectName("entry")
-        self.entry2.setObjectName("entry")
+        self.entry1.setObjectName("modificar-entry")
+        self.entry2.setObjectName("modificar-entry")
 
         self.show=qtw.QCheckBox()
-        self.show.stateChanged.connect(lambda:self.showPassword(self.show.isChecked()))
-        self.showPassword(False)
+        self.show.stateChanged.connect(lambda:showPassword([self.entry2], [self.show], self.show.isChecked()))
+        showPassword([self.entry2], [self.show], False)
+        self.show.setObjectName("show")
+        self.show.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         self.confirmar=qtw.QPushButton("confirmar")
-        self.confirmar.setObjectName("confirmar")
+        self.confirmar.setObjectName("confirmar-grande")
+        self.confirmar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+
         self.registrarse=qtw.QPushButton("¿No tienes una cuenta? Regístrate")
         self.registrarse.setObjectName("boton-texto")
+        self.registrarse.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         layout=qtw.QGridLayout()
-        layout.addWidget(titulo, 0, 0, 1, 3)
-        layout.addWidget(label1, 1, 0)
-        layout.addWidget(label2, 2, 0)
+        layout.addWidget(titulo, 0, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.entry1, 1, 1)
         layout.addWidget(self.entry2, 2, 1)
         layout.addWidget(self.show, 2, 2)
-        layout.addWidget(self.confirmar, 3, 1, 1, 3)
+        layout.addWidget(self.confirmar, 3, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.registrarse, 4, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
         self.setLayout(layout)
     
-    def showPassword(self, checked):
-        if checked:
-            self.entry2.setEchoMode(qtw.QLineEdit.EchoMode.Normal)
-            self.show.setIcon(qtg.QIcon("../images/hide.png"))
-        else:
-            self.entry2.setEchoMode(qtw.QLineEdit.EchoMode.Password)
-            self.show.setIcon(qtg.QIcon("../images/mostrar.png"))
