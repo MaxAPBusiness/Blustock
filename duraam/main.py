@@ -82,11 +82,11 @@ class MainWindow(qtw.QMainWindow):
         for i in pantallas:
             self.stack.addWidget(i)
 
-        self.iniciarSesion.registrarse.toggled.connect(lambda:self.stack.setCurrentIndex(1))
-        self.iniciarSesion.confirmar.toggled.connect(lambda:self.confirmarInicio())
+        self.iniciarSesion.registrarse.clicked.connect(lambda:self.stack.setCurrentIndex(1))
+        self.iniciarSesion.confirmar.clicked.connect(lambda:self.confirmarInicio())
 
-        self.registrarse.ingresar.toggled.connect(lambda:self.stack.setCurrentIndex(0))
-        self.registrarse.confirmar.toggled.connect(lambda:self.registrarse)
+        self.registrarse.ingresar.clicked.connect(lambda:self.stack.setCurrentIndex(0))
+        self.registrarse.confirmar.clicked.connect(lambda:self.registrarse)
 
         self.menuIzquierdo.gestion1.toggled.connect(lambda:self.stack.setCurrentIndex(2))
         self.menuIzquierdo.gestion2.toggled.connect(lambda:self.stack.setCurrentIndex(3))

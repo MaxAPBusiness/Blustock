@@ -4,12 +4,15 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
 
-def encriptar(password, key = "PensaEnElColeAntesDeRobar"):
-    fernet = Fernet(key)
+def encriptar(password, key = "xQInlLoNPQK05ytstTGSrc-HmquOy3QM6hg7CRSBAtc="):
+    bkey=key.encode('ascii')
+    fernet = Fernet(bkey)
     return fernet.encrypt(password.encode())
 
-def decriptar(password, key = "PensaEnElColeAntesDeRobar"):
-    fernet = Fernet(key)
+def decriptar(password, key = "xQInlLoNPQK05ytstTGSrc-HmquOy3QM6hg7CRSBAtc="):
+    bkey=key.encode('ascii')
+    print(bkey)
+    fernet = Fernet(bkey)
     return fernet.decrypt(password).decode()
 
 def showPassword(entries, showButtons, checked):
