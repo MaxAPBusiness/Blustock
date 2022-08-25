@@ -108,7 +108,7 @@ class MainWindow(qtw.QMainWindow):
     
             
     def confirmarInicio(self):
-        truePass = decriptar(self.iniciarSesion.entry2.text())
+        truePass = encriptar(self.iniciarSesion.entry2.text())
 
         cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=? AND CONTRASENA=?", (self.iniciarSesion.entry1.text(), truePass))
         query=cur.fetchall()

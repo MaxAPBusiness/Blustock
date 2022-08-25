@@ -43,10 +43,10 @@ class Registrarse(qtw.QWidget):
         self.entry3=qtw.QLineEdit()
         self.entry4=qtw.QLineEdit()
 
-        self.entry1.setObjectName("entry")
-        self.entry2.setObjectName("entry")
-        self.entry3.setObjectName("entry")
-        self.entry4.setObjectName("entry")
+        self.entry1.setObjectName("modificar-entry")
+        self.entry2.setObjectName("modificar-entry")
+        self.entry3.setObjectName("modificar-entry")
+        self.entry4.setObjectName("modificar-entry")
     
         self.show1=qtw.QCheckBox()
         self.show2=qtw.QCheckBox()
