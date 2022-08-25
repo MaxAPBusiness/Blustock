@@ -193,8 +193,7 @@ class GestionTurnos(qtw.QWidget):
             """)
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
-            print("Error crítico: un bobi escribio la consulta mal.")
-            return
+            return print("Error crítico: un bobi escribio la consulta mal.")
         # Se guarda la consulta en una variable.
         query = cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
@@ -245,9 +244,9 @@ class GestionTurnos(qtw.QWidget):
 
         # Inserta un label por cada campo.
         for i in range(1, len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i-1, 0)
+            layoutEditar.addWidget(label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         self.entry1Dia = qtw.QSpinBox()
@@ -373,8 +372,7 @@ class GestionTurnos(qtw.QWidget):
         try:
             dt.datetime(year=self.entry1Año.value(), month=self.entry1Mes.value(), day=self.entry1Dia.value())
         except ValueError:
-            mostrarMensaje("Error", "Error", "La fecha ingresada no es válida. Ingresar nuevamente.")
-            return
+            return mostrarMensaje("Error", "Error", "La fecha ingresada no es válida. Ingresar nuevamente.")
 
         cur.execute("""
         SELECT ID
@@ -386,9 +384,8 @@ class GestionTurnos(qtw.QWidget):
         alumno=cur.fetchall()
 
         if not alumno:
-            mostrarMensaje("Error", "Error", 
+            return mostrarMensaje("Error", "Error", 
             "El alumno no está ingresado. Por favor, verifique que el alumno ingresado exista.")
-            return
 
         cur.execute("""
         SELECT ID
@@ -400,9 +397,8 @@ class GestionTurnos(qtw.QWidget):
         profeIngreso=cur.fetchall()
 
         if not profeIngreso:
-            mostrarMensaje("Error", "Error", 
+            return mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el ingreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
-            return
         
         cur.execute("""
         SELECT ID
@@ -414,9 +410,8 @@ class GestionTurnos(qtw.QWidget):
         profeEgreso=cur.fetchall()
 
         if not profeEgreso:
-            mostrarMensaje("Error", "Error", 
+            return mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el egreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
-            return
         
         if self.entry1Mes.value() < 10:
             mes=f"0{self.entry1Mes.value()}"
@@ -480,8 +475,7 @@ class GestionTurnos(qtw.QWidget):
 
             # Si no, se inserta la fila en la tabla de la base de datos.
             except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-                return
+                return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         else:
             try:
                 cur.execute(
@@ -494,8 +488,7 @@ class GestionTurnos(qtw.QWidget):
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un turno.")
             except:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-                return
+                return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         #Se refrescan los datos.
         self.edita.close()
         self.mostrarDatos()

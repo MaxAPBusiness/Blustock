@@ -86,7 +86,7 @@ class MainWindow(qtw.QMainWindow):
         self.iniciarSesion.confirmar.clicked.connect(lambda:self.confirmarInicio())
 
         self.registrarse.ingresar.clicked.connect(lambda:self.stack.setCurrentIndex(0))
-        self.registrarse.confirmar.clicked.connect(lambda:self.registrarse)
+        self.registrarse.confirmar.clicked.connect(lambda:self.registrar())
 
         self.menuIzquierdo.gestion1.toggled.connect(lambda:self.stack.setCurrentIndex(2))
         self.menuIzquierdo.gestion2.toggled.connect(lambda:self.stack.setCurrentIndex(3))
@@ -108,36 +108,50 @@ class MainWindow(qtw.QMainWindow):
     
             
     def confirmarInicio(self):
-        truePass = encriptar(self.iniciarSesion.entry2.text())
-
-        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=? AND CONTRASENA=?", (self.iniciarSesion.entry1.text(), truePass))
+        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=?", (self.iniciarSesion.entry1.text(),))
         query=cur.fetchall()
-        if query:
-            self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
-            self.stack.setCurrentIndex(2)
-            mostrarMensaje("Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
-        else: 
-            mostrarMensaje("Advertencia", "Error",
-            "El usuario y la contraseña no coinciden. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
-    
-    def registrarse(self):
-        if self.registrarse.entry3.text() == self.registrarse.entry4.text():
-            cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?", (self.registrarse.entry2.text(),))
-            if cur.fetchall():
-                mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese los datos nuevamente.")
+        if not query:
+            return mostrarMensaje("Advertencia", "Error",
+            "El usuario no está registrado. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
+        try:
+            if decriptar(query[0][1].encode('utf-8')) == self.iniciarSesion.entry2.text():
+                mostrarMensaje("Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
+                self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
+                self.stack.setCurrentIndex(2)
                 return
-
-            cur.execute("SELECT * FROM USUARIOS")
-            if cur.fetchall():
-                cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")', 
-                (self.registrarse.entry2.text(), self.registrarse.entry3.text(), self.registrarse.entry1.text(),))
-                mostrarMensaje("Aviso", "Información", 
-                "El registro se realizó correctamente. Recuerde que el administrador debe verificar su registro para que su usuario esté habilitado y pueda acceder.")
             else:
-                cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)", 
-                (self.registrarse.entry2.text(), self.registrarse.entry3.text(), self.registrarse.entry1.text(),))
-                mostrarMensaje("Aviso", "Información", "El registro se realizó correctamente.")
-            con.commit()
+                return mostrarMensaje("Advertencia", "Error",
+                "El usuario y la contraseña no coinciden. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
+        except AttributeError as e:
+            print(e)
+            return mostrarMensaje("Advertencia", "Error",
+            "La contraseña es incorrecta. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
+
+    
+    def registrar(self):
+        if len(self.registrarse.entry2.text()) < 8:
+            return mostrarMensaje("Error", "Aviso", "El usuario es demasiado corto. Por favor, ingrese uno más largo.")
+        elif len(self.registrarse.entry3.text()) < 8:
+            return mostrarMensaje("Error", "Aviso", "La contraseña es demasiado corta. Por favor, ingrese una más larga.")
+        elif self.registrarse.entry3.text() != self.registrarse.entry4.text():
+            return mostrarMensaje("Error", "Aviso", "Las contraseñas no coinciden. Por favor, revise los datos e ingrese nuevamente.")
+
+        cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?", (self.registrarse.entry2.text(),))
+        if cur.fetchall():
+            return mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese los datos nuevamente.")
+
+        cur.execute("SELECT * FROM USUARIOS")
+        password=encriptar(self.registrarse.entry3.text())
+        if cur.fetchall():
+            cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")', 
+            (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
+            mostrarMensaje("Aviso", "Información", 
+            "El registro se realizó correctamente. Recuerde que el administrador debe verificar su registro para que su usuario esté habilitado y pueda acceder.")
+        else:
+            cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)", 
+            (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
+        con.commit()
+        mostrarMensaje("Aviso", "Información", "El registro se realizó correctamente.")
 
 
 if __name__ == "__main__":

@@ -219,8 +219,8 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
 
         layoutMenuPase = qtw.QGridLayout()
         layoutMenuPase.addWidget(titulo, 0, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layoutMenuPase.addWidget(label1, 1, 0)
-        layoutMenuPase.addWidget(label2, 2, 0)
+        layoutMenuPase.addWidget(label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layoutMenuPase.addWidget(label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         layoutMenuPase.addWidget(self.entry1, 1, 1)
         layoutMenuPase.addWidget(self.entry2, 2, 1)
         layoutMenuPase.addWidget(confirmar, 3, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)

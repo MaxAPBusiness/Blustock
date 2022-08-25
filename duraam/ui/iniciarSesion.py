@@ -12,7 +12,7 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
-from crypt import showPassword
+from show_password import showPassword
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -38,8 +38,8 @@ class IniciarSesion(qtw.QWidget):
         label1=qtw.QLabel("Usuario: ")
         label2=qtw.QLabel("Contraseña: ")
 
-        label1.setObjectName("modificar-label")
-        label2.setObjectName("modificar-label")
+        label1.setObjectName("ingresar-label")
+        label2.setObjectName("ingresar-label")
 
         self.entry1=qtw.QLineEdit()
         self.entry2=qtw.QLineEdit()
@@ -47,9 +47,12 @@ class IniciarSesion(qtw.QWidget):
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
 
+        self.entry1.setMaxLength(20)
+        self.entry2.setMaxLength(20)
+
         self.show=qtw.QCheckBox()
-        self.show.stateChanged.connect(lambda:showPassword([self.entry2], [self.show], self.show.isChecked()))
-        showPassword([self.entry2], [self.show], False)
+        self.show.stateChanged.connect(lambda:showPassword(self.entry2, self.show, self.show.isChecked()))
+        showPassword(self.entry2, self.show, False)
         self.show.setObjectName("show")
         self.show.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
