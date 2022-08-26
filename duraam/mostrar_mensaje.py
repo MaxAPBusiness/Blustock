@@ -17,7 +17,7 @@ def mostrarMensaje(title, msg, info):
         window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
     elif title == "Advertencia" or title == "Warning":
         window.setIcon(qtw.QMessageBox.Icon.Warning)
-        window.setStandardButtons(qtg.QIcon(qtw.QMessageBox.Icon.Warning))
+        window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
     elif title == "Aviso" or title == "Information":
         window.setIcon(qtw.QMessageBox.Icon.Information)
         window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)

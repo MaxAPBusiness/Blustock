@@ -204,9 +204,9 @@ class GestionHerramientas(qtw.QWidget):
 
         # Inserta un label por cada campo.
         for i in range(len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+            layoutEditar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         self.entry0 = qtw.QSpinBox()

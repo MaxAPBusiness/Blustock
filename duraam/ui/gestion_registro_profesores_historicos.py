@@ -11,10 +11,11 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
+import datetime as dt
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
-
+from cursos import cursos
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
@@ -22,22 +23,25 @@ cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
-class GestionGrupos(qtw.QWidget):
+class GestionRegistroProfesoresHistoricos(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QWidget.
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DE GRUPOS")
+        self.titulo=qtw.QLabel("GESTIÓN DEL REGISTRO DE PROFESORES HISTÓRICOS")
         self.titulo.setObjectName("titulo")
 
+        self.subtitulo=qtw.QLabel("Pase profesores existentes a históricos y revise los profesores ")
+        self.subtitulo.setObjectName("subtitulo")
         # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Grupo", "", ""]      
+        self.campos = ["ID", "DNI", "Nombre y Apellido", "Curso",
+                       "Fecha de Salida", "EMAIL"]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -47,8 +51,10 @@ class GestionGrupos(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
-        self.tabla.setColumnWidth(1, 35)
-        self.tabla.setColumnWidth(2, 35)
+        self.tabla.setColumnWidth(2, 120)
+        self.tabla.setColumnWidth(3, 200)
+        self.tabla.setColumnWidth(5, 35)
+        self.tabla.setColumnWidth(6, 35)
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -70,26 +76,29 @@ class GestionGrupos(qtw.QWidget):
         # Se le da la función de buscar los datos introducidos.
         self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
-        self.label2= qtw.QLabel("Ordenar: ")
-        self.radio1 = qtw.QRadioButton("Ascendente")
-        self.radio2 = qtw.QRadioButton("Descendente")
+        self.label2= qtw.QLabel("Ordenar por: ")
+        self.radio1 = qtw.QRadioButton("Nombre")
+        self.radio2 = qtw.QRadioButton("DNI")
+        self.radio3 = qtw.QRadioButton("Fecha de salida")
 
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
+        self.radio3.setObjectName("Radio3")
 
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("Ascendente"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Descendente"))
+        self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
+        self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
+        self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
 
 
         # Se crea el boton de agregar herramientas nuevas.
-        self.agregar = qtw.QPushButton("Agregar")
-        self.agregar.setObjectName("agregar")
+        self.botonPase = qtw.QPushButton("Pase Individual")
+        self.botonPase.setObjectName("confirmar")
         # Se le da la función.
-        self.agregar.clicked.connect(
-            lambda: self.modificarLinea('agregar'))
+        self.botonPase.clicked.connect(
+            lambda: self.paseHistorico())
         # Cuando el cursor pasa por el botón, cambia de forma.
-        self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        self.botonPase.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
@@ -100,7 +109,7 @@ class GestionGrupos(qtw.QWidget):
         layout.addWidget(self.radio1, 1, 3)
         layout.addWidget(self.radio2, 1, 4)
         layout.addWidget(self.tabla, 2, 1, 1, 9)
-        layout.addWidget(self.agregar, 3, 1)
+        layout.addWidget(self.botonPase, 3, 1)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -121,20 +130,29 @@ class GestionGrupos(qtw.QWidget):
             # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(len(self.campos)-2): 
+            for i in range(4): 
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("SELECT * FROM GRUPOS WHERE ID LIKE ?", busqueda)
+            cur.execute("""
+            SELECT * FROM PROFESORES_HISTORICOS 
+            WHERE ID LIKE ? 
+            OR DNI LIKE ? 
+            OR NOMBRE_APELLIDO LIKE ? 
+            OR EMAIL LIKE ? 
+            """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
-        elif consulta=="Ascendente":
-            cur.execute('SELECT * FROM GRUPOS ORDER BY ID ASC')
+        elif consulta=="Nombre":
+            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="Descendente":
-            cur.execute('SELECT * FROM GRUPOS ORDER BY ID DESC')
+        elif consulta=="DNI":
+            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY DNI')
+        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
+        elif consulta=="Fecha":
+            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY FECHA_SALIDA')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM GRUPOS')
+            cur.execute('SELECT * FROM PROFESORES_HISTORICOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
@@ -153,163 +171,91 @@ class GestionGrupos(qtw.QWidget):
 
             self.tabla.setRowHeight(i, 35)
 
-            # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton()
-            botonEditar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
-            botonEditar.setIconSize(qtc.QSize(25, 25))
-            botonEditar.setObjectName("editar")
-            botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
-            botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-2, botonEditar)
 
-            # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
-            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
-
-    # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
+    # Función paseHistorico: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
     # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
     # # Identica a la de editar pero no viene con datos por defecto.
-    def modificarLinea(self, tipo):
+    def paseHistorico(self):
         # Se crea el widget que va a funcionar como ventana.
-        self.edita = qtw.QWidget()
+        self.menuPase = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
-        self.edita.setWindowTitle("Agregar Grupo")
-        self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        self.menuPase.setWindowTitle("Realizar Pase Histórico Individual de Profesores")
+        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
-        # Se crea el layout.
-        layoutEditar = qtw.QGridLayout()
-
-        # Inserta un label por cada campo.
-        for i in range(len(self.campos)-2):
-            label = qtw.QLabel(f"{self.campos[i]}: ")
-            label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        titulo=qtw.QLabel("Ingresa al alumno que quieres pasar a histórico")
+        titulo.setObjectName("subtitulo")
+        label1=qtw.QLabel("Nombre del Alumno: ")
+        label2=qtw.QLabel("DNI: ")
         
-        # Crea los entries.
-        
+        # Crea los entries. 
         self.entry1 = qtw.QLineEdit()
+        self.entry2 = qtw.QLineEdit()
+
+        sugerenciasNombre=[]
+
+        cur.execute("SELECT NOMBRE FROM PROFESORES")
+
+        for i in cur.fetchall():
+            sugerenciasNombre.append(i[0])
+            
+        cuadroSugerenciasNombre=qtw.QCompleter(sugerenciasNombre, self)
+        cuadroSugerenciasNombre.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry1.setCompleter(cuadroSugerenciasNombre)
+        self.entry1.editingFinished.connect(lambda:self.cargarDNI(self.entry1.text()))
        
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
 
-        # Si el tipo es editar, se crea la pantalla de editar.
-        if tipo == 'editar':
-            # Se obtiene la posición del boton clickeado: 
-            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
-            botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
-            posicion = self.tabla.indexAt(botonClickeado.pos())
-            
-            # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
-            for cell in range(0, len(self.campos)-2):
-                datos.append(posicion.sibling(posicion.row(), cell).data())
-            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
-            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
-            # Se les añade a los entries sus valores por defecto.
-            
-            self.entry1.setText(datos[0])
-            
-            self.edita.setWindowTitle("Editar")
-
-        # Se añaden los entries al layout.
-        entries=[self.entry1]
-        for i in range(len(entries)):
-            entries[i].setObjectName("modificar-entry")
-            layoutEditar.addWidget(entries[i], i, 1)
+        self.entry1.setObjectName("modificar-entry")
+        self.entry2.setObjectName("modificar-entry")
 
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+
+        layoutMenuPase = qtw.QGridLayout()
+        layoutMenuPase.addWidget(titulo, 0, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layoutMenuPase.addWidget(label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layoutMenuPase.addWidget(self.entry1, 1, 1)
+        layoutMenuPase.addWidget(self.entry2, 2, 1)
+        layoutMenuPase.addWidget(confirmar, 3, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
-        self.edita.setLayout(layoutEditar)
+        self.menuPase.setLayout(layoutMenuPase)
         # Se muestra la ventana
-        self.edita.show()
+        self.menuPase.show()
+
+    def cargarDNI(self, nombre):
+        cur.execute("SELECT DNI FROM PROFESORES WHERE NOMBRE_APELLIDO=?", (nombre,))
+
+        sugerenciasDNI=[]
+
+        for i in cur.fetchall():
+            sugerenciasDNI.append(i[0])
+
+        cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
+        cuadroSugerenciasDNI.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry2.setCompleter(cuadroSugerenciasDNI)
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
-        # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-        if len(self.entry1.text()) > 40:
-            mostrarMensaje("Error", "Error", "El grupo ingresado es demasiado largo. Ingrese uno más corto.")
+        cur.execute("SELECT * FROM PROFESORES WHERE DNI=?",(self.entry2.text(),))
+        datos=cur.fetchall()
+        cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
+                datos[0][0], datos[0][1], datos[0][2], datos[0][3],
+                dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
+        ))
+        cur.execute('DELETE FROM PROFESORES WHERE ID=?', (datos[0][0], ))
 
-        # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
-        if datos:
-            try:
-                # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("UPDATE GRUPOS SET ID=? WHERE ID=?", (
-                    self.entry1.text().upper(), datos[0],
-                ))
-                con.commit()
-                # Se muestra el mensaje exitoso.
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado el grupo.")           
-            except BaseException as e:
-                mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")  
-                print(e)
-                return
-        # Si no, se inserta la fila en la tabla de la base de datos.
-        else:
-            try:
-                cur.execute("INSERT INTO GRUPOS VALUES(?) ", (
-                     self.entry1.text().upper(),
-                ))
-                con.commit()
-
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado un grupo.")
-            except:
-                mostrarMensaje("Error", "Error", "El grupo ingresado ya está registrado. Por favor, ingrese otro.")
-                return
-        
+        mostrarMensaje("Information", "Aviso",
+                    "Se ha pasado un alumno al registro histórico.")
+        mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")    
         #Se refrescan los datos.
         self.mostrarDatos()
-        self.edita.close()
-
-    # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
-    # - idd: el id de la fila que se va a eliminar.
-    def eliminar(self, idd):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
-        # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea eliminar estos datos?')
-        # si pulsó el boton de sí:
-        if resp == qtw.QMessageBox.StandardButton.Yes:
-            # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute("SELECT GRUPO FROM HERRAMIENTAS WHERE GRUPO=?", (idd,))
-            herramientas=cur.fetchall()
-            cur.execute("SELECT GRUPO FROM SUBGRUPOS WHERE GRUPO=?", (idd,))
-            subgrupo=cur.fetchall()
-            if herramientas or subgrupo:
-                resp2=mostrarMensaje('Pregunta', 'Advertencia',
-"""
-Todavía hay herramientas y/o subgrupos cargados. 
-Eliminar el grupo eliminará también TODOS los datos en los que está ingresado.
-¿Desea eliminarlo de todas formas?
-""")
-            else:
-                resp2=True
-            if resp2:
-                cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
-                cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
-                cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
-                con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
-
+        self.menuPase.close()

@@ -37,7 +37,7 @@ class GestionProfesores(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID","DNI","Nombre y Apellido", "Email","", ""]      
+        self.campos = ["ID","DNI","Nombre y Apellido", "Email", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -171,16 +171,6 @@ class GestionProfesores(qtw.QWidget):
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 4, botonEditar)
 
-            # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
-            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 5, botonEliminar)
-
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
@@ -197,10 +187,10 @@ class GestionProfesores(qtw.QWidget):
         layoutEditar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
-        for i in range(len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+        for i in range(len(self.campos)-1):
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+            layoutEditar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         

@@ -225,9 +225,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
         # Inserta un label por cada campo.
         for i in range(1, len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i-1, 0)
+            layoutEditar.addWidget(label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         self.entry1 = qtw.QLineEdit()
@@ -263,6 +263,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.radio1.toggled.connect(lambda: self.cambiarTipo("Retiro"))
         self.radio2.toggled.connect(lambda: self.cambiarTipo("Devolucion"))
 
+        self.radio1.setObjectName("tipo")
+        self.radio2.setObjectName("tipo")
+        
         self.entry6 = qtw.QSpinBox()
         self.entry4.setMaximum(9999)
         self.entry6.setMaximum(9999)

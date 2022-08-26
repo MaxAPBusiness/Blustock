@@ -38,7 +38,7 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
         self.campos = ["ID", "DNI", "Nombre y Apellido", "Curso",
-                       "EMAIL", "", ""]      
+                       "EMAIL", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -51,7 +51,6 @@ class GestionAlumnos(qtw.QWidget):
         self.tabla.setColumnWidth(2, 120)
         self.tabla.setColumnWidth(3, 200)
         self.tabla.setColumnWidth(5, 35)
-        self.tabla.setColumnWidth(6, 35)
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -71,7 +70,7 @@ class GestionAlumnos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.editingFinished.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
@@ -178,16 +177,6 @@ class GestionAlumnos(qtw.QWidget):
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 5, botonEditar)
 
-            # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
-            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 6, botonEliminar)
-
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
@@ -197,17 +186,17 @@ class GestionAlumnos(qtw.QWidget):
         # Se crea el widget que va a funcionar como ventana.
         self.edita = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
-        self.edita.setWindowTitle("Agregar Herramienta")
+        self.edita.setWindowTitle("Agregar Alumno")
         self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
         # Se crea el layout.
         layoutEditar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
-        for i in range(len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+        for i in range(len(self.campos)-1):
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+            layoutEditar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         
@@ -217,11 +206,11 @@ class GestionAlumnos(qtw.QWidget):
         self.entry4 = qtw.QLineEdit()
         self.entry5 = qtw.QLineEdit()
 
-        cuadroSugerencias=qtw.QCompleter(cursos, self)
-        cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry4.setCompleter(cuadroSugerencias)
         self.entry1.setMaximum(9999)
         self.entry2.setMaximum(99999999)
+
+        self.entry3.setMaxLength(50)
+        self.entry5.setMaxLength(320)
        
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
@@ -260,6 +249,8 @@ class GestionAlumnos(qtw.QWidget):
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
+        confirmar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        
         layoutEditar.addWidget(confirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
@@ -271,17 +262,13 @@ class GestionAlumnos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-        if len(self.entry3.text()) > 50:
-            mostrarMensaje("Error", "Error", "El nombre ingresado es demasiado largo. Ingresa uno más corto.")
-            return
-        elif len(self.entry5.text()) > 100:
-            mostrarMensaje("Error", "Error", "El email ingresado es demasiado largo. Ingresa uno más corto.")
-            return
 
         if self.entry4.text() not in cursos:
             mostrarMensaje("Error", "Error", 
             "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
             return
+
+
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
@@ -293,6 +280,18 @@ class GestionAlumnos(qtw.QWidget):
                 """, (
                     self.entry1.value(), self.entry2.value(), self.entry3.text(
                     ).upper(), self.entry4.text(), self.entry5.text(), datos[0],
+                ))
+                cur.execute("""
+                UPDATE MOVIMIENTOS_HERRAMIENTAS
+                SET ID_ALUMNO=? WHERE ID_ALUMNO=?
+                """, (
+                    self.entry1.value(), datos[0],
+                ))
+                cur.execute("""
+                UPDATE TURNO_PANOL
+                SET ID_ALUMNO=? WHERE ID_ALUMNO=?
+                """, (
+                    self.entry1.value(), datos[0],
                 ))
                 con.commit()
                 # Se muestra el mensaje exitoso.
@@ -320,23 +319,3 @@ class GestionAlumnos(qtw.QWidget):
         #Se refrescan los datos.
         self.mostrarDatos()
         self.edita.close()
-
-    # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
-    # - idd: el id de la fila que se va a eliminar.
-    def eliminar(self, idd):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
-        # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea eliminar estos datos?')
-        # si pulsó el boton de sí:
-        if resp == qtw.QMessageBox.StandardButton.Yes:
-            # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (idd,))
-            con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
-

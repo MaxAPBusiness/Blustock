@@ -22,10 +22,14 @@ class MenuIzquierdo(qtw.QToolBar):
         self.gestion5=qtw.QRadioButton('GESTIÓN DE PROFESORES')
         self.gestion6=qtw.QRadioButton('GESTIÓN DE GRUPOS')
         self.gestion7=qtw.QRadioButton('GESTIÓN DE SUBGRUPOS')
+        self.gestion8=qtw.QRadioButton('GESTIÓN DE ALUMNOS\nHISTÓRICOS')
+        self.gestion9=qtw.QRadioButton('GESTIÓN DE PROFESORES\nHISTÓRICOS')
 
         self.addWidget(titulo)
 
-        self.gestiones=[self.gestion1, self.gestion2, self.gestion3, self.gestion4, self.gestion5, self.gestion6, self.gestion7]
+        self.gestiones=[self.gestion1, self.gestion2, self.gestion3, self.gestion4, 
+                        self.gestion5, self.gestion6, self.gestion7, self.gestion8,
+                        self.gestion9]
         
         for i in self.gestiones:
             i.setObjectName("gestion")

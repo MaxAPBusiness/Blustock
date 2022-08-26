@@ -190,9 +190,9 @@ class GestionSubgrupos(qtw.QWidget):
 
         # Inserta un label por cada campo.
         for i in range(len(self.campos)-2):
-            label = qtw.QLabel(self.campos[i])
+            label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i, 0)
+            layoutEditar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         
@@ -303,6 +303,7 @@ class GestionSubgrupos(qtw.QWidget):
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
+            cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
             con.commit()
 
             #elimina la fila de la tabla de la ui.
