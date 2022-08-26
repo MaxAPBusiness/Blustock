@@ -31,12 +31,14 @@ class Inicio(qtw.QWidget):
 
         # Se crea el título.
         titulo=qtw.QLabel("""
-        Bienvenido al sistema de gestión del pañol!
-        Ingrese el pañolero.
+Bienvenido al sistema de gestión del pañol!
+Ingrese el pañolero.
         """)
         titulo.setObjectName("titulo") 
         label1=qtw.QLabel("Curso: ")
         label2=qtw.QLabel("Alumno: ")
+        label2.setObjectName("alumno")
+        label1.setObjectName("curso")
         self.curso=qtw.QComboBox()
         self.curso.addItems(cursos)
         self.curso.currentIndexChanged.connect(lambda:self.busquedaAlumnos())
@@ -45,12 +47,12 @@ class Inicio(qtw.QWidget):
         self.confirmar=qtw.QPushButton("confirmar")
         self.confirmar.setObjectName("confirmar")
         layout=qtw.QGridLayout()
-        layout.addWidget(titulo, 0, 1, 0, 2)
+        layout.addWidget(titulo, 0, 1, 0, 1)
         layout.addWidget(label1, 1, 0)
         layout.addWidget(label2, 2, 0)
         layout.addWidget(self.curso, 1, 1)
         layout.addWidget(self.alumno, 2, 1)
-        layout.addWidget(self.confirmar, 3, 2, 1, 2)
+        layout.addWidget(self.confirmar, 3, 1, 1, 2)
         self.setLayout(layout)
         
     def busquedaAlumnos(self):

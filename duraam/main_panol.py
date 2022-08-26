@@ -71,7 +71,7 @@ class MainWindow(qtw.QMainWindow):
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     window = MainWindow()
-    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion.qss", 'r') as qss:
+    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion_panol.qss", 'r') as qss:
         app.setStyleSheet(qss.read())
     window.show()
     app.exec()
