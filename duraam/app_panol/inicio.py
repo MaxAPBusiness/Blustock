@@ -11,6 +11,7 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
+import datetime as dt
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
@@ -30,11 +31,14 @@ class Inicio(qtw.QWidget):
 
         # Se crea el título.
         titulo=qtw.QLabel("""
-        sistema de gestión del pañol
+Bienvenido al sistema de gestión del pañol!
+Ingrese el pañolero.
         """)
         titulo.setObjectName("titulo") 
         label1=qtw.QLabel("Curso: ")
         label2=qtw.QLabel("Alumno: ")
+        label2.setObjectName("alumno")
+        label1.setObjectName("curso")
         self.curso=qtw.QComboBox()
         self.curso.addItems(cursos)
         self.curso.currentIndexChanged.connect(lambda:self.busquedaAlumnos())
@@ -43,7 +47,7 @@ class Inicio(qtw.QWidget):
         self.confirmar=qtw.QPushButton("confirmar")
         self.confirmar.setObjectName("confirmar")
         layout=qtw.QGridLayout()
-        layout.addWidget(titulo, 0, 0, 1, 2)
+        layout.addWidget(titulo, 0, 1, 0, 1)
         layout.addWidget(label1, 1, 0)
         layout.addWidget(label2, 2, 0)
         layout.addWidget(self.curso, 1, 1)
