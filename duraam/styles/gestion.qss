@@ -54,7 +54,8 @@
 #editar::hover, 
 #eliminar::hover,
 #confirmar::hover,
-#confirmar-grande::hover {
+#confirmar-grande::hover,
+#usuario::hover {
     background-color:rgb(20,20,200);
 }
 
@@ -120,13 +121,19 @@
 }
 
 #boton-texto,
-#subtitulo {
+#subtitulo,
+#usuario {
     border-style:hidden;
     font-size:24px;
     margin:10px;
     font-weight:400;
     width: 400px;
     border-radius: 10px;
+}
+
+#usuario {
+    width: 120px;
+    margin: 0px 30px 0px 30px;
 }
 
 #boton-texto::hover {

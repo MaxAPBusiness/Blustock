@@ -54,8 +54,9 @@ class MainWindow(qtw.QMainWindow):
         self.resize(1280, 1024)
         self.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
-        cabecera=Cabecera()
-        cabecera.setObjectName("cabecera")
+        self.cabecera=Cabecera()
+        self.cabecera.usuario.hide()
+        self.cabecera.setObjectName("cabecera")
         self.menuIzquierdo=MenuIzquierdo()
         
         # Creamos la colección de pantallas
@@ -73,7 +74,7 @@ class MainWindow(qtw.QMainWindow):
         self.alumnosHistoricos=GestionRegistroAlumnosHistoricos()
         self.profesoresHistoricos=GestionRegistroProfesoresHistoricos()
 
-        self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
+        self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, self.cabecera)
 
         # Añadimos las pantallas a la colección
         pantallas=[self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos, 
@@ -118,6 +119,7 @@ class MainWindow(qtw.QMainWindow):
                 mostrarMensaje("Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
                 self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
                 self.stack.setCurrentIndex(2)
+                self.cabecera.usuario.show()
                 return
             else:
                 return mostrarMensaje("Advertencia", "Error",
