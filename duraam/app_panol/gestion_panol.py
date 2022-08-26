@@ -30,7 +30,7 @@ class Inicio(qtw.QWidget):
 
         # Se crea el título.
         titulo=qtw.QLabel("""
-        sistema de gestión del pañol
+       PAÑOL
         """)
         titulo.setObjectName("titulo") 
         label1=qtw.QLabel("Curso: ")
@@ -44,11 +44,11 @@ class Inicio(qtw.QWidget):
         self.confirmar.setObjectName("confirmar")
         layout=qtw.QGridLayout()
         layout.addWidget(titulo, 0, 0, 1, 2)
-        layout.addWidget(label1, 1, 0)
-        layout.addWidget(label2, 2, 0)
-        layout.addWidget(self.curso, 1, 1)
-        layout.addWidget(self.alumno, 2, 1)
-        layout.addWidget(self.confirmar, 3, 1, 1, 2)
+        layout.addWidget(label1, 1, 1)
+        layout.addWidget(label2, 2, 1)
+        layout.addWidget(self.curso, 1, 2)
+        layout.addWidget(self.alumno, 2, 2)
+        layout.addWidget(self.confirmar, 3, 1)
         self.setLayout(layout)
         
     def busquedaAlumnos(self):
