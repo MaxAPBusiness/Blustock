@@ -25,17 +25,29 @@ class MenuIzquierdo(qtw.QToolBar):
         self.gestion8=qtw.QRadioButton('GESTIÓN DE ALUMNOS\nHISTÓRICOS')
         self.gestion9=qtw.QRadioButton('GESTIÓN DE PROFESORES\nHISTÓRICOS')
 
-        self.addWidget(titulo)
+        container=qtw.QWidget()
+        container.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
+        container.setMinimumHeight(525)
+        container.setMinimumWidth(300)
+        containerLayout=qtw.QGridLayout()
+
+        containerLayout.addWidget(titulo, 0, 0, 1, 2)
 
         self.gestiones=[self.gestion1, self.gestion2, self.gestion3, self.gestion4, 
                         self.gestion5, self.gestion6, self.gestion7, self.gestion8,
                         self.gestion9]
         
-        for i in self.gestiones:
-            i.setObjectName("gestion")
-            self.addWidget(i)
+        for i in range(len(self.gestiones)):
+            self.gestiones[i].setObjectName("gestion")
+            containerLayout.addWidget(self.gestiones[i], i+1, 0)
 
         self.gestion1.toggle()
+        container.setLayout(containerLayout)
+
+        scroll=qtw.QScrollArea()
+        scroll.setWidget(container)
+
+        self.addWidget(scroll)
         
         with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/menu_izquierdo.qss", "r") as qss:
             self.setStyleSheet(qss.read())

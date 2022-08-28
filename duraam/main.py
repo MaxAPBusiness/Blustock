@@ -55,9 +55,10 @@ class MainWindow(qtw.QMainWindow):
         self.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
         self.cabecera=Cabecera()
-        self.cabecera.usuario.hide()
         self.cabecera.setObjectName("cabecera")
+
         self.menuIzquierdo=MenuIzquierdo()
+        self.menuIzquierdo.setFixedWidth(300)
         
         # Creamos la colección de pantallas
         self.stack = qtw.QStackedWidget()
@@ -102,7 +103,7 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(self.stack)
         self.stack.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
-    
+
     def closeEvent(self, event):
         global app
         app.closeAllWindows()
@@ -118,8 +119,9 @@ class MainWindow(qtw.QMainWindow):
             if decriptar(query[0][1].encode('utf-8')) == self.iniciarSesion.entry2.text():
                 mostrarMensaje("Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
                 self.addToolBar(qtc.Qt.ToolBarArea.LeftToolBarArea, self.menuIzquierdo)
+                self.cabecera.addWidget(self.cabecera.usuario)
+                self.cabecera.usuario.clicked.connect(lambda:self.informacionUsuario(query[0][2], query[0][0]))
                 self.stack.setCurrentIndex(2)
-                self.cabecera.usuario.show()
                 return
             else:
                 return mostrarMensaje("Advertencia", "Error",
@@ -154,6 +156,25 @@ class MainWindow(qtw.QMainWindow):
             (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
         con.commit()
         mostrarMensaje("Aviso", "Información", "El registro se realizó correctamente.")
+    
+    def informacionUsuario(self, nombre, usuario):
+        menu = qtw.QMenu(self)
+        menu.setObjectName("menu")
+        nombre = qtw.QLabel(nombre)     
+        usuario = qtw.QLabel(usuario)
+        botonCerrarSesion = qtg.QAction("Cerrar sesión")
+        botonCerrarSesion.triggered.connect(lambda:self.cerrarSesion())
+        insertarNombre = qtw.QWidgetAction(menu)
+        insertarUsuario = qtw.QWidgetAction(menu)
+        insertarNombre.setDefaultWidget(nombre)
+        insertarUsuario.setDefaultWidget(usuario)
+        menu.addAction(insertarNombre)
+        menu.addAction(insertarUsuario)
+        menu.addSeparator()
+        menu.addAction(botonCerrarSesion)
+
+        menu.exec(qtg.QCursor.pos())
+
 
 
 if __name__ == "__main__":
