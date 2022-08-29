@@ -155,4 +155,13 @@
     font-size: 28px;
 }
 
+#check::indicator {
+    width: 25px;
+    height: 25px;
+}
+
+#check::indicator::toggled {
+    width: 25px;
+    height: 25px;
+}
 

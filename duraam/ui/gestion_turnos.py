@@ -40,6 +40,8 @@ class GestionTurnos(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
+        self.tabla.setColumnWidth(5, 125)
+        self.tabla.setColumnWidth(6, 125)
         self.tabla.setColumnWidth(7, 35)
         self.tabla.setColumnWidth(8, 35)
 

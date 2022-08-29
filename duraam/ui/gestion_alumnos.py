@@ -10,6 +10,7 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
+import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
@@ -98,7 +99,7 @@ class GestionAlumnos(qtw.QWidget):
         self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         self.paseAnual = qtw.QPushButton("Pase Anual")
-        self.paseAnual.setObjectName("paseAnual")
+        self.paseAnual.setObjectName("confirmar")
         # Se le da la función.
         self.paseAnual.clicked.connect(
             lambda: self.realizarPaseAnual())
@@ -108,14 +109,14 @@ class GestionAlumnos(qtw.QWidget):
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
         layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.buscar, 1, 0)
+        layout.addWidget(self.buscar, 1, 0, 1, 2)
         layout.addWidget(icono,1,0)
-        layout.addWidget(self.label2, 1, 1)
-        layout.addWidget(self.radio1, 1, 2)
-        layout.addWidget(self.radio2, 1, 3)
+        layout.addWidget(self.label2, 1, 2)
+        layout.addWidget(self.radio1, 1, 3)
+        layout.addWidget(self.radio2, 1, 4)
         layout.addWidget(self.tabla, 2, 0, 1, 9)
         layout.addWidget(self.agregar, 3, 0)
-        layout.addWidget(self.paseAnual, 3, 1)
+        layout.addWidget(self.paseAnual, 3, 1, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -373,7 +374,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         # Se crea el widget que va a funcionar como ventana.
         self.menuPase = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
-        self.menuPase.setWindowTitle("Realizar Pase Histórico Grupal de Alumnos")
+        self.menuPase.setWindowTitle("Realizar Pase Anual de Alumnos")
         self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
         titulo=qtw.QLabel("Seleccione los alumnos que desea pasar de año.")
@@ -395,33 +396,34 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.editingFinished.connect(lambda: self.buscarF())
+        self.buscar.editingFinished.connect(lambda: self.mostrarDatosPase("Buscar"))
 
-        self.pantallaListaAlumnos=qtw.QScrollArea()
-        self.pantallaListaAlumnos.setMaximumSize(400, 400)
-        self.layoutLista=qtw.QVBoxLayout()
-        
-        cursosAPasar = cursos[:-3]
-        for curso in cursosAPasar:
-            label=qtw.QLabel(curso)
-            self.layoutLista.addWidget(label)
-            cur.execute("SELECT NOMBRE_APELLIDO, DNI FROM ALUMNOS WHERE CURSO = ?", (curso,))
-            for i in cur.fetchall():
-                alumno=qtw.QCheckBox(f'{i[0]} DNI: {i[1]}')
-                alumno.setChecked(True)
-                self.layoutLista.addWidget(alumno)
+        self.tablaListaAlumnos=qtw.QTableWidget()
+        self.tablaListaAlumnos.setMaximumSize(400, 345)
+
+        self.camposPase = ["", "Nombre y Apellido", "DNI", "Curso"]
+                                
+        # Se establece el número de columnas que va a tener. 
+        self.tablaListaAlumnos.setColumnCount(len(self.camposPase))
+        self.tablaListaAlumnos.setColumnWidth(0, 15)   
+        self.tablaListaAlumnos.setColumnWidth(1, 125)   
+        # Se introducen los títulos en la tabla.
+        self.tablaListaAlumnos.setHorizontalHeaderLabels(self.camposPase)
+        self.tablaListaAlumnos.verticalHeader().hide()
+        self.mostrarDatosPase()
 
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        confirmar.clicked.connect(lambda: self.confirmarGrupal())
+        confirmar.clicked.connect(lambda: self.confirmarPase())
+        confirmar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         layoutMenuPase = qtw.QGridLayout()
         layoutMenuPase.addWidget(titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
         layoutMenuPase.addWidget(self.buscar, 1, 0)
         layoutMenuPase.addWidget(icono,1,0)
-        layoutMenuPase.addWidget(self.pantallaListaAlumnos, 2, 0)
+        layoutMenuPase.addWidget(self.tablaListaAlumnos, 2, 0, 1, 4)
         layoutMenuPase.addWidget(confirmar, 3, 0)
         layoutMenuPase.addWidget(confirmar, 3, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
@@ -430,25 +432,58 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         # Se muestra la ventana
         self.menuPase.show()
     
-    def buscarF(self):
-        for i in len(self.layoutLista.count()):
-            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
-                if self.buscar.text() not in self.layoutLista.itemAt(i).widget().text():
-                    self.layoutLista.itemAt(i).widget().hide()
-                elif self.buscar.text() in self.layoutLista.itemAt(i).widget() and self.layoutLista.itemAt(i).widget().isHidden():
-                    self.layoutLista.itemAt(i).widget().show()
+    def mostrarDatosPase(self, consulta="Normal"):
+        cursosPase=cursos[-3]
+        # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
+        if consulta=="Buscar":
+            #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
+            cur.execute("""
+            SELECT NOMBRE_APELLIDO, DNI, CURSO
+            FROM ALUMNOS
+            WHERE CURSO IN ?
+            AND NOMBRE_APELLIDO LIKE ?
+            OR DNI LIKE ?
+            OR CURSO LIKE ?
+            ORDER BY CURSO, ID""", (cursosPase, self.buscar.text(), 
+                            self.buscar.text(), self.buscar.text()))
+        elif consulta=="Normal":
+            cur.execute("""
+            SELECT NOMBRE_APELLIDO, DNI, CURSO
+            FROM ALUMNOS
+            WHERE CURSO IN ?
+            ORDER BY CURSO, ID""", (cursosPase,))
+        # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
+        else:
+            print("Error crítico: un bobolon escribio la consulta mal.")
+            return
+        # Se guarda la consulta en una variable.
+        query = cur.fetchall()
+        # Se establece la cantidad de filas que va a tener la tabla
+        self.tablaListaAlumnos.setRowCount(len(query))
+        # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
+        # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
+        for i in range(len(query)):
+            # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
+            check=qtw.QCheckBox()
+            check.setObjectName("check")
+            check.toggle()
+            self.tablaListaAlumnos.setCellWidget(i, 0, check)
+            for j in range(len(query[i])):
+                self.tablaListaAlumnos.setItem(i, j+1, qtw.QTableWidgetItem(str(query[i][j])))
+
+            self.tablaListaAlumnos.setRowHeight(i, 35)
     
-    def confirmarGrupal(self):
-        for i in len(self.layoutLista.count()):
-            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
-                if self.layoutLista.itemAt(i).widget().isChecked():
-                    datalist = self.layoutLista.itemAt(i).widget().text().split(": ")
-                    dni=datalist[-1]
-                    cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (dni,))
-                    datos=cur.fetchall()
-                    cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
-                        datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
-                        dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
-                    ))
-                    cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
-                    con.commit()
+    def confirmarPase(self):
+        for i in range(self.tablaListaAlumnos.rowCount()):
+            if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
+                curso=[int(self.tablaListaAlumnos.item(i, 3).text()[0]),
+                        self.tablaListaAlumnos.item(i, 3).text()[1]]
+                curso[0]+=1
+
+                cur.execute('UPDATE ALUMNOS SET CURSO=? WHERE DNI=?',
+                (f"{curso[0]}{curso[1]}", int(self.tablaListaAlumnos.item(i, 2).text())))
+                con.commit()
+        
+        self.mostrarDatos()
+        mostrarMensaje("Aviso", "Aviso", "El pase anual se ha realizado con éxito.")
+        self.menuPase.close()
