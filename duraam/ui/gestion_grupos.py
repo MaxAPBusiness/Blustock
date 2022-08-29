@@ -93,14 +93,14 @@ class GestionGrupos(qtw.QWidget):
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 1)
-        layout.addWidget(self.buscar, 1, 1)
-        layout.addWidget(icono,1,1)
-        layout.addWidget(self.label2, 1, 2)
-        layout.addWidget(self.radio1, 1, 3)
-        layout.addWidget(self.radio2, 1, 4)
-        layout.addWidget(self.tabla, 2, 1, 1, 9)
-        layout.addWidget(self.agregar, 3, 1)
+        layout.addWidget(self.titulo, 0, 0)
+        layout.addWidget(self.buscar, 1, 0)
+        layout.addWidget(icono,1,0)
+        layout.addWidget(self.label2, 1, 1)
+        layout.addWidget(self.radio1, 1, 2)
+        layout.addWidget(self.radio2, 1, 3)
+        layout.addWidget(self.tabla, 2, 0, 1, 9)
+        layout.addWidget(self.agregar, 3, 0)
 
         # Se le da el layout al widget central
         self.setLayout(layout)

@@ -47,6 +47,7 @@ class Solicitudes(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
+        self.tabla.setColumnWidth(1, 125)
         self.tabla.setColumnWidth(2, 35)
         self.tabla.setColumnWidth(3, 35)
 
@@ -55,8 +56,8 @@ class Solicitudes(qtw.QWidget):
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 1)
-        layout.addWidget(self.tabla, 1  , 1, 1, 9)
+        layout.addWidget(self.titulo, 0, 0)
+        layout.addWidget(self.tabla, 1, 0, 1, 9)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -70,7 +71,7 @@ class Solicitudes(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM SOLICITUDES')
+        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM SOLICITUDES WHERE ESTADO="Pendiente"')
         # Se guarda la consulta en una variable.
         query = cur.fetchall()
 
@@ -93,16 +94,7 @@ class Solicitudes(qtw.QWidget):
             botonAceptar.setIconSize(qtc.QSize(25, 25))
             botonAceptar.setObjectName("aceptar")
 
-
-            # Se obtiene la posición del boton clickeado: 
-            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
-            botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
-            posicion = self.tabla.indexAt(botonClickeado.pos())
-            
-            cur.execute("SELECT * FROM SOLICITUDES WHERE USUARIO=?", (posicion.sibling(posicion.row(), 0).data(),)) 
-
-            botonAceptar.clicked.connect(lambda: self.aceptar(cur.fetchall()))
+            botonAceptar.clicked.connect(lambda: self.aceptar())
             botonAceptar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonAceptar)
 
@@ -116,9 +108,16 @@ class Solicitudes(qtw.QWidget):
             botonRechazar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonRechazar)
 
-    def aceptar(self, datos):
-        cur.execute('INSERT INTO USUARIOS VALUES (NULL, ?, ?, ?)', (datos[0],))
-        cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0],))
+    def aceptar(self):
+        # Se obtiene la posición del boton clickeado: 
+            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
+        botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+        posicion = self.tabla.indexAt(botonClickeado.pos())
+        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM SOLICITUDES WHERE USUARIO=?", (posicion.sibling(posicion.row(), 0).data(),)) 
+        datos=cur.fetchall()
+        cur.execute('INSERT INTO USUARIOS VALUES (NULL, ?, ?, ?)', datos[0])
+        cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
         con.commit()
         self.mostrarDatos()
 

@@ -31,9 +31,18 @@ class Cabecera(qtw.QToolBar):
         self.usuario.setObjectName("usuario")
         self.usuario.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
-        self.addWidget(icono)
-        self.addWidget(self.headerLabel)
-        self.addWidget(self.spacer)
+        self.container=qtw.QWidget()
+        self.containerLayout=qtw.QHBoxLayout()
+
+        self.containerLayout.addWidget(icono)
+        self.containerLayout.addWidget(self.headerLabel)
+        self.containerLayout.addWidget(self.spacer)
+
+        self.container.setLayout(self.containerLayout)
+
+        self.container.setMinimumHeight(100)
+
+        self.addWidget(self.container)
         
         with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/cabecera.qss", "r") as qss:
             self.setStyleSheet(qss.read())

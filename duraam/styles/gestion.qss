@@ -55,11 +55,16 @@
 #eliminar::hover,
 #confirmar::hover,
 #confirmar-grande::hover,
-#usuario::hover {
+#usuario::hover,
+#aceptar::hover,
+#rechazar::hover {
     background-color:rgb(20,20,200);
 }
 
-#editar, #eliminar {
+#editar, 
+#eliminar,
+#aceptar,
+#rechazar {
     background-color:#0d43d4; 
     border-radius: 5px;
     color: white;
@@ -149,3 +154,5 @@
     max-width: 145px;
     font-size: 28px;
 }
+
+

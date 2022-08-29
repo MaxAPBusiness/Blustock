@@ -25,6 +25,8 @@ def mostrarMensaje(title, msg, info):
         window.setIcon(qtw.QMessageBox.Icon.Warning)
         window.setStandardButtons(
             qtw.QMessageBox.StandardButton.No | qtw.QMessageBox.StandardButton.Yes)
+        si = window.button(qtw.QMessageBox.StandardButton.Yes)
+        si.setText('Sí')
     else:
         print("Error de titulo")
         return

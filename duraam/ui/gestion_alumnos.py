@@ -97,16 +97,25 @@ class GestionAlumnos(qtw.QWidget):
         # Cuando el cursor pasa por el botón, cambia de forma.
         self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
+        self.paseAnual = qtw.QPushButton("Pase Anual")
+        self.paseAnual.setObjectName("paseAnual")
+        # Se le da la función.
+        self.paseAnual.clicked.connect(
+            lambda: self.realizarPaseAnual())
+        # Cuando el cursor pasa por el botón, cambia de forma.
+        self.paseAnual.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 1)
-        layout.addWidget(self.buscar, 1, 1)
-        layout.addWidget(icono,1,1)
-        layout.addWidget(self.label2, 1, 2)
-        layout.addWidget(self.radio1, 1, 3)
-        layout.addWidget(self.radio2, 1, 4)
-        layout.addWidget(self.tabla, 2, 1, 1, 9)
-        layout.addWidget(self.agregar, 3, 1)
+        layout.addWidget(self.titulo, 0, 0)
+        layout.addWidget(self.buscar, 1, 0)
+        layout.addWidget(icono,1,0)
+        layout.addWidget(self.label2, 1, 1)
+        layout.addWidget(self.radio1, 1, 2)
+        layout.addWidget(self.radio2, 1, 3)
+        layout.addWidget(self.tabla, 2, 0, 1, 9)
+        layout.addWidget(self.agregar, 3, 0)
+        layout.addWidget(self.paseAnual, 3, 1)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -359,3 +368,87 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
                 boton = qtw.QApplication.focusWidget()
                 i = self.tabla.indexAt(boton.pos())
                 self.tabla.removeRow(i.row())
+
+    def realizarPaseAnual(self):
+        # Se crea el widget que va a funcionar como ventana.
+        self.menuPase = qtw.QWidget()
+        # Se le da el título a la ventana, que por defecto es agregar.
+        self.menuPase.setWindowTitle("Realizar Pase Histórico Grupal de Alumnos")
+        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+
+        titulo=qtw.QLabel("Seleccione los alumnos que desea pasar de año.")
+        titulo.setObjectName("subtitulo")
+        
+        
+        # Crea los entries. 
+        self.buscar = qtw.QLineEdit()
+        self.buscar.setObjectName("buscar")
+        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
+        self.buscar.setClearButtonEnabled(True)
+        # Se le pone el texto por defecto a la barra de búsqueda
+        self.buscar.setPlaceholderText("Buscar...")
+        # Se importa el ícono de lupa para la barra.
+        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        # Se crea un label que va a contener el ícono.
+        icono=qtw.QLabel()
+        icono.setObjectName("lupa")
+        icono.setPixmap(lupa)
+
+        # Se le da la función de buscar los datos introducidos.
+        self.buscar.editingFinished.connect(lambda: self.buscarF())
+
+        self.pantallaListaAlumnos=qtw.QScrollArea()
+        self.pantallaListaAlumnos.setMaximumSize(400, 400)
+        self.layoutLista=qtw.QVBoxLayout()
+        
+        cursosAPasar = cursos[:-3]
+        for curso in cursosAPasar:
+            label=qtw.QLabel(curso)
+            self.layoutLista.addWidget(label)
+            cur.execute("SELECT NOMBRE_APELLIDO, DNI FROM ALUMNOS WHERE CURSO = ?", (curso,))
+            for i in cur.fetchall():
+                alumno=qtw.QCheckBox(f'{i[0]} DNI: {i[1]}')
+                alumno.setChecked(True)
+                self.layoutLista.addWidget(alumno)
+
+        # Se crea el boton de confirmar, y se le da la función de confirmarr.
+        confirmar = qtw.QPushButton("Confirmar")
+        confirmar.setObjectName("confirmar")
+        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        confirmar.clicked.connect(lambda: self.confirmarGrupal())
+
+        layoutMenuPase = qtw.QGridLayout()
+        layoutMenuPase.addWidget(titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(self.buscar, 1, 0)
+        layoutMenuPase.addWidget(icono,1,0)
+        layoutMenuPase.addWidget(self.pantallaListaAlumnos, 2, 0)
+        layoutMenuPase.addWidget(confirmar, 3, 0)
+        layoutMenuPase.addWidget(confirmar, 3, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+
+        # Se le da el layout a la ventana.
+        self.menuPase.setLayout(layoutMenuPase)
+        # Se muestra la ventana
+        self.menuPase.show()
+    
+    def buscarF(self):
+        for i in len(self.layoutLista.count()):
+            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
+                if self.buscar.text() not in self.layoutLista.itemAt(i).widget().text():
+                    self.layoutLista.itemAt(i).widget().hide()
+                elif self.buscar.text() in self.layoutLista.itemAt(i).widget() and self.layoutLista.itemAt(i).widget().isHidden():
+                    self.layoutLista.itemAt(i).widget().show()
+    
+    def confirmarGrupal(self):
+        for i in len(self.layoutLista.count()):
+            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
+                if self.layoutLista.itemAt(i).widget().isChecked():
+                    datalist = self.layoutLista.itemAt(i).widget().text().split(": ")
+                    dni=datalist[-1]
+                    cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (dni,))
+                    datos=cur.fetchall()
+                    cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
+                        datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
+                        dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
+                    ))
+                    cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+                    con.commit()
