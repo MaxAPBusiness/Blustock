@@ -27,7 +27,7 @@ cur=con.cursor()
 # Importamos las pantallas y el codigo de BD
 from db.db import crearBBDD
 from ui.cabecera import Cabecera
-from app_panol.inicio import Inicio
+from app_panol.ingreso_panol import Inicio
 
 # Se crea la base de datos
 crearBBDD()
@@ -41,15 +41,15 @@ class MainWindow(qtw.QMainWindow):
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
         cabecera=Cabecera()
         cabecera.setObjectName("cabecera")
-        self.inicio=Inicio()
+        self.ingreso_panol=Inicio()
         # Creamos la colección de pantallas
         stack = qtw.QStackedWidget()
 
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, cabecera)
 
-        self.inicio.confirmar.clicked.connect(lambda:self.confirmar())
+        self.ingreso_panol.confirmar.clicked.connect(lambda:self.confirmar())
         # Añadimos las pantallas a la colección
-        for i in [self.inicio]:
+        for i in [self.ingreso_panol]:
             stack.addWidget(i)
  
         # Añadimos la colección a la ventana
