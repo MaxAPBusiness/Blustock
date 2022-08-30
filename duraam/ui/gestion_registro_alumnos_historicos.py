@@ -334,14 +334,14 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         self.menuPase.show()
     
     def mostrarDatosPase(self, consulta="Normal"):
-        cursosPase=cursos[-3]
+        cursosPase=["7A", "7B"]
         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
         if consulta=="Buscar":
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
-            WHERE CURSO IN ?
+            WHERE CURSO IN (?, ?)
             AND NOMBRE_APELLIDO LIKE ?
             OR DNI LIKE ?
             OR CURSO LIKE ?
@@ -351,7 +351,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             cur.execute("""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
-            WHERE CURSO IN ?
+            WHERE CURSO IN (?, ?)
             ORDER BY CURSO, ID""", (cursosPase,))
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
@@ -374,34 +374,16 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
 
             self.tablaListaAlumnos.setRowHeight(i, 35)
     
-    def confirmarPase(self):
+    def confirmarGrupal(self):
         for i in range(self.tablaListaAlumnos.rowCount()):
             if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
-                curso=[int(self.tablaListaAlumnos.item(i, 3).text()[0]),
-                        self.tablaListaAlumnos.item(i, 3).text()[1]]
-                curso[0]+=1
-
-                cur.execute('UPDATE ALUMNOS SET CURSO=? WHERE DNI=?',
-                (f"{curso[0]}{curso[1]}", int(self.tablaListaAlumnos.item(i, 2).text())))
+                cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (int(self.tablaListaAlumnos.item(i, 2).text())))
+                datos=cur.fetchall()
+                cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
+                    datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
+                    dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
+                ))
+                cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
                 con.commit()
-        
-        self.mostrarDatos()
-        mostrarMensaje("Aviso", "Aviso", "El pase anual se ha realizado con éxito.")
-        self.menuPase.close()
-    
-    def confirmarGrupal(self):
-        for i in len(self.layoutLista.count()):
-            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
-                if self.layoutLista.itemAt(i).widget().isChecked():
-                    datalist = self.layoutLista.itemAt(i).widget().text().split(": ")
-                    dni=datalist[-1]
-                    cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (dni,))
-                    datos=cur.fetchall()
-                    cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
-                        datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
-                        dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
-                    ))
-                    cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
-                    con.commit()
 
         

@@ -433,25 +433,26 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         self.menuPase.show()
     
     def mostrarDatosPase(self, consulta="Normal"):
-        cursosPase=cursos[-3]
+        cursosPase=cursos[:-2]
+        print(cursosPase)
         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
         if consulta=="Buscar":
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            cur.execute(f"""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
-            WHERE CURSO IN ?
+            WHERE CURSO IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             AND NOMBRE_APELLIDO LIKE ?
             OR DNI LIKE ?
             OR CURSO LIKE ?
             ORDER BY CURSO, ID""", (cursosPase, self.buscar.text(), 
                             self.buscar.text(), self.buscar.text()))
         elif consulta=="Normal":
-            cur.execute("""
+            cur.execute(f"""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
-            WHERE CURSO IN ?
-            ORDER BY CURSO, ID""", (cursosPase,))
+            WHERE CURSO IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ORDER BY CURSO, ID""", cursosPase)
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
