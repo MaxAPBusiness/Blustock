@@ -111,13 +111,14 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
         layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.buscar, 1, 0)
+        layout.addWidget(self.buscar, 1, 0, 1, 2)
         layout.addWidget(icono,1,0)
-        layout.addWidget(self.label2, 1, 1)
+        layout.addWidget(self.label2, 1, 1, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.radio1, 1, 2)
-        layout.addWidget(self.radio2, 1, 3)
-        layout.addWidget(self.tabla, 2, 0, 1, 9)
+        layout.addWidget(self.radio2, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.tabla, 2, 0, 1, 7)
         layout.addWidget(self.botonPase, 3, 0)
+        layout.addWidget(self.botonPaseEgreso, 3, 1)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -146,7 +147,9 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             SELECT * FROM ALUMNOS_HISTORICOS 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
-            OR NOMBRE_APELLIDO LIKE ? 
+            OR NOMBRE_APELLIDO LIKE ?
+            OR CURSO LIKE ?
+            OR FECHA_SALIDA LIKE ? 
             OR EMAIL LIKE ? 
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
@@ -203,7 +206,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
 
         sugerenciasNombre=[]
 
-        cur.execute("SELECT NOMBRE FROM ALUMNOS")
+        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE CURSO IN ('7A', '7B')")
 
         for i in cur.fetchall():
             sugerenciasNombre.append(i[0])
@@ -244,7 +247,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         sugerenciasDNI=[]
 
         for i in cur.fetchall():
-            sugerenciasDNI.append(i[0])
+            sugerenciasDNI.append(str(i[0]))
 
         cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
         cuadroSugerenciasDNI.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -262,16 +265,15 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
                     datos[0][0], datos[0][1], datos[0][2], datos[0][3],
                     dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
             ))
-            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0]))
-
+            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+            con.commit()
             mostrarMensaje("Information", "Aviso",
-                        "Se ha pasado un alumno al registro histórico.")
-            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")    
+                        "Se ha pasado un alumno al registro histórico.")    
             #Se refrescan los datos.
             self.mostrarDatos()
             self.menuPase.close()
 
-    def realizarPaseGrupal(self):
+    def paseHistoricoGrupal(self):
         # Se crea el widget que va a funcionar como ventana.
         self.menuPase = qtw.QWidget()
         # Se le da el título a la ventana, que por defecto es agregar.
@@ -345,14 +347,14 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             AND NOMBRE_APELLIDO LIKE ?
             OR DNI LIKE ?
             OR CURSO LIKE ?
-            ORDER BY CURSO, ID""", (cursosPase, self.buscar.text(), 
-                            self.buscar.text(), self.buscar.text()))
+            ORDER BY CURSO, ID""", (cursosPase[0], cursosPase[1], 
+            self.buscar.text(), self.buscar.text(), self.buscar.text()))
         elif consulta=="Normal":
             cur.execute("""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
             WHERE CURSO IN (?, ?)
-            ORDER BY CURSO, ID""", (cursosPase,))
+            ORDER BY CURSO, ID""", (cursosPase[0], cursosPase[1],))
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")

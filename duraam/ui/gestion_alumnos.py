@@ -109,14 +109,14 @@ class GestionAlumnos(qtw.QWidget):
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
         layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.buscar, 1, 0, 1, 2)
+        layout.addWidget(self.buscar, 1, 0)
         layout.addWidget(icono,1,0)
-        layout.addWidget(self.label2, 1, 2)
-        layout.addWidget(self.radio1, 1, 3)
-        layout.addWidget(self.radio2, 1, 4)
-        layout.addWidget(self.tabla, 2, 0, 1, 9)
+        layout.addWidget(self.label2, 1, 1, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(self.radio1, 1, 2)
+        layout.addWidget(self.radio2, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.tabla, 2, 0, 1, 7)
         layout.addWidget(self.agregar, 3, 0)
-        layout.addWidget(self.paseAnual, 3, 1, alignment=qtc.Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.paseAnual, 3, 1)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -303,10 +303,11 @@ class GestionAlumnos(qtw.QWidget):
                 ))
                 cur.execute("""
                 UPDATE MOVIMIENTOS_HERRAMIENTAS
-                SET ID_ALUMNO=? WHERE ID_ALUMNO=?
-                """, (
-                    self.entry1.value(), datos[0],
-                ))
+                SET ID_PERSONA=? 
+                WHERE ROL=0 AND ID_PERSONA=?
+                """,
+                (self.entry1.value(), datos[0],)
+                )
                 cur.execute("""
                 UPDATE TURNO_PANOL
                 SET ID_ALUMNO=? WHERE ID_ALUMNO=?
@@ -351,7 +352,7 @@ class GestionAlumnos(qtw.QWidget):
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_ALUMNO=?', (idd,))
+            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
             if cur.fetchall():
                 resp=mostrarMensaje('Pregunta', 'Advertencia', '''
 El alumno tiene movimientos registrados. 
@@ -361,7 +362,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 ''')
             if resp == qtw.QMessageBox.StandardButton.Yes:
                 cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (idd,))
-                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_ALUMNO=?', (idd,))
+                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
                 cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
                 con.commit()
 
@@ -442,9 +443,9 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
             WHERE CURSO IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            AND NOMBRE_APELLIDO LIKE ?
+            AND (NOMBRE_APELLIDO LIKE ?
             OR DNI LIKE ?
-            OR CURSO LIKE ?
+            OR CURSO LIKE ?)
             ORDER BY CURSO, ID""", (cursosPase, self.buscar.text(), 
                             self.buscar.text(), self.buscar.text()))
         elif consulta=="Normal":

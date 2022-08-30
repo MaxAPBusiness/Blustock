@@ -88,10 +88,10 @@ class MainWindow(qtw.QMainWindow):
         self.solicitudes= Solicitudes()
 
         # Añadimos las pantallas a la colección
-        pantallas = [self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos,
+        self.pantallas = [self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos,
                      self.turnos, self.alumnos, self.profesores, self.grupos, self.subgrupos,
                      self.alumnosHistoricos, self.profesoresHistoricos, self.solicitudes]
-        for i in pantallas:
+        for i in self.pantallas:
             self.stack.addWidget(i)
 
         self.iniciarSesion.registrarse.clicked.connect(lambda: self.stack.setCurrentIndex(1))
@@ -102,21 +102,25 @@ class MainWindow(qtw.QMainWindow):
             lambda: self.stack.setCurrentIndex(0))
         self.registrarse.confirmar.clicked.connect(lambda: self.registrar())
 
-        self.menuIzquierdo.gestion1.toggled.connect(lambda: self.stack.setCurrentIndex(2))
-        self.menuIzquierdo.gestion2.toggled.connect(lambda: self.stack.setCurrentIndex(3))
-        self.menuIzquierdo.gestion3.toggled.connect(lambda: self.stack.setCurrentIndex(4))
-        self.menuIzquierdo.gestion4.toggled.connect(lambda: self.stack.setCurrentIndex(5))
-        self.menuIzquierdo.gestion5.toggled.connect(lambda: self.stack.setCurrentIndex(6))
-        self.menuIzquierdo.gestion6.toggled.connect(lambda: self.stack.setCurrentIndex(7))
-        self.menuIzquierdo.gestion7.toggled.connect(lambda: self.stack.setCurrentIndex(8))
-        self.menuIzquierdo.gestion8.toggled.connect(lambda: self.stack.setCurrentIndex(9))
-        self.menuIzquierdo.gestion9.toggled.connect(lambda: self.stack.setCurrentIndex(10))
-        self.menuIzquierdo.gestion10.toggled.connect(lambda: self.stack.setCurrentIndex(11))
+        self.menuIzquierdo.gestion1.toggled.connect(lambda: self.cambiarPantalla(2))
+        self.menuIzquierdo.gestion2.toggled.connect(lambda: self.cambiarPantalla(3))
+        self.menuIzquierdo.gestion3.toggled.connect(lambda: self.cambiarPantalla(4))
+        self.menuIzquierdo.gestion4.toggled.connect(lambda: self.cambiarPantalla(5))
+        self.menuIzquierdo.gestion5.toggled.connect(lambda: self.cambiarPantalla(6))
+        self.menuIzquierdo.gestion6.toggled.connect(lambda: self.cambiarPantalla(7))
+        self.menuIzquierdo.gestion7.toggled.connect(lambda: self.cambiarPantalla(8))
+        self.menuIzquierdo.gestion8.toggled.connect(lambda: self.cambiarPantalla(9))
+        self.menuIzquierdo.gestion9.toggled.connect(lambda: self.cambiarPantalla(10))
+        self.menuIzquierdo.gestion10.toggled.connect(lambda: self.cambiarPantalla(11))
         # Añadimos la colección a la ventana
         self.setCentralWidget(self.stack)
         self.stack.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding,)
 
+    def cambiarPantalla(self, nro):
+        self.pantallas[nro].mostrarDatos()
+        self.stack.setCurrentIndex(nro)
+    
     def closeEvent(self, event):
         global app
         app.closeAllWindows()

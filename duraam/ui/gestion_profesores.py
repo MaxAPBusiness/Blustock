@@ -37,7 +37,7 @@ class GestionProfesores(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID","DNI","Nombre y Apellido", "Email", ""]      
+        self.campos = ["ID","DNI","Nombre y Apellido", "Email", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -170,6 +170,15 @@ class GestionProfesores(qtw.QWidget):
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 4, botonEditar)
+
+            botonEliminar = qtw.QPushButton()
+            botonEliminar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
+            botonEliminar.setObjectName("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, 6, botonEliminar)
 
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
@@ -305,6 +314,23 @@ class GestionProfesores(qtw.QWidget):
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute('SELECT * FROM TURNO_PANOL WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            turno=cur.fetchall()
+
+            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            if cur.fetchall():
+                resp = mostrarMensaje('Pregunta', 'Advertencia', 
+                """
+El profesor tiene turnos y/o movimientos registrados. 
+Es recomendable que lo pase a registro histórico, quedando
+eliminado de profesores vigentes pero su información relacionada
+y sus datos siguen registrados en la base de datos. Eliminarlo 
+eliminará toda la información relacionada, como sus turnos y sus movimientos.
+¿Está seguro que desea continuar y eliminar la información relacionada?
+                """
+                )
+        
+        if resp == qtw.QMessageBox.StandardButton.Yes:
             cur.execute('DELETE FROM PROFESORES WHERE ID=?', (idd,))
             con.commit()
 

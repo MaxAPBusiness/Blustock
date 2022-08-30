@@ -184,9 +184,9 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         self.menuPase.setWindowTitle("Realizar Pase Histórico Individual de Profesores")
         self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
-        titulo=qtw.QLabel("Ingresa al alumno que quieres pasar a histórico")
+        titulo=qtw.QLabel("Ingresa al profesor que quieres pasar a histórico")
         titulo.setObjectName("subtitulo")
-        label1=qtw.QLabel("Nombre del Alumno: ")
+        label1=qtw.QLabel("Nombre del Profesor: ")
         label2=qtw.QLabel("DNI: ")
         
         # Crea los entries. 
@@ -195,7 +195,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
 
         sugerenciasNombre=[]
 
-        cur.execute("SELECT NOMBRE FROM PROFESORES")
+        cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
 
         for i in cur.fetchall():
             sugerenciasNombre.append(i[0])
@@ -236,7 +236,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         sugerenciasDNI=[]
 
         for i in cur.fetchall():
-            sugerenciasDNI.append(i[0])
+            sugerenciasDNI.append(str(i[0]))
 
         cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
         cuadroSugerenciasDNI.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -247,15 +247,13 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         global mostrarMensaje
         cur.execute("SELECT * FROM PROFESORES WHERE DNI=?",(self.entry2.text(),))
         datos=cur.fetchall()
-        cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
-                datos[0][0], datos[0][1], datos[0][2], datos[0][3],
-                dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
-        ))
+        cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
+                datos[0][0], datos[0][1], datos[0][2], dt.date.today().strftime('%Y/%m/%d'),
+                                                                            datos[0][3],))
         cur.execute('DELETE FROM PROFESORES WHERE ID=?', (datos[0][0], ))
-
+        con.commit()
         mostrarMensaje("Information", "Aviso",
-                    "Se ha pasado un alumno al registro histórico.")
-        mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")    
+                    "Se ha pasado un alumno al registro histórico.")  
         #Se refrescan los datos.
         self.mostrarDatos()
         self.menuPase.close()

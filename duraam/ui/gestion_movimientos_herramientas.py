@@ -37,7 +37,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "Herramienta", "Alumno", "Fecha", "Cantidad", 
+        self.campos = ["ID", "Herramienta", "Nombre y Apellido", "Tipo", "Fecha", "Cantidad", 
                         "Tipo", "Turno de Pañol", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
@@ -128,12 +128,18 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
-            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA, 
+            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
-            WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
             AND (H.DESC_LARGA LIKE ? 
-            OR A.NOMBRE_APELLIDO LIKE ? 
+            OR NOMBRE LIKE ? 
             OR M.ID LIKE ?
             OR M.FECHA LIKE ? 
             OR M.CANTIDAD LIKE ? 
@@ -142,34 +148,62 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Herramienta":
             cur.execute("""
-            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
-            WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY H.DESC_LARGA
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
+            ORDER BY H.DESC_LARGA
             """)
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Alumno":
             cur.execute("""
-            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
-            WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY A.NOMBRE_APELLIDO
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
+            ORDER BY H.DESC_LARGA
             """)
         # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Fecha":
             cur.execute("""
-            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
-            WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID ORDER BY M.FECHA
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
+            ORDER BY H.DESC_LARGA
             """)
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute("""
-            SELECT M.ID, H.DESC_LARGA, A.NOMBRE_APELLIDO,
+            SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
             M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M, HERRAMIENTAS H, ALUMNOS A
-            WHERE M.ID_HERRAMIENTA = H.ID AND M.ID_ALUMNO = A.ID
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
+            ORDER BY H.DESC_LARGA
             """)
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
@@ -408,7 +442,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             cur.execute("""
             UPDATE MOVIMIENTOS_HERRAMIENTAS
             SET ID_HERRAMIENTA=?,
-            ID_ALUMNO=?,
+            ID_PERSONA=?,
+            TIPO=?,
             FECHA=?,
             CANTIDAD=?,
             TIPO=?,
@@ -425,7 +460,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
-            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?)", (
+            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", (
                 herramienta[0][0], alumno[0][0], fecha, self.entry4.text(), self.tipo, turnoPanol[0][0],
             ))
             con.commit()
