@@ -282,6 +282,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasAlumnos)
         
+        self.radio1 = qtw.QRadioButton("Alumno")
+        self.radio2 = qtw.QRadioButton("Profesor")
+
         self.entry3Dia = qtw.QSpinBox()
         self.entry3Mes = qtw.QSpinBox()
         self.entry3Año = qtw.QSpinBox()
@@ -290,8 +293,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry3Año.setMaximum(2022)
 
         self.entry4 = qtw.QSpinBox()
-        self.radio1 = qtw.QRadioButton("Retiro")
-        self.radio2 = qtw.QRadioButton("Devolución")
+        self.radio3 = qtw.QRadioButton("Retiro")
+        self.radio4 = qtw.QRadioButton("Devolución")
 
         self.tipo=""
         self.radio1.toggled.connect(lambda: self.cambiarTipo("Retiro"))
@@ -339,15 +342,17 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
         layoutEditar.addWidget(self.entry1, 0, 1, 1, 5)
         layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
-        layoutEditar.addWidget(self.entry3Dia, 2, 1, 1, 1)
-        layoutEditar.addWidget(qtw.QLabel("/"), 2, 2, 1, 1)
-        layoutEditar.addWidget(self.entry3Mes, 2, 3, 1, 1)
-        layoutEditar.addWidget(qtw.QLabel("/"), 2, 4, 1, 1)
-        layoutEditar.addWidget(self.entry3Año, 2, 5, 1, 1)
-        layoutEditar.addWidget(self.entry4, 3, 1, 1, 5)
-        layoutEditar.addWidget(self.radio1, 4, 1, 1, 2)
-        layoutEditar.addWidget(self.radio2, 4, 2, 1, 2)
-        layoutEditar.addWidget(self.entry6, 5, 1, 1, 5)
+        layoutEditar.addWidget(self.radio1, 2, 1, 1, 2)
+        layoutEditar.addWidget(self.radio2, 2, 2, 1, 2)        
+        layoutEditar.addWidget(self.entry3Dia, 3, 1, 1, 1)
+        layoutEditar.addWidget(qtw.QLabel("/"), 3, 2, 1, 1)
+        layoutEditar.addWidget(self.entry3Mes, 3, 3, 1, 1)
+        layoutEditar.addWidget(qtw.QLabel("/"), 3, 4, 1, 1)
+        layoutEditar.addWidget(self.entry3Año, 3, 5, 1, 1)
+        layoutEditar.addWidget(self.entry4, 4, 1, 1, 5)
+        layoutEditar.addWidget(self.radio3, 5, 1, 1, 2)
+        layoutEditar.addWidget(self.radio4, 5, 2, 1, 2)
+        layoutEditar.addWidget(self.entry6, 6, 1, 1, 5)
 
         entries=[self.entry1, self.entry2, self.entry4, self.entry6]
         for i in entries:
