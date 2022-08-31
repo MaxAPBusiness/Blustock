@@ -305,9 +305,5 @@ class GestionSubgrupos(qtw.QWidget):
             cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
             cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
             con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
+            self.mostrarDatos()
 

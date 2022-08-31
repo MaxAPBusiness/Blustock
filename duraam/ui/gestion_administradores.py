@@ -22,14 +22,14 @@ cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
-class Solicitudes(qtw.QWidget):
+class GestionDeAdministradores(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
         # Se inicializa la clase QWidget.
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("Solicitudes de usuario")
+        self.titulo=qtw.QLabel("Gestión de usuarios")
         self.titulo.setObjectName("titulo")
 
         # Se crea la tabla.
@@ -71,7 +71,7 @@ class Solicitudes(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM SOLICITUDES WHERE ESTADO="Pendiente"')
+        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM USUARIOS')
         # Se guarda la consulta en una variable.
         query = cur.fetchall()
 
@@ -88,48 +88,43 @@ class Solicitudes(qtw.QWidget):
             self.tabla.setRowHeight(i, 35)
 
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonAceptar = qtw.QPushButton()
-            botonAceptar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/aceptar.png")))
-            botonAceptar.setIconSize(qtc.QSize(25, 25))
-            botonAceptar.setObjectName("aceptar")
+            botonHacerAdmin = qtw.QPushButton()
+            botonHacerAdmin.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/ascender.png")))
+            botonHacerAdmin.setIconSize(qtc.QSize(25, 25))
+            botonHacerAdmin.setObjectName("aceptar")
 
-            botonAceptar.clicked.connect(lambda: self.aceptar(query[i][0]))
-            botonAceptar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-2, botonAceptar)
+            botonHacerAdmin.clicked.connect(lambda: self.hacerAdmin(query[i][0]))
+            botonHacerAdmin.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, len(self.campos)-2, botonHacerAdmin)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonRechazar = qtw.QPushButton()
-            botonRechazar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/rechazar.png")))
-            botonRechazar.setIconSize(qtc.QSize(25, 25))
-            botonRechazar.setObjectName("rechazar")
-            botonRechazar.clicked.connect(lambda: self.rechazar(query[i][0]))
-            botonRechazar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-1, botonRechazar)
+            botonEliminar = qtw.QPushButton()
+            botonEliminar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
+            botonEliminar.setObjectName("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
-    def aceptar(self, idd):
-                # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
-        # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-'¿Está seguro que desea aceptar la solicitud? El usuario podrá acceder a todas las bases de datos.')
-        if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM SOLICITUDES WHERE USUARIO=?", (idd,)) 
-            datos=cur.fetchall()
-            cur.execute('INSERT INTO USUARIOS VALUES (NULL, ?, ?, ?)', datos[0])
-            cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
-            con.commit()
-            self.mostrarDatos()
+    def hacerAdmin(self, idd):
+        cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
+        datos=cur.fetchall()
+        cur.execute('INSERT INTO ADMINISTRADORES VALUES (NULL, ?, ?, ?)', datos[0])
+        cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
+        con.commit()
+        self.mostrarDatos()
 
-    def rechazar(self, idd):
+    def eliminar(self, idd):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea rechazar la solicitud?')
+                '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute('UPDATE SOLICITUDES SET ESTADO="Rechazado" WHERE USUARIO=?', (idd,))
+            # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
             con.commit()
             self.mostrarDatos()

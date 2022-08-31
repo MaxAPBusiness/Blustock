@@ -333,11 +333,7 @@ eliminará toda la información relacionada, como sus turnos y sus movimientos.
         if resp == qtw.QMessageBox.StandardButton.Yes:
             cur.execute('DELETE FROM PROFESORES WHERE ID=?', (idd,))
             con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
+            self.mostrarDatos()
 
     # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
     # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
