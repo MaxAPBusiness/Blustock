@@ -29,7 +29,7 @@ class GestionDeAdministradores(qtw.QWidget):
         super().__init__()
 
         # Se crea el título.
-        self.titulo=qtw.QLabel("Gestión de usuarios")
+        self.titulo=qtw.QLabel("Gestión de administradores")
         self.titulo.setObjectName("titulo")
 
         # Se crea la tabla.
@@ -71,7 +71,7 @@ class GestionDeAdministradores(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM USUARIOS')
+        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM ADMINISTRADORES')
         # Se guarda la consulta en una variable.
         query = cur.fetchall()
 
