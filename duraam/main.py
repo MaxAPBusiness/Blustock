@@ -1,3 +1,24 @@
+#Para ahorrar selfs, pasa los datos como argumentos en vez de hacerlos globales
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # main.py: es el archivo principal, que ensambla todo el código y lo ejecuta.
 # Lo que hace, en detalle, lo siguiente:
 # 1. Crea la base de datos (si no estaba creada antes) con la función crearBBDD de db.py.

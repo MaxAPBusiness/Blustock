@@ -365,11 +365,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
                 cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
                 cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
                 con.commit()
-
-            #elimina la fila de la tabla de la ui.
-                boton = qtw.QApplication.focusWidget()
-                i = self.tabla.indexAt(boton.pos())
-                self.tabla.removeRow(i.row())
+                self.mostrarDatos()
 
     def realizarPaseAnual(self):
         # Se crea el widget que va a funcionar como ventana.

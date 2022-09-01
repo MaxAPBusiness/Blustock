@@ -181,6 +181,40 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
 
             self.tabla.setRowHeight(i, 35)
+        
+            botonEliminar = qtw.QPushButton()
+            botonEliminar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
+            botonEliminar.setObjectName("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
+    
+    def eliminar(self, idd):
+        # se obtiene la función definida fuera de la clase.
+        global mostrarMensaje
+        # se le pregunta al usuario si desea eliminar la fila.
+        resp = mostrarMensaje('Pregunta', 'Advertencia',
+                              '¿Está seguro que desea eliminar estos datos?')
+        # si pulsó el boton de sí:
+        if resp == qtw.QMessageBox.StandardButton.Yes:
+            # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+            if cur.fetchall():
+                resp=mostrarMensaje('Pregunta', 'Advertencia', '''
+El alumno tiene movimientos registrados. 
+Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
+por lo que sus registros de deudas se eliminarán y podría perderse información valiosa.
+
+¿Desea eliminarlo de todas formas?
+''')
+            if resp == qtw.QMessageBox.StandardButton.Yes:
+                cur.execute('DELETE FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
+                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+                cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
+                con.commit()
+                self.mostrarDatos()
 
 
     # Función paseHistorico: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.

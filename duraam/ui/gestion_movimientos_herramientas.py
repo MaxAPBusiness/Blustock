@@ -37,7 +37,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "Herramienta", "Nombre y Apellido", "Tipo", "Fecha", "Cantidad", 
+        self.campos = ["ID", "Herramienta", "Nombre y Apellido", "Clase", "Fecha", "Cantidad", 
                         "Tipo", "Turno de Pañol", "", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
@@ -129,8 +129,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA, 
-            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
@@ -143,14 +143,14 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             OR M.ID LIKE ?
             OR M.FECHA LIKE ? 
             OR M.CANTIDAD LIKE ? 
-            OR M.TIPO LIKE ? 
+            OR M.CLASE LIKE ? 
             OR M.ID_TURNO_PANOL LIKE ?)""", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Herramienta":
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
@@ -164,8 +164,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         elif consulta=="Alumno":
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
@@ -179,8 +179,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         elif consulta=="Fecha":
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
@@ -194,8 +194,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         elif consulta=="Normal":
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.TIPO = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
@@ -281,10 +281,11 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         cuadroSugerenciasAlumnos=qtw.QCompleter(sugerenciasAlumnos, self)
         cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasAlumnos)
-        
         self.radio1 = qtw.QRadioButton("Alumno")
         self.radio2 = qtw.QRadioButton("Profesor")
-
+        agruparClase=qtw.QButtonGroup()
+        agruparClase.addButton(self.radio1)
+        agruparClase.addButton(self.radio2)
         self.entry3Dia = qtw.QSpinBox()
         self.entry3Mes = qtw.QSpinBox()
         self.entry3Año = qtw.QSpinBox()
@@ -295,14 +296,23 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry4 = qtw.QSpinBox()
         self.radio3 = qtw.QRadioButton("Retiro")
         self.radio4 = qtw.QRadioButton("Devolución")
+        agruparTipo=qtw.QButtonGroup()
+        agruparTipo.addButton(self.radio3)
+        agruparTipo.addButton(self.radio4)
 
-        self.tipo=""
-        self.radio1.toggled.connect(lambda: self.cambiarTipo("Retiro"))
-        self.radio2.toggled.connect(lambda: self.cambiarTipo("Devolucion"))
+        self.clase=0
+        self.tipo=0
+        self.radio1.toggled.connect(lambda: self.cambiarClase("Alumno"))
+        self.radio2.toggled.connect(lambda: self.cambiarClase("Profesor"))
+        self.radio3.toggled.connect(lambda: self.cambiarTipo("Retiro"))
+        self.radio4.toggled.connect(lambda: self.cambiarTipo("Devolucion"))
+        self.radio1.toggle()
+        self.radio3.toggle()
 
         self.radio1.setObjectName("tipo")
         self.radio2.setObjectName("tipo")
-        
+        self.radio3.setObjectName("tipo")
+        self.radio4.setObjectName("tipo")
         self.entry6 = qtw.QSpinBox()
         self.entry4.setMaximum(9999)
         self.entry6.setMaximum(9999)
@@ -328,22 +338,26 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # Se les añade a los entries sus valores por defecto.
             self.entry1.setText(datos[1])
             self.entry2.setText(datos[2])
-            fecha=datos[3].split("/")
+            if datos[3]:
+                self.radio2.toggle()
+            else:
+                self.radio1.toggle()
+            fecha=datos[4].split("/")
             self.entry3Dia.setValue(int(fecha[2]))
             self.entry3Mes.setValue(int(fecha[1]))
             self.entry3Año.setValue(int(fecha[0]))
-            self.entry4.setValue(int(datos[4]))
-            if datos[5] == "Retiro":
-                self.radio1.toggle()
-            else:
+            self.entry4.setValue(int(datos[5]))
+            if datos[6]:
                 self.radio2.toggle()
+            else:
+                self.radio1.toggle()
             self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
         layoutEditar.addWidget(self.entry1, 0, 1, 1, 5)
         layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
         layoutEditar.addWidget(self.radio1, 2, 1, 1, 2)
-        layoutEditar.addWidget(self.radio2, 2, 2, 1, 2)        
+        layoutEditar.addWidget(self.radio2, 2, 2, 1, 2)
         layoutEditar.addWidget(self.entry3Dia, 3, 1, 1, 1)
         layoutEditar.addWidget(qtw.QLabel("/"), 3, 2, 1, 1)
         layoutEditar.addWidget(self.entry3Mes, 3, 3, 1, 1)
@@ -373,11 +387,17 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Se muestra la ventana
         self.edita.show()
 
+    def cambiarClase(self, clase):
+        if clase=="Alumno":
+            self.clase=0
+        elif clase=="Profesor":
+            self.clase=1
+    
     def cambiarTipo(self, tipo):
         if tipo=="Retiro":
-            self.tipo="Retiro"
+            self.tipo=0
         elif tipo=="Devolucion":
-            self.tipo="Devolución"
+            self.tipo=1
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
@@ -396,19 +416,34 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             "La herramienta no esta ingresada. Por favor, verifique que la herramienta ingresada es correcta.")
             return
         
-        cur.execute("""
-        SELECT ID
-        FROM ALUMNOS
-        WHERE NOMBRE_APELLIDO=?
-        LIMIT 1
-        """, (self.entry2.text().upper(),))
+        if self.clase:
+            cur.execute("""
+            SELECT ID
+            FROM PROFESORES
+            WHERE NOMBRE_APELLIDO=?
+            LIMIT 1
+            """, (self.entry2.text().upper(),))
 
-        alumno=cur.fetchall()
+            profesor=cur.fetchall()
 
-        if not alumno:
-            mostrarMensaje("Error", "Error", 
-            "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
-            return
+            if not profesor:
+                mostrarMensaje("Error", "Error", 
+                "El profesor no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
+                return
+        else:
+            cur.execute("""
+            SELECT ID
+            FROM ALUMNOS
+            WHERE NOMBRE_APELLIDO=?
+            LIMIT 1
+            """, (self.entry2.text().upper(),))
+
+            alumno=cur.fetchall()
+
+            if not alumno:
+                mostrarMensaje("Error", "Error", 
+                "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
+                return
         
         cur.execute("""
         SELECT ID
@@ -448,14 +483,14 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             UPDATE MOVIMIENTOS_HERRAMIENTAS
             SET ID_HERRAMIENTA=?,
             ID_PERSONA=?,
-            TIPO=?,
+            CLASE=?,
             FECHA=?,
             CANTIDAD=?,
             TIPO=?,
             ID_TURNO_PANOL=?
             WHERE ID=?
             """, (
-                herramienta[0][0], alumno[0][0], fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
+                herramienta[0][0], alumno[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
             ))
 
             con.commit()
@@ -491,11 +526,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
             con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
+            self.mostrarDatos()
 
     # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
     # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.

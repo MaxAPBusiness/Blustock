@@ -307,9 +307,5 @@ Eliminar el grupo eliminará también TODOS los datos en los que está ingresado
                 cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
                 cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
                 con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
+                self.mostrarDatos()
 

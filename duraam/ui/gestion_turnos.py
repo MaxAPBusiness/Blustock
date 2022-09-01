@@ -508,11 +508,7 @@ class GestionTurnos(qtw.QWidget):
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM TURNO_PANOL WHERE ID=?', (idd,))
             con.commit()
-
-            #elimina la fila de la tabla de la ui.
-            boton = qtw.QApplication.focusWidget()
-            i = self.tabla.indexAt(boton.pos())
-            self.tabla.removeRow(i.row())
+            self.mostrarDatos()
 
     # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
     # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
