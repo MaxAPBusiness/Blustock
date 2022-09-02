@@ -88,15 +88,15 @@ class GestionDeAdministradores(qtw.QWidget):
             self.tabla.setRowHeight(i, 35)
 
             # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonHacerAdmin = qtw.QPushButton()
-            botonHacerAdmin.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/ascender.png")))
-            botonHacerAdmin.setIconSize(qtc.QSize(25, 25))
-            botonHacerAdmin.setObjectName("aceptar")
+            botonDegradar = qtw.QPushButton()
+            botonDegradar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/degradar.png")))
+            botonDegradar.setIconSize(qtc.QSize(25, 25))
+            botonDegradar.setObjectName("aceptar")
 
-            botonHacerAdmin.clicked.connect(lambda: self.hacerAdmin(query[i][0]))
-            botonHacerAdmin.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-2, botonHacerAdmin)
+            botonDegradar.clicked.connect(lambda: self.degradar())
+            botonDegradar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, len(self.campos)-2, botonDegradar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
@@ -104,19 +104,30 @@ class GestionDeAdministradores(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
             botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.clicked.connect(lambda: self.eliminar())
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
-    def hacerAdmin(self, idd):
-        cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
-        datos=cur.fetchall()
-        cur.execute('INSERT INTO ADMINISTRADORES VALUES (NULL, ?, ?, ?)', datos[0])
-        cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
-        con.commit()
-        self.mostrarDatos()
+    def degradar(self):
+            # se obtiene la función definida fuera de la clase.
+        global mostrarMensaje
+        # se le pregunta al usuario si desea eliminar la fila.
+        resp = mostrarMensaje('Pregunta', 'Advertencia',
+                '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
+        # si pulsó el boton de sí:
+        if resp == qtw.QMessageBox.StandardButton.Yes:    
+            botonClickeado = qtw.QApplication.focusWidget()
+                # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
+            cur.execute("SELECT * FROM ADMINISTRADORES WHERE USUARIO=?", (idd,)) 
+            datos=cur.fetchall()
+            cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
+            cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
+            con.commit()
+            self.mostrarDatos()
 
-    def eliminar(self, idd):
+    def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
@@ -124,6 +135,10 @@ class GestionDeAdministradores(qtw.QWidget):
                 '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
             con.commit()

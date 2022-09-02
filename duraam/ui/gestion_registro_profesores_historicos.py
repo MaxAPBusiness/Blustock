@@ -170,6 +170,15 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
 
             self.tabla.setRowHeight(i, 35)
+            
+            botonEliminar = qtw.QPushButton()
+            botonEliminar.setIcon(qtg.QIcon(
+                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
+            botonEliminar.setIconSize(qtc.QSize(25, 25))
+            botonEliminar.setObjectName("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar())
+            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+            self.tabla.setCellWidget(i, 5, botonEliminar)
 
 
     # Función paseHistorico: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
@@ -257,3 +266,35 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         #Se refrescan los datos.
         self.mostrarDatos()
         self.menuPase.close()
+    
+    def eliminar(self):
+        # se obtiene la función definida fuera de la clase.
+        global mostrarMensaje
+        # se le pregunta al usuario si desea eliminar la fila.
+        resp = mostrarMensaje('Pregunta', 'Advertencia',
+                              '¿Está seguro que desea eliminar estos datos?')
+        # si pulsó el boton de sí:
+        if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
+            # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute('SELECT * FROM TURNO_PANOL WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            turno=cur.fetchall()
+
+            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            if cur.fetchall():
+                resp = mostrarMensaje('Pregunta', 'Advertencia', 
+                """
+El profesor tiene turnos y/o movimientos registrados. 
+Eliminarlo eliminará toda la información relacionada, 
+como sus turnos y sus movimientos.
+¿Está seguro que desea continuar y eliminar la información relacionada?
+                """
+                )
+        
+        if resp == qtw.QMessageBox.StandardButton.Yes:
+            cur.execute('DELETE FROM PROFESORES_HISTORICOS WHERE ID=?', (idd,))
+            con.commit()
+            self.mostrarDatos()

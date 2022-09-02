@@ -94,7 +94,7 @@ class GestionDeUsuarios(qtw.QWidget):
             botonHacerAdmin.setIconSize(qtc.QSize(25, 25))
             botonHacerAdmin.setObjectName("aceptar")
 
-            botonHacerAdmin.clicked.connect(lambda: self.hacerAdmin(query[i][0]))
+            botonHacerAdmin.clicked.connect(lambda: self.hacerAdmin())
             botonHacerAdmin.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonHacerAdmin)
 
@@ -104,19 +104,29 @@ class GestionDeUsuarios(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
             botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.clicked.connect(lambda: self.eliminar())
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
-    def hacerAdmin(self, idd):
-        cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
-        datos=cur.fetchall()
-        cur.execute('INSERT INTO ADMINISTRADORES VALUES (NULL, ?, ?, ?)', datos[0])
-        cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
-        con.commit()
-        self.mostrarDatos()
+    def hacerAdmin(self):
+        global mostrarMensaje
+        # se le pregunta al usuario si desea eliminar la fila.
+        resp = mostrarMensaje('Pregunta', 'Advertencia',
+                              '¿Está seguro que desea eliminar estos datos?')
+        # si pulsó el boton de sí:
+        if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
+            cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
+            datos=cur.fetchall()
+            cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos[0])
+            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[0][1],))
+            con.commit()
+            self.mostrarDatos()
 
-    def eliminar(self, idd):
+    def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
@@ -124,6 +134,10 @@ class GestionDeUsuarios(qtw.QWidget):
                 '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
             con.commit()

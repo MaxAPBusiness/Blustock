@@ -6,6 +6,7 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
+from pickle import TRUE
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
@@ -72,9 +73,13 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
+        self.grupo1 = qtw.QButtonGroup(self)
         self.radio1 = qtw.QRadioButton("Herramienta")
         self.radio2 = qtw.QRadioButton("Alumno")
         self.radio3 = qtw.QRadioButton("Fecha")
+        self.grupo1.addButton(self.radio1)
+        self.grupo1.addButton(self.radio2)
+        self.grupo1.addButton(self.radio3)
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
         self.radio3.setObjectName("Radio3")
@@ -82,6 +87,33 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.radio1.toggled.connect(lambda: self.mostrarDatos("Herramienta"))
         self.radio2.toggled.connect(lambda: self.mostrarDatos("Alumno"))
         self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
+
+        self.label3=qtw.QLabel("Persona: ")
+        self.alumno=qtw.QComboBox()
+        self.alumno.addItem("Todos")
+
+        self.label4=qtw.QLabel("Desde: ")
+        self.date1=qtw.QDateEdit()
+
+        self.label5=qtw.QLabel("Hasta: ")
+        self.date2=qtw.QDateEdit()
+        
+        self.label6=qtw.QLabel("Herramienta: ")
+        self.herramienta=qtw.QComboBox()
+        self.herramienta.addItem("Todas")
+
+        self.label7=qtw.QLabel("Estado: ")
+        self.grupo2=qtw.QButtonGroup(self)
+        self.retiro=qtw.QRadioButton("Retiro")
+        self.devolucion=qtw.QRadioButton("Devolución")
+        self.grupo2.addButton(self.retiro)
+        self.grupo2.addButton(self.devolucion)
+
+        self.container1=qtw.QWidget()
+        self.container1Layout=qtw.QGridLayout()
+        self.container2=qtw.QWidget()
+        self.container2Layout=qtw.QHBoxLayout()
+
 
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
@@ -93,16 +125,33 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
-        layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.buscar, 1, 0)
-        layout.addWidget(icono,1,0)
-        layout.addWidget(self.label2, 1, 1)
-        layout.addWidget(self.radio1, 1, 2)
-        layout.addWidget(self.radio2, 1, 3)
-        layout.addWidget(self.radio3, 1, 4)
-        layout.addWidget(self.tabla, 2, 0, 1, 9)
-        layout.addWidget(self.agregar, 3, 0)
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self.titulo)
+
+        self.container1Layout.addWidget(self.buscar, 0, 0)
+        self.container1Layout.addWidget(icono, 0, 0)
+        self.container1Layout.addWidget(self.label2, 0, 1)
+        self.container1Layout.addWidget(self.radio2, 0, 2)
+        self.container1Layout.addWidget(self.radio3, 0, 3)
+        self.container1.setLayout(self.container1Layout)
+        layout.addWidget(self.container1)
+
+        self.container2Layout.addWidget(self.label3)
+        self.container2Layout.addWidget(self.alumno)
+        self.container2Layout.addWidget(self.label4)
+        self.container2Layout.addWidget(self.date1)
+        self.container2Layout.addWidget(self.label5)
+        self.container2Layout.addWidget(self.date2)
+        self.container2Layout.addWidget(self.label6)
+        self.container2Layout.addWidget(self.herramienta)
+        self.container2Layout.addWidget(self.label7)
+        self.container2Layout.addWidget(self.retiro)
+        self.container2Layout.addWidget(self.devolucion)
+        self.container2.setLayout(self.container2Layout)
+        layout.addWidget(self.container2)
+
+        layout.addWidget(self.tabla)
+        layout.addWidget(self.agregar)
 
         # Se le da el layout al widget central
         self.setLayout(layout)
@@ -238,7 +287,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
             botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.clicked.connect(lambda: self.eliminar())
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 8, botonEliminar)
 
@@ -283,9 +332,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry2.setCompleter(cuadroSugerenciasAlumnos)
         self.radio1 = qtw.QRadioButton("Alumno")
         self.radio2 = qtw.QRadioButton("Profesor")
-        agruparClase=qtw.QButtonGroup()
-        agruparClase.addButton(self.radio1)
-        agruparClase.addButton(self.radio2)
+        agruparClase=qtw.QButtonGroup(self)
+        agruparClase.addButton(self.radio1, 0)
+        agruparClase.addButton(self.radio2, 1)
         self.entry3Dia = qtw.QSpinBox()
         self.entry3Mes = qtw.QSpinBox()
         self.entry3Año = qtw.QSpinBox()
@@ -296,9 +345,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry4 = qtw.QSpinBox()
         self.radio3 = qtw.QRadioButton("Retiro")
         self.radio4 = qtw.QRadioButton("Devolución")
-        agruparTipo=qtw.QButtonGroup()
-        agruparTipo.addButton(self.radio3)
-        agruparTipo.addButton(self.radio4)
+        agruparTipo=qtw.QButtonGroup(self)
+        agruparTipo.addButton(self.radio3, 0)
+        agruparTipo.addButton(self.radio4, 1)
 
         self.clase=0
         self.tipo=0
@@ -515,7 +564,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
-    def eliminar(self, idd):
+    def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
@@ -523,6 +572,10 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                               '¿Está seguro que desea eliminar estos datos?')
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
             con.commit()

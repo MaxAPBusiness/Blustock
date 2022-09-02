@@ -24,26 +24,33 @@ class MenuIzquierdo(qtw.QToolBar):
         self.gestion7=qtw.QRadioButton('GESTIÓN DE SUBGRUPOS')
         self.gestion8=qtw.QRadioButton('GESTIÓN DE ALUMNOS\nHISTÓRICOS')
         self.gestion9=qtw.QRadioButton('GESTIÓN DE PROFESORES\nHISTÓRICOS')
-        self.gestion10=qtw.QRadioButton('SOLICITUDES')
+        self.gestion10=qtw.QRadioButton('GESTIÓN DE SOLICITUDES')
+        self.gestion11=qtw.QRadioButton('GESTIÓN DE USUARIOS')
+        self.gestion12=qtw.QRadioButton('GESTIÓN DE ADMINISTRADORES')
 
         container=qtw.QWidget()
         container.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
         container.setMinimumHeight(700)
         container.setMinimumWidth(300)
-        containerLayout=qtw.QGridLayout()
+        self.containerLayout=qtw.QGridLayout()
 
-        containerLayout.addWidget(titulo, 0, 0, 1, 2)
+        self.containerLayout.addWidget(titulo, 0, 0, 1, 2)
 
         self.gestiones=[self.gestion1, self.gestion2, self.gestion3, self.gestion4, 
                         self.gestion5, self.gestion6, self.gestion7, self.gestion8,
-                        self.gestion9, self.gestion10]
+                        self.gestion9]
         
         for i in range(len(self.gestiones)):
             self.gestiones[i].setObjectName("gestion")
-            containerLayout.addWidget(self.gestiones[i], i+1, 0)
+            self.containerLayout.addWidget(self.gestiones[i], i+1, 0)
+
+        self.contador = i
+        self.gestion10.setObjectName("gestion")
+        self.gestion11.setObjectName("gestion")
+        self.gestion12.setObjectName("gestion")
 
         self.gestion1.toggle()
-        container.setLayout(containerLayout)
+        container.setLayout(self.containerLayout)
 
         scroll=qtw.QScrollArea()
         scroll.setWidget(container)

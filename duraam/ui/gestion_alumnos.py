@@ -193,7 +193,7 @@ class GestionAlumnos(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
             botonEliminar.setIconSize(qtc.QSize(25, 25))
             botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar(query[i][0]))
+            botonEliminar.clicked.connect(lambda: self.eliminar())
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 6, botonEliminar)
 
@@ -304,7 +304,7 @@ class GestionAlumnos(qtw.QWidget):
                 cur.execute("""
                 UPDATE MOVIMIENTOS_HERRAMIENTAS
                 SET ID_PERSONA=? 
-                WHERE ROL=0 AND ID_PERSONA=?
+                WHERE CLASE=0 AND ID_PERSONA=?
                 """,
                 (self.entry1.value(), datos[0],)
                 )
@@ -343,7 +343,7 @@ class GestionAlumnos(qtw.QWidget):
     
  # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
-    def eliminar(self, idd):
+    def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
@@ -351,8 +351,12 @@ class GestionAlumnos(qtw.QWidget):
                               '¿Está seguro que desea eliminar estos datos?')
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            # luego se obtiene la posicion del boton.
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
             if cur.fetchall():
                 resp=mostrarMensaje('Pregunta', 'Advertencia', '''
 El alumno tiene movimientos registrados. 
@@ -362,7 +366,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 ''')
             if resp == qtw.QMessageBox.StandardButton.Yes:
                 cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (idd,))
-                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
                 cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
                 con.commit()
                 self.mostrarDatos()
