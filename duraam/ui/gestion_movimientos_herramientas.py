@@ -6,7 +6,6 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
-from pickle import TRUE
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
@@ -49,11 +48,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
-        self.tabla.setColumnWidth(7, 35)
+        self.tabla.setColumnWidth(2, 125)
         self.tabla.setColumnWidth(8, 35)
-
-        # Se muestran los datos.
-        self.mostrarDatos()
+        self.tabla.setColumnWidth(9, 35)
 
         # Se crea una barra de búsqueda
         self.buscar = qtw.QLineEdit()
@@ -70,44 +67,47 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Listado"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.grupo1 = qtw.QButtonGroup(self)
         self.radio1 = qtw.QRadioButton("Herramienta")
         self.radio2 = qtw.QRadioButton("Alumno")
         self.radio3 = qtw.QRadioButton("Fecha")
-        self.grupo1.addButton(self.radio1)
-        self.grupo1.addButton(self.radio2)
-        self.grupo1.addButton(self.radio3)
+        self.grupo1.addButton(self.radio1, 1)
+        self.grupo1.addButton(self.radio2, 2)
+        self.grupo1.addButton(self.radio3, 3)
         self.radio1.setObjectName("Radio1")
         self.radio2.setObjectName("Radio2")
         self.radio3.setObjectName("Radio3")
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("Herramienta"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Alumno"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
+        self.radio1.toggled.connect(lambda:self.mostrarDatos("Listado", 1))
+        self.radio2.toggled.connect(lambda:self.mostrarDatos("Listado", 2))
+        self.radio3.toggled.connect(lambda:self.mostrarDatos("Listado", 3))
 
         self.label3=qtw.QLabel("Persona: ")
-        self.alumno=qtw.QComboBox()
-        self.alumno.addItem("Todos")
+        self.persona=qtw.QComboBox()
 
         self.label4=qtw.QLabel("Desde: ")
         self.date1=qtw.QDateEdit()
+        self.date1.editingFinished.connect(lambda:self.mostrarDatos("Listado"))
 
         self.label5=qtw.QLabel("Hasta: ")
         self.date2=qtw.QDateEdit()
+        self.date2.editingFinished.connect(lambda:self.mostrarDatos("Listado"))
         
         self.label6=qtw.QLabel("Herramienta: ")
         self.herramienta=qtw.QComboBox()
         self.herramienta.addItem("Todas")
+        self.herramienta.currentIndexChanged.connect(lambda:self.mostrarDatos("Listado"))
 
         self.label7=qtw.QLabel("Estado: ")
-        self.grupo2=qtw.QButtonGroup(self)
-        self.retiro=qtw.QRadioButton("Retiro")
-        self.devolucion=qtw.QRadioButton("Devolución")
-        self.grupo2.addButton(self.retiro)
-        self.grupo2.addButton(self.devolucion)
+        self.estado=qtw.QComboBox()
+        self.estado.addItem("Cualquiera")
+        self.estado.addItem("Retiro")
+        self.estado.addItem("Devolución")
+        self.retiro.toggled.connect(lambda:self.mostrarDatos("Listado", "", 0))
+        self.devolucion.toggled.connect(lambda:self.mostrarDatos("Listado", "", 1))
 
         self.container1=qtw.QWidget()
         self.container1Layout=qtw.QGridLayout()
@@ -131,13 +131,14 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.container1Layout.addWidget(self.buscar, 0, 0)
         self.container1Layout.addWidget(icono, 0, 0)
         self.container1Layout.addWidget(self.label2, 0, 1)
-        self.container1Layout.addWidget(self.radio2, 0, 2)
-        self.container1Layout.addWidget(self.radio3, 0, 3)
+        self.container1Layout.addWidget(self.radio1, 0, 2)
+        self.container1Layout.addWidget(self.radio2, 0, 3)
+        self.container1Layout.addWidget(self.radio3, 0, 4)
         self.container1.setLayout(self.container1Layout)
         layout.addWidget(self.container1)
 
         self.container2Layout.addWidget(self.label3)
-        self.container2Layout.addWidget(self.alumno)
+        self.container2Layout.addWidget(self.persona)
         self.container2Layout.addWidget(self.label4)
         self.container2Layout.addWidget(self.date1)
         self.container2Layout.addWidget(self.label5)
@@ -145,8 +146,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.container2Layout.addWidget(self.label6)
         self.container2Layout.addWidget(self.herramienta)
         self.container2Layout.addWidget(self.label7)
-        self.container2Layout.addWidget(self.retiro)
-        self.container2Layout.addWidget(self.devolucion)
+        self.container2Layout.addWidget(self.retiro, 0)
+        self.container2Layout.addWidget(self.devolucion, 1)
         self.container2.setLayout(self.container2Layout)
         layout.addWidget(self.container2)
 
@@ -155,6 +156,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
         # Se le da el layout al widget central
         self.setLayout(layout)
+        # Se muestran los datos.
+        self.refreshListas()
+        self.mostrarDatos()
 
         # Se crea este atributo para que exista en la pantalla y no se generen errores al abrir la ventana de edición. Explicado más adelante.
         self.edita = None
@@ -166,100 +170,90 @@ class GestionMovimientosHerramientas(qtw.QWidget):
     # - - Nombre: Muestra todos los datos de la tabla de la base de datos ordenados por su nombre.
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
-    def mostrarDatos(self, consulta="Normal"):
+    def mostrarDatos(self, consulta="Normal", orden=""):
         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
-        if consulta=="Buscar":
-            # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
-            busqueda=[]
-            # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(7): 
-                # El valor añadido es el texto en la barra de búsqueda.
-                busqueda.append(f"%{self.buscar.text()}%")
+        if consulta=="Listado":
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            if self.persona.currentText() == "Todos":
+                persona=""
+            else:
+                persona=self.persona.currentText()[10:]
+            
+            if self.herramienta.currentText() == "Todas":
+                herramientaABuscar=""
+            else:
+                herramientaABuscar=self.herramienta.currentText()
+            
+            if self.estado.currentText() == "Cualquiera":
+                estado=""
+            else:
+                estado=self.herramienta.currentText()
+            
+            ordenStatement=""
+            if orden:
+                if orden==1:
+                    ordenStatement="ORDER BY H.DESC_LARGA"
+                if orden==2:
+                    ordenStatement="ORDER BY NOMBRE"
+                if orden==3:
+                    ordenStatement="ORDER BY M.FECHA"
+ 
+
+            cur.execute(f"""
             SELECT M.ID, H.DESC_LARGA, 
             (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
+            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
-            JOIN ALUMNOS A
+            LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
-            JOIN PROFESORES P
+            LEFT JOIN PROFESORES P
             ON M.ID_PERSONA = P.ID
-            AND (H.DESC_LARGA LIKE ? 
+            WHERE (H.DESC_LARGA LIKE ? 
             OR NOMBRE LIKE ? 
             OR M.ID LIKE ?
             OR M.FECHA LIKE ? 
             OR M.CANTIDAD LIKE ? 
             OR M.CLASE LIKE ? 
-            OR M.ID_TURNO_PANOL LIKE ?)""", busqueda)
-        # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
-        elif consulta=="Herramienta":
-            cur.execute("""
-            SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M
-            JOIN HERRAMIENTAS H
-            ON M.ID_HERRAMIENTA = H.ID
-            JOIN ALUMNOS A
-            ON M.ID_PERSONA = A.ID
-            JOIN PROFESORES P
-            ON M.ID_PERSONA = P.ID
-            ORDER BY H.DESC_LARGA
-            """)
-        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="Alumno":
-            cur.execute("""
-            SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M
-            JOIN HERRAMIENTAS H
-            ON M.ID_HERRAMIENTA = H.ID
-            JOIN ALUMNOS A
-            ON M.ID_PERSONA = A.ID
-            JOIN PROFESORES P
-            ON M.ID_PERSONA = P.ID
-            ORDER BY H.DESC_LARGA
-            """)
-        # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
-        elif consulta=="Fecha":
-            cur.execute("""
-            SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
-            FROM MOVIMIENTOS_HERRAMIENTAS M
-            JOIN HERRAMIENTAS H
-            ON M.ID_HERRAMIENTA = H.ID
-            JOIN ALUMNOS A
-            ON M.ID_PERSONA = A.ID
-            JOIN PROFESORES P
-            ON M.ID_PERSONA = P.ID
-            ORDER BY H.DESC_LARGA
-            """)
+            OR M.ID_TURNO_PANOL LIKE ?)
+            AND NOMBRE LIKE ?
+            AND H.DESC_LARGA LIKE ?
+            AND M.TIPO LIKE ?
+            {ordenStatement}
+            """, (f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
+                                                f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{persona}%", f"%{herramientaABuscar}%", f"%{estado}%",))
+            
+            query = []
+            fetch=cur.fetchall()
+            for i in fetch:
+                fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
+                if fecha >= self.date1.date() and fecha <= self.date2.date():
+                    query.append(i)
+            
+
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
             cur.execute("""
             SELECT M.ID, H.DESC_LARGA,
             (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.FECHA, M.CANTIDAD, M.CLASE, M.ID_TURNO_PANOL
+            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
-            JOIN ALUMNOS A
+            LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
-            JOIN PROFESORES P
+            LEFT JOIN PROFESORES P
             ON M.ID_PERSONA = P.ID
-            ORDER BY H.DESC_LARGA
             """)
+
+            query=cur.fetchall()
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobi escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -279,7 +273,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             botonEditar.setObjectName("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 7, botonEditar)
+            self.tabla.setCellWidget(i, 8, botonEditar)
 
             # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
             botonEliminar = qtw.QPushButton()
@@ -289,8 +283,49 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             botonEliminar.setObjectName("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, 8, botonEliminar)
+            self.tabla.setCellWidget(i, 9, botonEliminar)
 
+    def refreshListas(self):
+        try:
+            self.persona.currentIndexChanged.disconnect()
+        except:
+            pass
+        try:
+            self.herramienta.currentIndexChanged.disconnect()
+        except:
+            pass
+        
+        self.persona.clear()
+        self.persona.addItem("Todos")
+        self.herramienta.clear()
+        self.herramienta.addItem("Todas")
+        cur.execute("SELECT DISTINCT ID_PERSONA, CLASE FROM MOVIMIENTOS_HERRAMIENTAS")
+        query=cur.fetchall()
+        for i in query:
+            if i[1]:
+                cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES WHERE ID=?", (i[0],))
+                self.persona.addItem(f"PROFESOR {cur.fetchall()[0][0]}")
+            else:
+                cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE ID=?", (i[0],))
+                nombre=cur.fetchall()[0][0]
+                cur.execute("""
+                SELECT CURSO
+                FROM ALUMNOS
+                WHERE ID IN (
+                    SELECT ID_PERSONA
+                    FROM MOVIMIENTOS_HERRAMIENTAS
+                    WHERE ID=? AND CLASE=0
+                )
+                """, (i[0],))
+                self.persona.addItem(f"ALUMNO {cur.fetchall()[0][0]} {nombre}")
+
+        cur.execute("SELECT DISTINCT ID_HERRAMIENTA FROM MOVIMIENTOS_HERRAMIENTAS")
+        query=cur.fetchall()
+        for i in query:
+            cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS WHERE ID=?", (i[0],))
+            self.herramienta.addItem(cur.fetchall()[0][0])
+        
+        self.persona.currentIndexChanged.connect(lambda:self.mostrarDatos("Listado"))
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
     # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
     # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
@@ -323,25 +358,14 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.entry1.setCompleter(cuadroSugerenciasHerramientas)
 
         self.entry2 = qtw.QLineEdit()
-        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
-        sugerenciasAlumnos=[]
-        for i in cur.fetchall():
-            sugerenciasAlumnos.append(i[0])
-        cuadroSugerenciasAlumnos=qtw.QCompleter(sugerenciasAlumnos, self)
-        cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry2.setCompleter(cuadroSugerenciasAlumnos)
+
         self.radio1 = qtw.QRadioButton("Alumno")
         self.radio2 = qtw.QRadioButton("Profesor")
         agruparClase=qtw.QButtonGroup(self)
         agruparClase.addButton(self.radio1, 0)
         agruparClase.addButton(self.radio2, 1)
-        self.entry3Dia = qtw.QSpinBox()
-        self.entry3Mes = qtw.QSpinBox()
-        self.entry3Año = qtw.QSpinBox()
-        self.entry3Dia.setMaximum(31)
-        self.entry3Mes.setMaximum(12)
-        self.entry3Año.setMaximum(2022)
 
+        self.entry3= qtw.QDateEdit()
         self.entry4 = qtw.QSpinBox()
         self.radio3 = qtw.QRadioButton("Retiro")
         self.radio4 = qtw.QRadioButton("Devolución")
@@ -391,10 +415,10 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                 self.radio2.toggle()
             else:
                 self.radio1.toggle()
-            fecha=datos[4].split("/")
-            self.entry3Dia.setValue(int(fecha[2]))
-            self.entry3Mes.setValue(int(fecha[1]))
-            self.entry3Año.setValue(int(fecha[0]))
+
+            qdate = qtc.QDate.fromString(datos[4], "dd/MM/yyyy")
+            self.entry3.setDate(qdate)
+
             self.entry4.setValue(int(datos[5]))
             if datos[6]:
                 self.radio2.toggle()
@@ -403,33 +427,27 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
-        layoutEditar.addWidget(self.entry1, 0, 1, 1, 5)
-        layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
-        layoutEditar.addWidget(self.radio1, 2, 1, 1, 2)
-        layoutEditar.addWidget(self.radio2, 2, 2, 1, 2)
-        layoutEditar.addWidget(self.entry3Dia, 3, 1, 1, 1)
-        layoutEditar.addWidget(qtw.QLabel("/"), 3, 2, 1, 1)
-        layoutEditar.addWidget(self.entry3Mes, 3, 3, 1, 1)
-        layoutEditar.addWidget(qtw.QLabel("/"), 3, 4, 1, 1)
-        layoutEditar.addWidget(self.entry3Año, 3, 5, 1, 1)
-        layoutEditar.addWidget(self.entry4, 4, 1, 1, 5)
-        layoutEditar.addWidget(self.radio3, 5, 1, 1, 2)
-        layoutEditar.addWidget(self.radio4, 5, 2, 1, 2)
-        layoutEditar.addWidget(self.entry6, 6, 1, 1, 5)
+        layoutEditar.addWidget(self.entry1, 0, 1, 1, 2)
+        layoutEditar.addWidget(self.entry2, 1, 1, 1, 2)
+        layoutEditar.addWidget(self.radio1, 2, 1)
+        layoutEditar.addWidget(self.radio2, 2, 2)
+        layoutEditar.addWidget(self.entry3, 3, 1, 1, 2)
+        layoutEditar.addWidget(self.entry4, 4, 1, 1, 2)
+        layoutEditar.addWidget(self.radio3, 5, 1)
+        layoutEditar.addWidget(self.radio4, 5, 2)
+        layoutEditar.addWidget(self.entry6, 6, 1, 1, 2)
 
         entries=[self.entry1, self.entry2, self.entry4, self.entry6]
         for i in entries:
             i.setObjectName("modificar-entry")
 
-        self.entry3Dia.setObjectName("modificar-entryDate")
-        self.entry3Mes.setObjectName("modificar-entryDate")
-        self.entry3Año.setObjectName("modificar-entryDate")
+        self.entry3.setObjectName("modificar-entry")
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
         confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
         confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, 6, 0, 1, 6, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutEditar.addWidget(confirmar, 7, 0, 1, 6, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
         self.edita.setLayout(layoutEditar)
@@ -439,8 +457,18 @@ class GestionMovimientosHerramientas(qtw.QWidget):
     def cambiarClase(self, clase):
         if clase=="Alumno":
             self.clase=0
+            cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
         elif clase=="Profesor":
             self.clase=1
+            cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+        else:
+            return print("XDDDDDDD")
+        sugerencias=[]
+        for i in cur.fetchall():
+            sugerencias.append(i[0])
+        cuadroSugerencias=qtw.QCompleter(sugerencias, self)
+        cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry2.setCompleter(cuadroSugerencias)
     
     def cambiarTipo(self, tipo):
         if tipo=="Retiro":
@@ -473,9 +501,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             LIMIT 1
             """, (self.entry2.text().upper(),))
 
-            profesor=cur.fetchall()
+            persona=cur.fetchall()
 
-            if not profesor:
+            if not persona:
                 mostrarMensaje("Error", "Error", 
                 "El profesor no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
                 return
@@ -487,9 +515,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             LIMIT 1
             """, (self.entry2.text().upper(),))
 
-            alumno=cur.fetchall()
+            persona=cur.fetchall()
 
-            if not alumno:
+            if not persona:
                 mostrarMensaje("Error", "Error", 
                 "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
                 return
@@ -507,23 +535,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             mostrarMensaje("Error", "Error", 
             "El turno no está registrado. Por favor, verifique que el turno registrado es correcto.")
             return
-        
-        if self.entry3Mes.value() < 10:
-            mes=f"0{self.entry3Mes.value()}"
-        else:
-            mes=self.entry3Mes.value()
-        if self.entry3Dia.value() < 10:
-            dia=f"0{self.entry3Dia.value()}"
-        else:
-            dia=self.entry3Dia.value()  
 
-        if self.entry3Año.value()<1000:
-            año=f"0{self.entry1Año.value()}"
-            for i in range(4-len(año)): 
-                año=f"0{año}"
-        else:
-            año=self.entry3Año.value()
-        fecha=f"{año}/{mes}/{dia}"
+        fecha=self.entry3.date().toString("dd/MM/yyyy")
 
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
@@ -539,7 +552,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             ID_TURNO_PANOL=?
             WHERE ID=?
             """, (
-                herramienta[0][0], alumno[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
+                herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
             ))
 
             con.commit()
@@ -550,7 +563,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", (
-                herramienta[0][0], alumno[0][0], fecha, self.entry4.text(), self.tipo, turnoPanol[0][0],
+                herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0],
             ))
             con.commit()
 
@@ -559,6 +572,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             
         
         #Se refrescan los datos.
+        self.refreshPersonas()
         self.mostrarDatos()
         self.edita.close()
 

@@ -251,9 +251,7 @@ class GestionTurnos(qtw.QWidget):
             layoutEditar.addWidget(label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
-        self.entry1Dia = qtw.QSpinBox()
-        self.entry1Mes = qtw.QSpinBox()
-        self.entry1Año = qtw.QSpinBox()
+        self.entry1 = qtw.QDateEdit()
         self.entry2 = qtw.QLineEdit()
 
         cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
@@ -264,10 +262,9 @@ class GestionTurnos(qtw.QWidget):
         cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasAlumnos)
 
-        self.entry3Hora = qtw.QSpinBox()
-        self.entry3Minuto = qtw.QSpinBox()
-        self.entry4Hora = qtw.QSpinBox()
-        self.entry4Minuto = qtw.QSpinBox()
+        self.entry3 = qtw.QTimeEdit()
+        self.entry4 = qtw.QTimeEdit()
+
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QLineEdit()
 
@@ -279,15 +276,6 @@ class GestionTurnos(qtw.QWidget):
         cuadroSugerenciasProfesores.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry5.setCompleter(cuadroSugerenciasProfesores)
         self.entry6.setCompleter(cuadroSugerenciasProfesores)
-
-        self.entry1Dia.setMaximum(31)
-        self.entry1Mes.setMaximum(12)
-        self.entry1Año.setMaximum(9999)
-        self.entry3Hora.setMaximum(23)
-        self.entry3Minuto.setMaximum(59)
-        self.entry4Hora.setMaximum(23)
-        self.entry4Minuto.setMaximum(59)
-
         # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
         datos = []
 
@@ -305,19 +293,15 @@ class GestionTurnos(qtw.QWidget):
             # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
             # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
             # Se les añade a los entries sus valores por defecto.
-            fecha=datos[1].split("/")
-            self.entry1Dia.setValue(int(fecha[2]))
-            self.entry1Mes.setValue(int(fecha[1]))
-            self.entry1Año.setValue(int(fecha[0]))
+            qdate = qtc.QDate.fromString(datos[1], "dd/MM/yyyy")
+            self.entry1.setDate(qdate)
             self.entry2.setText(datos[2])
 
-            ingreso=datos[3].split(":")
-            self.entry3Hora.setValue(int(ingreso[0]))
-            self.entry3Minuto.setValue(int(ingreso[1]))
+            qtime1 = qtc.QTime.fromString(datos[3], "hh:mm")
+            self.entry3.setTime(qtime1)
 
-            egreso=datos[4].split(":")
-            self.entry4Hora.setValue(int(egreso[0]))
-            self.entry4Minuto.setValue(int(egreso[1]))
+            qtime2 = qtc.QTime.fromString(datos[4], "hh:mm")
+            self.entry4.setTime(qtime2)
 
             self.entry5.setText(datos[5])
             self.entry6.setText(datos[6])
@@ -325,36 +309,24 @@ class GestionTurnos(qtw.QWidget):
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        layoutEditar.addWidget(self.entry1Dia, 0, 1)
-        layoutEditar.addWidget(qtw.QLabel("/"), 0, 2)
-        layoutEditar.addWidget(self.entry1Mes, 0, 3)
-        layoutEditar.addWidget(qtw.QLabel("/"), 0, 4)
-        layoutEditar.addWidget(self.entry1Año, 0, 5)
-        self.entry1Dia.setObjectName("modificar-entryDate")
-        self.entry1Mes.setObjectName("modificar-entryDate")
-        self.entry1Año.setObjectName("modificar-entryDate")
+        layoutEditar.addWidget(self.entry1, 0, 1)
+        self.entry1.setObjectName("modificar-entry")
 
 
-        layoutEditar.addWidget(self.entry2, 1, 1, 1, 5)
+        layoutEditar.addWidget(self.entry2, 1, 1)
         self.entry2.setObjectName("modificar-entry")
 
-        layoutEditar.addWidget(self.entry3Hora, 2, 1)
-        layoutEditar.addWidget(qtw.QLabel(":"), 2, 2)
-        layoutEditar.addWidget(self.entry3Minuto, 2, 3)
-        layoutEditar.addWidget(self.entry4Hora, 3, 1)
-        layoutEditar.addWidget(qtw.QLabel(":"), 3, 2)
-        layoutEditar.addWidget(self.entry4Minuto, 3, 3)
+        layoutEditar.addWidget(self.entry3, 2, 1)
+        layoutEditar.addWidget(self.entry4, 3, 1)
 
-        self.entry3Hora.setObjectName("modificar-entryDate")
-        self.entry3Minuto.setObjectName("modificar-entryDate")
+        self.entry3.setObjectName("modificar-entry")
+        self.entry4.setObjectName("modificar-entry")
 
-        self.entry4Hora.setObjectName("modificar-entryDate")
-        self.entry4Minuto.setObjectName("modificar-entryDate")
-        
-        layoutEditar.addWidget(self.entry5, 4, 1, 1, 5)
+        layoutEditar.addWidget(self.entry5, 4, 1)
         self.entry5.setObjectName("modificar-entry")
-        layoutEditar.addWidget(self.entry6, 5, 1, 1, 5)
+        layoutEditar.addWidget(self.entry6, 5, 1)
         self.entry6.setObjectName("modificar-entry")
+
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
         confirmar = qtw.QPushButton("Confirmar")
         confirmar.setObjectName("confirmar")
@@ -371,10 +343,6 @@ class GestionTurnos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
-        try:
-            dt.datetime(year=self.entry1Año.value(), month=self.entry1Mes.value(), day=self.entry1Dia.value())
-        except ValueError:
-            return mostrarMensaje("Error", "Error", "La fecha ingresada no es válida. Ingresar nuevamente.")
 
         cur.execute("""
         SELECT ID
@@ -415,43 +383,10 @@ class GestionTurnos(qtw.QWidget):
             return mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el egreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
         
-        if self.entry1Mes.value() < 10:
-            mes=f"0{self.entry1Mes.value()}"
-        else:
-            mes=self.entry1Mes.value()
-        if self.entry1Dia.value() < 10:
-            dia=f"0{self.entry1Dia.value()}"
-        else:
-            dia=self.entry1Dia.value()  
-
-        if self.entry1Año.value()<1000:
-            año=f"0{self.entry1Año.value()}"
-            for i in range(4-len(año)): 
-                año=f"0{año}"
-        else:
-            año=self.entry1Año.value()
-        fecha=f"{año}/{mes}/{dia}"
-
-        if self.entry3Hora.value()<10:
-            horaIngreso=f"0{self.entry3Hora.value()}"
-        else:
-            horaIngreso=f"{self.entry3Hora.value()}"
-        if self.entry3Minuto.value()<10:
-            minutoIngreso=f"0{self.entry3Minuto.value()}"
-        else:
-            minutoIngreso=f"{self.entry3Hora.value()}"
-
-        if self.entry4Hora.value()<10:
-            horaEgreso=f"0{self.entry4Hora.value()}"
-        else:
-            horaEgreso=f"{self.entry4Hora.value()}"
-        if self.entry4Minuto.value()<10:
-            minutoEgreso=f"0{self.entry4Minuto.value()}"
-        else:
-            minutoEgreso=f"{self.entry4Minuto.value()}"
-
-        ingreso=f"{horaIngreso}:{minutoIngreso}"
-        egreso=f"{horaEgreso}:{minutoEgreso}"
+        
+        fecha=self.entry1.date().toString("dd/MM/yyyy")
+        ingreso=self.entry3.time().toString("hh:mm")
+        egreso=self.entry4.time().toString("hh:mm")
         
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
@@ -479,18 +414,15 @@ class GestionTurnos(qtw.QWidget):
             except:
                 return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         else:
-            try:
-                cur.execute(
-                """INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)
-                """, (
-                    fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0],
-                ))
-                con.commit()
+            cur.execute(
+            "INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)", (
+                fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0],
+            ))
+            con.commit()
 
-                mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado un turno.")
-            except:
-                return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+            mostrarMensaje("Information", "Aviso",
+                        "Se ha ingresado un turno.")
+
         #Se refrescan los datos.
         self.edita.close()
         self.mostrarDatos()

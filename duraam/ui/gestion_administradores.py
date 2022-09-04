@@ -14,6 +14,7 @@ import os
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
+from main import usuario
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -37,7 +38,7 @@ class GestionDeAdministradores(qtw.QWidget):
         self.tabla.setObjectName("tabla")
 
         # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Usuario", "Nombre y Apellido", "", ""]      
+        self.campos = ["Usuario", "Nombre y Apellido", ""]      
                                 
         # Se establece el número de columnas que va a tener. 
         self.tabla.setColumnCount(len(self.campos))
@@ -49,7 +50,6 @@ class GestionDeAdministradores(qtw.QWidget):
         # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(1, 125)
         self.tabla.setColumnWidth(2, 35)
-        self.tabla.setColumnWidth(3, 35)
 
         # Se muestran los datos.
         self.mostrarDatos()
@@ -96,21 +96,12 @@ class GestionDeAdministradores(qtw.QWidget):
 
             botonDegradar.clicked.connect(lambda: self.degradar())
             botonDegradar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-2, botonDegradar)
-
-            # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
-            botonEliminar.clicked.connect(lambda: self.eliminar())
-            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-            self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
+            self.tabla.setCellWidget(i, len(self.campos)-1, botonDegradar)
 
     def degradar(self):
             # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
+        global usuario
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                 '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
@@ -124,22 +115,9 @@ class GestionDeAdministradores(qtw.QWidget):
             datos=cur.fetchall()
             cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
             cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
-            con.commit()
-            self.mostrarDatos()
-
-    def eliminar(self):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
-        # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
-        # si pulsó el boton de sí:
-        if resp == qtw.QMessageBox.StandardButton.Yes:
-            botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
-            posicion = self.tabla.indexAt(botonClickeado.pos())
-            idd=posicion.sibling(posicion.row(), 0).data()
-            # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
+            if usuario=="Administrador":
+                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE ')
+            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+            (usuario, ))
             con.commit()
             self.mostrarDatos()
