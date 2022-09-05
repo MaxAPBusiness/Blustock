@@ -115,8 +115,7 @@ class GestionDeAdministradores(qtw.QWidget):
             datos=cur.fetchall()
             cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
             cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
-            if usuario=="Administrador":
-                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE ')
+            cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?'(idd,))
             cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
             (usuario, ))
             con.commit()
