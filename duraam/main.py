@@ -70,6 +70,7 @@ crearBBDD()
 os.chdir(f"{os.path.abspath(__file__)}/../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
 cur = con.cursor()
+userInfo=["", 0]
 
 # Creamos la ventana principal
 
@@ -154,6 +155,7 @@ class MainWindow(qtw.QMainWindow):
         app.closeAllWindows()
 
     def confirmarInicio(self):
+        global userInfo
         cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM ADMINISTRADORES WHERE USUARIO=?",
                     (self.iniciarSesion.entry1.text(),))
         query = cur.fetchall()
@@ -174,6 +176,7 @@ class MainWindow(qtw.QMainWindow):
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion11, self.menuIzquierdo.contador+3, 0)
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion12, self.menuIzquierdo.contador+4, 0)
                 self.stack.setCurrentIndex(2)
+                userInfo=[query[0][0], 1]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return
@@ -195,6 +198,7 @@ class MainWindow(qtw.QMainWindow):
                 self.cabecera.usuario.clicked.connect(
                     lambda: self.informacionUsuario(query[0][2], query[0][0]))
                 self.stack.setCurrentIndex(2)
+                userInfo=[query[0][0], 0]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return

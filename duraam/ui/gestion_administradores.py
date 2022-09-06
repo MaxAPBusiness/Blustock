@@ -9,12 +9,14 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
+
+import datetime as dt
 import sqlite3 as db
 import os
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
-from main import usuario
+from main import userInfo
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -101,7 +103,7 @@ class GestionDeAdministradores(qtw.QWidget):
     def degradar(self):
             # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
-        global usuario
+        global userInfo
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                 '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
@@ -115,8 +117,16 @@ class GestionDeAdministradores(qtw.QWidget):
             datos=cur.fetchall()
             cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
             cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
-            cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?'(idd,))
+
+            if userInfo[1]:
+                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+            else:
+                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+            userId=cur.fetchall()[0][0]
+            
             cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-            (usuario, ))
+            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+            "Descenso", "Administradores Usuarios", datos[0][0], None, 
+            f"NOMBRE: {datos[0][3]} USUARIO: {datos[0][1]}"))
             con.commit()
             self.mostrarDatos()

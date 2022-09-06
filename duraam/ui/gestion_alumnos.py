@@ -16,6 +16,7 @@ import os
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
 from cursos import cursos
+from main import userInfo
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
 con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
@@ -282,6 +283,7 @@ class GestionAlumnos(qtw.QWidget):
     def confirmarr(self, datos):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
+        global userInfo
 
         if self.entry4.text() not in cursos:
             mostrarMensaje("Error", "Error", 
@@ -314,6 +316,16 @@ class GestionAlumnos(qtw.QWidget):
                 """, (
                     self.entry1.value(), datos[0],
                 ))
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Edición", "Alumnos", datos[0][0], f"{datos[0]}", 
+                f"""{self.entry1.value()}, {self.entry2.value()}, {self.entry3.text(
+                ).upper()}, {self.entry4.text()}, {self.entry5.text()}, {datos[0]}""",))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -329,13 +341,23 @@ class GestionAlumnos(qtw.QWidget):
                      self.entry1.value(), self.entry2.value(), 
                     self.entry3.text().upper(), self.entry4.text(), self.entry5.text(), 
                 ))
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Inserción", "Alumnos", datos[0][0], None, 
+                f"""{self.entry1.value()}, {self.entry2.value()}, {self.entry3.text(
+                ).upper()}, {self.entry4.text()}, {self.entry5.text()}, {datos[0]}""",))
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un alumno.")
-            except:
+            except BaseException as e:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
-                return
+                return print(e)
         
         #Se refrescan los datos.
         self.mostrarDatos()
