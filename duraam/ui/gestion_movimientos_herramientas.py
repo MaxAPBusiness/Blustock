@@ -14,6 +14,7 @@ import os
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
+from main import userInfo
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -554,6 +555,16 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             """, (
                 herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
             ))
+            if userInfo[1]:
+                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+            else:
+                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+            userId=cur.fetchall()[0][0]
+            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+            "Edición", "Alumnos", datos[0][0], f"{datos[0]}", 
+            f"""{self.entry1.value()}, {self.entry2.value()}, {self.entry3.text(
+            ).upper()}, {self.entry4.text()}, {self.entry5.text()}, {datos[0]}""",))
 
             con.commit()
             # Se muestra el mensaje exitoso.

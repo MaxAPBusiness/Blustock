@@ -14,6 +14,8 @@ import os
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
+from main import userInfo
+import datetime as dt
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -252,10 +254,20 @@ class GestionGrupos(qtw.QWidget):
                 cur.execute("UPDATE GRUPOS SET ID=? WHERE ID=?", (
                     self.entry1.text().upper(), datos[0],
                 ))
+                
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Edición", "Grupos", datos[0][0], datos[0][0], self.entry1.text().upper(),))       
+                
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado el grupo.")           
+                            "Se ha actualizado el grupo.") 
             except BaseException as e:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")  
                 print(e)
@@ -266,6 +278,10 @@ class GestionGrupos(qtw.QWidget):
                 cur.execute("INSERT INTO GRUPOS VALUES(?) ", (
                      self.entry1.text().upper(),
                 ))
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Inserción", "Grupos", datos[0][0], None, 
+                self.entry1.text().upper()),)
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",

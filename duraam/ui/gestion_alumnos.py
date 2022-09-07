@@ -323,9 +323,8 @@ class GestionAlumnos(qtw.QWidget):
                 userId=cur.fetchall()[0][0]
                 cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
                 (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-                "Edición", "Alumnos", datos[0][0], f"{datos[0]}", 
-                f"""{self.entry1.value()}, {self.entry2.value()}, {self.entry3.text(
-                ).upper()}, {self.entry4.text()}, {self.entry5.text()}, {datos[0]}""",))
+                "Edición", "Grupos", datos[0][0], datos[0][0], 
+                self.entry1.text(),))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -379,17 +378,32 @@ class GestionAlumnos(qtw.QWidget):
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
+
+            tipo="Eliminación simple"
+            tablas="Alumnos"
             if cur.fetchall():
+                tipo="Eliminación compleja"
+                tablas="Alumnos Movimientos"
                 resp=mostrarMensaje('Pregunta', 'Advertencia', '''
 El alumno tiene movimientos registrados. 
 Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
 por lo que sus registros de deudas se eliminarán y podría perderse información valiosa.
-¿Desea eliminarlo de todas formas?
-''')
+¿Desea eliminarlo de todas formas?''')
             if resp == qtw.QMessageBox.StandardButton.Yes:
+                cur.execute('SELECT * FROM ALUMNOS WHERE ID=?', (idd,))
+                datosEliminados=cur.fetchall[0]
                 cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (idd,))
                 cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
                 cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
+
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                tipo, tablas, idd, f"{datosEliminados}", None,))
                 con.commit()
                 self.mostrarDatos()
 
@@ -499,15 +513,40 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
     
     def confirmarPase(self):
         for i in range(self.tablaListaAlumnos.rowCount()):
-            if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
-                curso=[int(self.tablaListaAlumnos.item(i, 3).text()[0]),
-                        self.tablaListaAlumnos.item(i, 3).text()[1]]
-                curso[0]+=1
+                if self.tablaListaAlumnos.cellWidget(i, 0).isChecked() and self.tablaListaAlumnos.item(i, 3).text()[0] == "7":
+                    resp=mostrarMensaje('Pregunta', 'Advertencia', '''
+Hay alumnos de séptimo año seleccionados. Hacer el pase eliminará a estos alumnos. 
+Si quiere conservar sus datos, haga un registro histórico grupal y páselos a no activos.
+¿Desea seguir con el pase de todas formas y eliminarlos?''')
+                    break
+        if resp == qtw.QMessageBox.StandardButton.Yes:
+            listaVieja=[]
+            listaNueva=[]
 
-                cur.execute('UPDATE ALUMNOS SET CURSO=? WHERE DNI=?',
-                (f"{curso[0]}{curso[1]}", int(self.tablaListaAlumnos.item(i, 2).text())))
-                con.commit()
-        
-        self.mostrarDatos()
-        mostrarMensaje("Aviso", "Aviso", "El pase anual se ha realizado con éxito.")
-        self.menuPase.close()
+            for i in range(self.tablaListaAlumnos.rowCount()):
+                if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
+                    if self.tablaListaAlumnos.item(i, 3).text()[0] == "7":
+                        cur.execute('DELETE FROM ALUMNOS WHERE DNI=?',
+                        (int(self.tablaListaAlumnos.item(i, 2).text()),))
+                        listaVieja.append(int(self.tablaListaAlumnos.item(i, 2).text()))
+                    else:
+                        curso=[int(self.tablaListaAlumnos.item(i, 3).text()[0]),
+                                self.tablaListaAlumnos.item(i, 3).text()[1]]
+                        curso[0]+=1
+                        cur.execute('UPDATE ALUMNOS SET CURSO=? WHERE DNI=?',
+                        (f"{curso[0]}{curso[1]}", int(self.tablaListaAlumnos.item(i, 2).text())))
+                        listaVieja.append(int(self.tablaListaAlumnos.item(i, 2).text()))
+                        listaNueva.append(int(self.tablaListaAlumnos.item(i, 2).text()))
+            
+            if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+            else:
+                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+            userId=cur.fetchall()[0][0]
+            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+            "Pase anual", "Alumnos", None, f"{listaVieja}", f"{listaNueva}",))
+            con.commit()
+            self.mostrarDatos()
+            mostrarMensaje("Aviso", "Aviso", "El pase anual se ha realizado con éxito.")
+            self.menuPase.close()

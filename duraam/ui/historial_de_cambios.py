@@ -274,7 +274,7 @@ class HistorialDeCambios(qtw.QWidget):
                 descripcion=f"Editó la fila{textoId} de la tabla {query[i][4]}, reemplazando los datos{query[i][6]} con los datos {query[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Eliminación":
+            elif query[i][3]=="Eliminación simple":
                 if query[i][5]:
                     textoId=f" de id {query[i][5]}"
                 else:
@@ -282,6 +282,14 @@ class HistorialDeCambios(qtw.QWidget):
                 descripcion=f"Eliminó de la tabla {query[i][4]} la fila{textoId} que tenía los datos {query[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
+            elif query[i][3]=="Eliminación compleja":
+                if query[i][5]:
+                    textoId=f" de id {query[i][5]}"
+                else:
+                    textoId=""
+                descripcion=f"Eliminó de la tabla {query[i][4]} la fila{textoId} que tenía los datos {query[i][6]}."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+
             elif query[i][3]=="Pase Anual":
                 descripcion=f"Realizó el pase anual de los alumnos de id: {query[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))

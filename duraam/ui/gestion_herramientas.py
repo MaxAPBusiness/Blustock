@@ -11,9 +11,11 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
-
+import datetime as dt
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
+from main import userInfo
+
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -336,6 +338,17 @@ class GestionHerramientas(qtw.QWidget):
                     self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), self.entry3.value(
                     ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
                 ))
+
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Edición", "Herramientas", datos[0][0], f"{datos[0]}", 
+                f"""{self.entry0.value()}, {self.entry1.text().upper()}, {self.entry2.value()}, {self.entry3.value()},
+                {self.entry4.value()}, {self.entry5.text()}, {self.entry6.text()}, {datos[0]}""",))
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -352,6 +365,17 @@ class GestionHerramientas(qtw.QWidget):
                     self.entry3.value(), self.entry4.value(), self.entry5.text(), 
                     self.entry6.text(),
                 ))
+
+                if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+                else:
+                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+                userId=cur.fetchall()[0][0]
+                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Inserción", "Herramientas", datos[0][0], None, 
+                f"""{self.entry0.value()}, {self.entry1.text().upper()}, {self.entry2.value()}, {self.entry3.value()},
+                {self.entry4.value()}, {self.entry5.text()}, {self.entry6.text()}, {datos[0]}""",))
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
@@ -378,8 +402,18 @@ class GestionHerramientas(qtw.QWidget):
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
+            cur.execute('SELECT * FROM ALUMNOS WHERE ID=?', (idd,))
+            datosEliminados=cur.fetchall[0]
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
+            if userInfo[1]:
+                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
+            else:
+                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
+            userId=cur.fetchall()[0][0]
+            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
+            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+            "Eliminacion simple", "Herramientas", idd, f"{datosEliminados}", None,))
             con.commit()
             self.mostrarDatos()
 
