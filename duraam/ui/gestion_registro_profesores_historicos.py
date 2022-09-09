@@ -13,13 +13,9 @@ import sqlite3 as db
 import os
 import datetime as dt
 
-# Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-from cursos import cursos
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -253,13 +249,13 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
-        global mostrarMensaje
         cur.execute("SELECT * FROM PROFESORES WHERE DNI=?",(self.entry2.text(),))
         datos=cur.fetchall()
         cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
                 datos[0][0], datos[0][1], datos[0][2], dt.date.today().strftime('%Y/%m/%d'),
                                                                             datos[0][3],))
         cur.execute('DELETE FROM PROFESORES WHERE ID=?', (datos[0][0], ))
+        registrarCambios("Pase historico individual", "Profesores historicos", datos[0][0], datos[0], None)
         con.commit()
         mostrarMensaje("Information", "Aviso",
                     "Se ha pasado un alumno al registro histórico.")  
@@ -280,11 +276,13 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM TURNO_PANOL WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
-            turno=cur.fetchall()
 
             cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            tipo="Eliminación simple"
+            tablas="Alumnos históricos"
             if cur.fetchall():
+                tipo="Eliminación compleja"
+                tablas="Alumnos históricos Movimientos de herramientas"
                 resp = mostrarMensaje('Pregunta', 'Advertencia', 
                 """
 El profesor tiene turnos y/o movimientos registrados. 
@@ -295,6 +293,12 @@ como sus turnos y sus movimientos.
                 )
         
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
+            datosEliminados=cur.fetchall[0]
             cur.execute('DELETE FROM PROFESORES_HISTORICOS WHERE ID=?', (idd,))
+            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=1 AND ID_PERSONA=?', (idd,))
+            cur.execute('UPDATE TURNO_PANOL SET PROFESOR_INGRESO=NULL WHERE PROFESOR_INGRESO=?', (idd,))
+            cur.execute('UPDATE TURNO_PANOL SET PROFESOR_EGRESO=NULL WHERE PROFESOR_EGRESO=?', (idd,))
+            registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
             con.commit()
             self.mostrarDatos()

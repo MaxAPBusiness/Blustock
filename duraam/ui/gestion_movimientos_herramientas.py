@@ -9,17 +9,13 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
+import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-from main import userInfo
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -538,9 +534,24 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             return
 
         fecha=self.entry3.date().toString("dd/MM/yyyy")
-
+        
+        datosNuevos=(
+            herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, 
+            turnoPanol[0][0]
+            )
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
+            cur.execute("""SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            LEFT JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            LEFT JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID""")
+            datosViejos=cur.fetchall()
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
             cur.execute("""
             UPDATE MOVIMIENTOS_HERRAMIENTAS
@@ -553,19 +564,12 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             ID_TURNO_PANOL=?
             WHERE ID=?
             """, (
-                herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0], datos[0],
+                datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3], datosNuevos[4], 
+                datosNuevos[5], datosNuevos[6], datos[0],
             ))
-            if userInfo[1]:
-                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-            else:
-                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-            userId=cur.fetchall()[0][0]
-            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-            "Edición", "Alumnos", datos[0][0], f"{datos[0]}", 
-            f"""{self.entry1.value()}, {self.entry2.value()}, {self.entry3.text(
-            ).upper()}, {self.entry4.text()}, {self.entry5.text()}, {datos[0]}""",))
-
+            registrarCambios(
+                "Edición", "Movimientos de herramientas", datos[0][0], f"{datosViejos}", f"{datosNuevos}"
+                )
             con.commit()
             # Se muestra el mensaje exitoso.
             mostrarMensaje("Information", "Aviso",
@@ -573,11 +577,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
-            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", (
-                herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, turnoPanol[0][0],
-            ))
+            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", datosNuevos)
+            registrarCambios("Inserción", "Movimientos de herramientas", datos[0][0], None, f"{datosNuevos}") 
             con.commit()
-
             mostrarMensaje("Information", "Aviso",
                         "Se ha ingresado un movimiento.")
             
@@ -590,8 +592,8 @@ class GestionMovimientosHerramientas(qtw.QWidget):
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
     def eliminar(self):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
+        # se obtiene la función definida fuera de 
+        global userInfo
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                               '¿Está seguro que desea eliminar estos datos?')
@@ -601,15 +603,21 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
+            cur.execute("""
+            SELECT M.ID, H.DESC_LARGA,
+            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
+            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            FROM MOVIMIENTOS_HERRAMIENTAS M
+            JOIN HERRAMIENTAS H
+            ON M.ID_HERRAMIENTA = H.ID
+            LEFT JOIN ALUMNOS A
+            ON M.ID_PERSONA = A.ID
+            LEFT JOIN PROFESORES P
+            ON M.ID_PERSONA = P.ID
+            WHERE ID=?""", (idd,))
+            datosEliminados=cur.fetchall()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
+            registrarCambios("Eliminación simple", "Movimientos de herramientas", idd, f"{datosEliminados}", None)
             con.commit()
             self.mostrarDatos()
-
-    # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
-    # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
-    def closeEvent(self, event):
-        # Si hay una ventana de edición abierta, la cierra. 
-        # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
-        if self.edita:
-            self.edita.close()

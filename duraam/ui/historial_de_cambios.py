@@ -294,12 +294,12 @@ class HistorialDeCambios(qtw.QWidget):
                 descripcion=f"Realizó el pase anual de los alumnos de id: {query[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Pase histórico individual":
+            elif query[i][3]=="Pase historico individual":
                 descripcion=f"Realizó el pase histórico individual de {query[i][4]} de la persona de id: {query[i][5]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Pase histórico grupal":
-                descripcion=f"Realizó el pase histórico grupal de {query[i][4]} de las personas de id: {query[i][5]}."
+            elif query[i][3]=="Pase historico grupal":
+                descripcion=f"Realizó el pase histórico grupal de {query[i][4]} de las personas de id: {query[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
             elif query[i][3]=="Verificación de solicitud":

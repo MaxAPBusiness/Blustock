@@ -1,17 +1,13 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class GestionTurnos(qtw.QWidget):
@@ -388,10 +384,13 @@ class GestionTurnos(qtw.QWidget):
         ingreso=self.entry3.time().toString("hh:mm")
         egreso=self.entry4.time().toString("hh:mm")
         
+        datosNuevos=(fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0])
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
             try:
+                cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
+                datosViejos=cur.fetchall()[0]
                 cur.execute("""
                 UPDATE TURNO_PANOL
                 SET FECHA = ?,
@@ -402,9 +401,14 @@ class GestionTurnos(qtw.QWidget):
                 PROF_EGRESO = ?
                 WHERE ID = ?
                 """, (
-                    fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0], datos[0],
+                    datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3], datosNuevos[4], 
+                    datosNuevos[5], datos[0],
                 ))
 
+                registrarCambios(
+                    "Edición", "Turnos del pañol", datos[0][0], f"{datosViejos}", f"{datosNuevos}"
+                    
+                    )
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -418,6 +422,7 @@ class GestionTurnos(qtw.QWidget):
             "INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)", (
                 fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0],
             ))
+            registrarCambios("Inserción", "Subgrupos", datos[0][0], None, datosNuevos)
             con.commit()
 
             mostrarMensaje("Information", "Aviso",
@@ -442,14 +447,9 @@ class GestionTurnos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute("SELECT * FROM TURNO_PANOL WHERE ID=?", (idd,))
+            datosEliminados=cur.fetchall()[0]
             cur.execute('DELETE FROM TURNO_PANOL WHERE ID=?', (idd,))
+            registrarCambios("Eliminación", "Subgrupos", idd, datosEliminados, None)
             con.commit()
             self.mostrarDatos()
-
-    # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
-    # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
-    def closeEvent(self, event):
-        # Si hay una ventana de edición abierta, la cierra. 
-        # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
-        if self.edita:
-            self.edita.close()

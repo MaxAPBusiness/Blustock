@@ -6,21 +6,17 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
+from atexit import register
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 import datetime as dt
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-from main import userInfo
+from registrar_cambios import registrarCambios
 
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -326,29 +322,27 @@ class GestionHerramientas(qtw.QWidget):
             mostrarMensaje("Error", "Error", 
             "El subgrupo no está ingresado. Por favor, verifique que el grupo ingresado es correcto.")
             return
+        
+        datosNuevos=(
+            self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), 
+            self.entry3.value(), self.entry4.value(), self.entry5.text(), 
+            self.entry6.text()
+            )
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
+                cur.execute("SELECT * FROM HERRAMIENTAS WHERE ID=?", (datos[0][0]))
+                datosViejos=cur.fetchall()[0]
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE HERRAMIENTAS 
                 SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?, GRUPO=?, 
                 SUBGRUPO=?
                 WHERE ID=?""", (
-                    self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), self.entry3.value(
-                    ), self.entry4.value(), self.entry5.text(), self.entry6.text(), datos[0],
+                    datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3],
+                    datosNuevos[4], datosNuevos[5], datosNuevos[6],  datos[0],
                 ))
-
-                if userInfo[1]:
-                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-                else:
-                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-                userId=cur.fetchall()[0][0]
-                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-                "Edición", "Herramientas", datos[0][0], f"{datos[0]}", 
-                f"""{self.entry0.value()}, {self.entry1.text().upper()}, {self.entry2.value()}, {self.entry3.value()},
-                {self.entry4.value()}, {self.entry5.text()}, {self.entry6.text()}, {datos[0]}""",))
+                registrarCambios("Edición", "Herramientas", datos[0][0], f"{datosViejos}", f"{datosNuevos}")
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -360,24 +354,9 @@ class GestionHerramientas(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", (
-                    self.entry0.value(), self.entry1.text().upper(), self.entry2.value(), 
-                    self.entry3.value(), self.entry4.value(), self.entry5.text(), 
-                    self.entry6.text(),
-                ))
-
-                if userInfo[1]:
-                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-                else:
-                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-                userId=cur.fetchall()[0][0]
-                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-                "Inserción", "Herramientas", datos[0][0], None, 
-                f"""{self.entry0.value()}, {self.entry1.text().upper()}, {self.entry2.value()}, {self.entry3.value()},
-                {self.entry4.value()}, {self.entry5.text()}, {self.entry6.text()}, {datos[0]}""",))
+                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", datosNuevos)
+                registrarCambios( "Inserción", "Herramientas", datos[0][0], None, datosNuevos)
                 con.commit()
-
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado una herramienta.")
             except:
@@ -393,6 +372,7 @@ class GestionHerramientas(qtw.QWidget):
     def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
+        global userInfo
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                               '¿Está seguro que desea eliminar estos datos?')
@@ -406,14 +386,7 @@ class GestionHerramientas(qtw.QWidget):
             datosEliminados=cur.fetchall[0]
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
-            if userInfo[1]:
-                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-            else:
-                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-            userId=cur.fetchall()[0][0]
-            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-            "Eliminacion simple", "Herramientas", idd, f"{datosEliminados}", None,))
+            registrarCambios( "Eliminacion simple", "Herramientas", idd, f"{datosEliminados}", None)
             con.commit()
             self.mostrarDatos()
 

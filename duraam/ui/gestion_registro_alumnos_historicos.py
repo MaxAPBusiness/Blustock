@@ -9,17 +9,13 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 import datetime as dt
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-from cursos import cursos
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -205,7 +201,11 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
             cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+            tipo="Eliminación simple"
+            tablas="Alumnos históricos"
             if cur.fetchall():
+                tipo="Eliminación compleja"
+                tablas="Alumnos históricos Movimientos de herramientas"
                 resp=mostrarMensaje('Pregunta', 'Advertencia', '''
 El alumno tiene movimientos registrados. 
 Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
@@ -214,9 +214,12 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 ¿Desea eliminarlo de todas formas?
 ''')
             if resp == qtw.QMessageBox.StandardButton.Yes:
+                cur.execute('SELECT * FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
+                datosEliminados=cur.fetchall[0]
                 cur.execute('DELETE FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
                 cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
-                cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
+                cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL WHERE ID_ALUMNO=?', (idd,))
+                registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None,) 
                 con.commit()
                 self.mostrarDatos()
 
@@ -304,6 +307,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
                     dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
             ))
             cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+            registrarCambios("Pase historico individual", "Alumnos historicos", datos[0][0], datos[0], None,)
             con.commit()
             mostrarMensaje("Information", "Aviso",
                         "Se ha pasado un alumno al registro histórico.")    
@@ -416,6 +420,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
     
     def confirmarGrupal(self):
         for i in range(self.tablaListaAlumnos.rowCount()):
+            datosGrupales=[]
             if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
                 cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (int(self.tablaListaAlumnos.item(i, 2).text())))
                 datos=cur.fetchall()
@@ -423,7 +428,11 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
                     datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
                     dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
                 ))
+                datosGrupales.append(datos[0][0])
                 cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
-                con.commit()
+        registrarCambios(
+            "Pase historico grupal", "Alumnos historicos", datos[0][0], f"{datosGrupales}", None
+            )
+        con.commit()
 
         

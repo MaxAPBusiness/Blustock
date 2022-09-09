@@ -9,16 +9,12 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -120,9 +116,10 @@ class GestionDeUsuarios(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
-            datos=cur.fetchall()
-            cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos[0])
-            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[0][1],))
+            datos=cur.fetchall()[0]
+            cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos)
+            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[1],))
+            registrarCambios("Ascenso", "Usuarios Administradores", datos[0], f"{datos}", f"{datos}")
             con.commit()
             self.mostrarDatos()
 

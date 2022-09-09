@@ -9,16 +9,13 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
+import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -264,18 +261,23 @@ class GestionProfesores(qtw.QWidget):
             return
         elif len(self.entry4.text()) > 100:
             mostrarMensaje("Error", "Error", "El email ingresado es demasiado largo. Ingresa uno más corto.")
+        datosNuevos=(
+            self.entry1.value(), self.entry2.value(), self.entry3.text().upper(), self.entry4.text()
+            )
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
+                cur.execute("SELECT * FROM PROFESORES WHERE ID=?", (datos[0], ))
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
                 cur.execute("""
                 UPDATE PROFESORES
                 SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
                 where id =?
                 """, (
-                    self.entry1.value(), self.entry2.value(), self.entry3.text(
-                    ).upper(), self.entry4.text(), datos[0],
+                    datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3], datos[0],
                 ))
+                datosViejos=cur.fetchall()[0]
+                registrarCambios("Edición", "Profesores", datos[0][0], f"{datosViejos}", f"{datosNuevos}")
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -291,6 +293,7 @@ class GestionProfesores(qtw.QWidget):
                     self.entry1.value(), self.entry2.value(), 
                     self.entry3.text().upper(), self.entry4.text(), 
                 ))
+                registrarCambios("Inserción", "Profesores", datos[0][0], None, f"{datosNuevos}")
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
@@ -318,11 +321,13 @@ class GestionProfesores(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM TURNO_PANOL WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
-            turno=cur.fetchall()
 
             cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            tipo="Eliminación simple"
+            tablas="Profesores"
             if cur.fetchall():
+                tipo="Eliminación compleja"
+                tablas="Profesores Movimientos de herramientas"
                 resp = mostrarMensaje('Pregunta', 'Advertencia', 
                 """
 El profesor tiene turnos y/o movimientos registrados. 
@@ -330,19 +335,14 @@ Es recomendable que lo pase a registro histórico, quedando
 eliminado de profesores vigentes pero su información relacionada
 y sus datos siguen registrados en la base de datos. Eliminarlo 
 eliminará toda la información relacionada, como sus turnos y sus movimientos.
-¿Está seguro que desea continuar y eliminar la información relacionada?
-                """
-                )
+¿Está seguro que desea continuar y eliminar la información relacionada?""")
         
         if resp == qtw.QMessageBox.StandardButton.Yes:
+            cur.execute('SELECT * FROM PROFESORES WHERE ID=?', (idd,))
+            datosEliminados=cur.fetchall[0]
             cur.execute('DELETE FROM PROFESORES WHERE ID=?', (idd,))
+            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
+            cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
+            registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
             con.commit()
             self.mostrarDatos()
-
-    # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
-    # Cuando esto ocurra, también cerrara las demás ventanas que hayan quedado abiertas.
-    def closeEvent(self, event):
-        # Si hay una ventana de edición abierta, la cierra. 
-        # Por esto estaba en el init la variable inicializada con None, porque si no se inicializa no existe y al no existir tira error.
-        if self.edita:
-            self.edita.close()

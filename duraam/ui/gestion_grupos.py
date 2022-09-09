@@ -6,21 +6,17 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
+from importlib.resources import is_resource
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
+from duraam.registrar_cambios import registrarCambios
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-from main import userInfo
 import datetime as dt
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -254,16 +250,14 @@ class GestionGrupos(qtw.QWidget):
                 cur.execute("UPDATE GRUPOS SET ID=? WHERE ID=?", (
                     self.entry1.text().upper(), datos[0],
                 ))
+                cur.execute("UPDATE HERRAMIENTAS SET GRUPO=? WHERE GRUPO=?", (
+                    self.entry1.text().upper(), datos[0],
+                ))
+                cur.execute("UPDATE SUBGRUPOS SET GRUPO=? WHERE GRUPO=?", (
+                    self.entry1.text().upper(), datos[0],
+                ))
                 
-                if userInfo[1]:
-                    cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-                else:
-                    cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-                userId=cur.fetchall()[0][0]
-                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-                "Edición", "Grupos", datos[0][0], datos[0][0], self.entry1.text().upper(),))       
-                
+                registrarCambios("Edición", "Grupos", datos[0][0], datos[0][0], self.entry1.text().upper())
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -278,16 +272,14 @@ class GestionGrupos(qtw.QWidget):
                 cur.execute("INSERT INTO GRUPOS VALUES(?) ", (
                      self.entry1.text().upper(),
                 ))
-                cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-                (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-                "Inserción", "Grupos", datos[0][0], None, 
-                self.entry1.text().upper()),)
+                registrarCambios("Inserción", "Grupos", datos[0][0], None, self.entry1.text().upper())
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un grupo.")
             except:
-                mostrarMensaje("Error", "Error", "El grupo ingresado ya está registrado. Por favor, ingrese otro.")
+                mostrarMensaje("Error", "Error", 
+                "El grupo ingresado ya está registrado. Por favor, ingrese otro.")
                 return
         
         #Se refrescan los datos.
@@ -313,7 +305,11 @@ class GestionGrupos(qtw.QWidget):
             herramientas=cur.fetchall()
             cur.execute("SELECT GRUPO FROM SUBGRUPOS WHERE GRUPO=?", (idd,))
             subgrupo=cur.fetchall()
+            tipo="Eliminación simple"
+            tablas="Alumnos"
             if herramientas or subgrupo:
+                tipo="Eliminación compleja"
+                tablas="Alumnos Movimientos de herramientas"
                 resp2=mostrarMensaje('Pregunta', 'Advertencia',
 """
 Todavía hay herramientas y/o subgrupos cargados. 
@@ -323,9 +319,12 @@ Eliminar el grupo eliminará también TODOS los datos en los que está ingresado
             else:
                 resp2=True
             if resp2:
+                cur.execute('SELECT * FROM GRUPOS WHERE ID=?', (idd,))
+                datosEliminados=cur.fetchall()[0]
                 cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
                 cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
                 cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
+                registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
                 con.commit()
                 self.mostrarDatos()
 

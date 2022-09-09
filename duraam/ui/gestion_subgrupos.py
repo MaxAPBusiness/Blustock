@@ -9,16 +9,13 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
+import datetime as dt
 
 # Se importa la función mostrarMensaje.
+from main import con, cur
 from mostrar_mensaje import mostrarMensaje
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from registrar_cambios import registrarCambios
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -261,10 +258,21 @@ class GestionSubgrupos(qtw.QWidget):
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
+                cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
+                datosViejos=cur.fetchall()[0]
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("UPDATE SUBGRUPOS SET ID=?, GRUPO=? WHERE ID=?", (
+                cur.execute("UPDATE SUBGRUPOS SET ID = ?, GRUPO = ? WHERE ID = ?", (
                     self.entry1.text().upper(), grupo[0][0], datos[0],
                 ))
+                cur.execute("UPDATE ALUMNOS SET SUBGRUPO=? WHERE SUBGRUPO=? AND GRUPO=?", (
+                    self.entry1.text().upper(), datos[0], grupo[0][0]
+                ))
+
+                registrarCambios(
+                    "Edición", "Subgrupos", datos[0][0], f"{datosViejos}", 
+                    f"{(self.entry1.text().upper(), grupo[0][0])}"
+                    )
+                 
                 con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
@@ -279,6 +287,10 @@ class GestionSubgrupos(qtw.QWidget):
                 cur.execute("INSERT INTO SUBGRUPOS VALUES(?, ?) ", (
                      self.entry1.text().upper(), grupo[0][0], 
                 ))
+                registrarCambios(
+                    "Inserción", "Subgrupos", datos[0][0], None, 
+                    f"{self.entry1.text().upper()}, {grupo[0][0]}"
+                )
                 con.commit()
 
                 mostrarMensaje("Information", "Aviso",
@@ -306,8 +318,11 @@ class GestionSubgrupos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            cur.execute('SELECT * FROM SUBGRUPOS WHERE ID=?', (idd,))
+            datosEliminados=cur.fetchall()[0]
             cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
             cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
+            registrarCambios("Eliminación simple", "Subgrupos", idd, f"{datosEliminados}", None)
             con.commit()
             self.mostrarDatos()
 
