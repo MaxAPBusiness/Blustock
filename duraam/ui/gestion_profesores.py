@@ -13,7 +13,7 @@ import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -68,7 +68,7 @@ class GestionProfesores(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
@@ -123,7 +123,7 @@ class GestionProfesores(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            db.cur.execute("""
             SELECT * FROM PROFESORES
             WHERE ID LIKE ? 
             OR ID LIKE ?
@@ -132,20 +132,20 @@ class GestionProfesores(qtw.QWidget):
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM PROFESORES ORDER BY NOMBRE_APELLIDO')
+            db.cur.execute('SELECT * FROM PROFESORES ORDER BY NOMBRE_APELLIDO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="DNI":
-            cur.execute('SELECT * FROM PROFESORES ORDER BY DNI')
+            db.cur.execute('SELECT * FROM PROFESORES ORDER BY DNI')
         elif consulta=="Email":
-            cur.execute('SELECT * FROM PROFESORES ORDER BY EMAIL')
+            db.cur.execute('SELECT * FROM PROFESORES ORDER BY EMAIL')
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM PROFESORES')
+            db.cur.execute('SELECT * FROM PROFESORES')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -267,18 +267,18 @@ class GestionProfesores(qtw.QWidget):
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
-                cur.execute("SELECT * FROM PROFESORES WHERE ID=?", (datos[0], ))
+                db.cur.execute("SELECT * FROM PROFESORES WHERE ID=?", (datos[0], ))
+                datosViejos=db.cur.fetchall()[0]
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("""
+                db.cur.execute("""
                 UPDATE PROFESORES
                 SET ID=?, DNI=?, NOMBRE_APELLIDO=?, EMAIL=?
                 where id =?
                 """, (
                     datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3], datos[0],
                 ))
-                datosViejos=cur.fetchall()[0]
                 registrarCambios("Edición", "Profesores", datos[0][0], f"{datosViejos}", f"{datosNuevos}")
-                con.commit()
+                db.con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el profesor.")           
@@ -289,12 +289,12 @@ class GestionProfesores(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO PROFESORES VALUES(?, ? , ?, ?) ", (
+                db.cur.execute("INSERT INTO PROFESORES VALUES(?, ? , ?, ?) ", (
                     self.entry1.value(), self.entry2.value(), 
                     self.entry3.text().upper(), self.entry4.text(), 
                 ))
-                registrarCambios("Inserción", "Profesores", datos[0][0], None, f"{datosNuevos}")
-                con.commit()
+                registrarCambios("Inserción", "Profesores", datosNuevos[0], None, f"{datosNuevos}")
+                db.con.commit()
 
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un Profesor.")
@@ -322,27 +322,32 @@ class GestionProfesores(qtw.QWidget):
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
 
-            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            db.cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
+            movimientos=db.cur.fetchall()
+            db.cur.execute('SELECT * FROM TURNO_PANOL WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd,))
+            turnos=db.cur.fetchall()
             tipo="Eliminación simple"
             tablas="Profesores"
-            if cur.fetchall():
+            if movimientos or turnos:
                 tipo="Eliminación compleja"
                 tablas="Profesores Movimientos de herramientas"
                 resp = mostrarMensaje('Pregunta', 'Advertencia', 
-                """
+"""
 El profesor tiene turnos y/o movimientos registrados. 
 Es recomendable que lo pase a registro histórico, quedando
 eliminado de profesores vigentes pero su información relacionada
 y sus datos siguen registrados en la base de datos. Eliminarlo 
 eliminará toda la información relacionada, como sus turnos y sus movimientos.
-¿Está seguro que desea continuar y eliminar la información relacionada?""")
+¿Está seguro que desea continuar y eliminar la información relacionada?
+""")
         
         if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute('SELECT * FROM PROFESORES WHERE ID=?', (idd,))
-            datosEliminados=cur.fetchall[0]
-            cur.execute('DELETE FROM PROFESORES WHERE ID=?', (idd,))
-            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
-            cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL')
+            db.cur.execute('SELECT * FROM PROFESORES WHERE ID=?', (idd,))
+            datosEliminados=db.cur.fetchall()[0]
+            db.cur.execute('DELETE FROM PROFESORES WHERE ID=?', (idd,))
+            db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
+            db.cur.execute('UPDATE TURNO_PANOL SET PROF_INGRESO = NULL WHERE PROF_INGRESO=?', (idd,))
+            db.cur.execute('UPDATE TURNO_PANOL SET PROF_EGRESO = NULL WHERE PROF_EGRESO=?', (idd,))
             registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
-            con.commit()
+            db.con.commit()
             self.mostrarDatos()

@@ -9,11 +9,10 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 import datetime as dt
 
-from main import con, cur
+import db.inicializar_bbdd as db 
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -70,7 +69,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
@@ -130,7 +129,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            db.cur.execute("""
             SELECT * FROM PROFESORES_HISTORICOS 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
@@ -139,22 +138,22 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY NOMBRE_APELLIDO')
+            db.cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="DNI":
-            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY DNI')
+            db.cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY DNI')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Fecha":
-            cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY FECHA_SALIDA')
+            db.cur.execute('SELECT * FROM PROFESORES_HISTORICOS ORDER BY FECHA_SALIDA')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM PROFESORES_HISTORICOS')
+            db.cur.execute('SELECT * FROM PROFESORES_HISTORICOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -200,9 +199,9 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
 
         sugerenciasNombre=[]
 
-        cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+        db.cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
 
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasNombre.append(i[0])
             
         cuadroSugerenciasNombre=qtw.QCompleter(sugerenciasNombre, self)
@@ -236,11 +235,11 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         self.menuPase.show()
 
     def cargarDNI(self, nombre):
-        cur.execute("SELECT DNI FROM PROFESORES WHERE NOMBRE_APELLIDO=?", (nombre,))
+        db.cur.execute("SELECT DNI FROM PROFESORES WHERE NOMBRE_APELLIDO=?", (nombre,))
 
         sugerenciasDNI=[]
 
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasDNI.append(str(i[0]))
 
         cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
@@ -249,14 +248,14 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
     def confirmarr(self, datos):
-        cur.execute("SELECT * FROM PROFESORES WHERE DNI=?",(self.entry2.text(),))
-        datos=cur.fetchall()
-        cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
+        db.cur.execute("SELECT * FROM PROFESORES WHERE DNI=?",(self.entry2.text(),))
+        datos=db.cur.fetchall()
+        db.cur.execute("INSERT INTO PROFESORES_HISTORICOS VALUES(?, ?, ?, ?, ?) ", (
                 datos[0][0], datos[0][1], datos[0][2], dt.date.today().strftime('%Y/%m/%d'),
                                                                             datos[0][3],))
-        cur.execute('DELETE FROM PROFESORES WHERE ID=?', (datos[0][0], ))
+        db.cur.execute('DELETE FROM PROFESORES WHERE ID=?', (datos[0][0], ))
         registrarCambios("Pase historico individual", "Profesores historicos", datos[0][0], datos[0], None)
-        con.commit()
+        db.con.commit()
         mostrarMensaje("Information", "Aviso",
                     "Se ha pasado un alumno al registro histórico.")  
         #Se refrescan los datos.
@@ -277,10 +276,10 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
 
-            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
+            db.cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE PROF_INGRESO=? OR PROF_EGRESO=?', (idd, idd))
             tipo="Eliminación simple"
             tablas="Alumnos históricos"
-            if cur.fetchall():
+            if db.cur.fetchall():
                 tipo="Eliminación compleja"
                 tablas="Alumnos históricos Movimientos de herramientas"
                 resp = mostrarMensaje('Pregunta', 'Advertencia', 
@@ -293,12 +292,12 @@ como sus turnos y sus movimientos.
                 )
         
         if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
-            datosEliminados=cur.fetchall[0]
-            cur.execute('DELETE FROM PROFESORES_HISTORICOS WHERE ID=?', (idd,))
-            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=1 AND ID_PERSONA=?', (idd,))
-            cur.execute('UPDATE TURNO_PANOL SET PROFESOR_INGRESO=NULL WHERE PROFESOR_INGRESO=?', (idd,))
-            cur.execute('UPDATE TURNO_PANOL SET PROFESOR_EGRESO=NULL WHERE PROFESOR_EGRESO=?', (idd,))
+            db.cur.execute('SELECT * FROM PROFESORES_HISTORICOS WHERE ID=?', (idd,))
+            datosEliminados=db.cur.fetchall()[0]
+            db.cur.execute('DELETE FROM PROFESORES_HISTORICOS WHERE ID=?', (idd,))
+            db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=1 AND ID_PERSONA=?', (idd,))
+            db.cur.execute('UPDATE TURNO_PANOL SET PROFESOR_INGRESO=NULL WHERE PROFESOR_INGRESO=?', (idd,))
+            db.cur.execute('UPDATE TURNO_PANOL SET PROFESOR_EGRESO=NULL WHERE PROFESOR_EGRESO=?', (idd,))
             registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
-            con.commit()
+            db.con.commit()
             self.mostrarDatos()

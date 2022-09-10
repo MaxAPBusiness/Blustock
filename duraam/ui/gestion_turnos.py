@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
@@ -5,7 +6,7 @@ import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -59,7 +60,7 @@ class GestionTurnos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("ID")
@@ -117,83 +118,174 @@ class GestionTurnos(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
-            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
-            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
-            FROM TURNO_PANOL TURNO
-            JOIN ALUMNOS ALUMNO
-            ON TURNO.ID_ALUMNO = ALUMNO.ID
-            JOIN PROFESORES PROF_ING
-            ON TURNO.PROF_INGRESO = PROF_ING.ID
-            JOIN PROFESORES PROF_EGR
-            ON TURNO.PROF_EGRESO = PROF_EGR.ID
-            WHERE TURNO.ID LIKE ? 
-            OR TURNO.FECHA LIKE ? 
-            OR ALUMNO.NOMBRE_APELLIDO LIKE ?
-            OR TURNO.HORA_INGRESO LIKE ? 
-            OR TURNO.HORA_EGRESO LIKE ? 
-            OR PROF_ING.NOMBRE_APELLIDO LIKE ? 
-            OR PROF_EGR.NOMBRE_APELLIDO LIKE ?""", busqueda)
+            db.cur.execute(
+            """SELECT T.ID, T.FECHA, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
+                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+            ) AS ALUMNO, 
+            T.HORA_INGRESO, 
+            T.HORA_EGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
+                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+            ) AS PROFESOR_INGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
+                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+            ) AS PROFESOR_EGRESO
+            FROM TURNO_PANOL T
+            LEFT JOIN ALUMNOS A
+            ON T.ID_ALUMNO = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON T.ID_ALUMNO = AH.ID
+            LEFT JOIN PROFESORES P_ING
+            ON T.PROF_INGRESO = P_ING.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_ING
+            ON T.PROF_INGRESO = PH_ING.ID
+            LEFT JOIN PROFESORES P_EGR
+            ON T.PROF_EGRESO = P_EGR.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_EGR
+            ON T.PROF_EGRESO = PH_EGR.ID
+            WHERE T.ID LIKE ? 
+            OR T.FECHA LIKE ? 
+            OR ALUMNO LIKE ?
+            OR T.HORA_INGRESO LIKE ? 
+            OR T.HORA_EGRESO LIKE ? 
+            OR PROFESOR_INGRESO LIKE ? 
+            OR PROFESOR_EGRESO LIKE ?""", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="ID":
-            cur.execute("""
-            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
-            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
-            FROM TURNO_PANOL TURNO
-            JOIN ALUMNOS ALUMNO
-            ON TURNO.ID_ALUMNO = ALUMNO.ID
-            JOIN PROFESORES PROF_ING
-            ON TURNO.PROF_INGRESO = PROF_ING.ID
-            JOIN PROFESORES PROF_EGR
-            ON TURNO.PROF_EGRESO = PROF_EGR.ID
-            ORDER BY TURNO.ID
-            """)
+            db.cur.execute(
+            """SELECT T.ID, T.FECHA, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
+                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+            ) AS ALUMNO, 
+            T.HORA_INGRESO, 
+            T.HORA_EGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
+                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+            ) AS PROFESOR_INGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
+                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+            ) AS PROFESOR_EGRESO
+            FROM TURNO_PANOL T
+            LEFT JOIN ALUMNOS A
+            ON T.ID_ALUMNO = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON T.ID_ALUMNO = AH.ID
+            LEFT JOIN PROFESORES P_ING
+            ON T.PROF_INGRESO = P_ING.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_ING
+            ON T.PROF_INGRESO = PH_ING.ID
+            LEFT JOIN PROFESORES P_EGR
+            ON T.PROF_EGRESO = P_EGR.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_EGR
+            ON T.PROF_EGRESO = PH_EGR.ID
+            ORDER BY T.ID""")
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Alumno":
-            cur.execute("""
-            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
-            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
-            FROM TURNO_PANOL TURNO
-            JOIN ALUMNOS ALUMNO
-            ON TURNO.ID_ALUMNO = ALUMNO.ID
-            JOIN PROFESORES PROF_ING
-            ON TURNO.PROF_INGRESO = PROF_ING.ID
-            JOIN PROFESORES PROF_EGR
-            ON TURNO.PROF_EGRESO = PROF_EGR.ID
-            ORDER BY ALUMNO.NOMBRE_APELLIDO
-            """)
+            db.cur.execute(
+            """SELECT T.ID, T.FECHA, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
+                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+            ) AS ALUMNO, 
+            T.HORA_INGRESO, 
+            T.HORA_EGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
+                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+            ) AS PROFESOR_INGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
+                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+            ) AS PROFESOR_EGRESO
+            FROM TURNO_PANOL T
+            LEFT JOIN ALUMNOS A
+            ON T.ID_ALUMNO = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON T.ID_ALUMNO = AH.ID
+            LEFT JOIN PROFESORES P_ING
+            ON T.PROF_INGRESO = P_ING.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_ING
+            ON T.PROF_INGRESO = PH_ING.ID
+            LEFT JOIN PROFESORES P_EGR
+            ON T.PROF_EGRESO = P_EGR.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_EGR
+            ON T.PROF_EGRESO = PH_EGR.ID
+            ORDER BY ALUMNO""")
         # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Fecha":
-            cur.execute("""
-            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
-            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
-            FROM TURNO_PANOL TURNO
-            JOIN ALUMNOS ALUMNO
-            ON TURNO.ID_ALUMNO = ALUMNO.ID
-            JOIN PROFESORES PROF_ING
-            ON TURNO.PROF_INGRESO = PROF_ING.ID
-            JOIN PROFESORES PROF_EGR
-            ON TURNO.PROF_EGRESO = PROF_EGR.ID
-            ORDER BY TURNO.FECHA
-            """)
+            db.cur.execute(
+            """SELECT T.ID, T.FECHA, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
+                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+            ) AS ALUMNO, 
+            T.HORA_INGRESO, 
+            T.HORA_EGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
+                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+            ) AS PROFESOR_INGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
+                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+            ) AS PROFESOR_EGRESO
+            FROM TURNO_PANOL T
+            LEFT JOIN ALUMNOS A
+            ON T.ID_ALUMNO = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON T.ID_ALUMNO = AH.ID
+            LEFT JOIN PROFESORES P_ING
+            ON T.PROF_INGRESO = P_ING.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_ING
+            ON T.PROF_INGRESO = PH_ING.ID
+            LEFT JOIN PROFESORES P_EGR
+            ON T.PROF_EGRESO = P_EGR.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_EGR
+            ON T.PROF_EGRESO = PH_EGR.ID
+            ORDER BY T.FECHA""")
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute("""
-            SELECT TURNO.ID, TURNO.FECHA, ALUMNO.NOMBRE_APELLIDO, TURNO.HORA_INGRESO, 
-            TURNO.HORA_EGRESO, PROF_ING.NOMBRE_APELLIDO, PROF_EGR.NOMBRE_APELLIDO 
-            FROM TURNO_PANOL TURNO
-            JOIN ALUMNOS ALUMNO
-            ON TURNO.ID_ALUMNO = ALUMNO.ID
-            JOIN PROFESORES PROF_ING
-            ON TURNO.PROF_INGRESO = PROF_ING.ID
-            JOIN PROFESORES PROF_EGR
-            ON TURNO.PROF_EGRESO = PROF_EGR.ID
-            """)
+            db.cur.execute(
+            """SELECT T.ID, T.FECHA, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
+                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+            ) AS ALUMNO, 
+            T.HORA_INGRESO, 
+            T.HORA_EGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
+                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+            ) AS PROFESOR_INGRESO, 
+            (CASE WHEN EXISTS(
+                    SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
+                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+            ) AS PROFESOR_EGRESO
+            FROM TURNO_PANOL T
+            LEFT JOIN ALUMNOS A
+            ON T.ID_ALUMNO = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON T.ID_ALUMNO = AH.ID
+            LEFT JOIN PROFESORES P_ING
+            ON T.PROF_INGRESO = P_ING.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_ING
+            ON T.PROF_INGRESO = PH_ING.ID
+            LEFT JOIN PROFESORES P_EGR
+            ON T.PROF_EGRESO = P_EGR.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH_EGR
+            ON T.PROF_EGRESO = PH_EGR.ID""")
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             return print("Error crítico: un bobi escribio la consulta mal.")
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -250,9 +342,9 @@ class GestionTurnos(qtw.QWidget):
         self.entry1 = qtw.QDateEdit()
         self.entry2 = qtw.QLineEdit()
 
-        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
+        db.cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
         sugerenciasAlumnos=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasAlumnos.append(i[0])
         cuadroSugerenciasAlumnos=qtw.QCompleter(sugerenciasAlumnos, self)
         cuadroSugerenciasAlumnos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -264,9 +356,9 @@ class GestionTurnos(qtw.QWidget):
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QLineEdit()
 
-        cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+        db.cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
         sugerenciasProfesores=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasProfesores.append(i[0])
         cuadroSugerenciasProfesores=qtw.QCompleter(sugerenciasProfesores, self)
         cuadroSugerenciasProfesores.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -340,40 +432,40 @@ class GestionTurnos(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM ALUMNOS
         WHERE NOMBRE_APELLIDO=?
         LIMIT 1
         """, (self.entry2.text().upper(),))
 
-        alumno=cur.fetchall()
+        alumno=db.cur.fetchall()
 
         if not alumno:
             return mostrarMensaje("Error", "Error", 
             "El alumno no está ingresado. Por favor, verifique que el alumno ingresado exista.")
 
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM PROFESORES
         WHERE NOMBRE_APELLIDO=?
         LIMIT 1
         """, (self.entry5.text().upper(),))
 
-        profeIngreso=cur.fetchall()
+        profeIngreso=db.cur.fetchall()
 
         if not profeIngreso:
             return mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el ingreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
         
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM PROFESORES
         WHERE NOMBRE_APELLIDO=?
         LIMIT 1
         """, (self.entry6.text().upper(),))
 
-        profeEgreso=cur.fetchall()
+        profeEgreso=db.cur.fetchall()
 
         if not profeEgreso:
             return mostrarMensaje("Error", "Error", 
@@ -389,9 +481,9 @@ class GestionTurnos(qtw.QWidget):
         if datos:
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
             try:
-                cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
-                datosViejos=cur.fetchall()[0]
-                cur.execute("""
+                db.cur.execute("SELECT * FROM TURNO_PANOL WHERE ID = ?", (datos[0],))
+                datosViejos=db.cur.fetchall()[0]
+                db.cur.execute("""
                 UPDATE TURNO_PANOL
                 SET FECHA = ?,
                 ID_ALUMNO = ?,
@@ -406,24 +498,24 @@ class GestionTurnos(qtw.QWidget):
                 ))
 
                 registrarCambios(
-                    "Edición", "Turnos del pañol", datos[0][0], f"{datosViejos}", f"{datosNuevos}"
-                    
+                    "Edición", "Turnos del pañol", datos[0], f"{datosViejos}", f"{datosNuevos}"
                     )
-                con.commit()
+                db.con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el movimiento.")           
 
             # Si no, se inserta la fila en la tabla de la base de datos.
-            except:
+            except BaseException as e:
+                print(e)
                 return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         else:
-            cur.execute(
+            db.cur.execute(
             "INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)", (
                 fecha, alumno[0][0], ingreso, egreso, profeIngreso[0][0], profeEgreso[0][0],
             ))
-            registrarCambios("Inserción", "Subgrupos", datos[0][0], None, datosNuevos)
-            con.commit()
+            registrarCambios("Inserción", "Subgrupos", datosNuevos[0], None, f"{datosNuevos}")
+            db.con.commit()
 
             mostrarMensaje("Information", "Aviso",
                         "Se ha ingresado un turno.")
@@ -441,15 +533,28 @@ class GestionTurnos(qtw.QWidget):
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                               '¿Está seguro que desea eliminar estos datos?')
         # si pulsó el boton de sí:
+        db.cur.execute("SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL=?", (idd,))
+        tipo="Eliminación simple"
+        tablas="Alumnos"
+        if db.cur.fetchall():
+            tipo="Eliminación compleja"
+            tablas="Alumnos Movimientos de herramientas"
+            resp=mostrarMensaje('Pregunta', 'Advertencia',
+"""
+Todavía hay movimientos registrados con este turno. 
+Eliminar el turno eliminará también TODOS los movimientos relacionados.
+¿Desea eliminarlo de todas formas?
+""")
         if resp == qtw.QMessageBox.StandardButton.Yes:
             botonClickeado = qtw.QApplication.focusWidget()
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute("SELECT * FROM TURNO_PANOL WHERE ID=?", (idd,))
-            datosEliminados=cur.fetchall()[0]
-            cur.execute('DELETE FROM TURNO_PANOL WHERE ID=?', (idd,))
-            registrarCambios("Eliminación", "Subgrupos", idd, datosEliminados, None)
-            con.commit()
+            db.cur.execute("SELECT * FROM TURNO_PANOL WHERE ID=?", (idd,))
+            datosEliminados=db.cur.fetchall()[0]
+            db.cur.execute('DELETE FROM TURNO_PANOL WHERE ID=?', (idd,))
+            db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL=?', (idd,))
+            registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
+            db.con.commit()
             self.mostrarDatos()

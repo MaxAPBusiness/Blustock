@@ -13,7 +13,7 @@ import os
 import datetime as dt
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -65,7 +65,7 @@ class GestionSubgrupos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar: ")
         self.radio1 = qtw.QRadioButton("Subgrupo")
@@ -122,22 +122,22 @@ class GestionSubgrupos(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("SELECT * FROM SUBGRUPOS WHERE ID LIKE ?", busqueda)
+            db.cur.execute("SELECT * FROM SUBGRUPOS WHERE ID LIKE ?", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Subgrupo":
-            cur.execute('SELECT * FROM SUBGRUPOS ORDER BY ID')
+            db.cur.execute('SELECT * FROM SUBGRUPOS ORDER BY ID')
         # Si el tipo es SUBGRUPO, se hace una query que selecciona todos los elementos y los ordena por su SUBGRUPO.
         elif consulta=="Grupo":
-            cur.execute('SELECT * FROM SUBGRUPOS ORDER BY GRUPO')
+            db.cur.execute('SELECT * FROM SUBGRUPOS ORDER BY GRUPO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM SUBGRUPOS')
+            db.cur.execute('SELECT * FROM SUBGRUPOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -195,9 +195,9 @@ class GestionSubgrupos(qtw.QWidget):
         
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
-        cur.execute("SELECT ID FROM GRUPOS")
+        db.cur.execute("SELECT ID FROM GRUPOS")
         sugerenciasGrupos=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasGrupos.append(i[0])
         cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
         cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -249,8 +249,8 @@ class GestionSubgrupos(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
-        cur.execute("SELECT ID FROM GRUPOS WHERE ID=?", (self.entry2.text(),))
-        grupo=cur.fetchall()
+        db.cur.execute("SELECT ID FROM GRUPOS WHERE ID=?", (self.entry2.text(),))
+        grupo=db.cur.fetchall()
         if not grupo:
             mostrarMensaje("Error", "Error", "El grupo no está ingresado. Asegúrese de ingresar el grupo primero")
 
@@ -258,13 +258,13 @@ class GestionSubgrupos(qtw.QWidget):
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
-                cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
-                datosViejos=cur.fetchall()[0]
+                db.cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
+                datosViejos=db.cur.fetchall()[0]
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("UPDATE SUBGRUPOS SET ID = ?, GRUPO = ? WHERE ID = ?", (
+                db.cur.execute("UPDATE SUBGRUPOS SET ID = ?, GRUPO = ? WHERE ID = ?", (
                     self.entry1.text().upper(), grupo[0][0], datos[0],
                 ))
-                cur.execute("UPDATE ALUMNOS SET SUBGRUPO=? WHERE SUBGRUPO=? AND GRUPO=?", (
+                db.cur.execute("UPDATE HERRAMIENTAS SET SUBGRUPO=? WHERE SUBGRUPO=? AND GRUPO=?", (
                     self.entry1.text().upper(), datos[0], grupo[0][0]
                 ))
 
@@ -273,7 +273,7 @@ class GestionSubgrupos(qtw.QWidget):
                     f"{(self.entry1.text().upper(), grupo[0][0])}"
                     )
                  
-                con.commit()
+                db.con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el subgrupo.")           
@@ -284,14 +284,14 @@ class GestionSubgrupos(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO SUBGRUPOS VALUES(?, ?) ", (
+                db.cur.execute("INSERT INTO SUBGRUPOS VALUES(?, ?) ", (
                      self.entry1.text().upper(), grupo[0][0], 
                 ))
                 registrarCambios(
-                    "Inserción", "Subgrupos", datos[0][0], None, 
-                    f"{self.entry1.text().upper()}, {grupo[0][0]}"
+                    "Inserción", "Subgrupos", self.entry1.text().upper(), None, 
+                    f"{(self.entry1.text().upper(), grupo[0][0])}"
                 )
-                con.commit()
+                db.con.commit()
 
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un subgrupo.")
@@ -318,11 +318,11 @@ class GestionSubgrupos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM SUBGRUPOS WHERE ID=?', (idd,))
-            datosEliminados=cur.fetchall()[0]
-            cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
-            cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
+            db.cur.execute('SELECT * FROM SUBGRUPOS WHERE ID=?', (idd,))
+            datosEliminados=db.cur.fetchall()[0]
+            db.cur.execute('DELETE FROM SUBGRUPOS WHERE ID=?', (idd,))
+            db.cur.execute('UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO=?', (idd,))
             registrarCambios("Eliminación simple", "Subgrupos", idd, f"{datosEliminados}", None)
-            con.commit()
+            db.con.commit()
             self.mostrarDatos()
 

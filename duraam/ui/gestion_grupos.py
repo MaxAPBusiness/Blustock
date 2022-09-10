@@ -6,17 +6,16 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
-from importlib.resources import is_resource
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
-from duraam.registrar_cambios import registrarCambios
+from registrar_cambios import registrarCambios
 
-# Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 import datetime as dt
+
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -66,7 +65,7 @@ class GestionGrupos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar: ")
         self.radio1 = qtw.QRadioButton("Ascendente")
@@ -123,22 +122,22 @@ class GestionGrupos(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("SELECT * FROM GRUPOS WHERE ID LIKE ?", busqueda)
+            db.cur.execute("SELECT * FROM GRUPOS WHERE ID LIKE ?", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Ascendente":
-            cur.execute('SELECT * FROM GRUPOS ORDER BY ID ASC')
+            db.cur.execute('SELECT * FROM GRUPOS ORDER BY ID ASC')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Descendente":
-            cur.execute('SELECT * FROM GRUPOS ORDER BY ID DESC')
+            db.cur.execute('SELECT * FROM GRUPOS ORDER BY ID DESC')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM GRUPOS')
+            db.cur.execute('SELECT * FROM GRUPOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -247,18 +246,18 @@ class GestionGrupos(qtw.QWidget):
         if datos:
             try:
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("UPDATE GRUPOS SET ID=? WHERE ID=?", (
+                db.cur.execute("UPDATE GRUPOS SET ID=? WHERE ID=?", (
                     self.entry1.text().upper(), datos[0],
                 ))
-                cur.execute("UPDATE HERRAMIENTAS SET GRUPO=? WHERE GRUPO=?", (
+                db.cur.execute("UPDATE HERRAMIENTAS SET GRUPO=? WHERE GRUPO=?", (
                     self.entry1.text().upper(), datos[0],
                 ))
-                cur.execute("UPDATE SUBGRUPOS SET GRUPO=? WHERE GRUPO=?", (
+                db.cur.execute("UPDATE SUBGRUPOS SET GRUPO=? WHERE GRUPO=?", (
                     self.entry1.text().upper(), datos[0],
                 ))
                 
                 registrarCambios("Edición", "Grupos", datos[0][0], datos[0][0], self.entry1.text().upper())
-                con.commit()
+                db.con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el grupo.") 
@@ -269,11 +268,11 @@ class GestionGrupos(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO GRUPOS VALUES(?) ", (
+                db.cur.execute("INSERT INTO GRUPOS VALUES(?) ", (
                      self.entry1.text().upper(),
                 ))
-                registrarCambios("Inserción", "Grupos", datos[0][0], None, self.entry1.text().upper())
-                con.commit()
+                registrarCambios("Inserción", "Grupos", self.entry1.text().upper(), None, self.entry1.text().upper())
+                db.con.commit()
 
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado un grupo.")
@@ -288,7 +287,7 @@ class GestionGrupos(qtw.QWidget):
 
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
-    def eliminar(self, idd):
+    def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
@@ -301,30 +300,32 @@ class GestionGrupos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute("SELECT GRUPO FROM HERRAMIENTAS WHERE GRUPO=?", (idd,))
-            herramientas=cur.fetchall()
-            cur.execute("SELECT GRUPO FROM SUBGRUPOS WHERE GRUPO=?", (idd,))
-            subgrupo=cur.fetchall()
+            db.cur.execute("SELECT GRUPO FROM HERRAMIENTAS WHERE GRUPO=?", (idd,))
+            herramientas=db.cur.fetchall()
+            db.cur.execute("SELECT GRUPO FROM SUBGRUPOS WHERE GRUPO=?", (idd,))
+            subgrupo=db.cur.fetchall()
             tipo="Eliminación simple"
             tablas="Alumnos"
             if herramientas or subgrupo:
                 tipo="Eliminación compleja"
                 tablas="Alumnos Movimientos de herramientas"
-                resp2=mostrarMensaje('Pregunta', 'Advertencia',
+                resp=mostrarMensaje('Pregunta', 'Advertencia',
 """
 Todavía hay herramientas y/o subgrupos cargados. 
 Eliminar el grupo eliminará también TODOS los datos en los que está ingresado.
 ¿Desea eliminarlo de todas formas?
 """)
-            else:
-                resp2=True
-            if resp2:
-                cur.execute('SELECT * FROM GRUPOS WHERE ID=?', (idd,))
-                datosEliminados=cur.fetchall()[0]
-                cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
-                cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
-                cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
+            if resp == qtw.QMessageBox.StandardButton.Yes:
+                db.cur.execute('SELECT * FROM GRUPOS WHERE ID=?', (idd,))
+                datosEliminados=db.cur.fetchall()[0]
+                db.cur.execute('SELECT ID FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
+                herramientas=db.cur.fetchall()
+                db.cur.execute('DELETE FROM GRUPOS WHERE ID=?', (idd,))
+                if herramientas:
+                    db.cur.execute('DELETE FROM HERRAMIENTAS WHERE GRUPO=?', (idd,))
+                    db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
+                db.cur.execute('DELETE FROM SUBGRUPOS WHERE GRUPO=?', (idd,))
                 registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
-                con.commit()
+                db.con.commit()
                 self.mostrarDatos()
 

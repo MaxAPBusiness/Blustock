@@ -11,17 +11,12 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 
 import datetime as dt
-import sqlite3 as db
+import db.inicializar_bbdd as db
 import os
+from registrar_cambios import registrarCambios
 
 # Se importa la función mostrarMensaje.
 from mostrar_mensaje import mostrarMensaje
-from main import userInfo
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -73,9 +68,9 @@ class GestionDeAdministradores(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM ADMINISTRADORES')
+        db.cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM ADMINISTRADORES')
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
@@ -103,7 +98,6 @@ class GestionDeAdministradores(qtw.QWidget):
     def degradar(self):
             # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
-        global userInfo
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                 '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
@@ -113,20 +107,10 @@ class GestionDeAdministradores(qtw.QWidget):
                 # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            cur.execute("SELECT * FROM ADMINISTRADORES WHERE USUARIO=?", (idd,)) 
-            datos=cur.fetchall()
-            cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
-            cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
-
-            if userInfo[1]:
-                cur.execute('SELECT ID FROM ADMINISTRADORES WHERE USUARIO=?',(userInfo[0]))
-            else:
-                cur.execute('SELECT ID FROM USUARIOS WHERE USUARIO=?',(userInfo[0]))
-            userId=cur.fetchall()[0][0]
-            
-            cur.execute('INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)', 
-            (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
-            "Descenso", "Administradores Usuarios", datos[0][0], None, 
-            f"NOMBRE: {datos[0][3]} USUARIO: {datos[0][1]}"))
-            con.commit()
+            db.cur.execute("SELECT * FROM ADMINISTRADORES WHERE USUARIO=?", (idd,)) 
+            datos=db.cur.fetchall()
+            db.cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
+            db.cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
+            registrarCambios("Descenso", "Administradores Usuarios", datos[0][0], None, f"NOMBRE: {datos[0][3]} USUARIO: {datos[0][1]}")
+            db.con.commit()
             self.mostrarDatos()

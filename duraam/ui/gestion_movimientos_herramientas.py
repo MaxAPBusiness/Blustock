@@ -13,7 +13,7 @@ import datetime as dt
 import os
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -64,7 +64,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Listado"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Listado"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.grupo1 = qtw.QButtonGroup(self)
@@ -103,8 +103,6 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.estado.addItem("Cualquiera")
         self.estado.addItem("Retiro")
         self.estado.addItem("Devolución")
-        self.retiro.toggled.connect(lambda:self.mostrarDatos("Listado", "", 0))
-        self.devolucion.toggled.connect(lambda:self.mostrarDatos("Listado", "", 1))
 
         self.container1=qtw.QWidget()
         self.container1Layout=qtw.QGridLayout()
@@ -143,8 +141,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.container2Layout.addWidget(self.label6)
         self.container2Layout.addWidget(self.herramienta)
         self.container2Layout.addWidget(self.label7)
-        self.container2Layout.addWidget(self.retiro, 0)
-        self.container2Layout.addWidget(self.devolucion, 1)
+        self.container2Layout.addWidget(self.estado)
         self.container2.setLayout(self.container2Layout)
         layout.addWidget(self.container2)
 
@@ -196,55 +193,92 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                     ordenStatement="ORDER BY M.FECHA"
  
 
-            cur.execute(f"""
-            SELECT M.ID, H.DESC_LARGA, 
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            db.cur.execute(
+            f""" SELECT M.ID, H.DESC_LARGA, 
+            (
+                CASE WHEN M.CLASE = 0 THEN 
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM ALUMNOS WHERE M.ID_PERSONA = A.ID) 
+                    THEN A.NOMBRE_APELLIDO 
+                    ELSE AH.NOMBRE_APELLIDO END
+                ELSE
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM PROFESORES WHERE M.ID_PERSONA = P.ID) 
+                    THEN P.NOMBRE_APELLIDO 
+                    ELSE PH.NOMBRE_APELLIDO END
+                END
+            ) AS NOMBRE,
+            (CASE WHEN M.CLASE = 0 THEN "Alumno" ELSE "Profesor" END) AS CLASE, 
+            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
             LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON M.ID_PERSONA = AH.ID
             LEFT JOIN PROFESORES P
             ON M.ID_PERSONA = P.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH
+            ON M.ID_PERSONA = PH.ID
             WHERE (H.DESC_LARGA LIKE ? 
             OR NOMBRE LIKE ? 
             OR M.ID LIKE ?
             OR M.FECHA LIKE ? 
             OR M.CANTIDAD LIKE ? 
-            OR M.CLASE LIKE ? 
+            OR CLASE LIKE ? 
             OR M.ID_TURNO_PANOL LIKE ?)
             AND NOMBRE LIKE ?
             AND H.DESC_LARGA LIKE ?
             AND M.TIPO LIKE ?
-            {ordenStatement}
-            """, (f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
-                                                f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{persona}%", f"%{herramientaABuscar}%", f"%{estado}%",))
+            {ordenStatement}""", (f"%{self.buscar.text()}%", 
+            f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
+            f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
+            f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
+            f"%{persona}%", f"%{herramientaABuscar}%", f"%{estado}%",)
+            )
+
             
             query = []
-            fetch=cur.fetchall()
+            fetch=db.cur.fetchall()
             for i in fetch:
-                fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
+                fecha = qtc.QDateTime.fromString(i[4], "dd/MM/yyyy hh:mm:ss")
                 if fecha >= self.date1.date() and fecha <= self.date2.date():
                     query.append(i)
             
 
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute("""
-            SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            db.cur.execute(
+            """SELECT M.ID, H.DESC_LARGA, 
+            (
+                CASE WHEN M.CLASE = 0 THEN 
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM ALUMNOS WHERE M.ID_PERSONA = A.ID) 
+                    THEN A.NOMBRE_APELLIDO 
+                    ELSE AH.NOMBRE_APELLIDO END
+                ELSE
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM PROFESORES WHERE M.ID_PERSONA = P.ID) 
+                    THEN P.NOMBRE_APELLIDO 
+                    ELSE PH.NOMBRE_APELLIDO END
+                END
+            ) AS NOMBRE,
+            (CASE WHEN M.CLASE = 0 THEN "Alumno" ELSE "Profesor" END) AS CLASE, 
+            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
             LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON M.ID_PERSONA = AH.ID
             LEFT JOIN PROFESORES P
             ON M.ID_PERSONA = P.ID
-            """)
+            LEFT JOIN PROFESORES_HISTORICOS PH
+            ON M.ID_PERSONA = PH.ID""")
 
-            query=cur.fetchall()
+            query=db.cur.fetchall()
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobi escribio la consulta mal.")
@@ -296,16 +330,16 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         self.persona.addItem("Todos")
         self.herramienta.clear()
         self.herramienta.addItem("Todas")
-        cur.execute("SELECT DISTINCT ID_PERSONA, CLASE FROM MOVIMIENTOS_HERRAMIENTAS")
-        query=cur.fetchall()
+        db.cur.execute("SELECT DISTINCT ID_PERSONA, CLASE FROM MOVIMIENTOS_HERRAMIENTAS")
+        query=db.cur.fetchall()
         for i in query:
             if i[1]:
-                cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES WHERE ID=?", (i[0],))
-                self.persona.addItem(f"PROFESOR {cur.fetchall()[0][0]}")
+                db.cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES WHERE ID=?", (i[0],))
+                self.persona.addItem(f"PROFESOR {db.cur.fetchall()[0][0]}")
             else:
-                cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE ID=?", (i[0],))
-                nombre=cur.fetchall()[0][0]
-                cur.execute("""
+                db.cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE ID=?", (i[0],))
+                nombre=db.cur.fetchall()[0][0]
+                db.cur.execute("""
                 SELECT CURSO
                 FROM ALUMNOS
                 WHERE ID IN (
@@ -314,13 +348,13 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                     WHERE ID=? AND CLASE=0
                 )
                 """, (i[0],))
-                self.persona.addItem(f"ALUMNO {cur.fetchall()[0][0]} {nombre}")
+                self.persona.addItem(f"ALUMNO {db.cur.fetchall()[0][0]} {nombre}")
 
-        cur.execute("SELECT DISTINCT ID_HERRAMIENTA FROM MOVIMIENTOS_HERRAMIENTAS")
-        query=cur.fetchall()
+        db.cur.execute("SELECT DISTINCT ID_HERRAMIENTA FROM MOVIMIENTOS_HERRAMIENTAS")
+        query=db.cur.fetchall()
         for i in query:
-            cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS WHERE ID=?", (i[0],))
-            self.herramienta.addItem(cur.fetchall()[0][0])
+            db.cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS WHERE ID=?", (i[0],))
+            self.herramienta.addItem(db.cur.fetchall()[0][0])
         
         self.persona.currentIndexChanged.connect(lambda:self.mostrarDatos("Listado"))
     # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
@@ -346,9 +380,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         
         # Crea los entries.
         self.entry1 = qtw.QLineEdit()
-        cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS")
+        db.cur.execute("SELECT DESC_LARGA FROM HERRAMIENTAS")
         sugerenciasHerramientas=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasHerramientas.append(i[0])
         cuadroSugerenciasHerramientas=qtw.QCompleter(sugerenciasHerramientas, self)
         cuadroSugerenciasHerramientas.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -362,7 +396,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         agruparClase.addButton(self.radio1, 0)
         agruparClase.addButton(self.radio2, 1)
 
-        self.entry3= qtw.QDateEdit()
+        self.entry3= qtw.QDateTimeEdit()
         self.entry4 = qtw.QSpinBox()
         self.radio3 = qtw.QRadioButton("Retiro")
         self.radio4 = qtw.QRadioButton("Devolución")
@@ -408,19 +442,20 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # Se les añade a los entries sus valores por defecto.
             self.entry1.setText(datos[1])
             self.entry2.setText(datos[2])
-            if datos[3]:
+
+            if int(datos[3]):
                 self.radio2.toggle()
             else:
                 self.radio1.toggle()
 
-            qdate = qtc.QDate.fromString(datos[4], "dd/MM/yyyy")
-            self.entry3.setDate(qdate)
+            qdate = qtc.QDateTime.fromString(datos[4], "yyyy/MM/dd hh:mm:ss")
+            self.entry3.setDateTime(qdate)
 
             self.entry4.setValue(int(datos[5]))
-            if datos[6]:
-                self.radio2.toggle()
+            if int(datos[6]):
+                self.radio4.toggle()
             else:
-                self.radio1.toggle()
+                self.radio3.toggle()
             self.entry6.setValue(int(datos[6]))
             self.edita.setWindowTitle("Editar")
 
@@ -454,14 +489,14 @@ class GestionMovimientosHerramientas(qtw.QWidget):
     def cambiarClase(self, clase):
         if clase=="Alumno":
             self.clase=0
-            cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
+            db.cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
         elif clase=="Profesor":
             self.clase=1
-            cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+            db.cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
         else:
             return print("XDDDDDDD")
         sugerencias=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerencias.append(i[0])
         cuadroSugerencias=qtw.QCompleter(sugerencias, self)
         cuadroSugerencias.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -477,13 +512,13 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
         global mostrarMensaje
 
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM HERRAMIENTAS
         WHERE DESC_LARGA=? 
         LIMIT 1""", (self.entry1.text().upper(),))
 
-        herramienta=cur.fetchall()
+        herramienta=db.cur.fetchall()
 
         if not herramienta:
             mostrarMensaje("Error", "Error", 
@@ -491,49 +526,49 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             return
         
         if self.clase:
-            cur.execute("""
+            db.cur.execute("""
             SELECT ID
             FROM PROFESORES
             WHERE NOMBRE_APELLIDO=?
             LIMIT 1
             """, (self.entry2.text().upper(),))
 
-            persona=cur.fetchall()
+            persona=db.cur.fetchall()
 
             if not persona:
                 mostrarMensaje("Error", "Error", 
-                "El profesor no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
+                "El profesor no está ingresado. Por favor, verifique que el profesor ingresado es correcto.")
                 return
         else:
-            cur.execute("""
+            db.cur.execute("""
             SELECT ID
             FROM ALUMNOS
             WHERE NOMBRE_APELLIDO=?
             LIMIT 1
             """, (self.entry2.text().upper(),))
 
-            persona=cur.fetchall()
+            persona=db.cur.fetchall()
 
             if not persona:
                 mostrarMensaje("Error", "Error", 
-                "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcta.")
+                "El alumno no está ingresado. Por favor, verifique que el alumno ingresado es correcto.")
                 return
         
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM TURNO_PANOL
         WHERE ID=?
         LIMIT 1
         """, (self.entry6.value(),))
 
-        turnoPanol=cur.fetchall()
+        turnoPanol=db.cur.fetchall()
 
         if not turnoPanol:
             mostrarMensaje("Error", "Error", 
             "El turno no está registrado. Por favor, verifique que el turno registrado es correcto.")
             return
 
-        fecha=self.entry3.date().toString("dd/MM/yyyy")
+        fecha=self.entry3.dateTime().toString("dd/MM/yyyy hh:mm:ss")
         
         datosNuevos=(
             herramienta[0][0], persona[0][0], self.clase, fecha, self.entry4.text(), self.tipo, 
@@ -541,19 +576,36 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             )
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
-            cur.execute("""SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            db.cur.execute("""SELECT M.ID, H.DESC_LARGA, 
+            (
+                CASE WHEN M.CLASE = 0 THEN 
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM ALUMNOS WHERE M.ID_PERSONA = A.ID) 
+                    THEN A.NOMBRE_APELLIDO 
+                    ELSE AH.NOMBRE_APELLIDO END
+                ELSE
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM PROFESORES WHERE M.ID_PERSONA = P.ID) 
+                    THEN P.NOMBRE_APELLIDO 
+                    ELSE PH.NOMBRE_APELLIDO END
+                END
+            ) AS NOMBRE,
+            (CASE WHEN M.CLASE = 0 THEN "Alumno" ELSE "Profesor" END) AS CLASE, 
+            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
             LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON M.ID_PERSONA = AH.ID
             LEFT JOIN PROFESORES P
-            ON M.ID_PERSONA = P.ID""")
-            datosViejos=cur.fetchall()
+            ON M.ID_PERSONA = P.ID
+            LEFT JOIN PROFESORES_HISTORICOS PH
+            ON M.ID_PERSONA = PH.ID""")
+            datosViejos=db.cur.fetchall()
             # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-            cur.execute("""
+            db.cur.execute("""
             UPDATE MOVIMIENTOS_HERRAMIENTAS
             SET ID_HERRAMIENTA=?,
             ID_PERSONA=?,
@@ -570,22 +622,22 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             registrarCambios(
                 "Edición", "Movimientos de herramientas", datos[0][0], f"{datosViejos}", f"{datosNuevos}"
                 )
-            con.commit()
+            db.con.commit()
             # Se muestra el mensaje exitoso.
             mostrarMensaje("Information", "Aviso",
                         "Se ha actualizado el movimiento.")           
 
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
-            cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", datosNuevos)
-            registrarCambios("Inserción", "Movimientos de herramientas", datos[0][0], None, f"{datosNuevos}") 
-            con.commit()
+            db.cur.execute("INSERT INTO MOVIMIENTOS_HERRAMIENTAS VALUES(NULL,?,?,?,?,?,?,?)", datosNuevos)
+            registrarCambios("Inserción", "Movimientos de herramientas", datosNuevos[0], None, f"{datosNuevos}") 
+            db.con.commit()
             mostrarMensaje("Information", "Aviso",
                         "Se ha ingresado un movimiento.")
             
         
         #Se refrescan los datos.
-        self.refreshPersonas()
+        self.refreshListas()
         self.mostrarDatos()
         self.edita.close()
 
@@ -593,7 +645,6 @@ class GestionMovimientosHerramientas(qtw.QWidget):
     # - idd: el id de la fila que se va a eliminar.
     def eliminar(self):
         # se obtiene la función definida fuera de 
-        global userInfo
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                               '¿Está seguro que desea eliminar estos datos?')
@@ -603,21 +654,37 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            cur.execute("""
-            SELECT M.ID, H.DESC_LARGA,
-            (CASE WHEN M.CLASE = 0 THEN A.NOMBRE_APELLIDO ELSE P.NOMBRE_APELLIDO END) AS NOMBRE,
-            M.CLASE, M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
+            db.cur.execute("""
+            SELECT M.ID, H.DESC_LARGA, 
+            (
+                CASE WHEN M.CLASE = 0 THEN 
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM ALUMNOS WHERE M.ID_PERSONA = A.ID) 
+                    THEN A.NOMBRE_APELLIDO 
+                    ELSE AH.NOMBRE_APELLIDO END
+                ELSE
+                    CASE WHEN EXISTS(
+                        SELECT ID FROM PROFESORES WHERE M.ID_PERSONA = P.ID) 
+                    THEN P.NOMBRE_APELLIDO 
+                    ELSE PH.NOMBRE_APELLIDO END
+                END
+            ) AS NOMBRE,
+            (CASE WHEN M.CLASE = 0 THEN "Alumno" ELSE "Profesor" END) AS CLASE, 
+            M.FECHA, M.CANTIDAD, M.TIPO, M.ID_TURNO_PANOL
             FROM MOVIMIENTOS_HERRAMIENTAS M
             JOIN HERRAMIENTAS H
             ON M.ID_HERRAMIENTA = H.ID
             LEFT JOIN ALUMNOS A
             ON M.ID_PERSONA = A.ID
+            LEFT JOIN ALUMNOS_HISTORICOS AH
+            ON M.ID_PERSONA = AH.ID
             LEFT JOIN PROFESORES P
             ON M.ID_PERSONA = P.ID
-            WHERE ID=?""", (idd,))
-            datosEliminados=cur.fetchall()
+            LEFT JOIN PROFESORES_HISTORICOS PH
+            ON M.ID_PERSONA = PH.ID""", (idd,))
+            datosEliminados=db.cur.fetchall()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_HERRAMIENTA=?', (idd,))
+            db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID=?', (idd,))
             registrarCambios("Eliminación simple", "Movimientos de herramientas", idd, f"{datosEliminados}", None)
-            con.commit()
+            db.con.commit()
             self.mostrarDatos()

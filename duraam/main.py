@@ -37,14 +37,14 @@ import sys
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 
 # Importamos las pantallas y el codigo de BD
-from db.db import crearBBDD
-
+import db.inicializar_bbdd as db
 from crypt import encriptar, decriptar
 from mostrar_mensaje import mostrarMensaje
+import registrar_cambios as rc
+
 
 from ui.cabecera import Cabecera
 from ui.menu_izquierdo import MenuIzquierdo
@@ -63,14 +63,7 @@ from ui.gestion_registro_profesores_historicos import GestionRegistroProfesoresH
 from ui.solicitudes import Solicitudes
 from ui.gestion_usuarios import GestionDeUsuarios
 from ui.gestion_administradores import GestionDeAdministradores
-
-# Se crea la base de datos
-crearBBDD()
-
-os.chdir(f"{os.path.abspath(__file__)}/../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur = con.cursor()
-userInfo=["", 0]
+from ui.historial_de_cambios import HistorialDeCambios
 
 # Creamos la ventana principal
 
@@ -81,6 +74,7 @@ class MainWindow(qtw.QMainWindow):
         self.resize(1280, 1024)
         self.setWindowIcon(
             qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
         self.cabecera = Cabecera()
         self.cabecera.setObjectName("cabecera")
@@ -112,12 +106,15 @@ class MainWindow(qtw.QMainWindow):
         self.solicitudes= Solicitudes()
         self.usuarios= GestionDeUsuarios()
         self.administradores=GestionDeAdministradores()
+        self.historialDeCambios=HistorialDeCambios()
 
         # Añadimos las pantallas a la colección
-        self.pantallas = [self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos,
-                    self.turnos, self.alumnos, self.profesores, self.grupos, self.subgrupos,
-                    self.alumnosHistoricos, self.profesoresHistoricos, self.solicitudes, self.usuarios,
-                    self.administradores]
+        self.pantallas = [
+            self.iniciarSesion, self.registrarse, self.herramientas, self.movimientos,
+            self.turnos, self.alumnos, self.profesores, self.grupos, self.subgrupos,
+            self.alumnosHistoricos, self.profesoresHistoricos, self.solicitudes, self.usuarios,
+            self.administradores, self.historialDeCambios
+                    ]
         for i in self.pantallas:
             self.stack.addWidget(i)
 
@@ -141,6 +138,7 @@ class MainWindow(qtw.QMainWindow):
         self.menuIzquierdo.gestion10.toggled.connect(lambda: self.cambiarPantalla(11))
         self.menuIzquierdo.gestion11.toggled.connect(lambda: self.cambiarPantalla(12))
         self.menuIzquierdo.gestion12.toggled.connect(lambda: self.cambiarPantalla(13))
+        self.menuIzquierdo.gestion13.toggled.connect(lambda: self.cambiarPantalla(14))
         # Añadimos la colección a la ventana
         self.setCentralWidget(self.stack)
         self.stack.setSizePolicy(
@@ -155,10 +153,9 @@ class MainWindow(qtw.QMainWindow):
         app.closeAllWindows()
 
     def confirmarInicio(self):
-        global userInfo
-        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM ADMINISTRADORES WHERE USUARIO=?",
+        db.cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM ADMINISTRADORES WHERE USUARIO=?",
                     (self.iniciarSesion.entry1.text(),))
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         if query:
             try:
                 truePass=query[0][1].encode()
@@ -176,14 +173,14 @@ class MainWindow(qtw.QMainWindow):
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion11, self.menuIzquierdo.contador+3, 0)
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion12, self.menuIzquierdo.contador+4, 0)
                 self.stack.setCurrentIndex(2)
-                userInfo=[query[0][0], 1]
+                rc.userInfo=[query[0][0], 1]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return
 
-        cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=?",
+        db.cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=?",
                     (self.iniciarSesion.entry1.text(),))
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         if query:
             try:
                 truePass=query[0][1].encode()
@@ -198,14 +195,14 @@ class MainWindow(qtw.QMainWindow):
                 self.cabecera.usuario.clicked.connect(
                     lambda: self.informacionUsuario(query[0][2], query[0][0]))
                 self.stack.setCurrentIndex(2)
-                userInfo=[query[0][0], 0]
+                rc.userInfo=[query[0][0], 0]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return
         
-        cur.execute("SELECT USUARIO, CONTRASENA, ESTADO FROM SOLICITUDES WHERE USUARIO=?",
+        db.cur.execute("SELECT USUARIO, CONTRASENA, ESTADO FROM SOLICITUDES WHERE USUARIO=?",
                     (self.iniciarSesion.entry1.text(),))
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         if query:
             try:
                 truePass=query[0][1].encode()
@@ -220,7 +217,7 @@ class MainWindow(qtw.QMainWindow):
                 else:
                     mostrarMensaje("Advertencia", "Aviso", 
                 "La solicitud de registro de su cuenta fue rechazada. Si tiene algún inconveniente, póngase en contacto con algún administrador.")
-                    cur.execute("DELETE FROM SOLICITUDES WHERE USUARIO=?", (query[0][0],))
+                    db.cur.execute("DELETE FROM SOLICITUDES WHERE USUARIO=?", (query[0][0],))
             else:
                 return mostrarMensaje("Advertencia", "Error",
                                         "El usuario y la contraseña no coinciden. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
@@ -238,29 +235,29 @@ class MainWindow(qtw.QMainWindow):
         elif self.registrarse.entry3.text() != self.registrarse.entry4.text():
             return mostrarMensaje("Error", "Aviso", "Las contraseñas no coinciden. Por favor, revise los datos e ingrese nuevamente.")
 
-        cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?",
+        db.cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?",
                     (self.registrarse.entry2.text(),))
-        usuarioEncontrado=cur.fetchall()
-        cur.execute("SELECT USUARIO FROM SOLICITUDES WHERE USUARIO=?",
+        usuarioEncontrado=db.cur.fetchall()
+        db.cur.execute("SELECT USUARIO FROM SOLICITUDES WHERE USUARIO=?",
                     (self.registrarse.entry2.text(),))
-        solicitudEncontrada=cur.fetchall()
-        cur.execute("SELECT USUARIO FROM ADMINISTRADORES WHERE USUARIO=?",
+        solicitudEncontrada=db.cur.fetchall()
+        db.cur.execute("SELECT USUARIO FROM ADMINISTRADORES WHERE USUARIO=?",
                     (self.registrarse.entry2.text(),))
-        adminEncontrado=cur.fetchall()
+        adminEncontrado=db.cur.fetchall()
         if usuarioEncontrado or solicitudEncontrada or adminEncontrado:
             return mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese un usuario distinto.")
 
-        cur.execute("SELECT * FROM USUARIOS")
+        db.cur.execute("SELECT * FROM USUARIOS")
         password = encriptar(self.registrarse.entry3.text())
-        if cur.fetchall():
-            cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")',
+        if db.cur.fetchall():
+            db.cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")',
                         (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
             mostrarMensaje("Aviso", "Información",
                            "El registro se realizó correctamente. Recuerde que el administrador debe verificar su registro para que su usuario esté habilitado y pueda acceder.")
         else:
-            cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)",
+            db.cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)",
                         (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
-        con.commit()
+        db.con.commit()
         mostrarMensaje("Aviso", "Información",
                        "El registro se realizó correctamente.")
 

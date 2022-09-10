@@ -9,16 +9,11 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 
 # Se importa la función mostrarMensaje.
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -64,7 +59,7 @@ class HistorialDeCambios(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Listado"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Listado"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.grupo1 = qtw.QButtonGroup(self)
@@ -154,7 +149,7 @@ class HistorialDeCambios(qtw.QWidget):
         self.container2Layout.addWidget(self.label6)
         self.container2Layout.addWidget(self.tipo)
         self.container2Layout.addWidget(self.label7)
-        self.container2Layout.addWidget(self.tabla)
+        self.container2Layout.addWidget(self.seleccionarTabla)
         self.container2.setLayout(self.container2Layout)
         layout.addWidget(self.container2)
 
@@ -203,7 +198,7 @@ class HistorialDeCambios(qtw.QWidget):
                     ordenStatement="ORDER BY M.FECHA"
  
 
-            cur.execute(f"""
+            db.cur.execute(f"""
             SELECT (CASE WHEN H.ROL = 0 THEN U.NOMBRE_APELLIDO ELSE A.NOMBRE_APELLIDO END) AS NOMBRE,
             (CASE WHEN H.ROL = 0 THEN U.USUARIO ELSE A.USUARIO END) AS USUARIO,
             H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
@@ -228,7 +223,7 @@ class HistorialDeCambios(qtw.QWidget):
                     f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
             
             query = []
-            fetch=cur.fetchall()
+            fetch=db.cur.fetchall()
             for i in fetch:
                 fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
                 if fecha >= self.date1.date() and fecha <= self.date2.date():
@@ -237,7 +232,7 @@ class HistorialDeCambios(qtw.QWidget):
 
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('''
+            db.cur.execute('''
             SELECT (CASE WHEN H.ROL = 0 THEN U.NOMBRE_APELLIDO ELSE A.NOMBRE_APELLIDO END) AS NOMBRE,
             (CASE WHEN H.ROL = 0 THEN U.USUARIO ELSE A.USUARIO END) AS USUARIO,
             H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
@@ -248,7 +243,7 @@ class HistorialDeCambios(qtw.QWidget):
             ON A.ID = H.ID_USUARIO
             ''')
             # Se guarda la consulta en una variable.
-            query = cur.fetchall()
+            query = db.cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))

@@ -12,7 +12,7 @@ import PyQt6.QtGui as qtg
 import os
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -67,9 +67,9 @@ class GestionDeUsuarios(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM USUARIOS')
+        db.cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM USUARIOS')
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
@@ -115,12 +115,12 @@ class GestionDeUsuarios(qtw.QWidget):
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
-            datos=cur.fetchall()[0]
-            cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos)
-            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[1],))
+            db.cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
+            datos=db.cur.fetchall()[0]
+            db.cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos)
+            db.cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[1],))
             registrarCambios("Ascenso", "Usuarios Administradores", datos[0], f"{datos}", f"{datos}")
-            con.commit()
+            db.con.commit()
             self.mostrarDatos()
 
     def eliminar(self):
@@ -136,6 +136,9 @@ class GestionDeUsuarios(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
-            con.commit()
+            db.cur.execute("SELECT * FROM USUARIOS WHERE ID=?", (idd,))
+            datosEliminados=db.cur.fetchall()[0]
+            db.cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
+            registrarCambios("Eliminación simple", "Usuarios", idd, f"{datosEliminados}", None)
+            db.con.commit()
             self.mostrarDatos()

@@ -13,7 +13,7 @@ import os
 import datetime as dt
 
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
 
@@ -70,7 +70,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
@@ -135,11 +135,11 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(4): 
+            for i in range(6): 
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            db.cur.execute("""
             SELECT * FROM ALUMNOS_HISTORICOS 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
@@ -150,22 +150,22 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             """, busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY NOMBRE_APELLIDO')
+            db.cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY NOMBRE_APELLIDO')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="DNI":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY DNI')
+            db.cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY DNI')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Fecha":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY FECHA_SALIDA')
+            db.cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY FECHA_SALIDA')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS')
+            db.cur.execute('SELECT * FROM ALUMNOS_HISTORICOS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -200,10 +200,10 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
+            db.cur.execute('SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
             tipo="Eliminación simple"
             tablas="Alumnos históricos"
-            if cur.fetchall():
+            if db.cur.fetchall():
                 tipo="Eliminación compleja"
                 tablas="Alumnos históricos Movimientos de herramientas"
                 resp=mostrarMensaje('Pregunta', 'Advertencia', '''
@@ -214,13 +214,13 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 ¿Desea eliminarlo de todas formas?
 ''')
             if resp == qtw.QMessageBox.StandardButton.Yes:
-                cur.execute('SELECT * FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
-                datosEliminados=cur.fetchall[0]
-                cur.execute('DELETE FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
-                cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ROL=0 AND ID_PERSONA=?', (idd,))
-                cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL WHERE ID_ALUMNO=?', (idd,))
+                db.cur.execute('SELECT * FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
+                datosEliminados=db.cur.fetchall()[0]
+                db.cur.execute('DELETE FROM ALUMNOS_HISTORICOS WHERE ID=?', (idd,))
+                db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE CLASE=0 AND ID_PERSONA=?', (idd,))
+                db.cur.execute('UPDATE TURNO_PANOL SET ID_ALUMNO=NULL WHERE ID_ALUMNO=?', (idd,))
                 registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None,) 
-                con.commit()
+                db.con.commit()
                 self.mostrarDatos()
 
 
@@ -247,9 +247,9 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 
         sugerenciasNombre=[]
 
-        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE CURSO IN ('7A', '7B')")
+        db.cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE CURSO IN ('7A', '7B')")
 
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasNombre.append(i[0])
             
         cuadroSugerenciasNombre=qtw.QCompleter(sugerenciasNombre, self)
@@ -283,11 +283,11 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         self.menuPase.show()
 
     def cargarDNI(self, nombre):
-        cur.execute("SELECT DNI FROM ALUMNOS WHERE NOMBRE_APELLIDO=?", (nombre,))
+        db.cur.execute("SELECT DNI FROM ALUMNOS WHERE NOMBRE_APELLIDO=?", (nombre,))
 
         sugerenciasDNI=[]
 
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasDNI.append(str(i[0]))
 
         cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
@@ -300,15 +300,17 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         resp = mostrarMensaje("Pregunta", "Atención", 
         "¿Está seguro que desea pasar a este alumno al registro histórico? Esto no se puede deshacer")
         if resp:
-            cur.execute("SELECT * FROM ALUMNOS WHERE DNI=?",(self.entry2.text(),))
-            datos=cur.fetchall()
-            cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
+            db.cur.execute("SELECT * FROM ALUMNOS WHERE DNI=? AND CURSO IN ('7A', '7B')",(self.entry2.text(),))
+            datos=db.cur.fetchall()
+            if not datos:
+                return mostrarMensaje("Error", "Error", "El DNI no coincide con el alumno. Por favor, intente nuevamente.")
+            db.cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
                     datos[0][0], datos[0][1], datos[0][2], datos[0][3],
                     dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
             ))
-            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
-            registrarCambios("Pase historico individual", "Alumnos historicos", datos[0][0], datos[0], None,)
-            con.commit()
+            db.cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+            registrarCambios("Pase historico individual", "Alumnos historicos", datos[0][0], f"{datos[0]}", None,)
+            db.con.commit()
             mostrarMensaje("Information", "Aviso",
                         "Se ha pasado un alumno al registro histórico.")    
             #Se refrescan los datos.
@@ -327,12 +329,12 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         
         
         # Crea los entries. 
-        self.buscar = qtw.QLineEdit()
-        self.buscar.setObjectName("buscar")
+        self.buscarPase = qtw.QLineEdit()
+        self.buscarPase.setObjectName("buscar")
         # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
-        self.buscar.setClearButtonEnabled(True)
+        self.buscarPase.setClearButtonEnabled(True)
         # Se le pone el texto por defecto a la barra de búsqueda
-        self.buscar.setPlaceholderText("Buscar...")
+        self.buscarPase.setPlaceholderText("Buscar...")
         # Se importa el ícono de lupa para la barra.
         lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
         # Se crea un label que va a contener el ícono.
@@ -340,8 +342,8 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         icono.setObjectName("lupa")
         icono.setPixmap(lupa)
 
-        # Se le da la función de buscar los datos introducidos.
-        self.buscar.editingFinished.connect(lambda: self.mostrarDatosPase("Buscar"))
+        # Se le da la función de buscarPase los datos introducidos.
+        self.buscarPase.textEdited.connect(lambda: self.mostrarDatosPase("Buscar"))
 
         self.tablaListaAlumnos=qtw.QTableWidget()
         self.tablaListaAlumnos.setMaximumSize(400, 345)
@@ -366,7 +368,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
 
         layoutMenuPase = qtw.QGridLayout()
         layoutMenuPase.addWidget(titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layoutMenuPase.addWidget(self.buscar, 1, 0)
+        layoutMenuPase.addWidget(self.buscarPase, 1, 0)
         layoutMenuPase.addWidget(icono,1,0)
         layoutMenuPase.addWidget(self.tablaListaAlumnos, 2, 0, 1, 4)
         layoutMenuPase.addWidget(confirmar, 3, 0)
@@ -382,7 +384,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
         if consulta=="Buscar":
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            db.cur.execute("""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
             WHERE CURSO IN (?, ?)
@@ -390,9 +392,9 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
             OR DNI LIKE ?
             OR CURSO LIKE ?
             ORDER BY CURSO, ID""", (cursosPase[0], cursosPase[1], 
-            self.buscar.text(), self.buscar.text(), self.buscar.text()))
+            self.buscarPase.text(), self.buscarPase.text(), self.buscarPase.text()))
         elif consulta=="Normal":
-            cur.execute("""
+            db.cur.execute("""
             SELECT NOMBRE_APELLIDO, DNI, CURSO
             FROM ALUMNOS
             WHERE CURSO IN (?, ?)
@@ -402,7 +404,7 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
             print("Error crítico: un bobolon escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tablaListaAlumnos.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -422,17 +424,17 @@ por lo que sus registros de deudas se eliminarán y podría perderse informació
         for i in range(self.tablaListaAlumnos.rowCount()):
             datosGrupales=[]
             if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
-                cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (int(self.tablaListaAlumnos.item(i, 2).text())))
-                datos=cur.fetchall()
-                cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
+                db.cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (int(self.tablaListaAlumnos.item(i, 2).text())))
+                datos=db.cur.fetchall()
+                db.cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
                     datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
                     dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
                 ))
                 datosGrupales.append(datos[0][0])
-                cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
+                db.cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
         registrarCambios(
             "Pase historico grupal", "Alumnos historicos", datos[0][0], f"{datosGrupales}", None
             )
-        con.commit()
+        db.con.commit()
 
         

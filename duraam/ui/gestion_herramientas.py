@@ -6,17 +6,15 @@
 #                          Para editar y agregar, aparece un submenú con los datos a introducir.
 
 # Se importan las librerías.
-from atexit import register
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
 import datetime as dt
 # Se importa la función mostrarMensaje.
-from main import con, cur
+import db.inicializar_bbdd as db
 from mostrar_mensaje import mostrarMensaje
 from registrar_cambios import registrarCambios
-
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -67,7 +65,7 @@ class GestionHerramientas(qtw.QWidget):
         icono.setPixmap(lupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
+        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("Nombre")
@@ -126,7 +124,7 @@ class GestionHerramientas(qtw.QWidget):
                 # El valor añadido es el texto en la barra de búsqueda.
                 busqueda.append(f"%{self.buscar.text()}%")
             #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
+            db.cur.execute("""
             SELECT * FROM HERRAMIENTAS 
             WHERE ID LIKE ? 
             OR DESC_LARGA LIKE ? 
@@ -137,22 +135,22 @@ class GestionHerramientas(qtw.QWidget):
             OR SUBGRUPO LIKE ?""", busqueda)
         # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="Nombre":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY DESC_LARGA')
+            db.cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY DESC_LARGA')
         # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Grupo":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY GRUPO')
+            db.cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY GRUPO')
         # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Subgrupo":
-            cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY SUBGRUPO')
+            db.cur.execute('SELECT * FROM HERRAMIENTAS ORDER BY SUBGRUPO')
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            cur.execute('SELECT * FROM HERRAMIENTAS')
+            db.cur.execute('SELECT * FROM HERRAMIENTAS')
         # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
         else:
             print("Error crítico: un bobi escribio la consulta mal.")
             return
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        query = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(query))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
@@ -214,9 +212,9 @@ class GestionHerramientas(qtw.QWidget):
         self.entry4 = qtw.QSpinBox()
         self.entry5 = qtw.QLineEdit()
 
-        cur.execute("SELECT ID FROM GRUPOS")
+        db.cur.execute("SELECT ID FROM GRUPOS")
         sugerenciasGrupos=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasGrupos.append(i[0])
         cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
         cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -226,7 +224,7 @@ class GestionHerramientas(qtw.QWidget):
         self.entry6 = qtw.QLineEdit()
 
         sugerenciasGrupos=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasGrupos.append(i[0])
         cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
         cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -282,9 +280,9 @@ class GestionHerramientas(qtw.QWidget):
         self.edita.show()
     
     def cargarSubgrupos(self, grupo):
-        cur.execute("SELECT ID FROM SUBGRUPOS WHERE GRUPO=?", (grupo,))
+        db.cur.execute("SELECT ID FROM SUBGRUPOS WHERE GRUPO=?", (grupo,))
         sugerenciasSubgrupos=[]
-        for i in cur.fetchall():
+        for i in db.cur.fetchall():
             sugerenciasSubgrupos.append(i[0])
         cuadroSugerenciasSubgrupos=qtw.QCompleter(sugerenciasSubgrupos, self)
         cuadroSugerenciasSubgrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
@@ -299,24 +297,24 @@ class GestionHerramientas(qtw.QWidget):
             mostrarMensaje("Error", "Error", "La herramienta ingresada es demasiado larga. Ingresa una más corta.")
             return
 
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM GRUPOS
         WHERE ID=?""", (self.entry5.text().upper(),))
 
-        grupo=cur.fetchall()
+        grupo=db.cur.fetchall()
 
         if not grupo:
             mostrarMensaje("Error", "Error", 
             "El grupo no está ingresado. Por favor, verifique que el grupo ingresado es correcto.")
             return
 
-        cur.execute("""
+        db.cur.execute("""
         SELECT ID
         FROM SUBGRUPOS
         WHERE ID=?""", (self.entry6.text().upper(),))
 
-        subgrupo=cur.fetchall()
+        subgrupo=db.cur.fetchall()
 
         if not self.entry6.text() == "" and not subgrupo:
             mostrarMensaje("Error", "Error", 
@@ -331,10 +329,10 @@ class GestionHerramientas(qtw.QWidget):
         # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
         if datos:
             try:
-                cur.execute("SELECT * FROM HERRAMIENTAS WHERE ID=?", (datos[0][0]))
-                datosViejos=cur.fetchall()[0]
+                db.cur.execute("SELECT * FROM HERRAMIENTAS WHERE ID=?", (datos[0][0]))
+                datosViejos=db.cur.fetchall()[0]
                 # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
-                cur.execute("""
+                db.cur.execute("""
                 UPDATE HERRAMIENTAS 
                 SET ID=?, DESC_LARGA=?, CANT_CONDICIONES=?, CANT_REPARACION=?, CANT_BAJA=?, GRUPO=?, 
                 SUBGRUPO=?
@@ -343,7 +341,7 @@ class GestionHerramientas(qtw.QWidget):
                     datosNuevos[4], datosNuevos[5], datosNuevos[6],  datos[0],
                 ))
                 registrarCambios("Edición", "Herramientas", datos[0][0], f"{datosViejos}", f"{datosNuevos}")
-                con.commit()
+                db.con.commit()
                 # Se muestra el mensaje exitoso.
                 mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado la herramienta.")           
@@ -354,13 +352,14 @@ class GestionHerramientas(qtw.QWidget):
         # Si no, se inserta la fila en la tabla de la base de datos.
         else:
             try:
-                cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", datosNuevos)
-                registrarCambios( "Inserción", "Herramientas", datos[0][0], None, datosNuevos)
-                con.commit()
+                db.cur.execute("INSERT INTO HERRAMIENTAS VALUES(?, ?, ?, ?, ?, ?, ?) ", datosNuevos)
+                registrarCambios("Inserción", "Herramientas", datosNuevos[0], None, f"{datosNuevos}")
+                db.con.commit()
                 mostrarMensaje("Information", "Aviso",
                             "Se ha ingresado una herramienta.")
-            except:
+            except BaseException as e:
                 mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                print(e)
                 return
         
         #Se refrescan los datos.
@@ -372,7 +371,7 @@ class GestionHerramientas(qtw.QWidget):
     def eliminar(self):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
-        global userInfo
+
         # se le pregunta al usuario si desea eliminar la fila.
         resp = mostrarMensaje('Pregunta', 'Advertencia',
                               '¿Está seguro que desea eliminar estos datos?')
@@ -382,12 +381,12 @@ class GestionHerramientas(qtw.QWidget):
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            cur.execute('SELECT * FROM ALUMNOS WHERE ID=?', (idd,))
-            datosEliminados=cur.fetchall[0]
+            db.cur.execute('SELECT * FROM HERRAMIENTAS WHERE ID=?', (idd,))
+            datosEliminados=db.cur.fetchall()[0]
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
-            registrarCambios( "Eliminacion simple", "Herramientas", idd, f"{datosEliminados}", None)
-            con.commit()
+            db.cur.execute('DELETE FROM HERRAMIENTAS WHERE ID=?', (idd,))
+            registrarCambios("Eliminación simple", "Herramientas", idd, f"{datosEliminados}", None)
+            db.con.commit()
             self.mostrarDatos()
 
     # Función: closeEvent: funcion de qtmainwindow que se ejecuta automáticamente cuando se cierra la ventana principal. 
