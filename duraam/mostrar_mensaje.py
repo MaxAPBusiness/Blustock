@@ -1,5 +1,6 @@
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtGui as qtg
+from textwrap import dedent
 # Función mostrarMensaje: muestra un mensaje en la pantalla. Los argumentos son:
 # - title: funciona como el título del mensaje y también se usa para identificar el tipo de mensaje. Los tipos son:
 # - - Error: muestra un error.
@@ -28,13 +29,13 @@ def mostrarMensaje(title, msg, info):
         si = window.button(qtw.QMessageBox.StandardButton.Yes)
         si.setText('Sí')
     else:
-        print("Error de titulo")
-        return
+        return print("Error de titulo")
+
     
     # Se le da el título, el mensaje y la información adicional respectivamente.
     window.setWindowTitle(title)
     window.setText(msg)
-    window.setInformativeText(info)
+    window.setInformativeText(dedent(info))
 
     # La ventana se ejecuta. El return está para obtener la respuesta que el usuario dió en el caso de que algo se le preguntara.
     return window.exec()

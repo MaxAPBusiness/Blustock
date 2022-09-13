@@ -1,25 +1,20 @@
-# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
-#                          la tabla de la base de datos; una barra de buscador; botones para 
-#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
-#                          herramientas; botones para editar y eliminar los datos; un botón
-#                          para agregar herramientas. 
-#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+"""Este módulo crea una pantalla para gestionar la tabla de
+administradores. 
 
-# Se importan las librerías.
+El qwidget contiene
+
+"""
+
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-
-import datetime as dt
 import db.inicializar_bbdd as db
 import os
-from registrar_cambios import registrarCambios
 
-# Se importa la función mostrarMensaje.
+from registrar_cambios import registrarCambios
 from mostrar_mensaje import mostrarMensaje
 
 
-# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class GestionDeAdministradores(qtw.QWidget):
     # Se hace el init en donde se inicializan todos los elementos. 
     def __init__(self):
