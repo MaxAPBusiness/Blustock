@@ -10,10 +10,7 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
-
-# Se importa la función mostrarMensaje.
 import db.inicializar_bbdd as db
-from mostrar_mensaje import mostrarMensaje
 
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -45,21 +42,21 @@ class HistorialDeCambios(qtw.QWidget):
         self.tabla.setColumnWidth(2, 400)
 
         # Se crea una barra de búsqueda
-        self.buscar = qtw.QLineEdit()
-        self.buscar.setObjectName("buscar")
+        self.barraBusqueda = qtw.QLineEdit()
+        self.barraBusqueda.setObjectName("buscar")
         # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
-        self.buscar.setClearButtonEnabled(True)
+        self.barraBusqueda.setClearButtonEnabled(True)
         # Se le pone el texto por defecto a la barra de búsqueda
-        self.buscar.setPlaceholderText("Buscar...")
+        self.barraBusqueda.setPlaceholderText("Buscar...")
         # Se importa el ícono de lupa para la barra.
-        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        iconoLupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
         # Se crea un label que va a contener el ícono.
-        icono=qtw.QLabel()
-        icono.setObjectName("lupa")
-        icono.setPixmap(lupa)
+        contenedorIconoLupa=qtw.QLabel()
+        contenedorIconoLupa.setObjectName("lupa")
+        contenedorIconoLupa.setPixmap(iconoLupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Listado"))
+        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos("Listado"))
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.grupo1 = qtw.QButtonGroup(self)
@@ -130,8 +127,8 @@ class HistorialDeCambios(qtw.QWidget):
         layout = qtw.QVBoxLayout()
         layout.addWidget(self.titulo)
 
-        self.container1Layout.addWidget(self.buscar, 0, 0)
-        self.container1Layout.addWidget(icono, 0, 0)
+        self.container1Layout.addWidget(self.barraBusqueda, 0, 0)
+        self.container1Layout.addWidget(contenedorIconoLupa, 0, 0)
         self.container1Layout.addWidget(self.label2, 0, 1)
         self.container1Layout.addWidget(self.radio1, 0, 2)
         self.container1Layout.addWidget(self.radio2, 0, 3)
@@ -171,7 +168,7 @@ class HistorialDeCambios(qtw.QWidget):
     def mostrarDatos(self, consulta="Normal", orden=""):
          # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
         if consulta=="Listado":
-            #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
+            #Se hace la consulta: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             if self.usuario.currentText() == "Todos":
                 usuario=""
             else:
@@ -199,118 +196,121 @@ class HistorialDeCambios(qtw.QWidget):
  
 
             db.cur.execute(f"""
-            SELECT (CASE WHEN H.ROL = 0 THEN U.NOMBRE_APELLIDO ELSE A.NOMBRE_APELLIDO END) AS NOMBRE,
-            (CASE WHEN H.ROL = 0 THEN U.USUARIO ELSE A.USUARIO END) AS USUARIO,
+            SELECT (CASE WHEN H.ROL = 0 THEN U.nombre_apellido ELSE A.nombre_apellido END) AS NOMBRE,
+            (CASE WHEN H.ROL = 0 THEN U.usuario ELSE A.usuario END) AS usuario,
             H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
             FROM HISTORIAL_DE_CAMBIOS H
-            LEFT JOIN USUARIOS U
-            ON U.ID = H.ID_USUARIO
-            LEFT JOIN ADMINISTRADORES A
-            ON A.ID = H.ID_USUARIO
+            LEFT JOIN usuarioS U
+            ON U.ID = H.ID_usuario
+            LEFT JOIN administradores A
+            ON A.ID = H.ID_usuario
             WHERE (NOMBRE LIKE ? 
-            OR USUARIO LIKE ? 
+            OR usuario LIKE ? 
             OR H.FECHA_HORA LIKE ?
             OR H.TIPO LIKE ? 
             OR H.TABLA LIKE ? 
             OR H.ID_FILA LIKE ? 
             OR H.DATOS_VIEJOS LIKE ?
             OR H.DATOS_NUEVOS LIKE ?)
-            AND USUARIO LIKE ?
+            AND usuario LIKE ?
             AND H.TIPO LIKE ?
             AND H.TABLA LIKE ?
             {ordenStatement}
-            """, (f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", 
-                    f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{self.buscar.text()}%", f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
+            """, (f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%", 
+            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+            f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
             
-            query = []
+            consulta = []
             fetch=db.cur.fetchall()
             for i in fetch:
                 fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
                 if fecha >= self.date1.date() and fecha <= self.date2.date():
-                    query.append(i)
+                    consulta.append(i)
             
 
         # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
         elif consulta=="Normal":
-            db.cur.execute('''
-            SELECT (CASE WHEN H.ROL = 0 THEN U.NOMBRE_APELLIDO ELSE A.NOMBRE_APELLIDO END) AS NOMBRE,
-            (CASE WHEN H.ROL = 0 THEN U.USUARIO ELSE A.USUARIO END) AS USUARIO,
+            db.cur.execute("""
+            SELECT (CASE WHEN H.ROL = 0 THEN U.nombre_apellido ELSE A.nombre_apellido END) AS NOMBRE,
+            (CASE WHEN H.ROL = 0 THEN U.usuario ELSE A.usuario END) AS usuario,
             H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
             FROM HISTORIAL_DE_CAMBIOS H
-            LEFT JOIN USUARIOS U
-            ON U.ID = H.ID_USUARIO
-            LEFT JOIN ADMINISTRADORES A
-            ON A.ID = H.ID_USUARIO
-            ''')
+            LEFT JOIN usuarioS U
+            ON U.ID = H.ID_usuario
+            LEFT JOIN administradores A
+            ON A.ID = H.ID_usuario
+            """)
             # Se guarda la consulta en una variable.
-            query = db.cur.fetchall()
+            consulta = db.cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
+        self.tabla.setRowCount(len(consulta))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
         # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
-            self.tabla.setItem(i, 0, qtw.QTableWidgetItem(str(query[i][0])))
-            self.tabla.setItem(i, 1, qtw.QTableWidgetItem(str(query[i][1])))
-            self.tabla.setItem(i, 2, qtw.QTableWidgetItem(str(query[i][2])))
-            if query[i][3]=="Inserción":
-                if query[i][5]:
-                    textoId=f" de id {query[i][5]}"
+        for i in range(len(consulta)):
+            self.tabla.setItem(i, 0, qtw.QTableWidgetItem(str(consulta[i][0])))
+            self.tabla.setItem(i, 1, qtw.QTableWidgetItem(str(consulta[i][1])))
+            self.tabla.setItem(i, 2, qtw.QTableWidgetItem(str(consulta[i][2])))
+            if consulta[i][3]=="Inserción":
+                if consulta[i][5]:
+                    textoId=f" de id {consulta[i][5]}"
                 else:
                     textoId=""
-                descripcion=f"Agregó a la tabla {query[i][4]} la fila{textoId} con los datos {query[i][7]}."
+                descripcion=f"Agregó a la tabla {consulta[i][4]} la fila{textoId} con los datos {consulta[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Edición":
-                if query[i][5]:
-                    textoId=f" de id {query[i][5]}"
+            elif consulta[i][3]=="Edición":
+                if consulta[i][5]:
+                    textoId=f" de id {consulta[i][5]}"
                 else:
                     textoId=""
-                descripcion=f"Editó la fila{textoId} de la tabla {query[i][4]}, reemplazando los datos{query[i][6]} con los datos {query[i][7]}."
+                descripcion=f"Editó la fila{textoId} de la tabla {consulta[i][4]}, reemplazando los datos{consulta[i][6]} con los datos {consulta[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Eliminación simple":
-                if query[i][5]:
-                    textoId=f" de id {query[i][5]}"
+            elif consulta[i][3]=="Eliminación simple":
+                if consulta[i][5]:
+                    textoId=f" de id {consulta[i][5]}"
                 else:
                     textoId=""
-                descripcion=f"Eliminó de la tabla {query[i][4]} la fila{textoId} que tenía los datos {query[i][6]}."
+                descripcion=f"Eliminó de la tabla {consulta[i][4]} la fila{textoId} que tenía los datos {consulta[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Eliminación compleja":
-                if query[i][5]:
-                    textoId=f" de id {query[i][5]}"
+            elif consulta[i][3]=="Eliminación compleja":
+                if consulta[i][5]:
+                    textoId=f" de id {consulta[i][5]}"
                 else:
                     textoId=""
-                descripcion=f"Eliminó de la tabla {query[i][4]} la fila{textoId} que tenía los datos {query[i][6]}."
+                descripcion=f"Eliminó de la tabla {consulta[i][4]} la fila{textoId} que tenía los datos {consulta[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Pase Anual":
-                descripcion=f"Realizó el pase anual de los alumnos de id: {query[i][6]}."
+            elif consulta[i][3]=="Pase Anual":
+                descripcion=f"Realizó el pase anual de los alumnos de id: {consulta[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Pase historico individual":
-                descripcion=f"Realizó el pase histórico individual de {query[i][4]} de la persona de id: {query[i][5]}."
+            elif consulta[i][3]=="Pase historico individual":
+                descripcion=f"Realizó el pase histórico individual de {consulta[i][4]} de la persona de id: {consulta[i][5]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Pase historico grupal":
-                descripcion=f"Realizó el pase histórico grupal de {query[i][4]} de las personas de id: {query[i][6]}."
+            elif consulta[i][3]=="Pase historico grupal":
+                descripcion=f"Realizó el pase histórico grupal de {consulta[i][4]} de las personas de id: {consulta[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Verificación de solicitud":
-                descripcion=f"Aceptó la solicitud del usuario cuyos datos son: {query[i][7]}."
+            elif consulta[i][3]=="Verificación de solicitud":
+                descripcion=f"Aceptó la solicitud del usuario cuyos datos son: {consulta[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Rechazo de solicitud":
-                descripcion=f"Rechazó la solicitud del usuario cuyos datos eran: {query[i][6]}"
+            elif consulta[i][3]=="Rechazo de solicitud":
+                descripcion=f"Rechazó la solicitud del usuario cuyos datos eran: {consulta[i][6]}"
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif query[i][3]=="Ascenso":
-                descripcion=f"Ascendió al usuario con los datos: {query[i][7]} a administrador."
+            elif consulta[i][3]=="Ascenso":
+                descripcion=f"Ascendió al usuario con los datos: {consulta[i][7]} a administrador."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
             
-            elif query[i][3]=="Descenso":
-                descripcion=f"Descendió al administrador con los datos: {query[i][7]} a usuario."
+            elif consulta[i][3]=="Descenso":
+                descripcion=f"Descendió al administrador con los datos: {consulta[i][7]} a usuario."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
         
             self.tabla.setRowHeight(i, 35)

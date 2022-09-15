@@ -11,9 +11,9 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
 
-# Se importa la función mostrarMensaje.
+# Se importa la función m.mostrarMensaje.
 import db.inicializar_bbdd as db
-from mostrar_mensaje import mostrarMensaje
+import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -67,19 +67,19 @@ class GestionDeUsuarios(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        db.cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM USUARIOS')
+        db.cur.execute("SELECT usuario, nombre_apellido FROM usuarioS")
         # Se guarda la consulta en una variable.
-        query = db.cur.fetchall()
+        consulta = db.cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
+        self.tabla.setRowCount(len(consulta))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
         # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
+        for i in range(len(consulta)):
 
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
-            for j in range(len(query[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
+            for j in range(len(consulta[i])):
+                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
 
             self.tabla.setRowHeight(i, 35)
 
@@ -105,30 +105,27 @@ class GestionDeUsuarios(qtw.QWidget):
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
     def hacerAdmin(self):
-        global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea eliminar estos datos?')
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+                              "¿Está seguro que desea eliminar estos datos?")
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             botonClickeado = qtw.QApplication.focusWidget()
             # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            db.cur.execute("SELECT * FROM USUARIOS WHERE USUARIO=?", (idd,)) 
+            db.cur.execute("SELECT * FROM usuarioS WHERE usuario = ?", (idd,)) 
             datos=db.cur.fetchall()[0]
-            db.cur.execute('INSERT INTO ADMINISTRADORES VALUES (?, ?, ?, ?)', datos)
-            db.cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (datos[1],))
+            db.cur.execute("INSERT INTO administradores VALUES (?, ?, ?, ?)", datos)
+            db.cur.execute("DELETE FROM usuarioS WHERE usuario = ?", (datos[1],))
             registrarCambios("Ascenso", "Usuarios Administradores", datos[0], f"{datos}", f"{datos}")
             db.con.commit()
             self.mostrarDatos()
 
     def eliminar(self):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+                "¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.")
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
             botonClickeado = qtw.QApplication.focusWidget()
@@ -136,9 +133,9 @@ class GestionDeUsuarios(qtw.QWidget):
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            db.cur.execute("SELECT * FROM USUARIOS WHERE ID=?", (idd,))
+            db.cur.execute("SELECT * FROM usuarioS WHERE ID = ?", (idd,))
             datosEliminados=db.cur.fetchall()[0]
-            db.cur.execute('DELETE FROM USUARIOS WHERE USUARIO=?', (idd,))
+            db.cur.execute("DELETE FROM usuarioS WHERE usuario = ?", (idd,))
             registrarCambios("Eliminación simple", "Usuarios", idd, f"{datosEliminados}", None)
             db.con.commit()
             self.mostrarDatos()

@@ -71,19 +71,19 @@ class Solicitudes(qtw.QWidget):
     # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
     # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM SOLICITUDES WHERE ESTADO="Pendiente"')
+        cur.execute("SELECT USUARIO, nombre_apellido FROM SOLICITUDES WHERE ESTADO='Pendiente'")
         # Se guarda la consulta en una variable.
-        query = cur.fetchall()
+        consulta = cur.fetchall()
 
         # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
+        self.tabla.setRowCount(len(consulta))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
         # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
+        for i in range(len(consulta)):
 
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
-            for j in range(len(query[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
+            for j in range(len(consulta[i])):
+                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
 
             self.tabla.setRowHeight(i, 35)
 
@@ -94,7 +94,7 @@ class Solicitudes(qtw.QWidget):
             botonAceptar.setIconSize(qtc.QSize(25, 25))
             botonAceptar.setObjectName("aceptar")
 
-            botonAceptar.clicked.connect(lambda: self.aceptar(query[i][0]))
+            botonAceptar.clicked.connect(lambda: self.aceptar(consulta[i][0]))
             botonAceptar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonAceptar)
 
@@ -104,7 +104,7 @@ class Solicitudes(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/rechazar.png")))
             botonRechazar.setIconSize(qtc.QSize(25, 25))
             botonRechazar.setObjectName("rechazar")
-            botonRechazar.clicked.connect(lambda: self.rechazar(query[i][0]))
+            botonRechazar.clicked.connect(lambda: self.rechazar(consulta[i][0]))
             botonRechazar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonRechazar)
 
@@ -112,13 +112,13 @@ class Solicitudes(qtw.QWidget):
                 # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-'¿Está seguro que desea aceptar la solicitud? El usuario podrá acceder a todas las bases de datos.')
+        resp = mostrarMensaje("Pregunta", "Advertencia",
+"¿Está seguro que desea aceptar la solicitud? El usuario podrá acceder a todas las bases de datos.")
         if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM SOLICITUDES WHERE USUARIO=?", (idd,)) 
+            cur.execute("SELECT USUARIO, CONTRASENA, nombre_apellido FROM SOLICITUDES WHERE USUARIO = ?", (idd,)) 
             datos=cur.fetchall()
-            cur.execute('INSERT INTO USUARIOS VALUES (NULL, ?, ?, ?)', datos[0])
-            cur.execute('DELETE FROM SOLICITUDES WHERE USUARIO=?', (datos[0][0],))
+            cur.execute("INSERT INTO USUARIOS VALUES (NULL, ?, ?, ?)", datos[0])
+            cur.execute("DELETE FROM SOLICITUDES WHERE USUARIO = ?", (datos[0][0],))
             con.commit()
             self.mostrarDatos()
 
@@ -126,10 +126,10 @@ class Solicitudes(qtw.QWidget):
         # se obtiene la función definida fuera de la clase.
         global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea rechazar la solicitud?')
+        resp = mostrarMensaje("Pregunta", "Advertencia",
+                              "¿Está seguro que desea rechazar la solicitud?")
         # si pulsó el boton de sí:
         if resp == qtw.QMessageBox.StandardButton.Yes:
-            cur.execute('UPDATE SOLICITUDES SET ESTADO="Rechazado" WHERE USUARIO=?', (idd,))
+            cur.execute("UPDATE SOLICITUDES SET ESTADO='Rechazado' WHERE USUARIO = ?", (idd,))
             con.commit()
             self.mostrarDatos()

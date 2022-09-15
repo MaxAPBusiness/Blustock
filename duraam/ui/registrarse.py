@@ -12,7 +12,7 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
-from show_password import showPassword
+from mostrar_contrasena import mostrarContrasena
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -62,12 +62,12 @@ class Registrarse(qtw.QWidget):
         self.show1=qtw.QCheckBox()
         self.show2=qtw.QCheckBox()
 
-        self.show1.stateChanged.connect(lambda:showPassword(self.entry3, self.show1, self.show1.isChecked()))
-        self.show2.stateChanged.connect(lambda:showPassword(self.entry4, self.show2, self.show2.isChecked()))
+        self.show1.stateChanged.connect(lambda:mostrarContrasena(self.entry3, self.show1, self.show1.isChecked()))
+        self.show2.stateChanged.connect(lambda:mostrarContrasena(self.entry4, self.show2, self.show2.isChecked()))
         self.show1.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
         self.show2.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-        showPassword(self.entry3, self.show1, False)
-        showPassword(self.entry4, self.show2, False)
+        mostrarContrasena(self.entry3, self.show1, False)
+        mostrarContrasena(self.entry4, self.show2, False)
 
         self.show1.setObjectName("show")
         self.show2.setObjectName("show")

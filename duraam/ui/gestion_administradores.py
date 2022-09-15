@@ -1,10 +1,11 @@
 """Este módulo crea una pantalla para gestionar la tabla de
 administradores. 
 
-El qwidget contiene
-
+Clases
+------
+    GestionAdministradores:
+        Crea una pantalla para gestionar la tabla de administradores.
 """
-
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
@@ -12,100 +13,130 @@ import db.inicializar_bbdd as db
 import os
 
 from registrar_cambios import registrarCambios
-from mostrar_mensaje import mostrarMensaje
+import mostrar_mensaje as m
 
 
 class GestionDeAdministradores(qtw.QWidget):
-    # Se hace el init en donde se inicializan todos los elementos. 
+    """Esta clase crea una pantalla para gestionar la tabla de
+    administradores.
+
+    Hereda: PyQt6.QtWidgets.QWidget
+
+    Atributos
+    ---------
+        tabla : QTableWidget
+            la tabla de la pantalla.
+        campos : tuple
+            los títulos de las columnas de la tabla.
+        
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase GestionAdministradores.
+
+            Crea la pantalla, un QWidget, que contiene una tabla, un
+            QTableWidget, que muestra los datos de la tabla
+            administradores y botones para degradar su rol.
+            
+            Ver también
+            -----------
+            mostrarDatos: obtiene los datos de la tabla administradores
+                          y los introduce en la tabla de la pantalla.
+
+        mostrarDatos(self):
+            Obtiene los datos de la tabla administradores y los
+            introduce en la tabla de la pantalla.
+
+        degradar(self):
+            Degrada el rol del administrador a usuario.
+    """
     def __init__(self):
-        # Se inicializa la clase QWidget.
         super().__init__()
 
-        # Se crea el título.
         self.titulo=qtw.QLabel("Gestión de administradores")
         self.titulo.setObjectName("titulo")
 
-        # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
-
-        # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Usuario", "Nombre y Apellido", ""]      
-                                
-        # Se establece el número de columnas que va a tener. 
+        self.campos = ("Usuario", "Nombre y Apellido", "")                          
         self.tabla.setColumnCount(len(self.campos))
-        # Se introducen los títulos en la tabla.
         self.tabla.setHorizontalHeaderLabels(self.campos)
-
-        # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
-        # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(1, 125)
         self.tabla.setColumnWidth(2, 35)
-
-        # Se muestran los datos.
         self.mostrarDatos()
 
-        # Se crea el layout y se le añaden todos los widgets anteriores.
-        layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.tabla, 1, 0, 1, 9)
-
-        # Se le da el layout al widget central
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self.titulo)
+        layout.addWidget(self.tabla)
         self.setLayout(layout)
 
-
-# Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
-    # - consulta: muestra los datos de forma distinta según el tipo de consulta. Es opcional y, si no se introduce, su valor por defecto es normal. Valores:
-    # - - Normal: valor por defecto. Muestra todos los datos de la tabla de la base de datos.
-    # - - Buscar: Busca en la tabla de la base de datos las filas que contengan lo buscado.
-    # - - Nombre: Muestra todos los datos de la tabla de la base de datos ordenados por su nombre.
-    # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
-    # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
     def mostrarDatos(self):
-        db.cur.execute('SELECT USUARIO, NOMBRE_APELLIDO FROM ADMINISTRADORES')
-        # Se guarda la consulta en una variable.
-        query = db.cur.fetchall()
+        """Este método obtiene los datos de la tabla administradores y
+        los introduce en la tabla de la pantalla.
+        """
+        db.cur.execute("SELECT usuario, nombre_apellido FROM administradores")
+        consulta = db.cur.fetchall()
 
-        # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
-        # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
-        # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
+        self.tabla.setRowCount(len(consulta))
 
-            # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
-            for j in range(len(query[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
-
+        for i in range(len(consulta)):
+            for j in range(len(consulta[i])):
+                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
+            # Se crea el boton de editar con sus elementos necesarios.
             botonDegradar = qtw.QPushButton()
-            botonDegradar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/degradar.png")))
+            botonDegradar.setIcon(
+                qtg.QIcon(
+                    qtg.QPixmap(
+                        f"{os.path.abspath(os.getcwd())}/duraam/images/degradar.png"
+                        )
+                    )
+                )
             botonDegradar.setIconSize(qtc.QSize(25, 25))
             botonDegradar.setObjectName("aceptar")
-
             botonDegradar.clicked.connect(lambda: self.degradar())
             botonDegradar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonDegradar)
 
     def degradar(self):
-            # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
-        # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                '¿Está seguro que desea eliminar el usuario? No podrá volver a acceder al sistema.')
-        # si pulsó el boton de sí:
+        """Degrada el rol del administrador a usuario.
+
+        Elimina la fila de la tabla de administradores y la añade a la
+        tabla de usuarios.
+        """
+        # se le pregunta al usuario si desea degradar el administrador.
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+            "¿Está seguro que desea degradar al administrador?")
+        # si pulsó el boton de sí sigue el código.
         if resp == qtw.QMessageBox.StandardButton.Yes:    
             botonClickeado = qtw.QApplication.focusWidget()
-                # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
-            db.cur.execute("SELECT * FROM ADMINISTRADORES WHERE USUARIO=?", (idd,)) 
+            # Obtiene los datos del admin
+            db.cur.execute(
+                "SELECT * FROM administradores WHERE usuario = ?", 
+                (idd,)
+                ) 
             datos=db.cur.fetchall()
-            db.cur.execute('INSERT INTO USUARIOS VALUES (?, ?, ?, ?)', datos[0])
-            db.cur.execute('DELETE FROM ADMINISTRADORES WHERE USUARIO=?', (datos[0][1],))
-            registrarCambios("Descenso", "Administradores Usuarios", datos[0][0], None, f"NOMBRE: {datos[0][3]} USUARIO: {datos[0][1]}")
+
+            # Lo quita de la tabla de administradores y lo inserta en
+            # la tabla de usuarios.
+            db.cur.execute(
+                "INSERT INTO usuarios VALUES (?, ?, ?, ?)",
+                datos[0]
+                )
+            db.cur.execute(
+                "DELETE FROM administradores WHERE usuario = ?", 
+                (datos[0][1],)
+                )
+
+            # Se guardan los cambios y bla bla bla.
+            registrarCambios(
+                "Descenso", "Administradores Usuarios",
+                datos[0][0], None, 
+                f"Nombre: {datos[0][3]} Usuario: {datos[0][1]}"
+                )
             db.con.commit()
             self.mostrarDatos()

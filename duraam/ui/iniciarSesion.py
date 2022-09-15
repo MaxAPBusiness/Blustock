@@ -12,7 +12,7 @@ import PyQt6.QtGui as qtg
 import sqlite3 as db
 import os
 
-from show_password import showPassword
+from mostrar_contrasena import mostrarContrasena
 
 # Se hace una conexión a la base de datos
 os.chdir(f"{os.path.abspath(__file__)}/../../..")
@@ -32,8 +32,7 @@ class IniciarSesion(qtw.QWidget):
   Bienvenido al sistema de gestión de bases de datos del pañol!
   Inicia sesión
         """)
-        titulo.setObjectName("titulo") 
-        titulo.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        titulo.setObjectName("titulo")
 
         label1=qtw.QLabel("Usuario: ")
         label2=qtw.QLabel("Contraseña: ")
@@ -51,8 +50,8 @@ class IniciarSesion(qtw.QWidget):
         self.entry2.setMaxLength(20)
 
         self.show=qtw.QCheckBox()
-        self.show.stateChanged.connect(lambda:showPassword(self.entry2, self.show, self.show.isChecked()))
-        showPassword(self.entry2, self.show, False)
+        self.show.stateChanged.connect(lambda:mostrarContrasena(self.entry2, self.show, self.show.isChecked()))
+        mostrarContrasena(self.entry2, self.show, False)
         self.show.setObjectName("show")
         self.show.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 

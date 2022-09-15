@@ -42,7 +42,7 @@ import os
 # Importamos las pantallas y el codigo de BD
 import db.inicializar_bbdd as db
 from crypt import encriptar, decriptar
-from mostrar_mensaje import mostrarMensaje
+import mostrar_mensaje as m
 import registrar_cambios as rc
 
 
@@ -153,112 +153,112 @@ class MainWindow(qtw.QMainWindow):
         app.closeAllWindows()
 
     def confirmarInicio(self):
-        db.cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM ADMINISTRADORES WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario, CONTRASENA, nombre_apellido FROM administradores WHERE usuario = ?",
                     (self.iniciarSesion.entry1.text(),))
-        query = db.cur.fetchall()
-        if query:
+        consulta = db.cur.fetchall()
+        if consulta:
             try:
-                truePass=query[0][1].encode()
+                truePass=consulta[0][1].encode()
             except:
-                truePass=query[0][1]
+                truePass=consulta[0][1]
             
             if decriptar(truePass) == self.iniciarSesion.entry2.text():
-                mostrarMensaje(
-                    "Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
+                m.mostrarMensaje(
+                    "Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {consulta[0][2]}.")
                 self.menuIzquierdo.toggleViewAction().trigger()
                 self.cabecera.containerLayout.addWidget(self.cabecera.usuario)
                 self.cabecera.usuario.clicked.connect(
-                    lambda: self.informacionUsuario(query[0][2], query[0][0]))
+                    lambda: self.informacionUsuario(consulta[0][2], consulta[0][0]))
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion10, self.menuIzquierdo.contador+2, 0)
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion11, self.menuIzquierdo.contador+3, 0)
                 self.menuIzquierdo.containerLayout.addWidget(self.menuIzquierdo.gestion12, self.menuIzquierdo.contador+4, 0)
                 self.stack.setCurrentIndex(2)
-                rc.userInfo=[query[0][0], 1]
+                rc.userInfo=[consulta[0][0], 1]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return
 
-        db.cur.execute("SELECT USUARIO, CONTRASENA, NOMBRE_APELLIDO FROM USUARIOS WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario, CONTRASENA, nombre_apellido FROM usuarioS WHERE usuario = ?",
                     (self.iniciarSesion.entry1.text(),))
-        query = db.cur.fetchall()
-        if query:
+        consulta = db.cur.fetchall()
+        if consulta:
             try:
-                truePass=query[0][1].encode()
+                truePass=consulta[0][1].encode()
             except:
-                truePass=query[0][1]
+                truePass=consulta[0][1]
             
             if decriptar(truePass) == self.iniciarSesion.entry2.text():
-                mostrarMensaje(
-                    "Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {query[0][2]}.")
+                m.mostrarMensaje(
+                    "Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {consulta[0][2]}.")
                 self.menuIzquierdo.toggleViewAction().trigger()
                 self.cabecera.containerLayout.addWidget(self.cabecera.usuario)
                 self.cabecera.usuario.clicked.connect(
-                    lambda: self.informacionUsuario(query[0][2], query[0][0]))
+                    lambda: self.informacionUsuario(consulta[0][2], consulta[0][0]))
                 self.stack.setCurrentIndex(2)
-                rc.userInfo=[query[0][0], 0]
+                rc.userInfo=[consulta[0][0], 0]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
                 return
         
-        db.cur.execute("SELECT USUARIO, CONTRASENA, ESTADO FROM SOLICITUDES WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario, CONTRASENA, ESTADO FROM SOLICITUDES WHERE usuario = ?",
                     (self.iniciarSesion.entry1.text(),))
-        query = db.cur.fetchall()
-        if query:
+        consulta = db.cur.fetchall()
+        if consulta:
             try:
-                truePass=query[0][1].encode()
+                truePass=consulta[0][1].encode()
             except:
-                truePass=query[0][1]
+                truePass=consulta[0][1]
             
             
             if decriptar(truePass) == self.iniciarSesion.entry2.text():
-                if query[0][2]:
-                    return mostrarMensaje("Advertencia", "Aviso", 
+                if consulta[0][2]:
+                    return m.mostrarMensaje("Advertencia", "Aviso", 
                 "Su cuenta todavía no fue verificada. Por favor, espere a que su cuenta sea verificada. Si tiene inconvenientes, póngase en contacto con algún administrador.")
                 else:
-                    mostrarMensaje("Advertencia", "Aviso", 
+                    m.mostrarMensaje("Advertencia", "Aviso", 
                 "La solicitud de registro de su cuenta fue rechazada. Si tiene algún inconveniente, póngase en contacto con algún administrador.")
-                    db.cur.execute("DELETE FROM SOLICITUDES WHERE USUARIO=?", (query[0][0],))
+                    db.cur.execute("DELETE FROM SOLICITUDES WHERE usuario = ?", (consulta[0][0],))
             else:
-                return mostrarMensaje("Advertencia", "Error",
+                return m.mostrarMensaje("Advertencia", "Error",
                                         "El usuario y la contraseña no coinciden. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
         else:
-            return mostrarMensaje("Advertencia", "Error",
+            return m.mostrarMensaje("Advertencia", "Error",
                                   "El usuario no está registrado. Por favor, asegúrese que los datos son correctos e ingrese nuevamente.")
         
         
 
     def registrar(self):
         if len(self.registrarse.entry2.text()) < 8:
-            return mostrarMensaje("Error", "Aviso", "El usuario es demasiado corto. Por favor, ingrese uno más largo.")
+            return m.mostrarMensaje("Error", "Aviso", "El usuario es demasiado corto. Por favor, ingrese uno más largo.")
         elif len(self.registrarse.entry3.text()) < 8:
-            return mostrarMensaje("Error", "Aviso", "La contraseña es demasiado corta. Por favor, ingrese una más larga.")
+            return m.mostrarMensaje("Error", "Aviso", "La contraseña es demasiado corta. Por favor, ingrese una más larga.")
         elif self.registrarse.entry3.text() != self.registrarse.entry4.text():
-            return mostrarMensaje("Error", "Aviso", "Las contraseñas no coinciden. Por favor, revise los datos e ingrese nuevamente.")
+            return m.mostrarMensaje("Error", "Aviso", "Las contraseñas no coinciden. Por favor, revise los datos e ingrese nuevamente.")
 
-        db.cur.execute("SELECT USUARIO FROM USUARIOS WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario FROM usuarioS WHERE usuario = ?",
                     (self.registrarse.entry2.text(),))
         usuarioEncontrado=db.cur.fetchall()
-        db.cur.execute("SELECT USUARIO FROM SOLICITUDES WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario FROM SOLICITUDES WHERE usuario = ?",
                     (self.registrarse.entry2.text(),))
         solicitudEncontrada=db.cur.fetchall()
-        db.cur.execute("SELECT USUARIO FROM ADMINISTRADORES WHERE USUARIO=?",
+        db.cur.execute("SELECT usuario FROM administradores WHERE usuario = ?",
                     (self.registrarse.entry2.text(),))
         adminEncontrado=db.cur.fetchall()
         if usuarioEncontrado or solicitudEncontrada or adminEncontrado:
-            return mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese un usuario distinto.")
+            return m.mostrarMensaje("Error", "Error", "El usuario ya está ingresado. Por favor, ingrese un usuario distinto.")
 
-        db.cur.execute("SELECT * FROM USUARIOS")
+        db.cur.execute("SELECT * FROM usuarioS")
         password = encriptar(self.registrarse.entry3.text())
         if db.cur.fetchall():
-            db.cur.execute('INSERT INTO SOLICITUDES VALUES (?, ?, ?, "Pendiente")',
+            db.cur.execute("INSERT INTO SOLICITUDES VALUES (?, ?, ?, 'Pendiente')",
                         (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
-            mostrarMensaje("Aviso", "Información",
+            m.mostrarMensaje("Aviso", "Información",
                            "El registro se realizó correctamente. Recuerde que el administrador debe verificar su registro para que su usuario esté habilitado y pueda acceder.")
         else:
-            db.cur.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?)",
+            db.cur.execute("INSERT INTO usuarioS VALUES(NULL, ?, ?, ?)",
                         (self.registrarse.entry2.text(), password, self.registrarse.entry1.text().upper(),))
         db.con.commit()
-        mostrarMensaje("Aviso", "Información",
+        m.mostrarMensaje("Aviso", "Información",
                        "El registro se realizó correctamente.")
 
     def informacionUsuario(self, nombre, usuario):
@@ -284,8 +284,8 @@ class MainWindow(qtw.QMainWindow):
 
     def cerrarSesion(self):
         self.cabecera.usuario.clicked.disconnect()
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro de que desea cerrar la sesión?')
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+                              "¿Está seguro de que desea cerrar la sesión?")
         if resp==qtw.QMessageBox.StandardButton.Yes:
             self.cabecera.usuario.setParent(None)
             self.menuIzquierdo.toggleViewAction().trigger()
@@ -296,8 +296,8 @@ class MainWindow(qtw.QMainWindow):
     
     def salir(self):
         global app
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                            '¿Está seguro de que desea salir?')
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+                            "¿Está seguro de que desea salir?")
         if resp==qtw.QMessageBox.StandardButton.Yes:
             app.quit()
 
@@ -305,7 +305,7 @@ class MainWindow(qtw.QMainWindow):
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     window = MainWindow()
-    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion.qss", 'r') as qss:
+    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion.qss", "r") as qss:
         app.setStyleSheet(qss.read())
     window.show()
     app.exec()

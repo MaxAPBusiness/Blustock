@@ -5,9 +5,9 @@ import PyQt6.QtGui as qtg
 import datetime as dt
 import os
 
-# Se importa la función mostrarMensaje.
+# Se importa la función m.mostrarMensaje.
 import db.inicializar_bbdd as db
-from mostrar_mensaje import mostrarMensaje
+import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 # clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
@@ -46,21 +46,21 @@ class GestionTurnos(qtw.QWidget):
         self.mostrarDatos()
 
         # Se crea una barra de búsqueda
-        self.buscar = qtw.QLineEdit()
-        self.buscar.setObjectName("buscar")
+        self.barraBusqueda = qtw.QLineEdit()
+        self.barraBusqueda.setObjectName("buscar")
         # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
-        self.buscar.setClearButtonEnabled(True)
+        self.barraBusqueda.setClearButtonEnabled(True)
         # Se le pone el texto por defecto a la barra de búsqueda
-        self.buscar.setPlaceholderText("Buscar...")
+        self.barraBusqueda.setPlaceholderText("Buscar...")
         # Se importa el ícono de lupa para la barra.
-        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        iconoLupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
         # Se crea un label que va a contener el ícono.
-        icono=qtw.QLabel()
-        icono.setObjectName("lupa")
-        icono.setPixmap(lupa)
+        contenedorIconoLupa=qtw.QLabel()
+        contenedorIconoLupa.setObjectName("lupa")
+        contenedorIconoLupa.setPixmap(iconoLupa)
 
         # Se le da la función de buscar los datos introducidos.
-        self.buscar.textEdited.connect(lambda: self.mostrarDatos("Buscar"))
+        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos())
         # Se crean 3 botones de radio y un label para dar contexto.
         self.label2= qtw.QLabel("Ordenar por: ")
         self.radio1 = qtw.QRadioButton("ID")
@@ -70,24 +70,24 @@ class GestionTurnos(qtw.QWidget):
         self.radio2.setObjectName("Radio2")
         self.radio3.setObjectName("Radio3")
         # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("ID"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("Alumno"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
+        self.radio1.toggled.connect(lambda: self.mostrarDatos())
+        self.radio2.toggled.connect(lambda: self.mostrarDatos())
+        self.radio3.toggled.connect(lambda: self.mostrarDatos())
 
         # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
         self.agregar.setObjectName("agregar")
         # Se le da la función.
         self.agregar.clicked.connect(
-            lambda: self.modificarLinea('agregar'))
+            lambda: self.modificarLinea("agregar"))
         # Cuando el cursor pasa por el botón, cambia de forma.
         self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QGridLayout()
         layout.addWidget(self.titulo, 0, 1)
-        layout.addWidget(self.buscar, 1, 1)
-        layout.addWidget(icono,1,1)
+        layout.addWidget(self.barraBusqueda, 1, 1)
+        layout.addWidget(contenedorIconoLupa,1,1)
         layout.addWidget(self.label2, 1, 2)
         layout.addWidget(self.radio1, 1, 3)
         layout.addWidget(self.radio2, 1, 4)
@@ -111,28 +111,28 @@ class GestionTurnos(qtw.QWidget):
     def mostrarDatos(self, consulta="Normal"):
         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
         if consulta=="Buscar":
-            # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
+            # Se crea una lista para pasar por parámetro lo buscado en la consulta de la tabla de la base de datos.
             busqueda=[]
             # Por cada campo de la tabla, se añade un valor con el que se comparará.
             for i in range(7): 
                 # El valor añadido es el texto en la barra de búsqueda.
-                busqueda.append(f"%{self.buscar.text()}%")
-            #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
+                busqueda.append(f"%{self.barraBusqueda.text()}%")
+            #Se hace la consulta: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
             db.cur.execute(
             """SELECT T.ID, T.FECHA, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
-                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+                ) THEN A.nombre_apellido ELSE AH.nombre_apellido END
             ) AS ALUMNO, 
             T.HORA_INGRESO, 
             T.HORA_EGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
-                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+                ) THEN P_ING.nombre_apellido ELSE PH_ING.nombre_apellido END
             ) AS PROFESOR_INGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
-                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+                ) THEN P_EGR.nombre_apellido ELSE PH_EGR.nombre_apellido END
             ) AS PROFESOR_EGRESO
             FROM TURNO_PANOL T
             LEFT JOIN ALUMNOS A
@@ -154,23 +154,23 @@ class GestionTurnos(qtw.QWidget):
             OR T.HORA_EGRESO LIKE ? 
             OR PROFESOR_INGRESO LIKE ? 
             OR PROFESOR_EGRESO LIKE ?""", busqueda)
-        # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
+        # Si el tipo es nombre, se hace una consulta que selecciona todos los elementos y los ordena por su nombre.
         elif consulta=="ID":
             db.cur.execute(
             """SELECT T.ID, T.FECHA, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
-                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+                ) THEN A.nombre_apellido ELSE AH.nombre_apellido END
             ) AS ALUMNO, 
             T.HORA_INGRESO, 
             T.HORA_EGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
-                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+                ) THEN P_ING.nombre_apellido ELSE PH_ING.nombre_apellido END
             ) AS PROFESOR_INGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
-                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+                ) THEN P_EGR.nombre_apellido ELSE PH_EGR.nombre_apellido END
             ) AS PROFESOR_EGRESO
             FROM TURNO_PANOL T
             LEFT JOIN ALUMNOS A
@@ -186,23 +186,23 @@ class GestionTurnos(qtw.QWidget):
             LEFT JOIN PROFESORES_HISTORICOS PH_EGR
             ON T.PROF_EGRESO = PH_EGR.ID
             ORDER BY T.ID""")
-        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
+        # Si el tipo es grupo, se hace una consulta que selecciona todos los elementos y los ordena por su grupo.
         elif consulta=="Alumno":
             db.cur.execute(
             """SELECT T.ID, T.FECHA, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
-                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+                ) THEN A.nombre_apellido ELSE AH.nombre_apellido END
             ) AS ALUMNO, 
             T.HORA_INGRESO, 
             T.HORA_EGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
-                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+                ) THEN P_ING.nombre_apellido ELSE PH_ING.nombre_apellido END
             ) AS PROFESOR_INGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
-                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+                ) THEN P_EGR.nombre_apellido ELSE PH_EGR.nombre_apellido END
             ) AS PROFESOR_EGRESO
             FROM TURNO_PANOL T
             LEFT JOIN ALUMNOS A
@@ -218,23 +218,23 @@ class GestionTurnos(qtw.QWidget):
             LEFT JOIN PROFESORES_HISTORICOS PH_EGR
             ON T.PROF_EGRESO = PH_EGR.ID
             ORDER BY ALUMNO""")
-        # Si el tipo es subgrupo, se hace una query que selecciona todos los elementos y los ordena por su subgrupo.
+        # Si el tipo es subgrupo, se hace una consulta que selecciona todos los elementos y los ordena por su subgrupo.
         elif consulta=="Fecha":
             db.cur.execute(
             """SELECT T.ID, T.FECHA, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
-                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+                ) THEN A.nombre_apellido ELSE AH.nombre_apellido END
             ) AS ALUMNO, 
             T.HORA_INGRESO, 
             T.HORA_EGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
-                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+                ) THEN P_ING.nombre_apellido ELSE PH_ING.nombre_apellido END
             ) AS PROFESOR_INGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
-                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+                ) THEN P_EGR.nombre_apellido ELSE PH_EGR.nombre_apellido END
             ) AS PROFESOR_EGRESO
             FROM TURNO_PANOL T
             LEFT JOIN ALUMNOS A
@@ -256,17 +256,17 @@ class GestionTurnos(qtw.QWidget):
             """SELECT T.ID, T.FECHA, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM ALUMNOS WHERE T.ID_ALUMNO = A.ID
-                ) THEN A.NOMBRE_APELLIDO ELSE AH.NOMBRE_APELLIDO END
+                ) THEN A.nombre_apellido ELSE AH.nombre_apellido END
             ) AS ALUMNO, 
             T.HORA_INGRESO, 
             T.HORA_EGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_INGRESO = P_ING.ID
-                ) THEN P_ING.NOMBRE_APELLIDO ELSE PH_ING.NOMBRE_APELLIDO END
+                ) THEN P_ING.nombre_apellido ELSE PH_ING.nombre_apellido END
             ) AS PROFESOR_INGRESO, 
             (CASE WHEN EXISTS(
                     SELECT ID FROM PROFESORES WHERE T.PROF_EGRESO = P_EGR.ID
-                ) THEN P_EGR.NOMBRE_APELLIDO ELSE PH_EGR.NOMBRE_APELLIDO END
+                ) THEN P_EGR.nombre_apellido ELSE PH_EGR.nombre_apellido END
             ) AS PROFESOR_EGRESO
             FROM TURNO_PANOL T
             LEFT JOIN ALUMNOS A
@@ -285,15 +285,15 @@ class GestionTurnos(qtw.QWidget):
         else:
             return print("Error crítico: un bobi escribio la consulta mal.")
         # Se guarda la consulta en una variable.
-        query = db.cur.fetchall()
+        consulta = db.cur.fetchall()
         # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
+        self.tabla.setRowCount(len(consulta))
         # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
         # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
+        for i in range(len(consulta)):
             # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
-            for j in range(len(query[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
+            for j in range(len(consulta[i])):
+                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
 
             self.tabla.setRowHeight(i, 35)
 
@@ -303,7 +303,7 @@ class GestionTurnos(qtw.QWidget):
                 qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
             botonEditar.setIconSize(qtc.QSize(25, 25))
             botonEditar.setObjectName("editar")
-            botonEditar.clicked.connect(lambda: self.modificarLinea('editar'))
+            botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
@@ -330,19 +330,19 @@ class GestionTurnos(qtw.QWidget):
         self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
 
         # Se crea el layout.
-        layoutEditar = qtw.QGridLayout()
+        layoutVentanaModificar = qtw.QGridLayout()
 
         # Inserta un label por cada campo.
         for i in range(1, len(self.campos)-2):
             label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutEditar.addWidget(label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+            layoutVentanaModificar.addWidget(label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         
         # Crea los entries.
         self.entry1 = qtw.QDateEdit()
         self.entry2 = qtw.QLineEdit()
 
-        db.cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS")
+        db.cur.execute("SELECT nombre_apellido FROM ALUMNOS")
         sugerenciasAlumnos=[]
         for i in db.cur.fetchall():
             sugerenciasAlumnos.append(i[0])
@@ -356,7 +356,7 @@ class GestionTurnos(qtw.QWidget):
         self.entry5 = qtw.QLineEdit()
         self.entry6 = qtw.QLineEdit()
 
-        db.cur.execute("SELECT NOMBRE_APELLIDO FROM PROFESORES")
+        db.cur.execute("SELECT nombre_apellido FROM PROFESORES")
         sugerenciasProfesores=[]
         for i in db.cur.fetchall():
             sugerenciasProfesores.append(i[0])
@@ -368,7 +368,7 @@ class GestionTurnos(qtw.QWidget):
         datos = []
 
         # Si el tipo es editar, se crea la pantalla de editar.
-        if tipo == 'editar':
+        if tipo == "editar":
             # Se obtiene la posición del boton clickeado: 
             # primero se obtiene cual fue último widget clickeado (en este caso el boton)
             botonClickeado = qtw.QApplication.focusWidget()
@@ -397,78 +397,75 @@ class GestionTurnos(qtw.QWidget):
             self.edita.setWindowTitle("Editar")
 
         # Se añaden los entries al layout.
-        layoutEditar.addWidget(self.entry1, 0, 1)
+        layoutVentanaModificar.addWidget(self.entry1, 0, 1)
         self.entry1.setObjectName("modificar-entry")
 
 
-        layoutEditar.addWidget(self.entry2, 1, 1)
+        layoutVentanaModificar.addWidget(self.entry2, 1, 1)
         self.entry2.setObjectName("modificar-entry")
 
-        layoutEditar.addWidget(self.entry3, 2, 1)
-        layoutEditar.addWidget(self.entry4, 3, 1)
+        layoutVentanaModificar.addWidget(self.entry3, 2, 1)
+        layoutVentanaModificar.addWidget(self.entry4, 3, 1)
 
         self.entry3.setObjectName("modificar-entry")
         self.entry4.setObjectName("modificar-entry")
 
-        layoutEditar.addWidget(self.entry5, 4, 1)
+        layoutVentanaModificar.addWidget(self.entry5, 4, 1)
         self.entry5.setObjectName("modificar-entry")
-        layoutEditar.addWidget(self.entry6, 5, 1)
+        layoutVentanaModificar.addWidget(self.entry6, 5, 1)
         self.entry6.setObjectName("modificar-entry")
 
         # Se crea el boton de confirmar, y se le da la función de confirmarr.
-        confirmar = qtw.QPushButton("Confirmar")
-        confirmar.setObjectName("confirmar")
-        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        confirmar.clicked.connect(lambda: self.confirmarr(datos))
-        layoutEditar.addWidget(confirmar, 6, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        botonConfirmar = qtw.QPushButton("Confirmar")
+        botonConfirmar.setObjectName("confirmar")
+        botonConfirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        botonConfirmar.clicked.connect(lambda: self.confirmarModificacion(datos))
+        layoutVentanaModificar.addWidget(botonConfirmar, 6, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
-        self.edita.setLayout(layoutEditar)
+        self.edita.setLayout(layoutVentanaModificar)
         # Se muestra la ventana
         self.edita.show()
 
     # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
-    def confirmarr(self, datos):
-        # Se hace una referencia a la función de mensajes fuera de la clase y a la ventana principal.
-        global mostrarMensaje
-
+    def confirmarModificacion(self, tipo, datosPorDefecto=None):
         db.cur.execute("""
         SELECT ID
         FROM ALUMNOS
-        WHERE NOMBRE_APELLIDO=?
+        WHERE nombre_apellido = ?
         LIMIT 1
         """, (self.entry2.text().upper(),))
 
         alumno=db.cur.fetchall()
 
         if not alumno:
-            return mostrarMensaje("Error", "Error", 
+            return m.mostrarMensaje("Error", "Error", 
             "El alumno no está ingresado. Por favor, verifique que el alumno ingresado exista.")
 
         db.cur.execute("""
         SELECT ID
         FROM PROFESORES
-        WHERE NOMBRE_APELLIDO=?
+        WHERE nombre_apellido = ?
         LIMIT 1
         """, (self.entry5.text().upper(),))
 
         profeIngreso=db.cur.fetchall()
 
         if not profeIngreso:
-            return mostrarMensaje("Error", "Error", 
+            return m.mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el ingreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
         
         db.cur.execute("""
         SELECT ID
         FROM PROFESORES
-        WHERE NOMBRE_APELLIDO=?
+        WHERE nombre_apellido = ?
         LIMIT 1
         """, (self.entry6.text().upper(),))
 
         profeEgreso=db.cur.fetchall()
 
         if not profeEgreso:
-            return mostrarMensaje("Error", "Error", 
+            return m.mostrarMensaje("Error", "Error", 
             "El profesor que autorizó el egreso no está ingresado. Por favor, verifique que el profesor ingresado exista.")
         
         
@@ -502,13 +499,13 @@ class GestionTurnos(qtw.QWidget):
                     )
                 db.con.commit()
                 # Se muestra el mensaje exitoso.
-                mostrarMensaje("Information", "Aviso",
+                m.mostrarMensaje("Information", "Aviso",
                             "Se ha actualizado el movimiento.")           
 
             # Si no, se inserta la fila en la tabla de la base de datos.
-            except BaseException as e:
+            except sqlite3.IntegrityError as e:
                 print(e)
-                return mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                return m.mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         else:
             db.cur.execute(
             "INSERT INTO TURNO_PANOL VALUES(NULL, ?, ?, ?, ?, ?, ?)", (
@@ -517,7 +514,7 @@ class GestionTurnos(qtw.QWidget):
             registrarCambios("Inserción", "Subgrupos", datosNuevos[0], None, f"{datosNuevos}")
             db.con.commit()
 
-            mostrarMensaje("Information", "Aviso",
+            m.mostrarMensaje("Information", "Aviso",
                         "Se ha ingresado un turno.")
 
         #Se refrescan los datos.
@@ -527,19 +524,17 @@ class GestionTurnos(qtw.QWidget):
     # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
     # - idd: el id de la fila que se va a eliminar.
     def eliminar(self):
-        # se obtiene la función definida fuera de la clase.
-        global mostrarMensaje
         # se le pregunta al usuario si desea eliminar la fila.
-        resp = mostrarMensaje('Pregunta', 'Advertencia',
-                              '¿Está seguro que desea eliminar estos datos?')
+        resp = m.mostrarMensaje("Pregunta", "Advertencia",
+                              "¿Está seguro que desea eliminar estos datos?")
         # si pulsó el boton de sí:
-        db.cur.execute("SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL=?", (idd,))
+        db.cur.execute("SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL = ?", (idd,))
         tipo="Eliminación simple"
         tablas="Alumnos"
         if db.cur.fetchall():
             tipo="Eliminación compleja"
             tablas="Alumnos Movimientos de herramientas"
-            resp=mostrarMensaje('Pregunta', 'Advertencia',
+            resp=m.mostrarMensaje("Pregunta", "Advertencia",
 """
 Todavía hay movimientos registrados con este turno. 
 Eliminar el turno eliminará también TODOS los movimientos relacionados.
@@ -551,10 +546,10 @@ Eliminar el turno eliminará también TODOS los movimientos relacionados.
             posicion = self.tabla.indexAt(botonClickeado.pos())
             idd=posicion.sibling(posicion.row(), 0).data()
             # elimina la fila con el id correspondiente de la tabla de la base de datos.
-            db.cur.execute("SELECT * FROM TURNO_PANOL WHERE ID=?", (idd,))
+            db.cur.execute("SELECT * FROM TURNO_PANOL WHERE ID = ?", (idd,))
             datosEliminados=db.cur.fetchall()[0]
-            db.cur.execute('DELETE FROM TURNO_PANOL WHERE ID=?', (idd,))
-            db.cur.execute('DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL=?', (idd,))
+            db.cur.execute("DELETE FROM TURNO_PANOL WHERE ID = ?", (idd,))
+            db.cur.execute("DELETE FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL = ?", (idd,))
             registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
             db.con.commit()
             self.mostrarDatos()
