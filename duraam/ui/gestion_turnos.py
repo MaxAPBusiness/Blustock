@@ -373,7 +373,7 @@ class GestionTurnos(qtw.QWidget):
         FROM alumnos
         WHERE nombre_apellido = ?
         LIMIT 1
-        """, (self.entry2.text().upper(),))
+        """, (self.entry2.text(),))
 
         alumno = db.cur.fetchall()
 

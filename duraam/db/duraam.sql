@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS profesores_historicos(
 CREATE TABLE IF NOT EXISTS turno_panol(
     id INTEGER PRIMARY KEY,
     fecha VARCHAR(12),
-    id_alumno INTEGER,
+    id_alumno VARCHAR(4),
     hora_ingreso VARCHAR(12),
     hora_egreso VARCHAR(12),
     profesor_ingreso INTEGER,
@@ -86,7 +86,7 @@ y nombre_apellido*/
 CREATE TABLE IF NOT EXISTS usuarios(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario VARCHAR(20) UNIQUE NOT NULL,
-    contrasena VARCHAR(75),
+    contrasena VARCHAR(75) NOT NULL,
     nombre_apellido VARCHAR(35)
 );
 
@@ -95,7 +95,7 @@ y nombre_apellido*/
 CREATE TABLE IF NOT EXISTS administradores(
     id INTEGER PRIMARY KEY,
     usuario VARCHAR(20) UNIQUE NOT NULL,
-    contrasena VARCHAR(75),
+    contrasena VARCHAR(75) NOT NULL,
     nombre_apellido VARCHAR(35)
 );
 
