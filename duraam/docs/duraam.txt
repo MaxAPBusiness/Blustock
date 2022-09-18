@@ -63,4 +63,4 @@ Duraam: carpeta principal de la aplicación.
     |-> README.txt: el archivo readme de la aplicación. Leanlo.
     |-> setup.py: el archivo que instala el programa. Por ahora está vacio. Ignorar.
 
-Información de la aplicación Duraam versión PreAlpha.
+Información de la aplicación Duraam versión PreAlpha 1.0.0.
