@@ -24,6 +24,7 @@ import os
 
 # Se importan los módulos de la aplicación:
 # * inicializar_bbdd: se encarga de la conexión a la base de datos.
+# * botones: crea botones reutilizados en todos los módulos.
 #                     Se importa con el nombre de db.
 # * mostrar_mensaje: contiene una función que muestra un popup en la
 #                    pantalla.
@@ -31,8 +32,8 @@ import os
 # * cambiar_icono: cambia el icono del boton de ordenar.
 # * registrarCambios: guarda los cambios a la tabla en el historial.
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEditar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from cursos import cursos
 from registrar_cambios import registrarCambios
 
@@ -118,7 +119,7 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se crea el título, que es un widget QLabel.
         # QLabel: un label.
-        titulo = qtw.QLabel("GESTIÓN DE alumnos")
+        titulo = qtw.QLabel("GESTIÓN DE ALUMNOS")
 
         # Se le pone el nombre de objeto para personalizarlo más tarde
         # con estilos. Método setObjectName: le pone un tag al objeto
@@ -163,6 +164,8 @@ class GestionAlumnos(qtw.QWidget):
         # Se cambia el ancho de las columnas para que los datos se vean
         # correctamente y los títulos no se corten.
         # Método setColumnWidth: cambia el ancho de una columna.
+        # Recibe dos parámetros: el índice de la columna y el 
+        # numero de pixeles de ancho, los dos como int.
         self.tabla.setColumnWidth(2, 120)
         self.tabla.setColumnWidth(4, 200)
         self.tabla.setColumnWidth(5, 35)
@@ -415,7 +418,7 @@ class GestionAlumnos(qtw.QWidget):
             # consulta en la celda correspondiente de la fila de la
             # tabla.
             for j in range(len(consulta[i])):
-                # Método setItem: introduce in item de texto en la
+                # Método setItem: introduce un item de texto en la
                 # celda correspondiente. Parámetros: ancho, alto
                 # y un objeto QTableWidgetItem.
                 # QTableWidgetItem: un item que se puede introducir en
@@ -426,20 +429,20 @@ class GestionAlumnos(qtw.QWidget):
 
             # Aumentamos el tamaño de la altura de la fila en la tabla.
             # Método setRowHeight: cambia la altura de la fila.
-            # Parámetros: ancho y alto, respectivamente.
+            # Parámetros: índice de la fila y alto en píxeles.
             self.tabla.setRowHeight(i, 35)
 
             # Se crea el boton de editar, se le da la función de editar
             # y se lo introduce al final de la fila. Para ver una
             # explicación detallada del qpixmap y qsize, lean el módulo
             # de botones.py
-            botonEditar = BotonEditar()
+            botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             self.tabla.setCellWidget(i, 5, botonEditar)
 
             # Se crea el botón de eliminar y se introduce al final de
             # la fila.
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, 6, botonEliminar)
 
@@ -454,7 +457,7 @@ class GestionAlumnos(qtw.QWidget):
         en la tabla alumnos.
 
         El formulario es un QWidget que funciona como ventana. Por cada
-        campo de la fila, agrega un entry (QLineEdit o QSpinbox) y un
+        campo de la fila, agrega un entry (QLineEdit o QSpinBox) y un
         label descriptivo. Al confirmar los datos, ejecuta el método 
         confirmarModificacion.
 
@@ -493,7 +496,13 @@ class GestionAlumnos(qtw.QWidget):
             # Parámetro alignment: controla el alineamiento del
             # elemento en el layout. Por defecto está centrado. Recibe
             # como valor una variable Qt de alineamiento. En este caso,
-            #
+            # es alignRight, que siginifica que lo alineamos a la
+            # derecha.
+            # Variable AlingRight: variable que significa que el widget
+            # debe alinearse a la derecha. Pertenece a la clase 
+            # AlignmentFlag.
+            # Clase AlignmentFlag: contiene las variables de
+            # alineamiento de qt. Subclase de Qt.
             layoutVentanaModificar.addWidget(
                 label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
 
@@ -701,9 +710,9 @@ class GestionAlumnos(qtw.QWidget):
                 m.mostrarMensaje("Error", "Error",
                                  "El ID ingresado ya está registrado. Por favor, ingrese otro.")
 
-        # Si no, se inserta la fila en la tabla de la base de datos, se
-        # guarda la transacción en el historial, se hace el commit y se
-        # notifica al usuario.
+        # Si el tipo es editar, se inserta la fila en la tabla de la
+        # base de datos, se guarda la transacción en el historial, se
+        # hace el commit y se notifica al usuario.
         elif tipo == "insertar":
             try:
                 db.cur.execute(
@@ -720,11 +729,11 @@ class GestionAlumnos(qtw.QWidget):
                 return m.mostrarMensaje("Error", "Error",
                                         "El ID ingresado ya está registrado. Por favor, ingrese otro.")
 
-        # Se refrescan los datos.
+        # Se actualizan los datos.
         self.mostrarDatos()
 
         # Se cierra la ventana.
-        # Método close: cierra la ventana.
+        # Método close: cierra un widget ventana.
         self.ventanaEditar.close()
 
     def eliminar(self):
@@ -769,9 +778,9 @@ class GestionAlumnos(qtw.QWidget):
             # usuario si está seguro de su decisión.
             if db.cur.fetchall():
                 tipo = "Eliminacion compleja"
-                tablas = "Alumnos Movimientos de herramientas"
+                tablas = "Alumnos Movimientos de herramientas Turnos del pañol"
                 respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
-                                             """El alumno tiene movimientos registrados. 
+                    """El alumno tiene movimientos registrados. 
                     Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
                     por lo que sus registros de deudas se eliminarán y podría perderse información valiosa.
                     ¿Desea eliminarlo de todas formas?""")
@@ -856,7 +865,7 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se crean los títulos de la tabla. El primero está vacio
         # porque ahí van los botones de check.
-        self.camposPase = ["", "Nombre y Apellido", "DNI", "Curso"]
+        self.camposPase = ("", "Nombre y Apellido", "DNI", "Curso")
 
         # Se termina de configurar la tabla y se muestran los datos.
         # Lógica ya explicada en el constructor.
@@ -898,7 +907,7 @@ class GestionAlumnos(qtw.QWidget):
         """
         # Se selecciona el nombre, dni y curso de la tabla alumnos
         # donde el curso sea alguno de los cursos registrados en la
-        # variable cursos del módulo cursos.
+        # tupla cursos.
         db.cur.execute(
             f"""
             SELECT nombre_apellido, dni, curso
@@ -1008,7 +1017,7 @@ class GestionAlumnos(qtw.QWidget):
                         int(self.tablaListaAlumnos.item(i, 2).text())
                     )
 
-            # Se guardan los cambios en el historial y bla bla bla..
+            # Se guardan los cambios en el historial y bla bla bla.
             registrarCambios("Pase anual", "Alumnos", None,
                              f"{datosViejos}", f"{datosNuevos}")
             db.con.commit()

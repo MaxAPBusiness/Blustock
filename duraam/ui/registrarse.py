@@ -9,7 +9,7 @@ import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 
-from botones import BotonMostrarContrasena
+from .botones import BotonMostrarContrasena
 
 
 class Registrarse(qtw.QWidget):

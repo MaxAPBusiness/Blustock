@@ -30,7 +30,6 @@ import os
 # * registrar_cambios: guarda los cambios a la tabla en el historial.
 import db.inicializar_bbdd as db
 from crypt import encriptar, decriptar
-import mostrar_mensaje as m
 import registrar_cambios as rc
 
 # Se importan los módulos de ui: la cabecera, el menú izquierdo, las
@@ -52,6 +51,7 @@ from ui.solicitudes import Solicitudes
 from ui.gestion_usuarios import GestionUsuarios
 from ui.gestion_administradores import GestionAdministradores
 from ui.historial_de_cambios import HistorialDeCambios
+import ui.mostrar_mensaje as m
 
 
 # Creamos la ventana principal
@@ -102,7 +102,7 @@ class MainWindow(qtw.QMainWindow):
             Cierra la sesión del usuario.
         
         salir(self):
-            Este método cierra la aplicación.
+            Cierra la aplicación.
         
         closeEvent(self):
             Cierra todas las ventanas de la aplicación.
@@ -138,6 +138,7 @@ class MainWindow(qtw.QMainWindow):
         self.cabecera.setObjectName("cabecera")
         self.addToolBar(qtc.Qt.ToolBarArea.TopToolBarArea, self.cabecera)
 
+        # Creamos el objeto de menú izquierdo.
         self.menuIzquierdo = MenuIzquierdo()
 
         # Le damos un ancho fijo. Esto impide que se agrande o se
@@ -325,17 +326,17 @@ class MainWindow(qtw.QMainWindow):
 
                 # Añade el botón de usuario a la cabecera y le da un
                 # menú cuando el usuario le hace click derecho.
-                self.cabecera.containerLayout.addWidget(self.cabecera.usuario)
+                self.cabecera.contenedorLayout.addWidget(self.cabecera.usuario)
                 self.cabecera.usuario.clicked.connect(
                     lambda: self.informacionUsuario(consultaAdministradores[0][2], consultaAdministradores[0][0]))
                 
                 # Le añade al menú izquierdo los botones de gestión de
                 # usuarios, administradores y el historial de cambios.
-                self.menuIzquierdo.containerLayout.addWidget(
+                self.menuIzquierdo.contenedorLayout.addWidget(
                     self.menuIzquierdo.gestion10, self.menuIzquierdo.contador+2, 0)
-                self.menuIzquierdo.containerLayout.addWidget(
+                self.menuIzquierdo.contenedorLayout.addWidget(
                     self.menuIzquierdo.gestion11, self.menuIzquierdo.contador+3, 0)
-                self.menuIzquierdo.containerLayout.addWidget(
+                self.menuIzquierdo.contenedorLayout.addWidget(
                     self.menuIzquierdo.gestion12, self.menuIzquierdo.contador+4, 0)
                 
                 # Cambia el widget central a la primera gestión.
@@ -373,13 +374,13 @@ class MainWindow(qtw.QMainWindow):
                 m.mostrarMensaje(
                     "Aviso", "Aviso", f"Ha ingresado con éxito. Bienvenido, {consultaUsuarios[0][2]}.")
                 self.menuIzquierdo.toggleViewAction().trigger()
-                self.cabecera.containerLayout.addWidget(self.cabecera.usuario)
+                self.cabecera.contenedorLayout.addWidget(self.cabecera.usuario)
                 self.cabecera.usuario.clicked.connect(
                     lambda: self.informacionUsuario(consultaUsuarios[0][2], consultaUsuarios[0][0]))
                 self.stack.setCurrentIndex(2)
                 # Nótese que el rol registrado es usuario y que no se
-                # añaden los botones para ver las gestiones de usuario
-                # o administrador ni el historial de cambios.
+                # añaden los botones para ver las gestiones de usuario,
+                # administrador ni solicutudes.
                 rc.userInfo = [consultaUsuarios[0][0], 0]
                 self.iniciarSesion.entry1.setText("")
                 self.iniciarSesion.entry2.setText("")
@@ -405,7 +406,7 @@ class MainWindow(qtw.QMainWindow):
                 # una comparación, pero como el campo es un número
                 # la regla es así: si el numero es 0 devuelve false, si
                 # es cualquier otro devuelve true. El número 1 hace
-                # referencia a que el estad oesta pendiente y el 0
+                # referencia a que el estado esta pendiente y el 0
                 # significa que fue rechazado.
                 if consultaSolicitudes[0][2]:
                     return m.mostrarMensaje("Advertencia", "Aviso",
@@ -487,10 +488,6 @@ class MainWindow(qtw.QMainWindow):
                 El nombre y apellido del usuario.
             usuario : str
                 El nombre de usuario.
-        
-        Devuelve
-        --------
-            menu.exec(qtg.QCursor.pos()) -> QAction
         """
         # QMenu: un menú de contexto.
         menu = qtw.QMenu(self)
@@ -563,11 +560,11 @@ class MainWindow(qtw.QMainWindow):
             self.menuIzquierdo.toggleViewAction().trigger()
 
             # Quitamos los privilegios de administrador (por las dudas).
-            self.menuIzquierdo.containerLayout.removeWidget(
+            self.menuIzquierdo.contenedorLayout.removeWidget(
                 self.menuIzquierdo.gestion10)
-            self.menuIzquierdo.containerLayout.removeWidget(
+            self.menuIzquierdo.contenedorLayout.removeWidget(
                 self.menuIzquierdo.gestion11)
-            self.menuIzquierdo.containerLayout.removeWidget(
+            self.menuIzquierdo.contenedorLayout.removeWidget(
                 self.menuIzquierdo.gestion12)
             
             # Volvemos a la pantalla de inicio de sesión.
@@ -583,10 +580,18 @@ class MainWindow(qtw.QMainWindow):
             # Método quit: cierra la app.
             app.quit()
     
-    def closeEvent(self, event):
+    def closeEvent(self, event: qtc.QEvent):
         """Este método cierra todas las ventanas de la aplicación.
         
-        Se ejecuta cuando finaliza la ejecución de la aplicación."""
+        Qt lo ejecuta cuando finaliza la ejecución de la aplicación.
+        
+        Parámetros
+        ----------
+            event : qtc.QEvent
+                El evento que lanza qt. Nota: este parámetro no se usa
+                en el método pero debe existir porque Qt siempre lo
+                devuelve por defecto.
+        """
         # Obtiene el objeto de la aplicación para poder usarlo adentro
         # de la clase.
         # Lo que hace el global es obtener una variable global para

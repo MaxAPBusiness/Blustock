@@ -34,6 +34,7 @@ Duraam: carpeta principal de la aplicación.
     |    |    |-> gestion.qss: el estilo para la app del pañol. En construcción.
     |    |    |-> menu_izquierdo.qss: el estilo para el menú izquierdo.
     |    |-> ui: contiene todos los módulos que crean elementos de la ui. 
+    |    |    |-> botones.py: contiene clases relacionadas con crear botones.
     |    |    |-> cabecera.py: crea la cabecera de la ventana.
     |    |    |-> gestion_administradores.py: crea una pantalla para gestionar la tabla administradores.
     |    |    |-> gestion_alumnos.py: crea una pantalla para gestionar la tabla alumnos.
@@ -51,14 +52,12 @@ Duraam: carpeta principal de la aplicación.
     |    |    |-> menu_izquierdo.py: crea un menú izquierdo.
     |    |    |-> registrarse.py: crea una pantalla para registrarse en la aplicación.
     |    |    |-> solicitudes.py: crea una pantalla para gestionar la tabla solicitudes.
-    |    |-> botones.py: contiene clases relacionadas con crear botones.
     |    |-> crypt.py: crea las funciones relacionadas con la encriptación de contraseñas.
     |    |-> cursos.py: crea una tupla con todos los cursos.
     |    |-> main_panol.py: archivo main de la app del pañolero. En construccion.
     |    |-> main.py: crea la ventana principal y ejecuta la aplicación.
-    |    |-> mostrar_mensaje.py: crea una función para mostrar un mensaje en la pantalla.
     |    |-> registrar_cambios.py: crea una función para registrar los cambios realizados en la base de datos en el
     |        historial, y una lista para guardar los datos del usuario actual.
     |-> gitignore: archivo de git. Ignorar.
-    |-> README.txt: el archivo readme de la aplicación. Leanlo.
+    |-> README.txt: el archivo readme de la aplicación.
     |-> setup.py: el archivo que instala el programa. Por ahora está vacio. Ignorar.

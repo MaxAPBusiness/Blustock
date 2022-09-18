@@ -14,6 +14,8 @@ class Cabecera(qtw.QToolBar):
 
     Contiene el logo, el título y el boton de usuario.
 
+    Hereda: qtw.QToolBar
+
     Métodos
     -------
         __init__(self):
@@ -60,14 +62,14 @@ class Cabecera(qtw.QToolBar):
         self.usuario.setCursor(qtg.QCursor(
             qtc.Qt.CursorShape.PointingHandCursor))
 
-        container = qtw.QWidget()
-        self.containerLayout = qtw.QHBoxLayout()
-        self.containerLayout.addWidget(icono)
-        self.containerLayout.addWidget(headerLabel)
-        self.containerLayout.addWidget(spacer)
-        container.setLayout(self.containerLayout)
-        container.setMinimumHeight(100)
-        self.addWidget(container)
+        contenedor = qtw.QWidget()
+        self.contenedorLayout = qtw.QHBoxLayout()
+        self.contenedorLayout.addWidget(icono)
+        self.contenedorLayout.addWidget(headerLabel)
+        self.contenedorLayout.addWidget(spacer)
+        contenedor.setLayout(self.contenedorLayout)
+        contenedor.setMinimumHeight(100)
+        self.addWidget(contenedor)
 
         with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/cabecera.qss", "r") as qss:
             self.setStyleSheet(qss.read())

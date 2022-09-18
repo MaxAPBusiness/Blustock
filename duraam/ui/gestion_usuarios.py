@@ -11,8 +11,8 @@ import PyQt6.QtGui as qtg
 import os
 
 import db.inicializar_bbdd as db
-from botones import BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -84,16 +84,11 @@ class GestionUsuarios(qtw.QWidget):
                 self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            botonHacerAdmin = qtw.QPushButton()
-            botonHacerAdmin.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/ascender.png")))
-            botonHacerAdmin.setIconSize(qtc.QSize(25, 25))
-            botonHacerAdmin.setObjectName("aceptar")
+            botonHacerAdmin = BotonFila("ascender")
             botonHacerAdmin.clicked.connect(lambda: self.hacerAdmin())
-            botonHacerAdmin.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonHacerAdmin)
 
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 

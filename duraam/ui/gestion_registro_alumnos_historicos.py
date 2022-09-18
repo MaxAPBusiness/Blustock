@@ -13,8 +13,8 @@ import os
 import datetime as dt
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -221,7 +221,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
                     i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 

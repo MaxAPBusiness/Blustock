@@ -12,7 +12,8 @@ import PyQt6.QtGui as qtg
 import db.inicializar_bbdd as db
 import os
 
-import mostrar_mensaje as m
+from . import mostrar_mensaje as m
+from .botones import BotonFila
 
 class Solicitudes(qtw.QWidget):
     """Esta clase crea una pantalla para gestionar la tabla 
@@ -87,23 +88,12 @@ class Solicitudes(qtw.QWidget):
 
             self.tabla.setRowHeight(i, 35)
 
-            botonAceptar = qtw.QPushButton()
-            botonAceptar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/aceptar.png")))
-            botonAceptar.setIconSize(qtc.QSize(25, 25))
-            botonAceptar.setObjectName("aceptar")
-
+            botonAceptar = BotonFila("aceptar")
             botonAceptar.clicked.connect(lambda: self.aceptar(consulta[i][0]))
-            botonAceptar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonAceptar)
 
-            botonRechazar = qtw.QPushButton()
-            botonRechazar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/rechazar.png")))
-            botonRechazar.setIconSize(qtc.QSize(25, 25))
-            botonRechazar.setObjectName("rechazar")
+            botonRechazar = BotonFila("rechazar")
             botonRechazar.clicked.connect(lambda: self.rechazar(consulta[i][0]))
-            botonRechazar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonRechazar)
 
     def aceptar(self):

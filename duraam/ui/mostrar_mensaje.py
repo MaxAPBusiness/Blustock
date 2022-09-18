@@ -38,7 +38,6 @@ def mostrarMensaje(title: str, msg: str, info: str):
     elif title == "Aviso" or title == "Information":
         window.setIcon(qtw.QMessageBox.Icon.Information)
         window.setStandardButtons(qtw.QMessageBox.StandardButton.Ok)
-    # Si el tip
     elif title == "Pregunta" or title == "Question":
         window.setIcon(qtw.QMessageBox.Icon.Warning)
         # Va a tener dos botones, uno de no y uno de sí.
@@ -48,16 +47,13 @@ def mostrarMensaje(title: str, msg: str, info: str):
         # sí en vez de yes.
         si = window.button(qtw.QMessageBox.StandardButton.Yes)
         si.setText("Sí")
-    else:
-        return print("Error de titulo")
 
     window.setWindowTitle(title)
 
-    #Método setText: establece el texto inicial o título.
+    # Método setText: establece el texto inicial o título.
     window.setText(msg)
     # Método setInformativeText: establece el texto informativo.
     # Tiene un dedent para quitar la identación del código y que se
     # muestre bien, sino tiene márgen de más.
     window.setInformativeText(dedent(info))
-
     return window.exec()

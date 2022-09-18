@@ -12,8 +12,8 @@ import PyQt6.QtGui as qtg
 import os
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEditar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -136,6 +136,7 @@ class GestionHerramientas(qtw.QWidget):
         contenedor1Layout.addWidget(self.radioGrupo, 0, 3)
         contenedor1Layout.addWidget(self.radioSubgrupo, 0, 4)
         contenedor1Layout.addWidget(self.botonOrdenar, 0, 5)
+        contenedor1.setLayout(contenedor1Layout)
         layout.addWidget(contenedor1)
         layout.addWidget(self.tabla)
         layout.addWidget(botonAgregar)
@@ -186,11 +187,11 @@ class GestionHerramientas(qtw.QWidget):
                     i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            botonEditar = BotonEditar()
+            botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
-            botonEliminar = BotonEliminar
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, 8, botonEliminar)
 
@@ -224,12 +225,15 @@ class GestionHerramientas(qtw.QWidget):
             qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
 
         layoutVentanaModificar = qtw.QGridLayout()
+        # El c está para prevenir un bug.
+        c=0
         for i in range(len(self.campos)-2):
-            if self.campos[i] != "total":
+            if self.campos[i] != "Total":
                 label = qtw.QLabel(f"{self.campos[i]}: ")
                 label.setObjectName("modificar-label")
                 layoutVentanaModificar.addWidget(
-                    label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+                    label, c, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+                c += 1
 
         self.entry1 = qtw.QSpinBox()
         self.entry2 = qtw.QLineEdit()
@@ -308,7 +312,7 @@ class GestionHerramientas(qtw.QWidget):
         botonConfirmar.clicked.connect(
             lambda: self.confirmarModificacion(datos))
         layoutVentanaModificar.addWidget(
-            botonConfirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+            botonConfirmar, c+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         self.ventanaEditar.setLayout(layoutVentanaModificar)
         self.ventanaEditar.show()

@@ -12,8 +12,8 @@ import os
 import sqlite3
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEditar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -170,11 +170,11 @@ class GestionProfesores(qtw.QWidget):
 
             self.tabla.setRowHeight(i, 35)
 
-            botonEditar = BotonEditar()
+            botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             self.tabla.setCellWidget(i, 4, botonEditar)
 
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, 5, botonEliminar)
 

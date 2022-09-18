@@ -116,8 +116,15 @@
     max-width: 50px;
 }
 
-#show::indicator {
-    border-style:hidden;
+#show::indicator,
+#ordenar::indicator {
+    border-style: hidden;
+}
+
+#ordenar {
+    max-width: 62.5px;
+    max-height: 35px;
+    border-radius: 15px;
 }
 
 #tipo {
@@ -144,7 +151,8 @@
     border-radius:60px;
 }
 
-#boton-texto::hover {
+#boton-texto::hover,
+#ordenar::hover {
     background-color:rgb(220, 220, 220)
 }
 

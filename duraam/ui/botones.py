@@ -3,9 +3,7 @@
 Clases
 ------
     BotonEditar(qtw.QPushButton):
-        Crea un botón diseñado para editar.
-    BotonEliminar(qtw.QPushButton):
-        Crea un botón diseñado para eliminar.
+        Crea un botón ubicado en filas de la tabla de una pantalla.
     BotonMostrarContrasena(qtw.QCheckBox):
         Crea un botón para mostrar o esconder una contraseña.
     BotonOrdenar(qtw.QCheckBox):
@@ -18,10 +16,16 @@ import PyQt6.QtGui as qtg
 import os
 
 
-class BotonEditar(qtw.QPushButton):
-    """Esta clase crea un botón diseñado para editar.
+class BotonFila(qtw.QPushButton):
+    """Esta clase crea un botón ubicado en filas de la tabla de una
+    pantalla.
     
     Hereda: PyQt6.QtWidgets.QPushButton
+
+    Atributos
+    ---------
+        icono : str
+            El ícono del botón.
 
     Métodos
     -------
@@ -30,7 +34,7 @@ class BotonEditar(qtw.QPushButton):
 
             Crea el boton y establece su ícono y su tamaño.
     """
-    def __init__(self):
+    def __init__(self, icono: str):
         super().__init__()
 
         # Se introduce el ícono en el boton.
@@ -39,9 +43,10 @@ class BotonEditar(qtw.QPushButton):
         # QIcon: un ícono qt para introducir en widgets. Puede tomar
         # como parámetro un pixmap, que representa la imágen que va a 
         # tener el ícono.
+        # Nota: el atributo ícono de la clase es el nombre del icono
+        # que se busca en la carpeta images.
         self.setIcon(qtg.QIcon(
-            qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
-        
+            qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/{icono}.png")))  
         # Se cambia el tamaño del ícono. 
         # Método setIconSize: establece el tamaño del ícono de un
         # widget. Toma como parámetro un objeto QSize.
@@ -52,29 +57,6 @@ class BotonEditar(qtw.QPushButton):
         #     h (int): el alto.
         self.setIconSize(qtc.QSize(25, 25))
         self.setObjectName("editar")
-        self.setCursor(qtg.QCursor(
-            qtc.Qt.CursorShape.PointingHandCursor))
-
-
-class BotonEliminar(qtw.QPushButton):
-    """Esta clase crea un botón diseñado para eliminar.
-    
-    Hereda: PyQt6.QtWidgets.QPushButton
-
-    Métodos
-    -------
-        __init__(self):
-            El constructor de la clase BotonEliminar.
-
-            Crea el boton y establece su ícono y su tamaño.
-    """
-    def __init__(self):
-        super().__init__()
-
-        self.setIcon(qtg.QIcon(
-            qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-        self.setIconSize(qtc.QSize(25, 25))
-        self.setObjectName("eliminar")
         self.setCursor(qtg.QCursor(
             qtc.Qt.CursorShape.PointingHandCursor))
 
@@ -157,7 +139,7 @@ class BotonOrdenar(qtw.QCheckBox):
             )
         )
         self.setIconSize(qtc.QSize(25, 25))
-        self.setObjectName("show")
+        self.setObjectName("ordenar")
         self.setCursor(
             qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor)
         )

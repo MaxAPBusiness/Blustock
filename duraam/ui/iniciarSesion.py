@@ -10,7 +10,7 @@ import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 from textwrap import dedent
 
-from botones import BotonMostrarContrasena
+from .botones import BotonMostrarContrasena
 
 
 class IniciarSesion(qtw.QWidget):
@@ -67,11 +67,15 @@ class IniciarSesion(qtw.QWidget):
         self.entry1.setMaxLength(20)
         self.entry2.setMaxLength(20)
 
-        # Cuando el usuario termine de escribir su usario y presione
+        # Cuando el usuario termine de escribir su usuario y presione
         # enter, automáticamente selecciona el campo de la contraseña.
         # Método setFocus: selecciona un widget.
         self.entry1.returnPressed.connect(lambda: self.entry2.setFocus())
 
+        
+        # Creamos el botón mostrarContrasena y lo vinculamos con el
+        # entry 2. Para más información, lean la documentación de la
+        # clase BotonMostrarContrasena() del módulo botones.py
         mostrarContrasena = BotonMostrarContrasena(self.entry2)
 
         self.confirmar = qtw.QPushButton("confirmar")

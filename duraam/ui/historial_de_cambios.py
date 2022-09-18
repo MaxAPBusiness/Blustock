@@ -14,7 +14,7 @@ import os
 import datetime as dt
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar
+from .botones import BotonOrdenar
 
 # Método dedent: elimina la identación de un texto.
 # Lo usamos para que los textos multilinea (los que tienen """) se
@@ -22,8 +22,8 @@ from botones import BotonOrdenar
 from textwrap import dedent
 
 class HistorialDeCambios(qtw.QWidget):
-    """Esta clase crea una pantalla para gestionar la tabla
-    administradores.
+    """Esta clase crea una pantalla mostrar los datos de la tabla
+    historial_de_cambios. 
 
     Hereda: PyQt6.QtWidgets.QWidget
 
@@ -78,8 +78,8 @@ class HistorialDeCambios(qtw.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.titulo = qtw.QLabel("Historial de cambios")
-        self.titulo.setObjectName("titulo")
+        titulo = qtw.QLabel("Historial de cambios")
+        titulo.setObjectName("titulo")
 
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
@@ -174,7 +174,7 @@ class HistorialDeCambios(qtw.QWidget):
             lambda: self.mostrarDatos())
 
         layout = qtw.QVBoxLayout()
-        layout.addWidget(self.titulo)
+        layout.addWidget(titulo)
         contenedor1 = qtw.QWidget()
         contenedor1Layout = qtw.QGridLayout()
         contenedor1Layout.addWidget(self.barraBusqueda, 0, 0)
@@ -330,7 +330,7 @@ class HistorialDeCambios(qtw.QWidget):
                     textoId = f" de id {consulta[i][5]}"
                 else:
                     textoId = ""
-                descripcion = dedent(f"""Eliminó de la tabla {consulta[i][4]} la fila{textoId}
+                descripcion = dedent(f"""Eliminó de las tablas {consulta[i][4]} la fila{textoId}
                             que tenía los datos {consulta[i][6]},
                             lo que eliminó también todas las filas relacionadas en otras tablas.""")
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))

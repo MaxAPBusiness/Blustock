@@ -11,8 +11,8 @@ import PyQt6.QtGui as qtg
 import os
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEditar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -221,11 +221,11 @@ class GestionTurnos(qtw.QWidget):
                     i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            botonEditar = BotonEditar()
+            botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             self.tabla.setCellWidget(i, 7, botonEditar)
 
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             self.tabla.setCellWidget(i, 8, botonEliminar)
 
     def ordenar(self):

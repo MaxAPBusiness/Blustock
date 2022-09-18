@@ -84,7 +84,7 @@ class MenuIzquierdo(qtw.QToolBar):
         container = qtw.QWidget()
         # setSizePolicy: regula si queremos que el widget se agrande al
         # agrandar la ventana o no. Tiene dos parámetros, la expansión
-        # en ancho y en alto. Nosotros ponemos que si a ambas para que
+        # en ancho y en alto. Nosotros ponemos que sí a ambas para que
         # se expanda conforme agrandamos la pantalla.
         container.setSizePolicy(
             qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
@@ -94,8 +94,8 @@ class MenuIzquierdo(qtw.QToolBar):
         container.setMinimumHeight(800)
         container.setMinimumWidth(300)
 
-        self.containerLayout = qtw.QGridLayout()
-        self.containerLayout.addWidget(titulo, 0, 0, 1, 2)
+        self.contenedorLayout = qtw.QGridLayout()
+        self.contenedorLayout.addWidget(titulo, 0, 0, 1, 2)
         gestiones = (
             self.gestion1, self.gestion2, self.gestion3, self.gestion4,
             self.gestion5, self.gestion6, self.gestion7, self.gestion8,
@@ -103,13 +103,13 @@ class MenuIzquierdo(qtw.QToolBar):
         )
         for i in range(len(gestiones)):
             gestiones[i].setObjectName("gestion")
-            self.containerLayout.addWidget(gestiones[i], i+1, 0)
+            self.contenedorLayout.addWidget(gestiones[i], i+1, 0)
         self.contador = i
         self.gestion10.setObjectName("gestion")
         self.gestion11.setObjectName("gestion")
         self.gestion12.setObjectName("gestion")
 
-        container.setLayout(self.containerLayout)
+        container.setLayout(self.contenedorLayout)
 
         # QScrollArea: es un área que, si se le da a un widget, le da
         # una barra para desplazarse (barra lateral)

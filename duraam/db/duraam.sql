@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS grupos(
 subgrupo, y el grupo, que es una clave foránea del id de la tabla grupos*/
 CREATE TABLE IF NOT EXISTS subgrupos(
     id VARCHAR(40) PRIMARY KEY,
-    grupo VARCHAR(40),
+    grupo VARCHAR(40) NOT NULL,
     FOREIGN KEY(grupo) REFERENCES grupos(id) ON DELETE CASCADE
 );
 

@@ -16,8 +16,8 @@ import os
 import datetime as dt
 
 import db.inicializar_bbdd as db
-from botones import BotonOrdenar, BotonEditar, BotonEliminar
-import mostrar_mensaje as m
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
@@ -339,7 +339,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # texto "Alumno" para indicar que el 0 se refiere a la clase
         # alumno. Sino, devuelve "Profesor". Devuelve este campo bajo
         # el alias "clase". Luego selecciona la fecha y hora, la
-        # # cantidad, el tipo y el id del turno panol, todos los datos
+        # cantidad, el tipo y el id del turno panol, todos los datos
         # de la tabla movimientos_herramientas. Luego hace los joins de
         # todas las tablas. Los joins de alumnos, alumnos historicos,
         # profesores y profesores historicos son left joins porque
@@ -383,8 +383,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             ON m.id_persona = p.id
             LEFT JOIN profesores_historicos ph
             ON m.id_persona = ph.id
-            WHERE nombre IS NOT NULL
-            AND (h.descripcion LIKE ? 
+            WHERE (h.descripcion LIKE ? 
             OR nombre LIKE ? 
             OR m.id LIKE ?
             OR m.fecha_hora LIKE ? 
@@ -419,11 +418,11 @@ class GestionMovimientosHerramientas(qtw.QWidget):
 
             self.tabla.setRowHeight(i, 35)
 
-            botonEditar = BotonEditar()
+            botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
             self.tabla.setCellWidget(i, 8, botonEditar)
 
-            botonEliminar = BotonEliminar()
+            botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, 9, botonEliminar)
 
@@ -486,7 +485,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         consulta = db.cur.fetchall()
         for i in consulta:
             db.cur.execute(
-                "SELECT DESC_LARGA FROM herramientas WHERE ID = ?", (i[0],))
+                "SELECT descripcion FROM herramientas WHERE ID = ?", (i[0],))
             self.listaHerramientas.addItem(db.cur.fetchall()[0][0])
 
         self.persona.currentIndexChanged.connect(
@@ -531,7 +530,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
                 label, i-1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
 
         self.entry1 = qtw.QLineEdit()
-        db.cur.execute("SELECT DESC_LARGA FROM herramientas")
+        db.cur.execute("SELECT descripcion FROM herramientas")
         sugerenciasHerramientas = []
         for i in db.cur.fetchall():
             sugerenciasHerramientas.append(i[0])
@@ -687,7 +686,7 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         db.cur.execute("""
         SELECT ID
         FROM herramientas
-        WHERE DESC_LARGA = ? 
+        WHERE descripcion = ? 
         LIMIT 1""", (self.entry1.text().upper(),))
 
         herramienta = db.cur.fetchall()
