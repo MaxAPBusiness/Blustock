@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS herramientas(
     FOREIGN KEY(subgrupo) REFERENCES subgrupos(id) ON DELETE SET NULL
 );
 
-/*Crea la tabla de profesores con los campos id (PK) y nombre y apellido*/
+/*Crea la tabla de profesores con los campos id (PK), dni, nombre y apellido y email*/
 CREATE TABLE IF NOT EXISTS profesores(
     id VARCHAR(4) PRIMARY KEY,
     dni INTEGER UNIQUE NOT NULL,
@@ -45,11 +45,13 @@ CREATE TABLE IF NOT EXISTS profesores(
     email VARCHAR(320)
 );
 
+/*Crea la tabla de profesores con los campos id (PK), dni, nombre y apellido,
+fecha_salida (la fecha de salida del profesor) y el email.*/
 CREATE TABLE IF NOT EXISTS profesores_historicos(
     id VARCHAR(4) PRIMARY KEY,
     dni INTEGER UNIQUE NOT NULL,
     nombre_apellido VARCHAR(50) NOT NULL,
-    fecha_pase VARCHAR(10),
+    fecha_salida VARCHAR(10),
     email VARCHAR(320)
 );
 
@@ -60,8 +62,8 @@ CREATE TABLE IF NOT EXISTS turno_panol(
     id_alumno INTEGER,
     hora_ingreso VARCHAR(12),
     hora_egreso VARCHAR(12),
-    prof_ingreso INTEGER,
-    prof_egreso INTEGER
+    profesor_ingreso INTEGER,
+    profesor_egreso INTEGER
 );
 
 /*Crea la tabla de movimiento de herramientas con los campos id_herramienta, id_alumno, fecha, cantidad, 
@@ -79,7 +81,8 @@ CREATE TABLE IF NOT EXISTS movimientos_herramientas(
     FOREIGN KEY(id_turno_panol) REFERENCES turno_panol(id) ON DELETE CASCADE
 );
 
-/*Crea la tabla de usuarios. Ignorar por ahora*/
+/*Crea la tabla de usuarios con los campos id, usuario, contrasena
+y nombre_apellido*/
 CREATE TABLE IF NOT EXISTS usuarios(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario VARCHAR(20) UNIQUE NOT NULL,
@@ -87,6 +90,8 @@ CREATE TABLE IF NOT EXISTS usuarios(
     nombre_apellido VARCHAR(35)
 );
 
+/*Crea la tabla administradores con los campos id, usuario, contrasena
+y nombre_apellido*/
 CREATE TABLE IF NOT EXISTS administradores(
     id INTEGER PRIMARY KEY,
     usuario VARCHAR(20) UNIQUE NOT NULL,
@@ -94,6 +99,8 @@ CREATE TABLE IF NOT EXISTS administradores(
     nombre_apellido VARCHAR(35)
 );
 
+/*Crea la tabla solicitudes con los campos usuario, contrasena, 
+nombre_apellido y estado (el estado de la solicitud)*/
 CREATE TABLE IF NOT EXISTS solicitudes(
     usuario VARCHAR(20) UNIQUE NOT NULL,
     contrasena VARCHAR(75),
@@ -101,18 +108,25 @@ CREATE TABLE IF NOT EXISTS solicitudes(
     estado INTEGER
 );
 
-/*Crea la tabla de usuarios. Ignorar por ahora*/
+/*Crea la tabla de grupos con el campo id, que es el nombre del grupo*/
 CREATE TABLE IF NOT EXISTS grupos(
     id VARCHAR(40) PRIMARY KEY
 );
 
-/*Crea la tabla de usuarios. Ignorar por ahora*/
+/*Crea la tabla de subgrupos con el campo id, que es el nombre del
+subgrupo, y el grupo, que es una clave foránea del id de la tabla grupos*/
 CREATE TABLE IF NOT EXISTS subgrupos(
     id VARCHAR(40) PRIMARY KEY,
     grupo VARCHAR(40),
     FOREIGN KEY(grupo) REFERENCES grupos(id) ON DELETE CASCADE
 );
 
+/*Crea la tabla historial_de_cambios con los datos id_usuario,
+rol (el rol del usuario), fecha_hora (la fecha y hora de la
+modificacion), tipo (el tipo de modificacion), tabla (la 
+tabla de la modificacion), id_fila (el id de la fila modificada), 
+datos_viejos (los datos antes de la modificacion) y datos_nuevos (los
+datos nuevos)*/
 CREATE TABLE IF NOT EXISTS historial_de_cambios(
     id_usuario INTEGER,
     rol INTEGER,

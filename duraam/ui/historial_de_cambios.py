@@ -1,109 +1,164 @@
-# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
-#                          la tabla de la base de datos; una barra de buscador; botones para 
-#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
-#                          herramientas; botones para editar y eliminar los datos; un botón
-#                          para agregar herramientas. 
-#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+"""Este módulo crea una pantalla para mostrar los datos de la tabla
+historial_de_cambios. 
 
-# Se importan las librerías.
+Clases
+------
+    HistorialDeCambios(qtw.QWidget):
+        Crea una pantalla para mostrar los datos de la tabla
+        historial_de_cambios.
+"""
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
+import datetime as dt
+
 import db.inicializar_bbdd as db
+from botones import BotonOrdenar
 
+# Método dedent: elimina la identación de un texto.
+# Lo usamos para que los textos multilinea (los que tienen """) se
+# muestren sin la sangría del código de la izquierda.
+from textwrap import dedent
 
-# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class HistorialDeCambios(qtw.QWidget):
-    # Se hace el init en donde se inicializan todos los elementos. 
+    """Esta clase crea una pantalla para gestionar la tabla
+    administradores.
+
+    Hereda: PyQt6.QtWidgets.QWidget
+
+    Atributos
+    ---------
+        tabla : QTableWidget
+            La tabla de la pantalla.
+        campos : tuple
+            Los títulos de las columnas de la tabla.
+        barraBusqueda : QLineEdit
+            La barra de búsqueda.
+        radioHerramienta : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            herramienta.
+        radioAlumno : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            alumno.
+        radioFecha : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            fecha.
+        entryFechaDesde : QDateTimeEdit
+            El entry de fecha para marcar desde que fecha se pueden
+            mostrar los datos.
+        entryFechaHasta : QDateTimeEdit
+            El entry de fecha para marcar hasta que fecha se pueden
+            mostrar los datos.
+        listaHerramientas : QComboBox
+            Una lista para elegir una herramienta para que se muestren
+            solo sus datos
+        listaEstado : QComboBox
+            Una lista para elegir que se muestren solo los datos con un
+            dato específico
+
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase GestionAdministradores.
+
+            Crea la pantalla, un QWidget, que contiene un título
+            descrptivo, un QLabel y una tabla, un QTableWidget, que
+            muestra los datos de la tabla administradores y que
+            contiene botones para degradar su rol.
+
+        mostrarDatos(self):
+            Obtiene los datos de la tabla administradores y los
+            introduce en la tabla de la pantalla.
+
+        degradar(self):
+            Degrada el rol del administrador a usuario.
+    """
+
     def __init__(self):
-        # Se inicializa la clase QWidget.
         super().__init__()
 
-        # Se crea el título.
-        self.titulo=qtw.QLabel("Historial de cambios")
+        self.titulo = qtw.QLabel("Historial de cambios")
         self.titulo.setObjectName("titulo")
 
-        # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
-
-        # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Nombre y apellido", "Usuario", "Fecha y hora", "Descripción del cambio"]      
-                                
-        # Se establece el número de columnas que va a tener. 
+        self.campos = ("Nombre y apellido", "Usuario",
+                       "Fecha y hora", "Descripción del cambio")
         self.tabla.setColumnCount(len(self.campos))
-        # Se introducen los títulos en la tabla.
         self.tabla.setHorizontalHeaderLabels(self.campos)
-
-        # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
-        # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(2, 400)
 
-        # Se crea una barra de búsqueda
         self.barraBusqueda = qtw.QLineEdit()
         self.barraBusqueda.setObjectName("buscar")
-        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
         self.barraBusqueda.setClearButtonEnabled(True)
-        # Se le pone el texto por defecto a la barra de búsqueda
         self.barraBusqueda.setPlaceholderText("Buscar...")
-        # Se importa el ícono de lupa para la barra.
-        iconoLupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
-        # Se crea un label que va a contener el ícono.
-        contenedorIconoLupa=qtw.QLabel()
+        iconoLupa = qtg.QPixmap(
+            f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        contenedorIconoLupa = qtw.QLabel()
         contenedorIconoLupa.setObjectName("lupa")
         contenedorIconoLupa.setPixmap(iconoLupa)
 
-        # Se le da la función de buscar los datos introducidos.
-        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos("Listado"))
-        # Se crean 3 botones de radio y un label para dar contexto.
-        self.label2= qtw.QLabel("Ordenar por: ")
-        self.grupo1 = qtw.QButtonGroup(self)
-        self.radio1 = qtw.QRadioButton("Usuario")
-        self.radio2 = qtw.QRadioButton("Fecha")
-        self.radio3 = qtw.QRadioButton("Tipo")
-        self.radio4 = qtw.QRadioButton("Tabla")
+        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos())
+        labelOrdenar = qtw.QLabel("Ordenar por: ")
+        self.radioUsuario = qtw.QRadioButton("Usuario")
+        self.radioFecha = qtw.QRadioButton("Fecha")
+        self.radioTipo = qtw.QRadioButton("Tipo")
+        self.radioTabla = qtw.QRadioButton("Tabla")
+        self.radioUsuario.setObjectName("Radio1")
+        self.radioFecha.setObjectName("Radio2")
+        self.radioTipo.setObjectName("Radio3")
+        self.radioTabla.setObjectName("Radio3")
+        self.radioUsuario.toggled.connect(lambda: self.mostrarDatos())
+        self.radioFecha.toggled.connect(lambda: self.mostrarDatos())
+        self.radioTipo.toggled.connect(lambda: self.mostrarDatos())
+        self.radioTabla.toggled.connect(lambda: self.mostrarDatos())
 
-        self.radio1.setObjectName("Radio1")
-        self.radio2.setObjectName("Radio2")
-        self.radio3.setObjectName("Radio3")
-        self.radio3.setObjectName("Radio3")
-        # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda:self.mostrarDatos("Listado", 1))
-        self.radio2.toggled.connect(lambda:self.mostrarDatos("Listado", 2))
-        self.radio3.toggled.connect(lambda:self.mostrarDatos("Listado", 3))
-        self.radio4.toggled.connect(lambda:self.mostrarDatos("Listado", 4))
+        self.botonOrdenar = BotonOrdenar()
+        self.botonOrdenar.stateChanged.connect(lambda: self.ordenar())
 
-        self.label3=qtw.QLabel("Usuario: ")
-        self.usuario=qtw.QComboBox()
+        labelUsuario = qtw.QLabel("Usuario: ")
+        self.usuario = qtw.QComboBox()
 
-        self.label4=qtw.QLabel("Desde: ")
-        self.date1=qtw.QDateEdit()
-        self.date1.editingFinished.connect(lambda:self.mostrarDatos("Listado"))
+        labelFechaDesde = qtw.QLabel("Desde: ")
+        self.entryFechaDesde = qtw.QDateEdit()
+        self.entryFechaDesde.setDateTime(
+            qtc.QDateTime.fromString(
+                "12/12/2012 00:00:00", "dd/MM/yyyy hh:mm:ss")
+        )
+        self.entryFechaDesde.editingFinished.connect(
+            lambda: self.mostrarDatos())
 
-        self.label5=qtw.QLabel("Hasta: ")
-        self.date2=qtw.QDateEdit()
-        self.date2.editingFinished.connect(lambda:self.mostrarDatos("Listado"))
-        
-        self.label6=qtw.QLabel("Tipo: ")
-        self.tipo=qtw.QComboBox()
+        labelFechaHasta = qtw.QLabel("Hasta: ")
+        self.entryFechaHasta = qtw.QDateEdit()
+        self.entryFechaHasta.setDateTime(
+            qtc.QDateTime.fromString(
+                dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                "dd/MM/yyyy hh:mm:ss"
+            )
+        )
+        self.entryFechaHasta.editingFinished.connect(
+            lambda: self.mostrarDatos())
+
+        labelTipo = qtw.QLabel("Tipo: ")
+        self.tipo = qtw.QComboBox()
         self.tipo.addItem("Todos")
-        self.tipo.addItem("Inserción")
-        self.tipo.addItem("Edición")
+        self.tipo.addItem("Insercion")
+        self.tipo.addItem("Edicion")
         self.tipo.addItem("Eliminación")
         self.tipo.addItem("Pase anual")
         self.tipo.addItem("Pase histórico individual")
         self.tipo.addItem("Pase histórico grupal")
-        self.tipo.addItem("Verificación de solicitud")
+        self.tipo.addItem("Verificacion de solicitud")
         self.tipo.addItem("Rechazo de solicitud")
         self.tipo.addItem("Ascenso")
         self.tipo.addItem("Descenso")
-        self.tipo.currentIndexChanged.connect(lambda:self.mostrarDatos("Listado"))
+        self.tipo.currentIndexChanged.connect(lambda: self.mostrarDatos())
 
-        self.label7=qtw.QLabel("Tabla: ")
-        self.seleccionarTabla=qtw.QComboBox()
-        self.tipo.addItem("Todas")
+        labelTabla = qtw.QLabel("Tabla: ")
+        self.seleccionarTabla = qtw.QComboBox()
+        self.seleccionarTabla.addItem("Todas")
         self.seleccionarTabla.addItem("Herramientas")
         self.seleccionarTabla.addItem("Movimientos de herramientas")
         self.seleccionarTabla.addItem("Turnos del pañol")
@@ -115,202 +170,196 @@ class HistorialDeCambios(qtw.QWidget):
         self.seleccionarTabla.addItem("Profesores históricos")
         self.seleccionarTabla.addItem("Usuarios")
         self.seleccionarTabla.addItem("Administradores")
-        self.seleccionarTabla.currentIndexChanged.connect(lambda:self.mostrarDatos("Listado"))
+        self.seleccionarTabla.currentIndexChanged.connect(
+            lambda: self.mostrarDatos())
 
-        self.container1=qtw.QWidget()
-        self.container1Layout=qtw.QGridLayout()
-        self.container2=qtw.QWidget()
-        self.container2Layout=qtw.QHBoxLayout()
-
-
-        # Se crea el layout y se le añaden todos los widgets anteriores.
         layout = qtw.QVBoxLayout()
         layout.addWidget(self.titulo)
-
-        self.container1Layout.addWidget(self.barraBusqueda, 0, 0)
-        self.container1Layout.addWidget(contenedorIconoLupa, 0, 0)
-        self.container1Layout.addWidget(self.label2, 0, 1)
-        self.container1Layout.addWidget(self.radio1, 0, 2)
-        self.container1Layout.addWidget(self.radio2, 0, 3)
-        self.container1Layout.addWidget(self.radio3, 0, 4)
-        self.container1Layout.addWidget(self.radio4, 0, 5)
-        self.container1.setLayout(self.container1Layout)
-        layout.addWidget(self.container1)
-
-        self.container2Layout.addWidget(self.label3)
-        self.container2Layout.addWidget(self.usuario)
-        self.container2Layout.addWidget(self.label4)
-        self.container2Layout.addWidget(self.date1)
-        self.container2Layout.addWidget(self.label5)
-        self.container2Layout.addWidget(self.date2)
-        self.container2Layout.addWidget(self.label6)
-        self.container2Layout.addWidget(self.tipo)
-        self.container2Layout.addWidget(self.label7)
-        self.container2Layout.addWidget(self.seleccionarTabla)
-        self.container2.setLayout(self.container2Layout)
-        layout.addWidget(self.container2)
-
+        contenedor1 = qtw.QWidget()
+        contenedor1Layout = qtw.QGridLayout()
+        contenedor1Layout.addWidget(self.barraBusqueda, 0, 0)
+        contenedor1Layout.addWidget(contenedorIconoLupa, 0, 0)
+        contenedor1Layout.addWidget(labelOrdenar, 0, 1)
+        contenedor1Layout.addWidget(self.radioUsuario, 0, 2)
+        contenedor1Layout.addWidget(self.radioFecha, 0, 3)
+        contenedor1Layout.addWidget(self.radioTipo, 0, 4)
+        contenedor1Layout.addWidget(self.radioTabla, 0, 5)
+        contenedor1Layout.addWidget(self.botonOrdenar, 0, 6)
+        contenedor1.setLayout(contenedor1Layout)
+        layout.addWidget(contenedor1)
+        contenedor2 = qtw.QWidget()
+        contenedor2Layout = qtw.QHBoxLayout()
+        contenedor2Layout.addWidget(labelUsuario)
+        contenedor2Layout.addWidget(self.usuario)
+        contenedor2Layout.addWidget(labelFechaDesde)
+        contenedor2Layout.addWidget(self.entryFechaDesde)
+        contenedor2Layout.addWidget(labelFechaHasta)
+        contenedor2Layout.addWidget(self.entryFechaHasta)
+        contenedor2Layout.addWidget(labelTipo)
+        contenedor2Layout.addWidget(self.tipo)
+        contenedor2Layout.addWidget(labelTabla)
+        contenedor2Layout.addWidget(self.seleccionarTabla)
+        contenedor2.setLayout(contenedor2Layout)
+        layout.addWidget(contenedor2)
         layout.addWidget(self.tabla)
-
-        # Se muestran los datos.
-        self.mostrarDatos()
         self.setLayout(layout)
+        self.mostrarDatos()
 
+    def mostrarDatos(self):
+        """Este método obtiene los datos de la tabla administradores y
+        los introduce en la tabla de la pantalla.
 
+        Los datos se muestran acorde a los filtros seleccionados de la
+        pantalla. La descripción se muestra acorde al tipo de cambio
+        registrado.
+        """
+        if self.usuario.currentText() == "Todos":
+            usuario = ""
+        else:
+            usuario = self.usuario.currentText()
 
-# Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
-    # - consulta: muestra los datos de forma distinta según el tipo de consulta. Es opcional y, si no se introduce, su valor por defecto es normal. Valores:
-    # - - Normal: valor por defecto. Muestra todos los datos de la tabla de la base de datos.
-    # - - Buscar: Busca en la tabla de la base de datos las filas que contengan lo buscado.
-    # - - Nombre: Muestra todos los datos de la tabla de la base de datos ordenados por su nombre.
-    # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
-    # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
-    def mostrarDatos(self, consulta="Normal", orden=""):
-         # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
-        if consulta=="Listado":
-            #Se hace la consulta: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            if self.usuario.currentText() == "Todos":
-                usuario=""
-            else:
-                usuario=self.usuario.currentText()
-            
-            if self.tipo.currentText() == "Todos":
-                tipo=""
-            else:
-                tipo=self.tipo.currentText()
-            
-            if self.tabla.currentText() == "Todas":
-                tabla=""
-            else:
-                tabla=self.tabla.currentText()
-            
-            ordenStatement=""
+        if self.tipo.currentText() == "Todos":
+            tipo = ""
+        else:
+            tipo = self.tipo.currentText()
 
-            if orden:
-                if orden==1:
-                    ordenStatement="ORDER BY H.DESC_LARGA"
-                if orden==2:
-                    ordenStatement="ORDER BY NOMBRE"
-                if orden==3:
-                    ordenStatement="ORDER BY M.FECHA"
- 
+        if self.seleccionarTabla.currentText() == "Todas":
+            tabla = ""
+        else:
+            tabla = self.seleccionarTabla.currentText()
 
-            db.cur.execute(f"""
-            SELECT (CASE WHEN H.ROL = 0 THEN U.nombre_apellido ELSE A.nombre_apellido END) AS NOMBRE,
-            (CASE WHEN H.ROL = 0 THEN U.usuario ELSE A.usuario END) AS usuario,
-            H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
-            FROM HISTORIAL_DE_CAMBIOS H
-            LEFT JOIN usuarioS U
-            ON U.ID = H.ID_usuario
-            LEFT JOIN administradores A
-            ON A.ID = H.ID_usuario
-            WHERE (NOMBRE LIKE ? 
-            OR usuario LIKE ? 
-            OR H.FECHA_HORA LIKE ?
-            OR H.TIPO LIKE ? 
-            OR H.TABLA LIKE ? 
-            OR H.ID_FILA LIKE ? 
-            OR H.DATOS_VIEJOS LIKE ?
-            OR H.DATOS_NUEVOS LIKE ?)
-            AND usuario LIKE ?
-            AND H.TIPO LIKE ?
-            AND H.TABLA LIKE ?
-            {ordenStatement}
-            """, (f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%", 
-            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
-            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
-            f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
-            f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
-            
-            consulta = []
-            fetch=db.cur.fetchall()
-            for i in fetch:
-                fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
-                if fecha >= self.date1.date() and fecha <= self.date2.date():
-                    consulta.append(i)
-            
+        if self.radioUsuario.isChecked():
+            orden = "ORDER BY nombre"
+        elif self.radioFecha.isChecked():
+            orden = "ORDER BY h.fecha_hora"
+        if self.radioTipo.isChecked():
+            orden = "ORDER BY h.tipo"
+        if self.radioTabla.isChecked():
+            orden = "ORDER BY h.tabla"
+        else:
+            orden = ""
+        
+        if orden and self.botonOrdenar.isChecked():
+            orden += " ASC"
 
-        # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
-        elif consulta=="Normal":
-            db.cur.execute("""
-            SELECT (CASE WHEN H.ROL = 0 THEN U.nombre_apellido ELSE A.nombre_apellido END) AS NOMBRE,
-            (CASE WHEN H.ROL = 0 THEN U.usuario ELSE A.usuario END) AS usuario,
-            H.FECHA_HORA, H.TIPO, H.TABLA, H.ID_FILA, H.DATOS_VIEJOS, H.DATOS_NUEVOS
-            FROM HISTORIAL_DE_CAMBIOS H
-            LEFT JOIN usuarioS U
-            ON U.ID = H.ID_usuario
-            LEFT JOIN administradores A
-            ON A.ID = H.ID_usuario
-            """)
-            # Se guarda la consulta en una variable.
-            consulta = db.cur.fetchall()
+        # Explico esta monstruosidad. Primero, si el rol es 0, es
+        # decir, si el rol es usuario, entonces selecciona el nombre
+        # de la tabla usuarios. Sino, selecciona el nombre de la tabla
+        # administradores. Lo guarda bajo el alias "nombre". Luego,
+        # hace lo mismo para el usuario y lo guarda bajo el alias
+        # "usuario". Luego selecciona la fecha y hora, tipo, tabla,
+        # id de fila, datos viejos y datos nuevos de la tabla historial
+        # de cambios. Luego hace los joins. Después, hace la
+        # comparación con la búsqueda (ya explicado en otros módulos).
+        # Finalmente, verifica que los datos coincidan con lo
+        # seleccionado en las listas. Para una explicación más
+        # detallada sobre los campos y como se registran los datos en
+        # el historial, lean el código sql de la app y el módulo
+        # registrar_cambios.py
+        db.cur.execute(f"""
+        SELECT (CASE WHEN h.rol = 0 THEN u.nombre_apellido ELSE a.nombre_apellido END) AS nombre,
+        (CASE WHEN h.rol = 0 THEN u.usuario ELSE a.usuario END) AS nombre_usuario,
+        h.fecha_hora, h.tipo, h.tabla, h.id_fila, h.datos_viejos, h.datos_nuevos
+        FROM historial_de_cambios H
+        LEFT JOIN usuarios u
+        ON u.id = h.id_usuario
+        LEFT JOIN administradores a
+        ON a.id = h.id_usuario
+        WHERE (nombre LIKE ? 
+        OR nombre_usuario LIKE ? 
+        OR h.fecha_hora LIKE ?
+        OR h.tipo LIKE ? 
+        OR h.tabla LIKE ? 
+        OR h.id_fila LIKE ? 
+        OR h.datos_viejos LIKE ?
+        OR h.datos_nuevos LIKE ?)
+        AND nombre_usuario LIKE ?
+        AND h.tipo LIKE ?
+        AND h.tabla LIKE ?
+        {orden}
+        """, (f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+              f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+              f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+              f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+              f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
 
-        # Se establece la cantidad de filas que va a tener la tabla
+        consulta = []
+        fetch = db.cur.fetchall()
+        for i in fetch:
+            fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
+            if fecha >= self.entryFechaDesde.date() and fecha <= self.entryFechaHasta.date():
+                consulta.append(i)
+
         self.tabla.setRowCount(len(consulta))
-        # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
-        # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
         for i in range(len(consulta)):
             self.tabla.setItem(i, 0, qtw.QTableWidgetItem(str(consulta[i][0])))
             self.tabla.setItem(i, 1, qtw.QTableWidgetItem(str(consulta[i][1])))
             self.tabla.setItem(i, 2, qtw.QTableWidgetItem(str(consulta[i][2])))
-            if consulta[i][3]=="Inserción":
+
+            # Dependiendo del tipo de consulta, muestra algo distinto
+            # en el campo descripción.
+            # Los datos viejos del historial son los datos antes de un
+            # cambio, los datos nuevos son los datos que aparecen
+            # despues del cambio. Al insertar datos, por ejemplo, no
+            # se guarda nada en los datos viejos porque no hay.
+            # De la misma forma, al eliminar datos, no se guarda nada
+            # en el campo datos nuevos.
+            if consulta[i][3] == "Insercion":
                 if consulta[i][5]:
-                    textoId=f" de id {consulta[i][5]}"
+                    textoId = f" de id {consulta[i][5]}"
                 else:
-                    textoId=""
-                descripcion=f"Agregó a la tabla {consulta[i][4]} la fila{textoId} con los datos {consulta[i][7]}."
+                    textoId = ""
+                descripcion = f"Agregó a la tabla {consulta[i][4]} la fila{textoId} con los datos {consulta[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-
-            elif consulta[i][3]=="Edición":
+            elif consulta[i][3] == "Edicion":
                 if consulta[i][5]:
-                    textoId=f" de id {consulta[i][5]}"
+                    textoId = f" de id {consulta[i][5]}"
                 else:
-                    textoId=""
-                descripcion=f"Editó la fila{textoId} de la tabla {consulta[i][4]}, reemplazando los datos{consulta[i][6]} con los datos {consulta[i][7]}."
+                    textoId = ""
+                descripcion = f"Editó la fila{textoId} de la tabla {consulta[i][4]}, reemplazando los datos{consulta[i][6]} con los datos {consulta[i][7]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-
-            elif consulta[i][3]=="Eliminación simple":
+            elif consulta[i][3] == "Eliminacion simple":
                 if consulta[i][5]:
-                    textoId=f" de id {consulta[i][5]}"
+                    textoId = f" de id {consulta[i][5]}"
                 else:
-                    textoId=""
-                descripcion=f"Eliminó de la tabla {consulta[i][4]} la fila{textoId} que tenía los datos {consulta[i][6]}."
+                    textoId = ""
+                descripcion = f"Eliminó de la tabla {consulta[i][4]} la fila{textoId} que tenía los datos {consulta[i][6]}."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-            
-            elif consulta[i][3]=="Eliminación compleja":
+            elif consulta[i][3] == "Eliminacion compleja":
                 if consulta[i][5]:
-                    textoId=f" de id {consulta[i][5]}"
+                    textoId = f" de id {consulta[i][5]}"
                 else:
-                    textoId=""
-                descripcion=f"Eliminó de la tabla {consulta[i][4]} la fila{textoId} que tenía los datos {consulta[i][6]}."
+                    textoId = ""
+                descripcion = dedent(f"""Eliminó de la tabla {consulta[i][4]} la fila{textoId}
+                            que tenía los datos {consulta[i][6]},
+                            lo que eliminó también todas las filas relacionadas en otras tablas.""")
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Pase Anual":
+                descripcion = f"Realizó el pase anual de los alumnos de id: {consulta[i][6]}."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Pase historico individual":
+                descripcion = f"Realizó el pase histórico individual de {consulta[i][4]} de la persona de id: {consulta[i][5]}."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Pase historico grupal":
+                descripcion = f"Realizó el pase histórico grupal de {consulta[i][4]} de las personas de id: {consulta[i][6]}."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Verificacion de solicitud":
+                descripcion = f"Aceptó la solicitud del usuario cuyos datos son: {consulta[i][7]}."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Rechazo de solicitud":
+                descripcion = f"Rechazó la solicitud del usuario cuyos datos eran: {consulta[i][6]}"
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Ascenso":
+                descripcion = f"Ascendió al usuario con los datos: {consulta[i][7]} a administrador."
+                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
+            elif consulta[i][3] == "Descenso":
+                descripcion = f"Descendió al administrador con los datos: {consulta[i][7]} a usuario."
                 self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
 
-            elif consulta[i][3]=="Pase Anual":
-                descripcion=f"Realizó el pase anual de los alumnos de id: {consulta[i][6]}."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-            
-            elif consulta[i][3]=="Pase historico individual":
-                descripcion=f"Realizó el pase histórico individual de {consulta[i][4]} de la persona de id: {consulta[i][5]}."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-            
-            elif consulta[i][3]=="Pase historico grupal":
-                descripcion=f"Realizó el pase histórico grupal de {consulta[i][4]} de las personas de id: {consulta[i][6]}."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-
-            elif consulta[i][3]=="Verificación de solicitud":
-                descripcion=f"Aceptó la solicitud del usuario cuyos datos son: {consulta[i][7]}."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-            
-            elif consulta[i][3]=="Rechazo de solicitud":
-                descripcion=f"Rechazó la solicitud del usuario cuyos datos eran: {consulta[i][6]}"
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-
-            elif consulta[i][3]=="Ascenso":
-                descripcion=f"Ascendió al usuario con los datos: {consulta[i][7]} a administrador."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-            
-            elif consulta[i][3]=="Descenso":
-                descripcion=f"Descendió al administrador con los datos: {consulta[i][7]} a usuario."
-                self.tabla.setItem(i, 3, qtw.QTableWidgetItem(descripcion))
-        
             self.tabla.setRowHeight(i, 35)
+    
+    def ordenar(self):
+        """Este método cambia el ícono del botonOrdenar y actualiza los
+        datos de la tabla de la pantalla."""
+        self.botonOrdenar.cambiarIcono()
+        self.mostrarDatos()

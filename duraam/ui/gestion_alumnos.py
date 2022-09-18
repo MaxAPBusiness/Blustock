@@ -1,9 +1,9 @@
-"""Este módulo crea una pantalla para gestionar la tabla de alumnos.
+"""Este módulo crea una pantalla para gestionar la tabla alumnos.
 
 Clases
 ------
-    GestionAlumnos:
-        Crea una pantalla para gestionar la tabla de alumnos.
+    GestionAlumnos(qtw.QWidget):
+        Crea una pantalla para gestionar la tabla alumnos.
 """
 
 # Se importan las librerías de python:
@@ -25,87 +25,85 @@ import os
 # Se importan los módulos de la aplicación:
 # * inicializar_bbdd: se encarga de la conexión a la base de datos.
 #                     Se importa con el nombre de db.
-# * m.mostrarMensaje: función que muestra un popup en la pantalla.
+# * mostrar_mensaje: contiene una función que muestra un popup en la
+#                    pantalla.
 # * cursos: una lista con los cursos del colegio.
-# * cambiar_icono: cambia el icono del boton de ordenar-
+# * cambiar_icono: cambia el icono del boton de ordenar.
 # * registrarCambios: guarda los cambios a la tabla en el historial.
 import db.inicializar_bbdd as db
+from botones import BotonOrdenar, BotonEditar, BotonEliminar
 import mostrar_mensaje as m
 from cursos import cursos
-from cambiar_icono import cambiarIcono
 from registrar_cambios import registrarCambios
 
 
 class GestionAlumnos(qtw.QWidget):
-    """Esta clase crea una pantalla para gestionar la tabla de alumnos.
+    """Esta clase crea una pantalla para gestionar la tabla alumnos.
 
     Hereda: PyQt6.QtWidgets.QWidget
 
     Atributos
     ---------
         tabla : QTableWidget
-            la tabla de la pantalla.
+            La tabla de la pantalla.
         campos : tuple
-            los títulos de las columnas de la tabla.
-        barraBusqueda : QLabel
-            la barra de búsqueda.
+            Los títulos de las columnas de la tabla.
+        barraBusqueda : QLineEdit
+            La barra de búsqueda.
         radioNombre : QRadioButton
-            el botón de radio para ordenar por nombre.
+            El botón de radio para ordenar los datos de la tabla por
+            nombre.
         radioDNI : QRadioButton
-            el botón de radio para ordenar por DNI.
+            El botón de radio para ordenar los datos de la tabla
+            por DNI.
         radioCurso : QRadioButton
-            el botón de radio para ordenar por curso.
+            El botón de radio para ordenar los datos de la tabla por
+            curso.
         botonOrdenar : QPushButton
-            un botón para ordenar los datos de manera ascendente o
-            descendente.
-        botonAgregar : QPushButton
-            un botón para insertar datos a la tabla.
-        
+            Un botón para ordenar los datos de la tabla de manera
+            ascendente o descendente.
+
     Métodos
     -------
         __init__(self):
             El constructor de la clase GestionAlumnos.
 
-            Crea la pantalla, un QWidget, que contiene:
-                - Una tabla, un QTableWidget, que muestra los datos de
-                  la tabla alumnos y contiene botones para editarlos.
-                - Una barra de buscador, un QLineEdit, para buscar los
-                  datos.
-                - Botones de radio, QRadioWidget, para ordenar los
-                  datos mostrados de manera ascendente o descendente
-                  según el boton presionado.
-                - Un botón para insertar datos a la tabla.
-            
-            Ver también
-            -----------
-            mostrarDatos: obtiene los datos de la tabla alumnos y los
-                          introduce en la tabla de la pantalla.
+            Crea la pantalla, un QWidget, que contiene: un título
+            descriptivo, un QLabel; una tabla, un QTableWidget, que
+            muestra los datos de la tabla alumnos y contiene botones
+            para editarlos; una barra de buscador, un QLineEdit, para
+            buscar los datos; botones de radio, QRadioWidget, para
+            ordenar los datos mostrados según un dato seleccionado, un
+            botón, QCheckBox, para ordenar los datos mostrados de
+            manera ascendente o descendente según el boton presionado;
+            un botón, un QPushButton, para insertar datos a la tabla.
 
         mostrarDatos(self):
             Obtiene los datos de la tabla alumnos y los introduce en 
             la tabla de la pantalla.
-        
+
         ordenar(self):
-            Llama a la función cambiarIcono y al método mostrarDatos.
-        
-        modificarLinea(self, tipo):
+            Cambia el ícono del botonOrdenar y actualiza los datos de
+            la tabla de la pantalla.
+
+        modificarLinea(self, tipo: str):
             Crea un formulario para insertar o editar datos en la tabla
             alumnos.
-        
-        confirmarModificacion(self, tipo, datosPorDefecto=None):
+
+        confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
             Modifica los datos de la tabla alumnos.
-        
+
         eliminar(self):
             Elimina la fila de la tabla alumnos.
-        
+
         realizarPaseAnual(self):
             Crea un menú para realizar el pase anual de los alumnos de
             forma grupal.
-        
+
         mostrarDatosPase(self):
             Obtiene los datos de los alumnos a pasar y los introduce en
             la tabla del menú de pase anual.
-        
+
         confirmarPase(self):
             Actualiza los cursos en la tabla alumnos, realizando el
             pase anual y registrando los cambios en el historial.
@@ -113,14 +111,14 @@ class GestionAlumnos(qtw.QWidget):
     # Se inicializa la clase con el constructor.
 
     def __init__(self):
-        # Se inicializa la clase QWidget, de la que hereda nuestra 
+        # Se inicializa la clase QWidget, de la que hereda nuestra
         # clase. QWidget: un widget vacío, que usaremos para crear
         # contenedores y pantallas.
         super().__init__()
 
         # Se crea el título, que es un widget QLabel.
         # QLabel: un label.
-        titulo = qtw.QLabel("GESTIÓN DE ALUMNOS")
+        titulo = qtw.QLabel("GESTIÓN DE alumnos")
 
         # Se le pone el nombre de objeto para personalizarlo más tarde
         # con estilos. Método setObjectName: le pone un tag al objeto
@@ -140,7 +138,7 @@ class GestionAlumnos(qtw.QWidget):
         # Nota: una tupla es igual que una lista pero sus datos no
         # pueden cambiar.
         self.campos = ("ID", "DNI", "Nombre y Apellido",
-                       "Curso", "email", "", "")
+                       "Curso", "Email", "", "")
 
         # Se establece el número de columnas que va a tener.
         # Método setColumnCount: establece el número de columnas
@@ -150,15 +148,15 @@ class GestionAlumnos(qtw.QWidget):
         # títulos.
         self.tabla.setColumnCount(len(self.campos))
 
-        # Se introducen los títulos en la tabla. 
-        # Método setHorizontalHeaderLabels: cambia los títulos de las 
+        # Se introducen los títulos en la tabla.
+        # Método setHorizontalHeaderLabels: cambia los títulos de las
         # columnas de las tablas. Recibe de parámetro una lista con los
         # títulos. En este caso recibe la lista de campos.
         self.tabla.setHorizontalHeaderLabels(self.campos)
 
         # Se esconden los números de fila de la tabla que vienen por
         # defecto para evitar confusión con el campo ID.
-        # Método verticalHeader().hide(): esconde los títulos 
+        # Método verticalHeader().hide(): esconde los títulos
         # verticales (los de las filas).
         self.tabla.verticalHeader().hide()
 
@@ -170,10 +168,6 @@ class GestionAlumnos(qtw.QWidget):
         self.tabla.setColumnWidth(5, 35)
         self.tabla.setColumnWidth(6, 35)
 
-        # Se refrescan los datos de la tabla. Para saber exactamente
-        # qué hace esta función, leanla más adelante.
-        self.mostrarDatos()
-
         # Se crea una barra de búsqueda, que es un QLineEdit.
         # Clase QLineEdit: crea una caja de un renglón en el que se
         # escribe texto.
@@ -181,7 +175,7 @@ class GestionAlumnos(qtw.QWidget):
         self.barraBusqueda.setObjectName("buscar")
 
         # Método setClearButtonEnabled: cuando es true, se introduce un
-        # botón con una cruz a la derecha del QLineEdit que permite 
+        # botón con una cruz a la derecha del QLineEdit que permite
         # borrar la busqueda al clickearlo.
         self.barraBusqueda.setClearButtonEnabled(True)
 
@@ -190,13 +184,13 @@ class GestionAlumnos(qtw.QWidget):
         # al usuario pero que desaparece al comenzar a escribir,
         # haciendo de guía
         self.barraBusqueda.setPlaceholderText("Buscar...")
-        
+
         # Se importa el ícono de lupa para la barra.
         # Método QPixmap: crea un mapa de pixeles de una imagen, que
         # qt usa para manejar las imágenes.
         iconoLupa = qtg.QPixmap(
             f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
-        
+
         # Se crea un label que va a contener el ícono. Este label no va
         # a tener texto, solo el ícono.
         contenedorIconoLupa = qtw.QLabel()
@@ -216,7 +210,7 @@ class GestionAlumnos(qtw.QWidget):
         # texto de un qlineedit es editado.
         # El lambda está ahí porque si no se bugea. No se que función
         # cumple en el connect (se que hace pero no entiendo que tiene
-        # que ver con el connect). En tkinter también pasa lo mismo 
+        # que ver con el connect). En tkinter también pasa lo mismo
         # para darle funciones a los botones. Despues investigo.
         self.barraBusqueda.textEdited.connect(
             lambda: self.mostrarDatos()
@@ -234,24 +228,12 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se crea el botón para ordenar los resultados de manera
         # ascendente o descendente.
-        # QCheckBox: un botón de tick.
-        self.botonOrdenar=qtw.QCheckBox()
+        self.botonOrdenar = BotonOrdenar()
 
         # Se le da la funcionalidad al botón.
         # Método stateChanged: señal que se dispara cuando se tickea el
         # botón.
-        self.botonOrdenar.stateChanged.connect(lambda:self.ordenar())
-
-        # Función cambiarIcono: cambia el icono de botón ordenar.
-        # Parámetros: 
-        #   boton: el boton al que cambiar el ícono.
-        #   checked (bool): si el botón esta checkeado o no, pone o no
-        # un ícono
-        cambiarIcono(self.botonOrdenar, False)
-        self.botonOrdenar.setObjectName("show")
-        self.botonOrdenar.setCursor(
-            qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor)
-            )
+        self.botonOrdenar.stateChanged.connect(lambda: self.ordenar())
 
         # Se le da la funcionalidad a los botones de radio.
         # Método toggled: señal que se dispara cuando se activa un
@@ -260,7 +242,7 @@ class GestionAlumnos(qtw.QWidget):
         self.radioDNI.toggled.connect(lambda: self.mostrarDatos())
         self.radioCurso.toggled.connect(lambda: self.mostrarDatos())
 
-        # Se crea el boton de agregar alumnos nuevos. 
+        # Se crea el boton de agregar alumnos nuevos.
         # QPushButton: un botón normal.
         botonAgregar = qtw.QPushButton("Agregar")
         botonAgregar.setObjectName("agregar")
@@ -269,7 +251,7 @@ class GestionAlumnos(qtw.QWidget):
         # dispara cuando se clickea el widget.
         botonAgregar.clicked.connect(
             lambda: self.modificarLinea("agregar")
-            )
+        )
 
         # Cambia la forma del cursor cuando pasa por encima del botón.
         # Método setCursor: maneja la forma del cursor cuando pasa por
@@ -277,22 +259,22 @@ class GestionAlumnos(qtw.QWidget):
         # CursorShape de qt, que representa la forma del cursor.
         # Clase Qt: contiene identificadores misceláneos. Subclase de
         # QtCore
-        # Clase CursorShape: contiene las distintas formas de cursor 
+        # Clase CursorShape: contiene las distintas formas de cursor
         # que se pueden usar en Qt. Subclase de QtCore.Qt
         # Atributo PointingHandCursor: representa la forma de mano del
         # cursor. Pertenece a la clase CursorShape.
         botonAgregar.setCursor(
             qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor)
-            )
+        )
 
-        # Se crea el boton para realizar el pase anual. 
+        # Se crea el boton para realizar el pase anual.
         botonPaseAnual = qtw.QPushButton("Pase Anual")
         botonPaseAnual.setObjectName("confirmar")
         botonPaseAnual.clicked.connect(lambda: self.realizarPaseAnual())
         botonPaseAnual.setCursor(qtg.QCursor(
             qtc.Qt.CursorShape.PointingHandCursor))
 
-        # Se crea el layout principal. 
+        # Se crea el layout principal.
         # QVBoxLayout: un layout vertical.
         layout = qtw.QVBoxLayout()
 
@@ -301,13 +283,13 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se crea el widget que sevirá de contenedor de la primera fila
         # de elementos.
-        contenedor1=qtw.QWidget()
+        contenedor1 = qtw.QWidget()
 
         # Se crea el layout que se le dará al primer contenedor.
         # QGridLayout: un layout de grilla. Usamos este porque permite
         # meter dos objetos en el mismo lugar, ya que los otros no
         # permiten tener dos en la misma posición.
-        contenedor1Layout=qtw.QGridLayout()
+        contenedor1Layout = qtw.QGridLayout()
 
         # Se añade la barra de búsqueda, el ícono de lupa y los botones
         # de radio con su label.
@@ -317,8 +299,8 @@ class GestionAlumnos(qtw.QWidget):
         contenedor1Layout.addWidget(self.radioNombre, 0, 2)
         contenedor1Layout.addWidget(self.radioDNI, 0, 3)
         contenedor1Layout.addWidget(self.radioCurso, 0, 4)
-
-        # Se le da el layout al contenedor 1. 
+        contenedor1Layout.addWidget(self.botonOrdenar, 0, 5)
+        # Se le da el layout al contenedor 1.
         # Método setLayout: le pone un layout a un widget.
         contenedor1.setLayout(contenedor1Layout)
 
@@ -327,13 +309,13 @@ class GestionAlumnos(qtw.QWidget):
         layout.addWidget(self.tabla)
 
         # Se crea el segundo contenedor.
-        contenedor2=qtw.QWidget()
+        contenedor2 = qtw.QWidget()
 
         # Se crea el layout para el segundo contenedor.
         # QHBoxLayout: un layout horizontal.
-        contenedor2Layout=qtw.QHBoxLayout()
+        contenedor2Layout = qtw.QHBoxLayout()
 
-        #Se introducen los botones en el layout del contenedor 2.
+        # Se introducen los botones en el layout del contenedor 2.
         contenedor2Layout.addWidget(botonAgregar)
         contenedor2Layout.addWidget(botonPaseAnual)
 
@@ -345,6 +327,10 @@ class GestionAlumnos(qtw.QWidget):
         # Se le pone el layout al widget central.
         self.setLayout(layout)
 
+        # Se refrescan los datos de la tabla. Para saber exactamente
+        # qué hace esta función, leanla más adelante.
+        self.mostrarDatos()
+
     def mostrarDatos(self):
         """Este método obtiene los datos de la tabla alumnos y los
         introduce en la tabla de la pantalla.
@@ -354,13 +340,19 @@ class GestionAlumnos(qtw.QWidget):
         # Método isChecked: devuelve true si el botón está checkeado,
         # y false si no.
         if self.radioNombre.isChecked():
-            orden="ORDER BY nombre_apellido"
+            orden = "ORDER BY nombre_apellido"
         elif self.radioDNI.isChecked():
-            orden="ORDER BY dni"
+            orden = "ORDER BY dni"
         elif self.radioCurso.isChecked():
-            orden="ORDER BY curso"
+            orden = "ORDER BY curso"
         else:
-            orden=""
+            orden = ""
+
+        # Si el botonOrdenar está presionado y hay un orden
+        # seleccionado, lo ordena de forma ascendente, añadiendo
+        # el " ASC" al final del order by.
+        if orden and self.botonOrdenar.isChecked():
+            orden += " ASC"
 
         # Se hace la consulta. Se seleccionan todas las filas que
         # coincidan con el texto de la barra de búsqueda y se introduce
@@ -371,19 +363,22 @@ class GestionAlumnos(qtw.QWidget):
         # caso, cada uno representa el texto de la barra de búsqueda.
         # Despues del texto de la consulta, debe introducirse una tupla
         # o lista con valores, uno por cada ?. En este caso, como hay
-        # 4 ?, la tupla tiene 4 datos, y cada uno es el texto de la 
+        # 4 ?, la tupla tiene 4 datos, y cada uno es el texto de la
         # barra de búsqueda, por lo que cada ? va a ser ese texto.
         # El like lo que hace es devolver el texto que contenga otro
         # texto, es decir, checkea si el texto de la derecha del like
         # está dentro del texto del campo de la izquierda. Por ejemplo,
         # si se quiere buscar todas las filas con la fecha 2022, se
         # debería hacer lo siguiente: "WHERE FECHA LIKE %/2022". Esto
-        # se traduce a "Seleccionar donde la fecha contenga el texto 
+        # se traduce a "Seleccionar donde la fecha contenga el texto
         # /2022". Esto selecciona todas las fechas con el año 2022.
         # La variable orden puede ser un order by o nada, dependiendo
         # del botón de orden presionado.
+        # Aclaro que si el usuario no busco nada no pasa nada, porque
+        # entonces el texto de la barra quedará vacío y seleccionara
+        # todas las filas por defecto. El like con un texto vacío
+        # automáticamente selecciona todos los datos.
         # cur.execute(): ejecuta una sentencia SQL en la base de datos.
-
         db.cur.execute(
             f"""
             SELECT * FROM alumnos 
@@ -397,7 +392,7 @@ class GestionAlumnos(qtw.QWidget):
                 f"%{self.barraBusqueda.text()}%",
                 f"%{self.barraBusqueda.text()}%",
                 f"%{self.barraBusqueda.text()}%",
-                f"%{self.barraBusqueda.text()}%", 
+                f"%{self.barraBusqueda.text()}%",
             )
         )
 
@@ -410,14 +405,14 @@ class GestionAlumnos(qtw.QWidget):
         # seleccionadas en la consulta.
         self.tabla.setRowCount(len(consulta))
 
-        # Por cada fila de la consulta, se genera otro bucle que 
+        # Por cada fila de la consulta, se genera otro bucle que
         # recorre todos los campos e inserta cada dato en la celda
         # correspondiente en la fila correspondiente de la tabla de la
         # ui. Al final de cada fila, se insertan dos botones, uno para
         # editar y el otro para eliminar los datos.
         for i in range(len(consulta)):
             # Se introduce el valor de cada celda de la fila de la
-            # consulta en la celda correspondiente de la fila de la 
+            # consulta en la celda correspondiente de la fila de la
             # tabla.
             for j in range(len(consulta[i])):
                 # Método setItem: introduce in item de texto en la
@@ -427,7 +422,7 @@ class GestionAlumnos(qtw.QWidget):
                 # una tabla. Parámetro: el texto del item.
                 self.tabla.setItem(
                     i, j, qtw.QTableWidgetItem(str(consulta[i][j]))
-                    )
+                )
 
             # Aumentamos el tamaño de la altura de la fila en la tabla.
             # Método setRowHeight: cambia la altura de la fila.
@@ -435,78 +430,39 @@ class GestionAlumnos(qtw.QWidget):
             self.tabla.setRowHeight(i, 35)
 
             # Se crea el boton de editar, se le da la función de editar
-            # y se lo introduce al final de la fila.
-            botonEditar = qtw.QPushButton()
-
-            # Se introduce el ícono en el boton.
-            # Método setIcon: establece el ícono de un botón. Toma como
-            # parámetro un objeto QIcon.
-            # QIcon: un ícono qt para introducir en widgets. Toma como
-            # parámetro un pixmap, que representa la imágen que va a 
-            # tener el ícono.
-            botonEditar.setIcon(
-                qtg.QIcon(
-                    qtg.QPixmap(
-                        f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png"
-                        )
-                    )
-                )
-
-            # Se cambia el tamaño del ícono. 
-            # Método setIconSize: establece el tamaño del ícono de un
-            # widget. Toma como parámetro un objeto QSize.
-            # QSize: representa un tamaño. No se porque tienen un
-            # objeto para un tamaño pero bueno. 
-            # Parámetros: 
-            #     w (int): el ancho.
-            #     h (int): el alto.
-            botonEditar.setIconSize(qtc.QSize(25, 25))
-            botonEditar.setObjectName("editar")
+            # y se lo introduce al final de la fila. Para ver una
+            # explicación detallada del qpixmap y qsize, lean el módulo
+            # de botones.py
+            botonEditar = BotonEditar()
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
-            botonEditar.setCursor(qtg.QCursor(
-                qtc.Qt.CursorShape.PointingHandCursor))
-            
-            # Se introduce en la celda correspondiente.
-            # Método setCellWidget: introduce un widget en una celda.
             self.tabla.setCellWidget(i, 5, botonEditar)
 
             # Se crea el botón de eliminar y se introduce al final de
             # la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(
-                qtg.QIcon(
-                    qtg.QPixmap(
-                        f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png"
-                        )
-                    )
-                )
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
+            botonEliminar = BotonEliminar()
             botonEliminar.clicked.connect(lambda: self.eliminar())
-            botonEliminar.setCursor(qtg.QCursor(
-                qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, 6, botonEliminar)
 
     def ordenar(self):
-        """Este método llama a la función cambiarIcono y al método
-        mostrarDatos."""
-        cambiarIcono(self.entry2, self.botonOrdenar, self.botonOrdenar.isChecked())
+        """Este método cambia el ícono del botonOrdenar y actualiza los
+        datos de la tabla de la pantalla."""
+        self.botonOrdenar.cambiarIcono()
         self.mostrarDatos()
 
-    def modificarLinea(self, tipo):
+    def modificarLinea(self, tipo: str):
         """Este método crea un formulario para insertar o editar datos
         en la tabla alumnos.
 
         El formulario es un QWidget que funciona como ventana. Por cada
         campo de la fila, agrega un entry (QLineEdit o QSpinbox) y un
         label descriptivo. Al confirmar los datos, ejecuta el método 
-        confirmar.
+        confirmarModificacion.
 
         Parámetros
         ----------
             tipo : str
                 el tipo de formulario.
-        
+
         Ver también
         -----------
         confirmarModificacion: modifica los datos de la tabla alumnos.
@@ -518,14 +474,14 @@ class GestionAlumnos(qtw.QWidget):
         # Método setWindowTitle: establece el título de la ventana.
         ventanaModificar.setWindowTitle("Agregar Alumno")
 
-        # Se establece el ícono de la ventana. 
-        # Método setWindowIcon: establece el ícono de una ventana. 
+        # Se establece el ícono de la ventana.
+        # Método setWindowIcon: establece el ícono de una ventana.
         # Recibe como parámetro un objeto QIcon.
         ventanaModificar.setWindowIcon(
             qtg.QIcon(
-                f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"
-                )
+                f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"
             )
+        )
 
         # Se crea el layout.
         layoutVentanaModificar = qtw.QGridLayout()
@@ -559,37 +515,37 @@ class GestionAlumnos(qtw.QWidget):
 
         # Se establece el máximo de caracteres de los entries para que
         # no se ingresen datos demasiado largos.
-        # setMaxLength: establece el máximo de caracteres de un 
+        # setMaxLength: establece el máximo de caracteres de un
         # QLineEdit.
         self.entry1.setMaxLength(4)
         self.entry3.setMaxLength(50)
+        self.entry4.setMaxLength(2)
         self.entry5.setMaxLength(320)
-
 
         # Si el tipo es editar, se cargan los datos por defecto.
         if tipo == "editar":
-            # Se crea una lista de datos vacía en la que se introduciran 
+            # Se crea una lista de datos vacía en la que se introduciran
             # los valores que pasaran por defecto a la ventana.
             datos = []
 
-            # Se obtiene la fila en la que estaba el botón de edición 
+            # Se obtiene la fila en la que estaba el botón de edición
             # clickeado:
-            # primero se obtiene cual fue último widget clickeado (en 
+            # primero se obtiene cual fue último widget clickeado (en
             # este caso el boton).
-            # focusWidget: obtiene el boton que está seleccionado. 
+            # focusWidget: obtiene el boton que está seleccionado.
             # Pertenece a la clase QApplication.
             botonClickeado = qtw.QApplication.focusWidget()
 
             # luego se obtiene la posicion del boton.
-            # Método indexAt: obtiene el índice de la posicion de un 
-            # elemento. Método pos: obtiene la posición del último 
+            # Método indexAt: obtiene el índice de la posicion de un
+            # elemento. Método pos: obtiene la posición del último
             # widget clickeado.
             posicion = self.tabla.indexAt(botonClickeado.pos())
 
             # Se añaden a la lista los valores de la fila, recorriendo
-            # cada celda de la fila. 
+            # cada celda de la fila.
             # celda se refiere a la posición de cada celda en la fila.
-            # posicion.sibling se refiere al item que está en la celda 
+            # posicion.sibling se refiere al item que está en la celda
             # el data al final devuelve el texto de la celda.
             for celda in range(0, 6):
                 datos.append(posicion.sibling(posicion.row(), celda).data())
@@ -612,43 +568,45 @@ class GestionAlumnos(qtw.QWidget):
         # Primero, se crea una tupla con todos los entries.
         entries = (self.entry1, self.entry2,
                    self.entry3, self.entry4, self.entry5)
-        
+
         # Luego se hace el bucle. A cada entry de la tupla se le pone
         # su objectName y se lo agrega al layout.
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutVentanaModificar.addWidget(entries[i], i, 1)
 
-        # Se crea el boton de confirmar, y se le da la función de confirmar.
+        # Se crea el boton de confirmar, y se le da la función de confirmarModificacion
         botonConfirmar = qtw.QPushButton("Confirmar")
         botonConfirmar.setObjectName("confirmar")
         botonConfirmar.setWindowIcon(
             qtg.QIcon(
-                f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"
-                )
+                f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"
             )
+        )
         botonConfirmar.clicked.connect(
             lambda: self.confirmarModificacion(tipo)
-            )
+        )
         botonConfirmar.setCursor(
             qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor)
-            )
+        )
 
         layoutVentanaModificar.addWidget(botonConfirmar, i+1, 0, 1, 2,
-                               alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+                                         alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
         # Se le da el layout a la ventana.
         ventanaModificar.setLayout(layoutVentanaModificar)
-        
+
         # Se muestra la ventana. Método show: muestra el widget.
         ventanaModificar.show()
 
-    def confirmarModificacion(self, tipo, datosPorDefecto=None):
-        """Esta función modifica los datos de la tabla alumnos.
+    def confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
+        """Este método modifica los datos de la tabla alumnos.
 
-        Verifica que el curso sea correcto y luego intenta realizar los
-        cambios, registrarlos en el historial y notificar al usuario el 
-        éxito de la operacion. Si la base de datos arroja un 
+        Verifica que el id no esté repetido en alumnos históricos y que
+        el curso sea correcto y luego intenta realizar los cambios, 
+        registrarlos en el historial, notificar al usuario el éxito de
+        la operacion, actualizar la tabla de la pantalla y cerrar el
+        formulario. Si la base de datos arroja un 
         sqlite3.IntegrityError durante el intento, le notifica al 
         usuario que se ha repetido un valor único y termina la 
         ejecución de la función, sin modificar la tabla.
@@ -657,31 +615,39 @@ class GestionAlumnos(qtw.QWidget):
         ----------
             tipo : str
                 El tipo de modificación.
-            datosViejos : list
+            datosPorDefecto : list, default = None
                 Los datos de la fila previos a la modificación. 
 
         Ver también
         -----------
         modificarLinea: crea un formulario para insertar o editar datos
-                        en la tabla de alumnos.
+                        en la tabla alumnos.
         """
+        # Busca el id en la tabla alumnos_historicos. Si está
+        # registrado, notifica al usuario y finaliza la ejecución del
+        # método.
+        db.cur.execute(
+            "SELECT id FROM alumnos_historicos WHERE id = ?", (self.entry1.text(),))
+        if db.cur.fetchall():
+            return m.mostrarMensaje("Error", "Error",
+                                    "El ID ingresado ya está registrado en la tabla alumnos históricos. Por favor, ingrese otro.")
 
         # Si el curso no es correcto, notifica al usuario y finaliza
         # la ejecución del método.
         if self.entry4.text() not in cursos:
             return m.mostrarMensaje("Error", "Error",
-                "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
+                                    "El curso es incorrecto. Por favor, verifique que el curso ingresado es correcto.")
 
         # Guarda los datos ingresados por el usuario en una tupla para
         # usarlos más tarde.
         datosNuevos = (
-            self.entry1.text(), self.entry2.value(), 
+            self.entry1.text(), self.entry2.value(),
             self.entry3.text().upper(), self.entry4.text(),
             self.entry5.text()
-            )
+        )
 
         # Si el tipo de modificación es editar, se actualizan los datos.
-        if tipo=="editar":
+        if tipo == "editar":
             try:
                 # Se actualizan los datos en la tabla alumnos.
                 db.cur.execute(
@@ -692,7 +658,7 @@ class GestionAlumnos(qtw.QWidget):
                     WHERE id = ?
                     """,
                     (
-                        datosNuevos[0], datosNuevos[1], datosNuevos[2], 
+                        datosNuevos[0], datosNuevos[1], datosNuevos[2],
                         datosNuevos[3], datosNuevos[4], datosPorDefecto[0],
                     )
                 )
@@ -718,61 +684,62 @@ class GestionAlumnos(qtw.QWidget):
                 )
 
                 # Se guardan los cambios en el historial.
-                registrarCambios("Edición", "Alumnos", datosPorDefecto[0], 
-                                    f"{datosPorDefecto}", f"{datosNuevos}")
+                registrarCambios("Edicion", "Alumnos", datosPorDefecto[0],
+                                 f"{datosPorDefecto}", f"{datosNuevos}")
 
                 # Se hace un commit de la transacción.
                 db.con.commit()
 
                 # Se muestra el mensaje exitoso.
                 m.mostrarMensaje("Information", "Aviso",
-                               "Se ha actualizado el alumno.")
+                                 "Se ha actualizado el alumno.")
 
             # Si hay un error en la base de datos porque el id se
             # repite, en vez de parar el programa, notifica al usuario
-            # de que no puede registrar el mismo id.                   
+            # de que no puede registrar el mismo id.
             except sqlite3.IntegrityError:
-                m.mostrarMensaje("Error", "Error", 
-                    "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                m.mostrarMensaje("Error", "Error",
+                                 "El ID ingresado ya está registrado. Por favor, ingrese otro.")
 
         # Si no, se inserta la fila en la tabla de la base de datos, se
         # guarda la transacción en el historial, se hace el commit y se
         # notifica al usuario.
-        elif tipo=="insertar":
+        elif tipo == "insertar":
             try:
                 db.cur.execute(
                     "INSERT INTO alumnos VALUES(?, ?, ?, ?, ?) ", datosNuevos
-                    )
-                registrarCambios("Inserción", "Alumnos",
+                )
+                registrarCambios("Insercion", "Alumnos",
                                  datosNuevos[0], None, f"{datosNuevos}")
                 db.con.commit()
-                m.mostrarMensaje("Information", "Aviso",
-                               "Se ha ingresado un alumno.")
-            
+                return m.mostrarMensaje("Information", "Aviso",
+                                        "Se ha ingresado un alumno.")
+
             # Si salta error, se notifica al usuario.
             except sqlite3.IntegrityError:
-                m.mostrarMensaje("Error", "Error", 
-                    "El ID ingresado ya está registrado. Por favor, ingrese otro.")
+                return m.mostrarMensaje("Error", "Error",
+                                        "El ID ingresado ya está registrado. Por favor, ingrese otro.")
 
         # Se refrescan los datos.
         self.mostrarDatos()
-        
+
         # Se cierra la ventana.
         # Método close: cierra la ventana.
-        self.edita.close()
+        self.ventanaEditar.close()
 
     def eliminar(self):
-        """Esta función elimina la fila de la tabla alumnos.
+        """Este método elimina la fila de la tabla alumnos.
 
         Antes de eliminar, confirma la decisión del usuario.
         Si los datos están relacionados con otras tablas, vuelve a
         confirmar la decisión del usuario. Luego, elimina la fila de la
         tabla alumnos y las filas en donde los datos estaban
-        relacionados.
+        relacionados. Por último, registra los cambios y actualiza la
+        tabla.
         """
         # se le pregunta al usuario si desea eliminar la fila.
         respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
-                              "¿Está seguro que desea eliminar estos datos?")
+                                     "¿Está seguro que desea eliminar estos datos?")
 
         # si pulsó el boton de sí, sigue el código.
         # Nota: el mensaje no devuelve un "true o false" sino el boton
@@ -788,27 +755,27 @@ class GestionAlumnos(qtw.QWidget):
 
             # Guarda el tipo de modificación y la tabla para usarlos
             # más tarde para guardar en el historial.
-            tipo = "Eliminación simple"
+            tipo = "Eliminacion simple"
             tablas = "Alumnos"
 
             # Busca si hay datos relacionados en otras tablas.
             db.cur.execute(
                 "SELECT * FROM movimientos_herramientas WHERE clase=0 AND id_persona = ?",
                 (idd,)
-                )
+            )
 
-            # Si hay datos relacionados, cambia el tipo de 
+            # Si hay datos relacionados, cambia el tipo de
             # modificación y la tabla. Se le vuelve a preguntar al
             # usuario si está seguro de su decisión.
             if db.cur.fetchall():
-                tipo = "Eliminación compleja"
+                tipo = "Eliminacion compleja"
                 tablas = "Alumnos Movimientos de herramientas"
                 respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
-                    """El alumno tiene movimientos registrados. 
+                                             """El alumno tiene movimientos registrados. 
                     Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
                     por lo que sus registros de deudas se eliminarán y podría perderse información valiosa.
                     ¿Desea eliminarlo de todas formas?""")
-            
+
             # Si vuelve a responder que si, elimina los datos.
             if respuesta == qtw.QMessageBox.StandardButton.Yes:
                 # Guarda los datos por eliminar en una variable para
@@ -824,7 +791,7 @@ class GestionAlumnos(qtw.QWidget):
                     DELETE FROM movimientos_herramientas
                     WHERE clase=0
                     AND id_persona = ?
-                    """, 
+                    """,
                     (idd,)
                 )
 
@@ -832,7 +799,8 @@ class GestionAlumnos(qtw.QWidget):
                 # los datos del turno pañol, pero no se eliminan los
                 # datos del turno pañol para guardarlos por si se
                 # necesitan.
-                db.cur.execute("UPDATE turno_panol SET id_alumno=NULL WHERE id_alumno = ?", (idd,))
+                db.cur.execute(
+                    "UPDATE turno_panol SET id_alumno=NULL WHERE id_alumno = ?", (idd,))
 
                 # Se guardan los cambios en el historial y bla bla bla.
                 registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None)
@@ -840,29 +808,29 @@ class GestionAlumnos(qtw.QWidget):
                 self.mostrarDatos()
 
     def realizarPaseAnual(self):
-        """Esta función crea un menú para realizar el pase anual de
+        """Este método crea un menú para realizar el pase anual de
         los alumnos de forma grupal.
 
         El menú es un QWidget, que contiene:
-            - Una tabla, QTableWiget, que contiene los datos de los
+            \n- Una tabla, QTableWiget, que contiene los datos de los
               alumnos y un botón de check por cada fila para
               seleccionarlas para el pase. Por defecto viene checkeado.
-            - Una barra de búsqueda para navegar por los datos.
-            - Un botón para realizar el pase de las filas seleccionadas
-        
+            \n- Una barra de búsqueda para navegar por los datos.
+            \n- Un botón para realizar el pase de las filas seleccionadas
+
         Ver también
         -----------
         mostrarDatosPase: obtiene los datos de los alumnos a pasar y
                           los introduce en la tabla del menú de pase 
                           anual.
         """
-        # Se crea el widget que va a funcionar como ventana, se 
+        # Se crea el widget que va a funcionar como ventana, se
         # establece el título y el ícono.
         self.menuPase = qtw.QWidget()
         self.menuPase.setWindowTitle("Realizar Pase Anual de Alumnos")
         self.menuPase.setWindowIcon(
-            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
+
         # Se crea el título.
         titulo = qtw.QLabel("Seleccione los alumnos que desea pasar de año.")
         titulo.setObjectName("subtitulo")
@@ -887,10 +855,10 @@ class GestionAlumnos(qtw.QWidget):
         self.tablaListaAlumnos.setMaximumSize(400, 345)
 
         # Se crean los títulos de la tabla. El primero está vacio
-        # porque ahí van los botones de check. 
+        # porque ahí van los botones de check.
         self.camposPase = ["", "Nombre y Apellido", "DNI", "Curso"]
 
-        # Se termina de configurar la tabla y se muestran los datos. 
+        # Se termina de configurar la tabla y se muestran los datos.
         # Lógica ya explicada en el constructor.
         self.tablaListaAlumnos.setColumnCount(len(self.camposPase))
         self.tablaListaAlumnos.setColumnWidth(0, 15)
@@ -903,7 +871,8 @@ class GestionAlumnos(qtw.QWidget):
         botonConfirmar = qtw.QPushButton("Confirmar")
         botonConfirmar.setObjectName("confirmar")
         botonConfirmar.clicked.connect(lambda: self.confirmarPase())
-        botonConfirmar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        botonConfirmar.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
 
         # Se crea el layout y se introducen los widgets.
         layoutMenuPase = qtw.QVBoxLayout()
@@ -919,9 +888,9 @@ class GestionAlumnos(qtw.QWidget):
         self.menuPase.show()
 
     def mostrarDatosPase(self):
-        """Esta función obtiene los datos de los alumnos a pasar
+        """Este método obtiene los datos de los alumnos a pasar
         y los introduce en la tabla del menú de pase anual.
-        
+
         Ver también
         -----------
         realizarPaseAnual: crea un menú para realizar el pase anual de
@@ -939,9 +908,9 @@ class GestionAlumnos(qtw.QWidget):
             OR dni LIKE ?
             OR curso LIKE ?)
             ORDER BY curso, id
-            """, 
+            """,
             (cursos, self.barraBusquedaPase.text(),
-            self.barraBusquedaPase.text(), self.barraBusquedaPase.text())
+             self.barraBusquedaPase.text(), self.barraBusquedaPase.text())
         )
 
         # Se guarda la consulta en una variable.
@@ -964,12 +933,12 @@ class GestionAlumnos(qtw.QWidget):
             self.tablaListaAlumnos.setRowHeight(i, 35)
 
     def confirmarPase(self):
-        """Esta función actualiza los cursos en la tabla alumnos, 
+        """Este método actualiza los cursos en la tabla alumnos, 
         realizando el pase anual.
 
         Si hay, al menos, un alumno de séptimo año seleccionado,
         confirma la decisión del usuario.
-        
+
         Ver también
         -----------
         realizarPaseAnual: crea un menú para realizar el pase anual de
@@ -989,8 +958,8 @@ class GestionAlumnos(qtw.QWidget):
             if (self.tablaListaAlumnos.cellWidget(i, 0).isChecked()
                     and self.tablaListaAlumnos.item(i, 3).text()[0] == "7"):
                 # Confirma la decisión del usuario y rompe el bucle.
-                respuesta = m.mostrarMensaje("Pregunta", "Advertencia", 
-                """Hay alumnos de séptimo año seleccionados. Hacer el pase eliminará a estos alumnos.
+                respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
+                                             """Hay alumnos de séptimo año seleccionados. Hacer el pase eliminará a estos alumnos.
                 Si quiere conservar sus datos, haga un registro histórico grupal y páselos a no activos.
                 ¿Desea seguir con el pase de todas formas y eliminarlos?""")
                 break
@@ -1014,7 +983,7 @@ class GestionAlumnos(qtw.QWidget):
                         db.cur.execute(
                             "DELETE FROM alumnos WHERE dni = ?",
                             (int(self.tablaListaAlumnos.item(i, 2).text()),)
-                            )
+                        )
                     # Si no, obtiene el curso, lo actualiza y registra
                     # los cambios.
                     else:
@@ -1027,17 +996,17 @@ class GestionAlumnos(qtw.QWidget):
                         # Se actualiza la tabla.
                         db.cur.execute(
                             "UPDATE alumnos SET curso = ? WHERE dni = ?",
-                            (f"{curso[0]}{curso[1]}", 
-                            int(self.tablaListaAlumnos.item(i, 2).text()))
-                            )
+                            (f"{curso[0]}{curso[1]}",
+                             int(self.tablaListaAlumnos.item(i, 2).text()))
+                        )
                         # Se guarda el id en la lista de datos nuevos.
                         datosNuevos.append(
                             int(self.tablaListaAlumnos.item(i, 2).text())
-                            )
+                        )
                     # Se guarda el id en la lista de datos viejos.
                     datosViejos.append(
                         int(self.tablaListaAlumnos.item(i, 2).text())
-                        )
+                    )
 
             # Se guardan los cambios en el historial y bla bla bla..
             registrarCambios("Pase anual", "Alumnos", None,
@@ -1045,5 +1014,5 @@ class GestionAlumnos(qtw.QWidget):
             db.con.commit()
             self.mostrarDatos()
             m.mostrarMensaje("Aviso", "Aviso",
-                           "El pase anual se ha realizado con éxito.")
+                             "El pase anual se ha realizado con éxito.")
             self.menuPase.close()

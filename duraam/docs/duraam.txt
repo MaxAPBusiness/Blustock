@@ -62,3 +62,5 @@ Duraam: carpeta principal de la aplicación.
     |-> gitignore: archivo de git. Ignorar.
     |-> README.txt: el archivo readme de la aplicación. Leanlo.
     |-> setup.py: el archivo que instala el programa. Por ahora está vacio. Ignorar.
+
+Información de la aplicación Duraam versión PreAlpha.

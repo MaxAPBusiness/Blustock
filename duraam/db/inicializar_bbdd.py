@@ -1,5 +1,7 @@
-# db.py: Crea la base de datos y ejecuta los comandos de duraam.sql para crear las tablas.
-# importa las librerías
+"""Este módulo crea la conexión a la base de datos.
+
+Si la base de datos no estaba creada, la crea con todas sus tablas.
+"""
 import sqlite3 as db
 import os
 

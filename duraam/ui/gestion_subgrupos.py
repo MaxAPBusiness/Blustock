@@ -1,323 +1,334 @@
-# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
-#                          la tabla de la base de datos; una barra de buscador; botones para 
-#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
-#                          herramientas; botones para editar y eliminar los datos; un botón
-#                          para agregar herramientas. 
-#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+"""Este módulo crea una pantalla para gestionar la tabla subgrupos. 
 
-# Se importan las librerías.
+Clases
+------
+    GestionSubgrupos(qtw.QWidget):
+        Crea una pantalla para gestionar la tabla subgrupos.
+"""
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import os
-import datetime as dt
+import sqlite3
 
-# Se importa la función m.mostrarMensaje.
 import db.inicializar_bbdd as db
+from botones import BotonOrdenar, BotonEditar, BotonEliminar
 import mostrar_mensaje as m
 from registrar_cambios import registrarCambios
 
 
-# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class GestionSubgrupos(qtw.QWidget):
-    # Se hace el init en donde se inicializan todos los elementos. 
+    """Esta clase crea una pantalla para gestionar la tabla subgrupos.
+
+    Hereda: PyQt6.QtWidgets.QWidget
+
+    Atributos
+    ---------
+        tabla : QTableWidget
+            La tabla de la pantalla.
+        campos : tuple
+            Los títulos de las columnas de la tabla.
+        barraBusqueda : QLineEdit
+            La barra de búsqueda.
+        radioSubrupo : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            subgrupo.
+        radioGrupo : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            grupo.
+        botonOrdenar : QPushButton
+            Un botón para ordenar los datos de manera ascendente o
+            descendente.
+
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase GestionGrupos.
+
+            Crea la pantalla, un QWidget, que contiene: un título
+            descriptivo, un QLabel; una tabla, un QTableWidget, que
+            muestra los datos de la tabla grupos y contiene botones
+            para editarlos; una barra de buscador, un QLineEdit, para
+            buscar los datos; botones de radio, QRadioButton, para 
+            ordenar los datos en base a una columna seleccionada, un
+            botón, QCheckBox, para ordenar los datos mostrados de
+            manera ascendente o descendente; un botón, un QPushButton,
+            para insertar datos a la tabla.
+
+        mostrarDatos(self):
+            Obtiene los datos de la tabla grupos y los introduce en 
+            la tabla de la pantalla.
+
+        modificarLinea(self, tipo):
+            Crea un formulario para insertar o editar datos en la tabla
+            subgrupos.
+
+        confirmarModificacion(self, tipo, datosPorDefecto=None):
+            Modifica los datos de la tabla subgrupos.
+
+        eliminar(self):
+            Elimina la fila de la tabla subgrupos.
+    """
+
     def __init__(self):
-        # Se inicializa la clase QWidget.
         super().__init__()
 
-        # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DE SUBGRUPOS")
+        self.titulo = qtw.QLabel("GESTIÓN DE SUBGRUPOS")
         self.titulo.setObjectName("titulo")
 
-        # Se crea la tabla.
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
-
-        # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["Subgrupo", "Grupo", "", ""]      
-                                
-        # Se establece el número de columnas que va a tener. 
+        self.campos = ("Subgrupo", "Grupo", "", "")
         self.tabla.setColumnCount(len(self.campos))
-        # Se introducen los títulos en la tabla.
         self.tabla.setHorizontalHeaderLabels(self.campos)
-
-        # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
-        # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(2, 35)
         self.tabla.setColumnWidth(3, 35)
 
-        # Se muestran los datos.
-        self.mostrarDatos()
-
-        # Se crea una barra de búsqueda
         self.barraBusqueda = qtw.QLineEdit()
         self.barraBusqueda.setObjectName("buscar")
-        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
         self.barraBusqueda.setClearButtonEnabled(True)
-        # Se le pone el texto por defecto a la barra de búsqueda
         self.barraBusqueda.setPlaceholderText("Buscar...")
-        # Se importa el ícono de lupa para la barra.
-        iconoLupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
-        # Se crea un label que va a contener el ícono.
-        contenedorIconoLupa=qtw.QLabel()
+        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos())
+
+        iconoLupa = qtg.QPixmap(
+            f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        contenedorIconoLupa = qtw.QLabel()
         contenedorIconoLupa.setObjectName("iconoLupa")
         contenedorIconoLupa.setPixmap(iconoLupa)
 
-        # Se le da la función de buscar los datos introducidos.
-        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos())
-        # Se crean 3 botones de radio y un label para dar contexto.
-        self.label2= qtw.QLabel("Ordenar: ")
-        self.radio1 = qtw.QRadioButton("Subgrupo")
-        self.radio2 = qtw.QRadioButton("Grupo")
+        labelOrdenar = qtw.QLabel("Ordenar: ")
+        self.radioSubgrupo = qtw.QRadioButton("Subgrupo")
+        self.radioGrupo = qtw.QRadioButton("Grupo")
+        self.radioSubgrupo.setObjectName("Radio1")
+        self.radioGrupo.setObjectName("Radio2")
+        self.radioSubgrupo.toggled.connect(lambda: self.mostrarDatos())
+        self.radioGrupo.toggled.connect(lambda: self.mostrarDatos())
 
-        self.radio1.setObjectName("Radio1")
-        self.radio2.setObjectName("Radio2")
+        self.botonOrdenar = BotonOrdenar()
+        self.botonOrdenar.stateChanged.connect(lambda: self.ordenar())
 
-        # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos())
-        self.radio2.toggled.connect(lambda: self.mostrarDatos())
-
-
-        # Se crea el boton de agregar herramientas nuevas.
         self.agregar = qtw.QPushButton("Agregar")
         self.agregar.setObjectName("agregar")
-        # Se le da la función.
         self.agregar.clicked.connect(
             lambda: self.modificarLinea("agregar"))
-        # Cuando el cursor pasa por el botón, cambia de forma.
-        self.agregar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        self.agregar.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
 
-        # Se crea el layout y se le añaden todos los widgets anteriores.
-        layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 0)
-        layout.addWidget(self.barraBusqueda, 1, 0)
-        layout.addWidget(contenedorIconoLupa,1,0)
-        layout.addWidget(self.label2, 1, 1)
-        layout.addWidget(self.radio1, 1, 2)
-        layout.addWidget(self.radio2, 1, 3)
-        layout.addWidget(self.tabla, 2, 0, 1, 9)
-        layout.addWidget(self.agregar, 3, 0)
-
-        # Se le da el layout al widget central
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self.titulo)
+        contenedor1 = qtw.QWidget()
+        contenedor1Layout = qtw.QGridLayout()
+        contenedor1Layout.addWidget(self.barraBusqueda, 0, 0)
+        contenedor1Layout.addWidget(contenedorIconoLupa, 0, 0)
+        contenedor1Layout.addWidget(labelOrdenar, 0, 1)
+        contenedor1Layout.addWidget(self.radioSubgrupo, 0, 2)
+        contenedor1Layout.addWidget(self.radioGrupo, 0, 3)
+        contenedor1Layout.addWidget(self.botonOrdenar, 0, 4)
+        contenedor1.setLayout(contenedor1Layout)
+        layout.addWidget(contenedor1)
+        layout.addWidget(self.tabla)
+        layout.addWidget(self.agregar)
         self.setLayout(layout)
+        self.mostrarDatos()
 
-        # Se crea este atributo para que exista en la pantalla y no se generen errores al abrir la ventana de edición. Explicado más adelante.
-        self.edita = None
-
-# Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
-    # - consulta: muestra los datos de forma distinta según el tipo de consulta. Es opcional y, si no se introduce, su valor por defecto es normal. Valores:
-    # - - Normal: valor por defecto. Muestra todos los datos de la tabla de la base de datos.
-    # - - Buscar: Busca en la tabla de la base de datos las filas que contengan lo buscado.
-    # - - Nombre: Muestra todos los datos de la tabla de la base de datos ordenados por su nombre.
-    # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
-    # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
-    def mostrarDatos(self, consulta="Normal"):
-        # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
-        if consulta=="Buscar":
-            # Se crea una lista para pasar por parámetro lo buscado en la consulta de la tabla de la base de datos.
-            busqueda=[]
-            # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(len(self.campos)-2): 
-                # El valor añadido es el texto en la barra de búsqueda.
-                busqueda.append(f"%{self.barraBusqueda.text()}%")
-            #Se hace la consulta: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            db.cur.execute("SELECT * FROM SUBGRUPOS WHERE ID LIKE ?", busqueda)
-        # Si el tipo es nombre, se hace una consulta que selecciona todos los elementos y los ordena por su nombre.
-        elif consulta=="Subgrupo":
-            db.cur.execute("SELECT * FROM SUBGRUPOS ORDER BY ID")
-        # Si el tipo es SUBGRUPO, se hace una consulta que selecciona todos los elementos y los ordena por su SUBGRUPO.
-        elif consulta=="Grupo":
-            db.cur.execute("SELECT * FROM SUBGRUPOS ORDER BY GRUPO")
-        # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
-        elif consulta=="Normal":
-            db.cur.execute("SELECT * FROM SUBGRUPOS")
-        # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
+    def mostrarDatos(self):
+        """Este método obtiene los datos de la tabla subgrupos y los
+        introduce en la tabla de la pantalla.
+        """
+        if self.radioSubgrupo.isChecked():
+            orden = "ORDER BY id"
+        elif self.radioGrupo.isChecked():
+            orden = "ORDER BY grupo"
         else:
-            print("Error crítico: un bobolon escribio la consulta mal.")
-            return
-        # Se guarda la consulta en una variable.
+            orden = ""
+        
+        if orden and self.botonOrdenar.isChecked():
+            orden += " ASC"
+
+        db.cur.execute(
+            f"SELECT * FROM SUBGRUPOS WHERE ID LIKE ? AND GRUPO LIKE ? {orden}",
+            (
+                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+            )
+        )
         consulta = db.cur.fetchall()
-        # Se establece la cantidad de filas que va a tener la tabla
         self.tabla.setRowCount(len(consulta))
-        # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
-        # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
         for i in range(len(consulta)):
-
-            # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
             for j in range(len(consulta[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
-
+                self.tabla.setItem(
+                    i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
-            # Se crea el boton de editar, se le da la función de editar y se lo introduce después de introducir los datos.
-            botonEditar = qtw.QPushButton()
-            botonEditar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/editar.png")))
-            botonEditar.setIconSize(qtc.QSize(25, 25))
-            botonEditar.setObjectName("editar")
+            botonEditar = BotonEditar()
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
-            botonEditar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-2, botonEditar)
 
-            # Se crea el boton de eliminar, se le da la función de eliminar la tabla con su id correspondiente y se introduce el boton al final de la fila.
-            botonEliminar = qtw.QPushButton()
-            botonEliminar.setIcon(qtg.QIcon(
-                qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/eliminar.png")))
-            botonEliminar.setIconSize(qtc.QSize(25, 25))
-            botonEliminar.setObjectName("eliminar")
+            botonEliminar = BotonEliminar()
             botonEliminar.clicked.connect(lambda: self.eliminar())
-            botonEliminar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
             self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
-    # Función modificarLinea: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
-    # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
-    # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
-    # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
-    # # Identica a la de editar pero no viene con datos por defecto.
-    def modificarLinea(self, tipo):
-        # Se crea el widget que va a funcionar como ventana.
-        self.edita = qtw.QWidget()
-        # Se le da el título a la ventana, que por defecto es agregar.
-        self.edita.setWindowTitle("Agregar Subgrupo")
-        self.edita.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+    def ordenar(self):
+        """Este método cambia el ícono del botonOrdenar y actualiza los
+        datos de la tabla de la pantalla."""
+        self.botonOrdenar.cambiarIcono()
+        self.mostrarDatos()
 
-        # Se crea el layout.
+    def modificarLinea(self, tipo: str):
+        """Este método crea un formulario para insertar o editar datos
+        en la tabla subgrupos.
+
+        El formulario es un QWidget que funciona como ventana. Por cada
+        campo de la fila, agrega un entry (QLineEdit o QSpinbox) y un
+        label descriptivo. Al confirmar los datos, ejecuta el método 
+        confirmarModificacion.
+
+        Parámetros
+        ----------
+            tipo : str
+                el tipo de formulario.
+
+        Ver también
+        -----------
+        confirmarModificacion: modifica los datos de la tabla subgrupos.
+        """
+        self.ventanaEditar = qtw.QWidget()
+        self.ventanaEditar.setWindowTitle("Agregar Subgrupo")
+        self.ventanaEditar.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
+
         layoutVentanaModificar = qtw.QGridLayout()
 
-        # Inserta un label por cada campo.
         for i in range(len(self.campos)-2):
             label = qtw.QLabel(f"{self.campos[i]}: ")
             label.setObjectName("modificar-label")
-            layoutVentanaModificar.addWidget(label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
-        
-        # Crea los entries.
-        
+            layoutVentanaModificar.addWidget(
+                label, i, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
         db.cur.execute("SELECT ID FROM GRUPOS")
-        sugerenciasGrupos=[]
+        sugerenciasGrupos = []
         for i in db.cur.fetchall():
             sugerenciasGrupos.append(i[0])
-        cuadroSugerenciasGrupos=qtw.QCompleter(sugerenciasGrupos, self)
-        cuadroSugerenciasGrupos.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        cuadroSugerenciasGrupos = qtw.QCompleter(sugerenciasGrupos, self)
+        cuadroSugerenciasGrupos.setCaseSensitivity(
+            qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasGrupos)
-       
-        # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
-        datos = []
 
-        # Si el tipo es editar, se crea la pantalla de editar.
         if tipo == "editar":
-            # Se obtiene la posición del boton clickeado: 
-            # primero se obtiene cual fue último widget clickeado (en este caso el boton)
             botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
-            
-            # Se añaden a la lista los valores de la fila, recorriendo cada celda de la fila. Cell se refiere a la posición de cada celda en la fila.
+            datos = []
             for cell in range(0, len(self.campos)-2):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
-            # Se crea la ventana de edición, pasando como parámetros los títulos de los campos de la tabla y los datos por defecto para que se muestren
-            # Si se ingresaron datos, se muestran por defecto. Además, se muestra el id.
-            # Se les añade a los entries sus valores por defecto.
-            
+
             self.entry1.setText(datos[0])
             self.entry2.setText(datos[1])
-            
-            self.edita.setWindowTitle("Editar")
 
-        # Se añaden los entries al layout.
-        entries=[self.entry1, self.entry2]
+            self.ventanaEditar.setWindowTitle("Editar")
+
+        entries = [self.entry1, self.entry2]
         for i in range(len(entries)):
             entries[i].setObjectName("modificar-entry")
             layoutVentanaModificar.addWidget(entries[i], i, 1)
 
-        # Se crea el boton de confirmar, y se le da la función de confirmarr.
         botonConfirmar = qtw.QPushButton("Confirmar")
         botonConfirmar.setObjectName("confirmar")
-        botonConfirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        botonConfirmar.clicked.connect(lambda: self.confirmarModificacion(datos))
-        layoutVentanaModificar.addWidget(botonConfirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        botonConfirmar.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
+        botonConfirmar.clicked.connect(
+            lambda: self.confirmarModificacion(tipo, datos))
+        layoutVentanaModificar.addWidget(
+            botonConfirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
-        # Se le da el layout a la ventana.
-        self.edita.setLayout(layoutVentanaModificar)
-        # Se muestra la ventana
-        self.edita.show()
+        self.ventanaEditar.setLayout(layoutVentanaModificar)
+        self.ventanaEditar.show()
 
-    # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
-    def confirmarModificacion(self, tipo, datosPorDefecto=None):
-        db.cur.execute("SELECT ID FROM GRUPOS WHERE ID = ?", (self.entry2.text(),))
-        grupo=db.cur.fetchall()
+    def confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
+        """Este método modifica los datos de la tabla subgrupos.
+
+        Intenta realizar los cambios, registrarlos en el historial,
+        notificar al usuario el éxito de la operacion, actualizar la
+        tabla de la pantalla y cerrar el formulario. Si la base de
+        datos arroja un sqlite3.IntegrityError durante el intento, le
+        notifica al usuario que se ha repetido un valor único y termina
+        la ejecución de la función, sin modificar la tabla.
+
+        Parámetros
+        ----------
+            tipo : str
+                El tipo de modificación.
+            datosPorDefecto : list, default = None
+                Los datos de la fila previos a la modificación. 
+
+        Ver también
+        -----------
+        modificarLinea: crea un formulario para insertar o editar datos
+                        en la tabla subgrupos.
+        """
+        db.cur.execute("SELECT ID FROM GRUPOS WHERE ID = ?",
+                       (self.entry2.text(),))
+        grupo = db.cur.fetchall()
         if not grupo:
-            m.mostrarMensaje("Error", "Error", "El grupo no está ingresado. Asegúrese de ingresar el grupo primero")
+            m.mostrarMensaje(
+                "Error", "Error", "El grupo no está ingresado. Asegúrese de ingresar el grupo primero")
 
-
-        # Si habían datos por defecto, es decir, si se quería editar una fila, se edita la fila en la base de datos y muestra el mensaje.
-        if datos:
+        if tipo == "editar":
             try:
-                db.cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (datos[0],))
-                datosViejos=db.cur.fetchall()[0]
-                # Se actualiza la fila con su id correspondiente en la tabla de la base de datos.
+                db.cur.execute(
+                    "SELECT * FROM SUBGRUPOS WHERE ID = ?", (datosPorDefecto[0],))
+                datosViejos = db.cur.fetchall()[0]
                 db.cur.execute("UPDATE SUBGRUPOS SET ID = ?, GRUPO = ? WHERE ID = ?", (
-                    self.entry1.text().upper(), grupo[0][0], datos[0],
+                    self.entry1.text().upper(
+                    ), grupo[0][0], datosPorDefecto[0],
                 ))
                 db.cur.execute("UPDATE HERRAMIENTAS SET SUBGRUPO = ? WHERE SUBGRUPO = ? AND GRUPO = ?", (
-                    self.entry1.text().upper(), datos[0], grupo[0][0]
+                    self.entry1.text().upper(), datosPorDefecto[0], grupo[0][0]
                 ))
 
                 registrarCambios(
-                    "Edición", "Subgrupos", datos[0][0], f"{datosViejos}", 
+                    "Edicion", "Subgrupos", datosPorDefecto[0][0], f"{datosViejos}",
                     f"{(self.entry1.text().upper(), grupo[0][0])}"
-                    )
-                 
+                )
+
                 db.con.commit()
-                # Se muestra el mensaje exitoso.
                 m.mostrarMensaje("Information", "Aviso",
-                            "Se ha actualizado el subgrupo.")           
-            except sqlite3.IntegrityError as e:
-                m.mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")  
-                print(e)
-                return
-        # Si no, se inserta la fila en la tabla de la base de datos.
+                                 "Se ha actualizado el subgrupo.")
+            except sqlite3.IntegrityError:
+                return m.mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
         else:
             try:
                 db.cur.execute("INSERT INTO SUBGRUPOS VALUES(?, ?) ", (
-                     self.entry1.text().upper(), grupo[0][0], 
+                    self.entry1.text().upper(), grupo[0][0],
                 ))
                 registrarCambios(
-                    "Inserción", "Subgrupos", self.entry1.text().upper(), None, 
+                    "Insercion", "Subgrupos", self.entry1.text().upper(), None,
                     f"{(self.entry1.text().upper(), grupo[0][0])}"
                 )
                 db.con.commit()
-
                 m.mostrarMensaje("Information", "Aviso",
-                            "Se ha ingresado un subgrupo.")
-            except:
-                m.mostrarMensaje("Error", "Error", "El subgrupo ingresado ya está registrado. Por favor, ingrese otro.")
-                return
-        
-        #Se refrescan los datos.
-        self.mostrarDatos()
-        self.edita.close()
+                                 "Se ha ingresado un subgrupo.")
+            except sqlite3.IntegrityError:
+                return m.mostrarMensaje("Error", "Error", "El subgrupo ingresado ya está registrado. Por favor, ingrese otro.")
 
-    # Función eliminar: elimina la fila de la tabla de la base de datos y de la tabla de la ui. Parámetro:
-    # - idd: el id de la fila que se va a eliminar.
+        self.mostrarDatos()
+        self.ventanaEditar.close()
+
     def eliminar(self):
-        # se le pregunta al usuario si desea eliminar la fila.
+        """Este método elimina la fila de la tabla subgrupos."""
         resp = m.mostrarMensaje("Pregunta", "Advertencia",
-                              "¿Está seguro que desea eliminar estos datos?")
-        # si pulsó el boton de sí:
+                                "¿Está seguro que desea eliminar estos datos?")
         if resp == qtw.QMessageBox.StandardButton.Yes:
             botonClickeado = qtw.QApplication.focusWidget()
-            # luego se obtiene la posicion del boton.
             posicion = self.tabla.indexAt(botonClickeado.pos())
-            idd=posicion.sibling(posicion.row(), 0).data()
-            # elimina la fila con el id correspondiente de la tabla de la base de datos.
+            idd = posicion.sibling(posicion.row(), 0).data()
             db.cur.execute("SELECT * FROM SUBGRUPOS WHERE ID = ?", (idd,))
-            datosEliminados=db.cur.fetchall()[0]
+            datosEliminados = db.cur.fetchall()[0]
             db.cur.execute("DELETE FROM SUBGRUPOS WHERE ID = ?", (idd,))
-            db.cur.execute("UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO = ?", (idd,))
-            registrarCambios("Eliminación simple", "Subgrupos", idd, f"{datosEliminados}", None)
+            db.cur.execute(
+                "UPDATE HERRAMIENTAS SET SUBGRUPO=NULL WHERE SUBGRUPO = ?", (idd,))
+            registrarCambios("Eliminacion simple", "Subgrupos",
+                             idd, f"{datosEliminados}", None)
             db.con.commit()
             self.mostrarDatos()
-

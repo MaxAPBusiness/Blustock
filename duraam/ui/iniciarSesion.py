@@ -1,76 +1,101 @@
-# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
-#                          la tabla de la base de datos; una barra de buscador; botones para 
-#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
-#                          herramientas; botones para editar y eliminar los datos; un botón
-#                          para agregar herramientas. 
-#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+"""Este módulo crea una pantalla para iniciar sesión en la aplicación.
 
-# Se importan las librerías.
+Clases
+------
+    IniciarSesion(qtw.QWidget):
+        Crea una pantalla para iniciar sesión en la aplicación.
+"""
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
-import os
+from textwrap import dedent
 
-from mostrar_contrasena import mostrarContrasena
-
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+from botones import BotonMostrarContrasena
 
 
-# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class IniciarSesion(qtw.QWidget):
-    # Se hace el init en donde se inicializan todos los elementos. 
+    """Esta clase crea una pantalla para iniciar sesión en la
+    aplicación.
+
+    Hereda: PyQt6.QtWidgets.QWidget
+
+    Atributos
+    ---------
+        entry1 : QLineEdit
+            El campo de usuario.
+        entry2 : QLineEdit
+            El campo de contraseña.
+        confirmar : QPushButton
+            El boton para confirmar los datos.
+        registrarse : QPushButton
+            El boton para ir a la pantalla de registro de usuario.
+
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase IniciarSesion.
+
+            Crea la pantalla, un QWidget, que contiene un título
+            descriptivo, un QLabel, dos campos, QLineEdit, para
+            ingresar usuario y contraseña respectivamente, acompañados
+            de labels descriptivos, QLabel, un boton para mostrar la
+            contraseña, QCheckBox, un boton para iniciar sesion,
+            QPushButton, y otro para ir a la pantalla de registro,
+            también QPushButton.
+    """
+
     def __init__(self):
-        # Se inicializa la clase QWidget.
         super().__init__()
 
-        # Se crea el título.
-        titulo=qtw.QLabel("""
-  Bienvenido al sistema de gestión de bases de datos del pañol!
-  Inicia sesión
-        """)
+        titulo = qtw.QLabel(
+            dedent("""Bienvenido al sistema de gestión de bases de datos del pañol!
+            Inicia sesión
+            """)
+        )
         titulo.setObjectName("titulo")
 
-        label1=qtw.QLabel("Usuario: ")
-        label2=qtw.QLabel("Contraseña: ")
+        label1 = qtw.QLabel("Usuario: ")
+        label2 = qtw.QLabel("Contraseña: ")
 
         label1.setObjectName("ingresar-label")
         label2.setObjectName("ingresar-label")
 
-        self.entry1=qtw.QLineEdit()
-        self.entry2=qtw.QLineEdit()
-
+        self.entry1 = qtw.QLineEdit()
+        self.entry2 = qtw.QLineEdit()
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
-
         self.entry1.setMaxLength(20)
         self.entry2.setMaxLength(20)
 
-        self.show=qtw.QCheckBox()
-        self.show.stateChanged.connect(lambda:mostrarContrasena(self.entry2, self.show, self.show.isChecked()))
-        mostrarContrasena(self.entry2, self.show, False)
-        self.show.setObjectName("show")
-        self.show.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        # Cuando el usuario termine de escribir su usario y presione
+        # enter, automáticamente selecciona el campo de la contraseña.
+        # Método setFocus: selecciona un widget.
+        self.entry1.returnPressed.connect(lambda: self.entry2.setFocus())
 
-        self.confirmar=qtw.QPushButton("confirmar")
+        mostrarContrasena = BotonMostrarContrasena(self.entry2)
+
+        self.confirmar = qtw.QPushButton("confirmar")
         self.confirmar.setObjectName("confirmar-grande")
-        self.confirmar.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        self.confirmar.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
 
-        self.registrarse=qtw.QPushButton("¿No tienes una cuenta? Regístrate")
+        self.registrarse = qtw.QPushButton("¿No tienes una cuenta? Regístrate")
         self.registrarse.setObjectName("boton-texto")
-        self.registrarse.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
+        self.registrarse.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
 
-        layout=qtw.QGridLayout()
-        layout.addWidget(titulo, 0, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout = qtw.QGridLayout()
+        layout.addWidget(titulo, 0, 0, 1, 3,
+                         alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(
+            label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(
+            label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.entry1, 1, 1)
         layout.addWidget(self.entry2, 2, 1)
-        layout.addWidget(self.show, 2, 2)
-        layout.addWidget(self.confirmar, 3, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.registrarse, 4, 0, 1, 3, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(mostrarContrasena, 2, 2)
+        layout.addWidget(self.confirmar, 3, 0, 1, 3,
+                         alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.registrarse, 4, 0, 1, 3,
+                         alignment=qtc.Qt.AlignmentFlag.AlignCenter)
         self.setLayout(layout)
-    
