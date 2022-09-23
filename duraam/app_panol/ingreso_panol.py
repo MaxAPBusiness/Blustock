@@ -56,7 +56,7 @@ Ingrese el pañolero.
         self.setLayout(layout)
         
     def busquedaAlumnos(self):
-        cur.execute("SELECT NOMBRE_APELLIDO FROM ALUMNOS WHERE CURSO=?", (self.curso.currentText(),))
+        cur.execute("SELECT NOMBRE_APELLIDO FROM alumnos WHERE CURSO=?", (self.curso.currentText(),))
         a=cur.fetchall()
         for i in a:
             for j in i:

@@ -55,11 +55,16 @@
 #eliminar::hover,
 #confirmar::hover,
 #confirmar-grande::hover,
-#usuario::hover {
+#usuario::hover,
+#aceptar::hover,
+#rechazar::hover {
     background-color:rgb(20,20,200);
 }
 
-#editar, #eliminar {
+#editar, 
+#eliminar,
+#aceptar,
+#rechazar {
     background-color:#0d43d4; 
     border-radius: 5px;
     color: white;
@@ -111,8 +116,15 @@
     max-width: 50px;
 }
 
-#show::indicator {
-    border-style:hidden;
+#show::indicator,
+#ordenar::indicator {
+    border-style: hidden;
+}
+
+#ordenar {
+    max-width: 62.5px;
+    max-height: 35px;
+    border-radius: 15px;
 }
 
 #tipo {
@@ -132,16 +144,32 @@
 }
 
 #usuario {
-    width: 120px;
+    padding: 10px;
+    max-width: 100px;
+    max-height:100px;
     margin: 0px 30px 0px 30px;
+    border-radius:60px;
 }
 
-#boton-texto::hover {
+#boton-texto::hover,
+#ordenar::hover {
     background-color:rgb(220, 220, 220)
 }
+
 #confirmar-grande {
     height: 40px;
     width: 145px;
     max-width: 145px;
     font-size: 28px;
 }
+
+#check::indicator {
+    width: 25px;
+    height: 25px;
+}
+
+#check::indicator::toggled {
+    width: 25px;
+    height: 25px;
+}
+

@@ -37,7 +37,7 @@ class MainWindow(qtw.QMainWindow):
     def __init__(self):
         super().__init__()
         self.resize(600, 500)
-        self.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        self.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
         # Se crea el título (el nombre de la app que va al lado del logo en la barra superior).
         cabecera=Cabecera()
         cabecera.setObjectName("cabecera")
@@ -71,7 +71,7 @@ class MainWindow(qtw.QMainWindow):
 if __name__ == "__main__":
     app = qtw.QApplication(sys.argv)
     window = MainWindow()
-    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion_panol.qss", 'r') as qss:
+    with open(f"{os.path.abspath(os.getcwd())}/duraam/styles/gestion_panol.qss", "r") as qss:
         app.setStyleSheet(qss.read())
     window.show()
     app.exec()

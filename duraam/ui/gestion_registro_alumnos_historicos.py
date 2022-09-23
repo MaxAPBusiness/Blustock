@@ -1,357 +1,529 @@
-# gestion_herramientas.py: la gestión de herramientas. Contiene una tabla, que muestra 
-#                          la tabla de la base de datos; una barra de buscador; botones para 
-#                          ordenar alfabéticamente la tabla por nombre, grupo y subgrupo de 
-#                          herramientas; botones para editar y eliminar los datos; un botón
-#                          para agregar herramientas. 
-#                          Para editar y agregar, aparece un submenú con los datos a introducir.
+"""Este módulo crea una pantalla para gestionar la tabla
+alumnos_historicos.
 
-# Se importan las librerías.
+Clases
+------
+    GestionRegistroAlumnosHistoricos(qtw.QWidget):
+        Crea una pantalla para gestionar la tabla alumnos_historicos.
+"""
 import PyQt6.QtWidgets as qtw
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
-import sqlite3 as db
 import os
 import datetime as dt
 
-# Se importa la función mostrarMensaje.
-from mostrar_mensaje import mostrarMensaje
-from cursos import cursos
-# Se hace una conexión a la base de datos
-os.chdir(f"{os.path.abspath(__file__)}/../../..")
-con = db.Connection(f"{os.path.abspath(os.getcwd())}/duraam/db/duraam.sqlite3")
-cur=con.cursor()
+import db.inicializar_bbdd as db
+from .botones import BotonOrdenar, BotonFila
+from . import mostrar_mensaje as m
+from registrar_cambios import registrarCambios
 
 
-# clase GestiónHerramientas: ya explicada. Es un widget que después se ensambla en un stackwidget en main.py.
 class GestionRegistroAlumnosHistoricos(qtw.QWidget):
-    # Se hace el init en donde se inicializan todos los elementos. 
+    """Esta clase crea una pantalla para gestionar la tabla
+    alumnos_historicos.
+
+    Hereda: PyQt6.QtWidgets.QWidget
+
+    Atributos
+    ---------
+        tabla : QTableWidget
+            La tabla de la pantalla.
+        campos : tuple
+            Los títulos de las columnas de la tabla.
+        barraBusqueda : QLineEdit
+            La barra de búsqueda.
+        radioNombre : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            nombre.
+        radioDNI : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            DNI.
+        radioFecha : QRadioButton
+            El botón de radio para ordenar los datos de la tabla por
+            fecha de salida.
+        botonOrdenar : QPushButton
+            Un botón para ordenar los datos de manera ascendente o
+            descendente.
+
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase
+            GestionRegistroAlumnosHistoricos.
+
+            Crea la pantalla, un QWidget, que contiene: un título
+            descriptivo, un QLabel; una tabla, un QTableWidget, que
+            muestra los datos de la tabla alumnos_historicos y contiene
+            botones para editarlos; una barra de buscador, un
+            QLineEdit, para buscar los datos; botones de radio,
+            QRadioWidget, para ordenar los datos mostrados en base a
+            una columna seleccionada, un botón, un QCheckBox, para
+            ordenar los datos de manera ascendente o descendente según
+            el boton presionado; dos botones, QPushButton, para
+            insertar datos a la tabla.
+
+        mostrarDatos(self):
+            Obtiene los datos de la tabla alumnos_historicos y los
+            introduce en la tabla de la pantalla.
+
+        ordenar(self):
+            Llama a la función cambiarIcono y al método mostrarDatos.
+
+        eliminar(self):
+            Elimina la fila de la tabla alumnos_historicos.
+
+        paseHistoricoIndividual(self):
+            crea un formulario para pasar alumnos al registro histórico
+            de forma individual.
+
+        cargarDNI(self, nombre):
+            Crea un cuadro de sugerencias para el campo DNI
+            del formulario de pase histórico individual.
+
+        confirmarIndividual(self):
+            Pasa a un alumno al registro histórico.
+
+        paseHistoricoGrupal(self):
+            Crea una ventana para pasar alumnos al registro
+            histórico de forma grupal.
+
+        mostrarDatosPase(self):
+            Obtiene los datos de los alumnos de los cursos
+            7A y 7B y los introduce en la tabla de la ventana del pase 
+            histórico grupal de alumnos.
+
+        confirmarGrupal(self):
+            Pasa al grupo de alumnos seleccionados al
+            registro histórico.
+    """
+
     def __init__(self):
-        # Se inicializa la clase QWidget.
         super().__init__()
 
-        # Se crea el título.
-        self.titulo=qtw.QLabel("GESTIÓN DEL REGISTRO DE ALUMNOS HISTÓRICOS")
+        self.titulo = qtw.QLabel("GESTIÓN DEL REGISTRO DE ALUMNOS HISTÓRICOS")
         self.titulo.setObjectName("titulo")
 
-        self.subtitulo=qtw.QLabel("Pase alumnos existentes a históricos y revise los alumnos ")
+        self.subtitulo = qtw.QLabel("Pase alumnos existentes a históricos.")
         self.subtitulo.setObjectName("subtitulo")
-        # Se crea la tabla.
+
         self.tabla = qtw.QTableWidget(self)
         self.tabla.setObjectName("tabla")
-
-        # Se crean los títulos de las columnas de la tabla y se introducen en esta.
-        self.campos = ["ID", "DNI", "Nombre y Apellido", "Curso",
-                       "Fecha de Salida", "EMAIL", ""]      
-                                
-        # Se establece el número de columnas que va a tener. 
+        self.campos = ("ID", "DNI", "Nombre y Apellido", "Curso",
+                       "Fecha de Salida", "email", "")
         self.tabla.setColumnCount(len(self.campos))
-        # Se introducen los títulos en la tabla.
         self.tabla.setHorizontalHeaderLabels(self.campos)
-
-        # Se esconden los números de fila de la tabla que vienen por defecto para evitar confusión con el campo ID.
         self.tabla.verticalHeader().hide()
-        # Se cambia el ancho de las dos últimas columnas, porque son las que van a tener los botones de editar y eliminar.
         self.tabla.setColumnWidth(2, 120)
         self.tabla.setColumnWidth(3, 200)
         self.tabla.setColumnWidth(5, 35)
         self.tabla.setColumnWidth(6, 35)
 
-        # Se muestran los datos.
+        self.barraBusqueda = qtw.QLineEdit()
+        self.barraBusqueda.setObjectName("buscar")
+        self.barraBusqueda.setClearButtonEnabled(True)
+        self.barraBusqueda.setPlaceholderText("Buscar...")
+        self.barraBusqueda.textEdited.connect(lambda: self.mostrarDatos())
+
+        iconoLupa = qtg.QPixmap(
+            f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        contenedorIconoLupa = qtw.QLabel()
+        contenedorIconoLupa.setObjectName("lupa")
+        contenedorIconoLupa.setPixmap(iconoLupa)
+
+        labelOrdenar = qtw.QLabel("Ordenar por: ")
+        self.radioNombre = qtw.QRadioButton("Nombre")
+        self.radioDNI = qtw.QRadioButton("DNI")
+        self.radioFecha = qtw.QRadioButton("Fecha de salida")
+        self.radioNombre.setObjectName("Radio1")
+        self.radioDNI.setObjectName("Radio2")
+        self.radioFecha.setObjectName("Radio3")
+        self.radioNombre.toggled.connect(lambda: self.mostrarDatos())
+        self.radioDNI.toggled.connect(lambda: self.mostrarDatos())
+        self.radioFecha.toggled.connect(lambda: self.mostrarDatos())
+
+        self.botonOrdenar = BotonOrdenar()
+        self.botonOrdenar.stateChanged.connect(lambda: self.ordenar())
+
+        botonPaseIndividual = qtw.QPushButton("Pase Individual")
+        botonPaseIndividual.setObjectName("confirmar")
+        botonPaseIndividual.clicked.connect(
+            lambda: self.paseHistoricoIndividual())
+        botonPaseIndividual.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
+
+        botonPaseGrupal = qtw.QPushButton("Pase de Egresados")
+        botonPaseGrupal.setObjectName("confirmar")
+        botonPaseGrupal.clicked.connect(
+            lambda: self.paseHistoricoGrupal())
+        botonPaseGrupal.setCursor(
+            qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor)
+        )
+
+        layout = qtw.QVBoxLayout()
+        layout.addWidget(self.titulo)
+        contenedor1 = qtw.QWidget()
+        contenedor1Layout = qtw.QGridLayout()
+        contenedor1Layout.addWidget(self.barraBusqueda, 0, 0)
+        contenedor1Layout.addWidget(contenedorIconoLupa, 0, 0)
+        contenedor1Layout.addWidget(labelOrdenar, 0, 1)
+        contenedor1Layout.addWidget(self.radioNombre, 0, 2)
+        contenedor1Layout.addWidget(self.radioDNI, 0, 3)
+        contenedor1Layout.addWidget(self.botonOrdenar, 0, 4)
+        contenedor1.setLayout(contenedor1Layout)
+        layout.addWidget(contenedor1)
+        layout.addWidget(self.tabla)
+        contenedor2 = qtw.QWidget()
+        contenedor2Layout = qtw.QHBoxLayout()
+        contenedor2Layout.addWidget(botonPaseIndividual)
+        contenedor2Layout.addWidget(botonPaseGrupal)
+        contenedor2.setLayout(contenedor2Layout)
+        layout.addWidget(contenedor2)
+        self.setLayout(layout)
         self.mostrarDatos()
 
-        # Se crea una barra de búsqueda
-        self.buscar = qtw.QLineEdit()
-        self.buscar.setObjectName("buscar")
-        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
-        self.buscar.setClearButtonEnabled(True)
-        # Se le pone el texto por defecto a la barra de búsqueda
-        self.buscar.setPlaceholderText("Buscar...")
-        # Se importa el ícono de lupa para la barra.
-        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
-        # Se crea un label que va a contener el ícono.
-        icono=qtw.QLabel()
-        icono.setObjectName("lupa")
-        icono.setPixmap(lupa)
+    def mostrarDatos(self):
+        """Este método obtiene los datos de la tabla alumnos_historicos
+        y los introduce en la tabla de la pantalla.
+        """
+        if self.radioNombre.isChecked():
+            orden = "ORDER BY nombre_apellido"
+        elif self.radioDNI.isChecked():
+            orden = "ORDER BY dni"
+        elif self.radioFecha.isChecked():
+            orden = "ORDER BY fecha_salida"
+        else:
+            orden = ""
 
-        # Se le da la función de buscar los datos introducidos.
-        self.buscar.returnPressed.connect(lambda: self.mostrarDatos("Buscar"))
-        # Se crean 3 botones de radio y un label para dar contexto.
-        self.label2= qtw.QLabel("Ordenar por: ")
-        self.radio1 = qtw.QRadioButton("Nombre")
-        self.radio2 = qtw.QRadioButton("DNI")
-        self.radio3 = qtw.QRadioButton("Fecha de salida")
+        if orden and self.botonOrdenar.isChecked():
+            orden += " ASC"
 
-        self.radio1.setObjectName("Radio1")
-        self.radio2.setObjectName("Radio2")
-        self.radio3.setObjectName("Radio3")
-
-        # Se le da a los botones de radio la función de mostrar datos en un orden específico.
-        self.radio1.toggled.connect(lambda: self.mostrarDatos("Nombre"))
-        self.radio2.toggled.connect(lambda: self.mostrarDatos("DNI"))
-        self.radio3.toggled.connect(lambda: self.mostrarDatos("Fecha"))
-
-
-        # Se crea el boton de agregar herramientas nuevas.
-        self.botonPase = qtw.QPushButton("Pase Individual")
-        self.botonPase.setObjectName("confirmar")
-        # Se le da la función.
-        self.botonPase.clicked.connect(
-            lambda: self.paseHistoricoIndividual())
-        # Cuando el cursor pasa por el botón, cambia de forma.
-        self.botonPase.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-
-        self.botonPaseEgreso = qtw.QPushButton("Pase de Egresados")
-        self.botonPaseEgreso.setObjectName("confirmar")
-        # Se le da la función.
-        self.botonPaseEgreso.clicked.connect(
-            lambda: self.paseHistoricoGrupal())
-        # Cuando el cursor pasa por el botón, cambia de forma.
-        self.botonPaseEgreso.setCursor(qtg.QCursor(qtc.Qt.CursorShape.PointingHandCursor))
-
-        # Se crea el layout y se le añaden todos los widgets anteriores.
-        layout = qtw.QGridLayout()
-        layout.addWidget(self.titulo, 0, 1)
-        layout.addWidget(self.buscar, 1, 1)
-        layout.addWidget(icono,1,1)
-        layout.addWidget(self.label2, 1, 2)
-        layout.addWidget(self.radio1, 1, 3)
-        layout.addWidget(self.radio2, 1, 4)
-        layout.addWidget(self.tabla, 2, 1, 1, 9)
-        layout.addWidget(self.botonPase, 3, 1)
-
-        # Se le da el layout al widget central
-        self.setLayout(layout)
-
-        # Se crea este atributo para que exista en la pantalla y no se generen errores al abrir la ventana de edición. Explicado más adelante.
-        self.edita = None
-
-# Función mostrar datos: busca los datos de la tabla de la base de datos y los muestra en la tabla con la que el usuario puede interactuar. Parámetro:
-    # - consulta: muestra los datos de forma distinta según el tipo de consulta. Es opcional y, si no se introduce, su valor por defecto es normal. Valores:
-    # - - Normal: valor por defecto. Muestra todos los datos de la tabla de la base de datos.
-    # - - Buscar: Busca en la tabla de la base de datos las filas que contengan lo buscado.
-    # - - Nombre: Muestra todos los datos de la tabla de la base de datos ordenados por su nombre.
-    # - - Grupo: Muestra todos los datos de la tabla de la base de datos ordenados por su grupo.
-    # - - Subgrupo: Muestra todos los datos de la tabla de la base de datos ordenados por su subgrupo.
-    def mostrarDatos(self, consulta="Normal"):
-        # Si el tipo de consulta es buscar, muestra las filas que contengan lo buscado en la tabla de la base de datos.
-        if consulta=="Buscar":
-            # Se crea una lista para pasar por parámetro lo buscado en la query de la tabla de la base de datos.
-            busqueda=[]
-            # Por cada campo de la tabla, se añade un valor con el que se comparará.
-            for i in range(4): 
-                # El valor añadido es el texto en la barra de búsqueda.
-                busqueda.append(f"%{self.buscar.text()}%")
-            #Se hace la query: selecciona cada fila que cumpla con el requisito de que al menos una celda suya contenga el valor pasado por parámetro.
-            cur.execute("""
-            SELECT * FROM ALUMNOS_HISTORICOS 
+        db.cur.execute(
+            f"""
+            SELECT * FROM alumnos_historicos 
             WHERE ID LIKE ? 
             OR DNI LIKE ? 
-            OR NOMBRE_APELLIDO LIKE ? 
-            OR EMAIL LIKE ? 
-            """, busqueda)
-        # Si el tipo es nombre, se hace una query que selecciona todos los elementos y los ordena por su nombre.
-        elif consulta=="Nombre":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY NOMBRE_APELLIDO')
-        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="DNI":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY DNI')
-        # Si el tipo es grupo, se hace una query que selecciona todos los elementos y los ordena por su grupo.
-        elif consulta=="Fecha":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS ORDER BY FECHA_SALIDA')
-        # Si el tipo no se cambia o no se introduce, simplemente se seleccionan todos los datos como venian ordenados. 
-        elif consulta=="Normal":
-            cur.execute('SELECT * FROM ALUMNOS_HISTORICOS')
-        # Si la consulta es otra, se pasa por consola que un boludo escribió la consulta mal :) y termina la ejecución de la función.
-        else:
-            print("Error crítico: un bobolon escribio la consulta mal.")
-            return
-        # Se guarda la consulta en una variable.
-        query = cur.fetchall()
-        # Se establece la cantidad de filas que va a tener la tabla
-        self.tabla.setRowCount(len(query))
-        # Bucle: por cada fila de la consulta obtenida, se guarda su id y se genera otro bucle que inserta todos los datos en la fila de la tabla de la ui.
-        # Además, se insertan dos botones al costado de cada tabla: uno para editarla y otro para eliminarla.
-        for i in range(len(query)):
-
-            # Bucle: se introduce en cada celda el elemento correspondiente de la fila.
-            for j in range(len(query[i])):
-                self.tabla.setItem(i, j, qtw.QTableWidgetItem(str(query[i][j])))
-
+            OR nombre_apellido LIKE ?
+            OR curso LIKE ?
+            OR fecha_salida LIKE ? 
+            OR email LIKE ?
+            {orden}
+            """, (
+                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+            )
+        )
+        consulta = db.cur.fetchall()
+        self.tabla.setRowCount(len(consulta))
+        for i in range(len(consulta)):
+            for j in range(len(consulta[i])):
+                self.tabla.setItem(
+                    i, j, qtw.QTableWidgetItem(str(consulta[i][j])))
             self.tabla.setRowHeight(i, 35)
 
+            botonEliminar = BotonFila("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar())
+            self.tabla.setCellWidget(i, len(self.campos)-1, botonEliminar)
 
-    # Función paseHistorico: muestra un mensaje con un formulario que permite editar o ingresar los elementos a la tabla.
-    # Parametros: tipo: pregunta de que tipo va a ser la edición. Valores posibles:
-    # # editar: se creará una ventana con un f0rmulario y al enviar los datos se modifican los datos de la fila en la que se pulsó el boton de edición.
-    # # crear / insertar / None: crea una ventana con un formulario que insertará los datos en la tabla. 
-    # # Identica a la de editar pero no viene con datos por defecto.
+    def ordenar(self):
+        """Este método cambia el ícono del botonOrdenar y actualiza los
+        datos de la tabla de la pantalla."""
+        self.botonOrdenar.cambiarIcono()
+        self.mostrarDatos()
+
+    def eliminar(self):
+        """Este método elimina la fila de la tabla alumnos_historicos.
+
+        Antes de eliminar, confirma la decisión del usuario.
+        Si los datos están relacionados con otras tablas, vuelve a
+        confirmar la decisión del usuario. Luego, elimina la fila de la
+        tabla alumnos y las filas en donde los datos estaban
+        relacionados. Por último, registra los cambios y actualiza la
+        tabla.
+        """
+        respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
+                                     "¿Está seguro que desea eliminar estos datos?")
+        if respuesta == qtw.QMessageBox.StandardButton.Yes:
+            botonClickeado = qtw.QApplication.focusWidget()
+            posicion = self.tabla.indexAt(botonClickeado.pos())
+            idd = posicion.sibling(posicion.row(), 0).data()
+
+            tipo = "Eliminacion simple"
+            tablas = "Alumnos históricos"
+
+            db.cur.execute(
+                "SELECT * FROM movimientos_herramientas WHERE CLASE=0 AND ID_PERSONA = ?", (idd,))
+            if db.cur.fetchall():
+                tipo = "Eliminacion compleja"
+                tablas = "Alumnos históricos Movimientos de herramientas"
+                respuesta = m.mostrarMensaje("Pregunta", "Advertencia", """
+                El alumno tiene movimientos registrados. 
+                Eliminarlo eliminará tambien TODOS los movimientos en los que está registrado,
+                por lo que sus registros de deudas se eliminarán y podría perderse información valiosa.
+
+                ¿Desea eliminarlo de todas formas?
+                """)
+        if respuesta == qtw.QMessageBox.StandardButton.Yes:
+            db.cur.execute(
+                "SELECT * FROM alumnos_historicos WHERE ID = ?", (idd,))
+            datosEliminados = db.cur.fetchall()[0]
+            db.cur.execute(
+                "DELETE FROM alumnos_historicos WHERE ID = ?", (idd,))
+            db.cur.execute(
+                "DELETE FROM movimientos_herramientas WHERE CLASE=0 AND ID_PERSONA = ?", (idd,))
+            db.cur.execute(
+                "UPDATE turno_panol SET ID_ALUMNO=NULL WHERE ID_ALUMNO = ?", (idd,))
+            registrarCambios(tipo, tablas, idd, f"{datosEliminados}", None,)
+            db.con.commit()
+            self.mostrarDatos()
+
     def paseHistoricoIndividual(self):
-        # Se crea el widget que va a funcionar como ventana.
+        """Este método crea un formulario para pasar alumnos al
+        registro histórico de forma individual."""
         self.menuPase = qtw.QWidget()
-        # Se le da el título a la ventana, que por defecto es agregar.
-        self.menuPase.setWindowTitle("Realizar Pase Histórico Individual de Alumnos")
-        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        self.menuPase.setWindowTitle(
+            "Realizar Pase Histórico Individual de Alumnos")
+        self.menuPase.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
 
-        titulo=qtw.QLabel("Ingresa al alumno que quieres pasar a histórico")
+        titulo = qtw.QLabel(
+            "Ingresa al alumno que quieres pasar al registro histórico")
         titulo.setObjectName("subtitulo")
-        label1=qtw.QLabel("Nombre del Alumno: ")
-        label2=qtw.QLabel("DNI: ")
-        
-        # Crea los entries. 
+
+        label1 = qtw.QLabel("Nombre del Alumno: ")
+        label2 = qtw.QLabel("DNI: ")
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
-
-        sugerenciasNombre=[]
-
-        cur.execute("SELECT NOMBRE FROM ALUMNOS")
-
-        for i in cur.fetchall():
-            sugerenciasNombre.append(i[0])
-            
-        cuadroSugerenciasNombre=qtw.QCompleter(sugerenciasNombre, self)
-        cuadroSugerenciasNombre.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry1.setCompleter(cuadroSugerenciasNombre)
-        self.entry1.editingFinished.connect(lambda:self.cargarDNI(self.entry1.text()))
-       
-        # Se crea una lista de datos vacía en la que se introduciran los valores que pasaran por defecto a la ventana.
-        datos = []
-
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
 
-        # Se crea el boton de confirmar, y se le da la función de confirmarr.
-        confirmar = qtw.QPushButton("Confirmar")
-        confirmar.setObjectName("confirmar")
-        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        confirmar.clicked.connect(lambda: self.confirmarIndividual(datos))
+        # El código de abajo añade un cuadro de sugerencias al campo de
+        # nombre del alumno. Busca todos los nombres cargados y los
+        # introduce en el campo.
+        sugerenciasNombre = []
+        db.cur.execute("SELECT nombre_apellido FROM alumnos")
+        for i in db.cur.fetchall():
+            sugerenciasNombre.append(i[0])
+        cuadroSugerenciasNombre = qtw.QCompleter(sugerenciasNombre, self)
+        cuadroSugerenciasNombre.setCaseSensitivity(
+            qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry1.setCompleter(cuadroSugerenciasNombre)
+        self.entry1.editingFinished.connect(
+            lambda: self.cargarDNI(self.entry1.text()))
+
+        botonConfirmar = qtw.QPushButton("Confirmar")
+        botonConfirmar.setObjectName("confirmar")
+        botonConfirmar.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
+        botonConfirmar.clicked.connect(lambda: self.confirmarIndividual())
 
         layoutMenuPase = qtw.QGridLayout()
-        layoutMenuPase.addWidget(titulo, 0, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layoutMenuPase.addWidget(label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
-        layoutMenuPase.addWidget(label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layoutMenuPase.addWidget(
+            titulo, 0, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(
+            label1, 1, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
+        layoutMenuPase.addWidget(
+            label2, 2, 0, alignment=qtc.Qt.AlignmentFlag.AlignRight)
         layoutMenuPase.addWidget(self.entry1, 1, 1)
         layoutMenuPase.addWidget(self.entry2, 2, 1)
-        layoutMenuPase.addWidget(confirmar, 3, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-
-        # Se le da el layout a la ventana.
+        layoutMenuPase.addWidget(
+            botonConfirmar, 3, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
         self.menuPase.setLayout(layoutMenuPase)
-        # Se muestra la ventana
         self.menuPase.show()
 
-    def cargarDNI(self, nombre):
-        cur.execute("SELECT DNI FROM ALUMNOS WHERE NOMBRE_APELLIDO=?", (nombre,))
+    def cargarDNI(self, nombre: str):
+        """Este método crea un cuadro de sugerencias para el campo DNI
+        del formulario de pase histórico individual.
 
-        sugerenciasDNI=[]
+        Busca los dni relacionados con el nombre de alumno ingresado.
 
-        for i in cur.fetchall():
-            sugerenciasDNI.append(i[0])
+        Parámetros
+        ----------
+            nombre: str
+                El nombre del alumno ingresado en el formulario.
 
-        cuadroSugerenciasDNI=qtw.QCompleter(sugerenciasDNI, self)
-        cuadroSugerenciasDNI.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        Ver también
+        -----------
+        paseHistoricoIndividual: crea un formulario para pasar alumnos
+                                 al registro histórico de forma
+                                 individual.
+        """
+        db.cur.execute(
+            "SELECT DNI FROM alumnos WHERE nombre_apellido = ?", (nombre,))
+        sugerenciasDNI = []
+        for i in db.cur.fetchall():
+            sugerenciasDNI.append(str(i[0]))
+        cuadroSugerenciasDNI = qtw.QCompleter(sugerenciasDNI, self)
+        cuadroSugerenciasDNI.setCaseSensitivity(
+            qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasDNI)
 
-    # Función confirmar: se añaden o cambian los datos de la tabla en base al parámetro datos.
-    def confirmarIndividual(self, datos):
-        global mostrarMensaje
-        resp = mostrarMensaje("Pregunta", "Atención", 
-        "¿Está seguro que desea pasar a este alumno al registro histórico? Esto no se puede deshacer")
-        if resp:
-            cur.execute("SELECT * FROM ALUMNOS WHERE DNI=?",(self.entry2.text(),))
-            datos=cur.fetchall()
-            cur.execute("INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ?, ?, ?, ?) ", (
-                    datos[0][0], datos[0][1], datos[0][2], datos[0][3],
-                    dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
-            ))
-            cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0]))
+    def confirmarIndividual(self):
+        """Este método pasa a un alumno al registro histórico.
 
-            mostrarMensaje("Information", "Aviso",
-                        "Se ha pasado un alumno al registro histórico.")
-            mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")    
-            #Se refrescan los datos.
+        Comprueba que el dni coincida con el nombre del alumno y luego
+        realiza el pase, eliminandolo de la tabla alumnos, agregándolo
+        a la tabla alumnos_historicos Y registrando los cambios en el
+        historial. Luego, notifica al usuario el éxito del pase y
+        cierra el formulario.
+
+        Ver también
+        -----------
+        paseHistoricoIndividual: crea un formulario para pasar alumnos
+        al registro histórico de forma individual.
+        """
+        respuesta = m.mostrarMensaje("Pregunta", "Atención",
+                                     "¿Está seguro que desea pasar a este alumno al registro histórico? Esto no se puede deshacer")
+        if respuesta:
+            db.cur.execute("SELECT * FROM alumnos WHERE DNI = ?",
+                           (self.entry2.text(),))
+            datos = db.cur.fetchall()
+            if not datos:
+                return m.mostrarMensaje("Error", "Error", "El DNI no coincide con el alumno. Por favor, intente nuevamente.")
+
+            db.cur.execute("INSERT INTO alumnos_historicos VALUES(?, ?, ?, ?, ?, ?) ", (
+                datos[0][0], datos[0][1], datos[0][2], datos[0][3],
+                dt.date.today().strftime("%Y/%m/%d"), datos[0][4]
+            ))
+            db.cur.execute("DELETE FROM alumnos WHERE ID = ?", (datos[0][0],))
+            registrarCambios("Pase historico individual",
+                             "Alumnos historicos", datos[0][0], f"{datos[0]}", None,)
+            db.con.commit()
+            m.mostrarMensaje("Information", "Aviso",
+                             "Se ha pasado un alumno al registro histórico.")
             self.mostrarDatos()
             self.menuPase.close()
 
     def paseHistoricoGrupal(self):
-        # Se crea el widget que va a funcionar como ventana.
+        """Este método crea una ventana para pasar alumnos al registro
+        histórico de forma grupal.
+
+        La ventana es un QWidget, que contiene:
+            \n- Una tabla, un QTableWidget, que muestra los datos de
+              la tabla alumnos_historicos.
+            \n- Una barra de buscador, un QLineEdit, para buscar los
+              datos.
+            \n- Un botón para realizar el pase. 
+        """
         self.menuPase = qtw.QWidget()
-        # Se le da el título a la ventana, que por defecto es agregar.
-        self.menuPase.setWindowTitle("Realizar Pase Histórico Grupal de Alumnos")
-        self.menuPase.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
+        self.menuPase.setWindowTitle(
+            "Realizar Pase Histórico Grupal de Alumnos")
+        self.menuPase.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
 
-        titulo=qtw.QLabel("Seleccione los alumnos que desea pasar\nal registro histórico como egresados.")
+        titulo = qtw.QLabel(
+            "Seleccione los alumnos que desea egresar y dejar registrados históricamente.")
         titulo.setObjectName("subtitulo")
-        
-        
-        # Crea los entries. 
-        self.buscar = qtw.QLineEdit()
-        self.buscar.setObjectName("buscar")
-        # Se introduce un botón a la derecha que permite borrar la busqueda con un click.
-        self.buscar.setClearButtonEnabled(True)
-        # Se le pone el texto por defecto a la barra de búsqueda
-        self.buscar.setPlaceholderText("Buscar...")
-        # Se importa el ícono de lupa para la barra.
-        lupa=qtg.QPixmap(f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
-        # Se crea un label que va a contener el ícono.
-        icono=qtw.QLabel()
-        icono.setObjectName("lupa")
-        icono.setPixmap(lupa)
 
-        # Se le da la función de buscar los datos introducidos.
-        self.buscar.editingFinished.connect(lambda: self.buscarF())
+        self.barraBusquedaPase = qtw.QLineEdit()
+        self.barraBusquedaPase.setObjectName("buscar")
+        self.barraBusquedaPase.setClearButtonEnabled(True)
+        self.barraBusquedaPase.setPlaceholderText("Buscar...")
+        iconoLupa = qtg.QPixmap(
+            f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
+        contenedorIconoLupa = qtw.QLabel()
+        contenedorIconoLupa.setObjectName("lupa")
+        contenedorIconoLupa.setPixmap(iconoLupa)
 
-        self.pantallaListaAlumnos=qtw.QScrollArea()
-        self.pantallaListaAlumnos.setMaximumSize(400, 400)
-        self.layoutLista=qtw.QVBoxLayout()
+        self.barraBusquedaPase.textEdited.connect(
+            lambda: self.mostrarDatosPase())
 
-        for curso in ['A', 'B', 'C']:
-            label=qtw.QLabel(f"7{curso}:")
-            self.layoutLista.addWidget(label)
-            cur.execute("SELECT NOMBRE_APELLIDO, DNI FROM ALUMNOS WHERE CURSO = ?", (f'7{curso}'))
-            for i in cur.fetchall():
-                alumno=qtw.QCheckBox(f'{i[0]} DNI: {i[1]}')
-                alumno.setChecked(True)
-                self.layoutLista.addWidget(alumno)
+        self.tablaListaAlumnos = qtw.QTableWidget()
+        self.tablaListaAlumnos.setMaximumSize(400, 345)
 
-        # Se crea el boton de confirmar, y se le da la función de confirmarr.
-        confirmar = qtw.QPushButton("Confirmar")
-        confirmar.setObjectName("confirmar")
-        confirmar.setWindowIcon(qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/bitmap.png"))
-        confirmar.clicked.connect(lambda: self.confirmarGrupal())
+        self.camposPase = ("", "Nombre y Apellido", "DNI", "Curso")
+
+        self.tablaListaAlumnos.setColumnCount(len(self.camposPase))
+        self.tablaListaAlumnos.setColumnWidth(0, 15)
+        self.tablaListaAlumnos.setColumnWidth(1, 125)
+        self.tablaListaAlumnos.setHorizontalHeaderLabels(self.camposPase)
+        self.tablaListaAlumnos.verticalHeader().hide()
+        self.mostrarDatosPase()
+
+        botonConfirmar = qtw.QPushButton("Confirmar")
+        botonConfirmar.setObjectName("confirmar")
+        botonConfirmar.setWindowIcon(
+            qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
+        botonConfirmar.clicked.connect(lambda: self.confirmarPase())
+        botonConfirmar.setCursor(qtg.QCursor(
+            qtc.Qt.CursorShape.PointingHandCursor))
 
         layoutMenuPase = qtw.QGridLayout()
-        layoutMenuPase.addWidget(titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
-        layoutMenuPase.addWidget(self.buscar, 1, 0)
-        layoutMenuPase.addWidget(icono,1,0)
-        layoutMenuPase.addWidget(self.pantallaListaAlumnos, 2, 0)
-        layoutMenuPase.addWidget(confirmar, 3, 0)
-        layoutMenuPase.addWidget(confirmar, 3, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(
+            titulo, 0, 0, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
+        layoutMenuPase.addWidget(self.barraBusquedaPase, 1, 0)
+        layoutMenuPase.addWidget(contenedorIconoLupa, 1, 0)
+        layoutMenuPase.addWidget(self.tablaListaAlumnos, 2, 0, 1, 4)
+        layoutMenuPase.addWidget(botonConfirmar, 3, 0)
+        layoutMenuPase.addWidget(botonConfirmar, 3, 0,
+                                 alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
-        # Se le da el layout a la ventana.
         self.menuPase.setLayout(layoutMenuPase)
-        # Se muestra la ventana
         self.menuPase.show()
-    
-    def buscarF(self):
-        for i in len(self.layoutLista.count()):
-            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
-                if self.buscar.text() not in self.layoutLista.itemAt(i).widget().text():
-                    self.layoutLista.itemAt(i).widget().hide()
-                elif self.buscar.text() in self.layoutLista.itemAt(i).widget() and self.layoutLista.itemAt(i).widget().isHidden():
-                    self.layoutLista.itemAt(i).widget().show()
-    
-    def confirmarGrupal(self):
-        for i in len(self.layoutLista.count()):
-            if type(self.layoutLista.itemAt(i).widget()) == "<class 'PyQt6.QtWidgets.QCheckBox'>":
-                if self.layoutLista.itemAt(i).widget().isChecked():
-                    datalist = self.layoutLista.itemAt(i).widget().text().split(": ")
-                    dni=datalist[-1]
-                    cur.execute('SELECT * FROM ALUMNOS WHERE DNI=?', (dni,))
-                    datos=cur.fetchall()
-                    cur.execute('INSERT INTO ALUMNOS_HISTORICOS VALUES(?, ?, ? , ?, ?, ?)', (
-                        datos[0][0], datos[0][1], datos[0][2], datos[0][3], 
-                        dt.date.today().strftime('%Y/%m/%d'), datos[0][4]
-                    ))
-                    cur.execute('DELETE FROM ALUMNOS WHERE ID=?', (datos[0][0],))
-                    con.commit()
 
-        
+    def mostrarDatosPase(self):
+        """Este método obtiene los datos de los alumnos de los cursos
+        7A y 7B y los introduce en la tabla de la ventana del pase 
+        hsitórico grupal de alumnos.
+
+        Ver también
+        -----------
+        paseHistoricoGrupal: crea una ventana para pasar alumnos al
+        registro histórico de forma grupal.
+        """
+        db.cur.execute("""
+        SELECT nombre_apellido, DNI, curso
+        FROM alumnos
+        WHERE curso IN (?, ?)
+        AND nombre_apellido LIKE ?
+        OR DNI LIKE ?
+        OR curso LIKE ?
+        ORDER BY curso, ID
+        """, (
+            "7A", "7B", f"{self.barraBusquedaPase.text()}",
+            f"{self.barraBusquedaPase.text()}", f"{self.barraBusquedaPase.text()}"
+        )
+        )
+        consulta = db.cur.fetchall()
+        self.tablaListaAlumnos.setRowCount(len(consulta))
+        # Por cada fila, añade un boton de tick al inicio para
+        # seleccionarla.
+        for i in range(len(consulta)):
+            check = qtw.QCheckBox()
+            check.setObjectName("check")
+            check.toggle()
+            self.tablaListaAlumnos.setCellWidget(i, 0, check)
+            for j in range(len(consulta[i])):
+                self.tablaListaAlumnos.setItem(
+                    i, j+1, qtw.QTableWidgetItem(str(consulta[i][j])))
+            self.tablaListaAlumnos.setRowHeight(i, 35)
+
+    def confirmarGrupal(self):
+        """Este método pasa al grupo de alumnos seleccionados al
+        registro histórico.
+
+        Ver también
+        -----------
+        paseHistoricoGrupal: crea un formulario para pasar alumnos
+        al registro histórico de forma grupal.
+        """
+        for i in range(self.tablaListaAlumnos.rowCount()):
+            datosGrupales = []
+            # Comprueba que el botón este checkeado para pasar al
+            # alumno al registro histórico.
+            if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
+                db.cur.execute("SELECT * FROM alumnos WHERE DNI = ?",
+                               (int(self.tablaListaAlumnos.item(i, 2).text())))
+                datos = db.cur.fetchall()
+                db.cur.execute("INSERT INTO alumnos_historicos VALUES(?, ?, ? , ?, ?, ?)", (
+                    datos[0][0], datos[0][1], datos[0][2], datos[0][3],
+                    dt.date.today().strftime("%Y/%m/%d"), datos[0][4]
+                ))
+                datosGrupales.append(datos[0][0])
+                db.cur.execute(
+                    "DELETE FROM alumnos WHERE ID = ?", (datos[0][0],))
+        registrarCambios(
+            "Pase historico grupal", "Alumnos historicos", datos[
+                0][0], f"{datosGrupales}", None
+        )
+        db.con.commit()
