@@ -62,6 +62,7 @@ class IniciarSesion(qtw.QWidget):
 
         self.entry1 = qtw.QLineEdit()
         self.entry2 = qtw.QLineEdit()
+        self.entry2.setEchoMode(qtw.QLineEdit.EchoMode.Password)
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
         self.entry1.setMaxLength(20)

@@ -148,11 +148,11 @@ class GestionHerramientas(qtw.QWidget):
         introduce en la tabla de la pantalla.
         """
         if self.radioNombre.isChecked():
-            orden = "ORDER BY nombre_apellido"
+            orden = "ORDER BY descripcion"
         elif self.radioGrupo.isChecked():
-            orden = "ORDER BY dni"
+            orden = "ORDER BY grupo"
         elif self.radioSubgrupo.isChecked():
-            orden = "ORDER BY curso"
+            orden = "ORDER BY subgrupo"
         else:
             orden = ""
 

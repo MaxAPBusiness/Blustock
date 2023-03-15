@@ -94,7 +94,7 @@ class GestionSubgrupos(qtw.QWidget):
         iconoLupa = qtg.QPixmap(
             f"{os.path.abspath(os.getcwd())}/duraam/images/buscar.png")
         contenedorIconoLupa = qtw.QLabel()
-        contenedorIconoLupa.setObjectName("iconoLupa")
+        contenedorIconoLupa.setObjectName("lupa")
         contenedorIconoLupa.setPixmap(iconoLupa)
 
         labelOrdenar = qtw.QLabel("Ordenar: ")
@@ -149,7 +149,7 @@ class GestionSubgrupos(qtw.QWidget):
         db.cur.execute(
             f"SELECT * FROM SUBGRUPOS WHERE ID LIKE ? AND GRUPO LIKE ? {orden}",
             (
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
             )
         )
         consulta = db.cur.fetchall()
@@ -216,10 +216,10 @@ class GestionSubgrupos(qtw.QWidget):
             qtc.Qt.CaseSensitivity.CaseInsensitive)
         self.entry2.setCompleter(cuadroSugerenciasGrupos)
 
+        datos = []
         if tipo == "editar":
             botonClickeado = qtw.QApplication.focusWidget()
             posicion = self.tabla.indexAt(botonClickeado.pos())
-            datos = []
             for cell in range(0, len(self.campos)-2):
                 datos.append(posicion.sibling(posicion.row(), cell).data())
 
@@ -271,7 +271,7 @@ class GestionSubgrupos(qtw.QWidget):
                        (self.entry2.text(),))
         grupo = db.cur.fetchall()
         if not grupo:
-            m.mostrarMensaje(
+            return m.mostrarMensaje(
                 "Error", "Error", "El grupo no está ingresado. Asegúrese de ingresar el grupo primero")
 
         if tipo == "editar":

@@ -1,7 +1,7 @@
 """Este módulo crea la ventana principal y ejecuta la aplicación.
 
 Clases:
-    MainWindow(qtw.QMainWindow):
+    MainWindow(qtw.QMainWindow): crea la ventana principal.
 """
 # Importamos las librerías de python que vamos a usar en el módulo.
 # * sys: Para arrancar, la aplicación necesita unos parámetros del
@@ -542,7 +542,7 @@ class MainWindow(qtw.QMainWindow):
         # eso podía generar demasiados problemas. El disconnect
         # soluciona ese bug.
         # Método disconnect: quita la funcionalidad de una señal.
-        self.cabecera.usuario.clicked.disconnect()
+
         respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
                                 "¿Está seguro de que desea cerrar la sesión?")
         # Si el usuario respondió que si, ejecuta el código.
@@ -557,7 +557,7 @@ class MainWindow(qtw.QMainWindow):
             self.cabecera.usuario.setParent(None)
 
             # Hacemos que no se vea el menú.
-            self.menuIzquierdo.toggleViewAction().trigger()
+            self.menuIzquierdo.hide()
 
             # Quitamos los privilegios de administrador (por las dudas).
             self.menuIzquierdo.contenedorLayout.removeWidget(

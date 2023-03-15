@@ -76,9 +76,14 @@ class Registrarse(qtw.QWidget):
         self.entry2.setObjectName("modificar-entry")
         self.entry3.setObjectName("modificar-entry")
         self.entry4.setObjectName("modificar-entry")
+
+        self.entry3.setEchoMode(qtw.QLineEdit.EchoMode.Password)
+        self.entry4.setEchoMode(qtw.QLineEdit.EchoMode.Password)
+
         self.entry2.setMaxLength(20)
         self.entry3.setMaxLength(20)
         self.entry4.setMaxLength(20)
+        
         self.entry1.returnPressed.connect(lambda: self.entry2.setFocus())
         self.entry2.returnPressed.connect(lambda: self.entry3.setFocus())
         self.entry3.returnPressed.connect(lambda: self.entry4.setFocus())

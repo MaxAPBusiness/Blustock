@@ -107,9 +107,10 @@ class GestionGrupos(qtw.QWidget):
         layout.addWidget(self.titulo)
         contenedor1 = qtw.QWidget()
         contenedor1Layout = qtw.QGridLayout()
-        contenedor1Layout.addWidget(self.barraBusqueda, 1, 0)
-        contenedor1Layout.addWidget(contenedorIconoLupa, 1, 0)
-        contenedor1Layout.addWidget(self.botonOrdenar, 1, 1)
+        contenedor1Layout.addWidget(self.barraBusqueda, 0, 0)
+        contenedor1Layout.addWidget(contenedorIconoLupa, 0, 0)
+        contenedor1Layout.addWidget(self.botonOrdenar, 0, 1)
+
         contenedor1.setLayout(contenedor1Layout)
         layout.addWidget(contenedor1)
         layout.addWidget(self.tabla)
