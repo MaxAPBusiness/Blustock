@@ -89,8 +89,8 @@ class GestionHerramientas(qtw.QWidget):
         self.tabla.setColumnCount(len(self.campos))
         self.tabla.setHorizontalHeaderLabels(self.campos)
         self.tabla.verticalHeader().hide()
-        self.tabla.setColumnWidth(7, 35)
         self.tabla.setColumnWidth(8, 35)
+        self.tabla.setColumnWidth(9, 35)
 
         self.barraBusqueda = qtw.QLineEdit()
         self.barraBusqueda.setObjectName("buscar")
@@ -157,7 +157,9 @@ class GestionHerramientas(qtw.QWidget):
             orden = ""
 
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY descripcion DESC"
 
         db.cur.execute(
             f"""
@@ -189,11 +191,11 @@ class GestionHerramientas(qtw.QWidget):
 
             botonEditar = BotonFila("editar")
             botonEditar.clicked.connect(lambda: self.modificarLinea("editar"))
-            self.tabla.setCellWidget(i, 7, botonEditar)
+            self.tabla.setCellWidget(i, 8, botonEditar)
 
             botonEliminar = BotonFila("eliminar")
             botonEliminar.clicked.connect(lambda: self.eliminar())
-            self.tabla.setCellWidget(i, 8, botonEliminar)
+            self.tabla.setCellWidget(i, 9, botonEliminar)
 
     def ordenar(self):
         """Este método cambia el ícono del botonOrdenar y actualiza los
@@ -241,6 +243,7 @@ class GestionHerramientas(qtw.QWidget):
         self.entry4 = qtw.QSpinBox()
         self.entry5 = qtw.QSpinBox()
         self.entry6 = qtw.QLineEdit()
+        self.entry7 = qtw.QLineEdit()
 
         # Este código es para insertar sugerencias en el campo de
         # grupos para ayudar al usuario.
@@ -265,17 +268,8 @@ class GestionHerramientas(qtw.QWidget):
         # Se introduce el cuadro de sugerencias en el entry.
         self.entry6.setCompleter(cuadroSugerenciasGrupos)
         # Cuando cambia el texto de entry5, se activa el cuadro.
-        self.entry6.textEdited.connect(
-            lambda: self.cargarSubgrupos(self.entry5.text()))
-
-        self.entry7 = qtw.QLineEdit()
-
-        sugerenciasGrupos = []
-        for i in db.cur.fetchall():
-            sugerenciasGrupos.append(i[0])
-        cuadroSugerenciasGrupos = qtw.QCompleter(sugerenciasGrupos, self)
-        cuadroSugerenciasGrupos.setCaseSensitivity(
-            qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.entry6.textChanged.connect(
+            lambda: self.cargarSubgrupos(self.entry6.text()))
 
         self.entry1.setMaximum(9999)
         self.entry2.setMaxLength(100)
@@ -332,9 +326,9 @@ class GestionHerramientas(qtw.QWidget):
         cuadroSugerenciasSubgrupos = qtw.QCompleter(sugerenciasSubgrupos, self)
         cuadroSugerenciasSubgrupos.setCaseSensitivity(
             qtc.Qt.CaseSensitivity.CaseInsensitive)
-        self.entry6.setCompleter(cuadroSugerenciasSubgrupos)
+        self.entry7.setCompleter(cuadroSugerenciasSubgrupos)
 
-    def confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
+    def confirmarModificacion(self, datosPorDefecto: list | None = None):
         """Este método modifica los datos de la tabla herramientas.
 
         Verifica que el grupo y el subgrupo sean correctos y luego
@@ -347,9 +341,7 @@ class GestionHerramientas(qtw.QWidget):
 
         Parámetros
         ----------
-            tipo : str
-                El tipo de modificación.
-            datosPorDefecto : list, default = None
+            datosPorDefecto : list | none, default = None
                 Los datos de la fila previos a la modificación. 
 
         Ver también
@@ -384,14 +376,14 @@ class GestionHerramientas(qtw.QWidget):
         total = self.entry3.value() + self.entry4.value() + self.entry5.value()
         datosNuevos = (
             self.entry1.value(), self.entry2.text().upper(), self.entry3.value(),
-            self.entry4.value(), self.entry5.value(), self.entry6.text(), total,
+            self.entry4.value(), self.entry5.value(), total, self.entry6.text(),
             self.entry7.text()
         )
 
-        if tipo == "editar":
+        if datosPorDefecto:
             try:
                 db.cur.execute(
-                    "SELECT * FROM herramientasWHERE ID = ?", (datosPorDefecto[0]))
+                    "SELECT * FROM herramientas WHERE ID = ?", (datosPorDefecto[0]))
                 datosViejos = db.cur.fetchall()[0]
                 db.cur.execute("""
                 UPDATE herramientas
@@ -401,7 +393,7 @@ class GestionHerramientas(qtw.QWidget):
                 WHERE ID = ?""", (
                     datosNuevos[0], datosNuevos[1], datosNuevos[2], datosNuevos[3],
                     datosNuevos[4], datosNuevos[5], datosNuevos[6], datosNuevos[7], 
-                    datosPorDefecto,
+                    datosPorDefecto[0],
                 ))
                 registrarCambios(
                     "Edicion", "Herramientas", datosPorDefecto[0], f"{datosViejos}", f"{datosNuevos}")

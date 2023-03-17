@@ -144,7 +144,9 @@ class GestionSubgrupos(qtw.QWidget):
             orden = ""
         
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY id DESC"
 
         db.cur.execute(
             f"SELECT * FROM SUBGRUPOS WHERE ID LIKE ? AND GRUPO LIKE ? {orden}",

@@ -170,7 +170,9 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
             orden = ""
 
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY nombre_apellido DESC"
 
         db.cur.execute(
             f"""

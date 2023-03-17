@@ -125,6 +125,7 @@
     max-width: 62.5px;
     max-height: 35px;
     border-radius: 15px;
+    background-color:rgb(220, 220, 220)
 }
 
 #tipo {
@@ -151,9 +152,12 @@
     border-radius:60px;
 }
 
-#boton-texto::hover,
-#ordenar::hover {
+#boton-texto::hover{
     background-color:rgb(220, 220, 220)
+}
+
+#ordenar::hover{
+    background-color:rgb(190, 190, 190)
 }
 
 #confirmar-grande {

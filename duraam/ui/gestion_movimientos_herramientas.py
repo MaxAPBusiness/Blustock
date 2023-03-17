@@ -316,7 +316,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
             orden = ""
         
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY nombre DESC"
 
         # Voy a explicar lo que hace este select porque parece chino
         # Al principio lo es pero despues es simple.

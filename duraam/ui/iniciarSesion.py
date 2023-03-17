@@ -49,7 +49,7 @@ class IniciarSesion(qtw.QWidget):
 
         titulo = qtw.QLabel(
             dedent("""Bienvenido al sistema de gestión de bases de datos del pañol!
-            Inicia sesión
+                                                  Inicia sesión
             """)
         )
         titulo.setObjectName("titulo")

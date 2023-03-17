@@ -123,9 +123,9 @@ class GestionGrupos(qtw.QWidget):
         introduce en la tabla de la pantalla.
         """
         if self.botonOrdenar.isChecked():
-            orden = 'ORDER BY id ASC'
-        else:
             orden = 'ORDER BY id DESC'
+        else:
+            orden = 'ORDER BY id ASC'
 
         db.cur.execute(f"SELECT * FROM grupos WHERE id LIKE ? {orden}",
                        (f"%{self.barraBusqueda.text()}%",))

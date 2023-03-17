@@ -88,7 +88,8 @@ class HistorialDeCambios(qtw.QWidget):
         self.tabla.setColumnCount(len(self.campos))
         self.tabla.setHorizontalHeaderLabels(self.campos)
         self.tabla.verticalHeader().hide()
-        self.tabla.setColumnWidth(2, 400)
+        self.tabla.setColumnWidth(0, 125)
+        self.tabla.setColumnWidth(3, 400)
 
         self.barraBusqueda = qtw.QLineEdit()
         self.barraBusqueda.setObjectName("buscar")
@@ -120,22 +121,30 @@ class HistorialDeCambios(qtw.QWidget):
 
         labelUsuario = qtw.QLabel("Usuario: ")
         self.usuario = qtw.QComboBox()
+        self.usuario.addItem("Todos")
+        db.cur.execute("SELECT usuario FROM administradores WHERE id IN (SELECT DISTINCT id_usuario FROM historial_de_cambios)")
+        for i in db.cur.fetchall():
+            self.usuario.addItem(i[0])
+        db.cur.execute("SELECT usuario FROM usuarios WHERE id IN (SELECT DISTINCT id_usuario FROM historial_de_cambios)")
+        for i in db.cur.fetchall():
+            self.usuario.addItem(i[0])
+        self.usuario.currentIndexChanged.connect(lambda: self.mostrarDatos())
 
         labelFechaDesde = qtw.QLabel("Desde: ")
         self.entryFechaDesde = qtw.QDateEdit()
-        self.entryFechaDesde.setDateTime(
-            qtc.QDateTime.fromString(
-                "12/12/2012 00:00:00", "dd/MM/yyyy hh:mm:ss")
+        self.entryFechaDesde.setDate(
+            qtc.QDate.fromString(
+                "12/12/2012", "dd/MM/yyyy")
         )
         self.entryFechaDesde.editingFinished.connect(
             lambda: self.mostrarDatos())
 
         labelFechaHasta = qtw.QLabel("Hasta: ")
         self.entryFechaHasta = qtw.QDateEdit()
-        self.entryFechaHasta.setDateTime(
-            qtc.QDateTime.fromString(
-                dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                "dd/MM/yyyy hh:mm:ss"
+        self.entryFechaHasta.setDate(
+            qtc.QDate.fromString(
+                dt.date.today().strftime("%d/%m/%Y"),
+                "dd/MM/yyyy"
             )
         )
         self.entryFechaHasta.editingFinished.connect(
@@ -229,18 +238,20 @@ class HistorialDeCambios(qtw.QWidget):
             tabla = self.seleccionarTabla.currentText()
 
         if self.radioUsuario.isChecked():
-            orden = "ORDER BY nombre"
+            orden = "ORDER BY nombre, h.fecha_hora"
         elif self.radioFecha.isChecked():
             orden = "ORDER BY h.fecha_hora"
-        if self.radioTipo.isChecked():
-            orden = "ORDER BY h.tipo"
-        if self.radioTabla.isChecked():
-            orden = "ORDER BY h.tabla"
+        elif self.radioTipo.isChecked():
+            orden = "ORDER BY h.tipo, h.fecha_hora"
+        elif self.radioTabla.isChecked():
+            orden = "ORDER BY h.tabla, h.fecha_hora"
         else:
             orden = ""
         
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY nombre DESC"
 
         # Explico esta monstruosidad. Primero, si el rol es 0, es
         # decir, si el rol es usuario, entonces selecciona el nombre
@@ -260,7 +271,7 @@ class HistorialDeCambios(qtw.QWidget):
         SELECT (CASE WHEN h.rol = 0 THEN u.nombre_apellido ELSE a.nombre_apellido END) AS nombre,
         (CASE WHEN h.rol = 0 THEN u.usuario ELSE a.usuario END) AS nombre_usuario,
         h.fecha_hora, h.tipo, h.tabla, h.id_fila, h.datos_viejos, h.datos_nuevos
-        FROM historial_de_cambios H
+        FROM historial_de_cambios h
         LEFT JOIN usuarios u
         ON u.id = h.id_usuario
         LEFT JOIN administradores a
@@ -282,12 +293,12 @@ class HistorialDeCambios(qtw.QWidget):
               f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
               f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
               f"%{usuario}%", f"%{tipo}%", f"%{tabla}%",))
-
-        consulta = []
         fetch = db.cur.fetchall()
+        consulta = []
         for i in fetch:
-            fecha = qtc.QDate.fromString(i[4], "dd/MM/yyyy")
-            if fecha >= self.entryFechaDesde.date() and fecha <= self.entryFechaHasta.date():
+            fecha = qtc.QDateTime.fromString(i[2], "dd/MM/yyyy hh:mm:ss")
+            if (fecha >= qtc.QDateTime.fromString(f"{self.entryFechaDesde.date().toString('dd/MM/yyyy')} 00:00:00", "dd/MM/yyyy hh:mm:ss")
+                and fecha <= qtc.QDateTime.fromString(f"{self.entryFechaHasta.date().toString('dd/MM/yyyy')} 23:59:59", "dd/MM/yyyy hh:mm:ss")):
                 consulta.append(i)
 
         self.tabla.setRowCount(len(consulta))

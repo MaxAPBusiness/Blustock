@@ -145,19 +145,21 @@ class GestionProfesores(qtw.QWidget):
             orden = ""
 
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY nombre_apellido DESC"
 
         db.cur.execute(
             f"""
             SELECT * FROM profesores
             WHERE ID LIKE ? 
-            OR ID LIKE ?
+            OR DNI LIKE ?
             OR nombre_apellido LIKE ?  
             OR email LIKE ?
             {orden}
             """, (
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
             )
         )
 
@@ -202,9 +204,9 @@ class GestionProfesores(qtw.QWidget):
         -----------
         confirmarModificacion: modifica los datos de la tabla profesores.
         """
-        self.ventanaEditar = qtw.QWidget()
-        self.ventanaEditar.setWindowTitle("Agregar Profesor")
-        self.ventanaEditar.setWindowIcon(
+        self.ventanaModificar = qtw.QWidget()
+        self.ventanaModificar.setWindowTitle("Agregar Profesor")
+        self.ventanaModificar.setWindowIcon(
             qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
 
         layoutVentanaModificar = qtw.QGridLayout()
@@ -239,7 +241,7 @@ class GestionProfesores(qtw.QWidget):
             self.entry3.setText(datos[2])
             self.entry4.setText(datos[3])
 
-            self.ventanaEditar.setWindowTitle("Editar")
+            self.ventanaModificar.setWindowTitle("Editar")
 
         entries = [self.entry1, self.entry2, self.entry3, self.entry4]
         for i in range(len(entries)):
@@ -255,10 +257,10 @@ class GestionProfesores(qtw.QWidget):
         layoutVentanaModificar.addWidget(
             botonConfirmar, i+1, 0, 1, 2, alignment=qtc.Qt.AlignmentFlag.AlignCenter)
 
-        self.ventanaEditar.setLayout(layoutVentanaModificar)
-        self.ventanaEditar.show()
+        self.ventanaModificar.setLayout(layoutVentanaModificar)
+        self.ventanaModificar.show()
 
-    def confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
+    def confirmarModificacion(self, datosPorDefecto: list | None = None):
         """Este método modifica los datos de la tabla profesores.
 
         Verifica que el id no esté repetido en profesores históricos.
@@ -291,7 +293,7 @@ class GestionProfesores(qtw.QWidget):
             self.entry1.text(), self.entry2.value(
             ), self.entry3.text().upper(), self.entry4.text()
         )
-        if tipo == "editar":
+        if datosPorDefecto:
             try:
                 db.cur.execute(
                     "SELECT * FROM profesores WHERE ID = ?", (datosPorDefecto[0], ))
@@ -326,7 +328,7 @@ class GestionProfesores(qtw.QWidget):
                 return m.mostrarMensaje("Error", "Error", "El ID ingresado ya está registrado. Por favor, ingrese otro.")
 
         self.mostrarDatos()
-        self.ventanaEditar.close()
+        self.ventanaModificar.close()
 
     def eliminar(self):
         """Este método elimina la fila de la tabla profesores.

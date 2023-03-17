@@ -146,16 +146,18 @@ class GestionTurnos(qtw.QWidget):
         if self.radioID.isChecked():
             orden = "ORDER BY t.id"
         elif self.radioAlumno.isChecked():
-            orden = "ORDER BY nombre"
+            orden = "ORDER BY a.nombre_apellido"
         elif self.radioFecha.isChecked():
-            orden = "ORDER BY m.fecha_hora"
+            orden = "ORDER BY t.fecha, t.hora_ingreso"
         else:
             orden = ""
 
         if orden and self.botonOrdenar.isChecked():
-            orden += " ASC"
+            orden += " DESC"
+        elif self.botonOrdenar.isChecked():
+            orden="ORDER BY t.id DESC"
         
-        # Explico lo que significa esta consulta enorme.
+        # Explico lo que significa el monstruo que viene abajo.
         # Selecciona primero el id y la fecha de la tabla turnos.
         # Luego ejecuta el comando case. Si no saben cual es, lean
         # primero la explicación de la consulta de movimientos
@@ -208,10 +210,10 @@ class GestionTurnos(qtw.QWidget):
         OR profesor_ingreso LIKE ? 
         OR profesor_egreso LIKE ?
         {orden}""", (
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%",
             ))
         consulta = db.cur.fetchall()
         self.tabla.setRowCount(len(consulta))
@@ -226,6 +228,7 @@ class GestionTurnos(qtw.QWidget):
             self.tabla.setCellWidget(i, 7, botonEditar)
 
             botonEliminar = BotonFila("eliminar")
+            botonEliminar.clicked.connect(lambda: self.eliminar())
             self.tabla.setCellWidget(i, 8, botonEliminar)
 
     def ordenar(self):
@@ -344,7 +347,7 @@ class GestionTurnos(qtw.QWidget):
         self.ventanaEditar.setLayout(layoutVentanaModificar)
         self.ventanaEditar.show()
 
-    def confirmarModificacion(self, tipo: str, datosPorDefecto: list | None = None):
+    def confirmarModificacion(self, datosPorDefecto: list | None = None):
         """Este método modifica los datos de la tabla turno_panol.
 
         Verifica que el alumno y los profesores que autorizaron el
@@ -358,8 +361,6 @@ class GestionTurnos(qtw.QWidget):
 
         Parámetros
         ----------
-            tipo : str
-                El tipo de modificación.
             datosPorDefecto : list, default = None
                 Los datos de la fila previos a la modificación. 
 
@@ -413,7 +414,7 @@ class GestionTurnos(qtw.QWidget):
 
         datosNuevos = (fecha, alumno[0][0], ingreso,
                        egreso, profeIngreso[0][0], profeEgreso[0][0])
-        if tipo == "editar":
+        if datosPorDefecto:
             db.cur.execute(
                 "SELECT * FROM TURNO_PANOL WHERE ID = ?", (datosPorDefecto[0],))
             datosViejos = db.cur.fetchall()[0]
@@ -459,6 +460,9 @@ class GestionTurnos(qtw.QWidget):
         """
         respuesta = m.mostrarMensaje("Pregunta", "Advertencia",
                                      "¿Está seguro que desea eliminar estos datos?")
+        botonClickeado = qtw.QApplication.focusWidget()
+        posicion = self.tabla.indexAt(botonClickeado.pos())
+        idd = posicion.sibling(posicion.row(), 0).data()
         db.cur.execute(
             "SELECT * FROM MOVIMIENTOS_HERRAMIENTAS WHERE ID_TURNO_PANOL = ?", (idd,))
         tipo = "Eliminacion simple"
@@ -473,9 +477,6 @@ class GestionTurnos(qtw.QWidget):
                 ¿Desea eliminarlo de todas formas?
                 """)
         if respuesta == qtw.QMessageBox.StandardButton.Yes:
-            botonClickeado = qtw.QApplication.focusWidget()
-            posicion = self.tabla.indexAt(botonClickeado.pos())
-            idd = posicion.sibling(posicion.row(), 0).data()
             db.cur.execute("SELECT * FROM TURNO_PANOL WHERE ID = ?", (idd,))
             datosEliminados = db.cur.fetchall()[0]
             db.cur.execute("DELETE FROM TURNO_PANOL WHERE ID = ?", (idd,))
