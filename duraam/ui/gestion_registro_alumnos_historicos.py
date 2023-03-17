@@ -210,9 +210,9 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             OR email LIKE ?
             {orden}
             """, (
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
-                f"{self.barraBusqueda.text()}", f"{self.barraBusqueda.text()}",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
+                f"%{self.barraBusqueda.text()}%", f"%{self.barraBusqueda.text()}%",
             )
         )
         consulta = db.cur.fetchall()
@@ -350,9 +350,9 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
                                  al registro histórico de forma
                                  individual.
         """
+        sugerenciasDNI = []
         db.cur.execute(
             "SELECT DNI FROM alumnos WHERE nombre_apellido = ?", (nombre,))
-        sugerenciasDNI = []
         for i in db.cur.fetchall():
             sugerenciasDNI.append(str(i[0]))
         cuadroSugerenciasDNI = qtw.QCompleter(sugerenciasDNI, self)
@@ -446,7 +446,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         botonConfirmar.setObjectName("confirmar")
         botonConfirmar.setWindowIcon(
             qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
-        botonConfirmar.clicked.connect(lambda: self.confirmarPase())
+        botonConfirmar.clicked.connect(lambda: self.confirmarGrupal())
         botonConfirmar.setCursor(qtg.QCursor(
             qtc.Qt.CursorShape.PointingHandCursor))
 
@@ -482,8 +482,8 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
         OR curso LIKE ?
         ORDER BY curso, ID
         """, (
-            "7A", "7B", f"{self.barraBusquedaPase.text()}",
-            f"{self.barraBusquedaPase.text()}", f"{self.barraBusquedaPase.text()}"
+            "7A", "7B", f"%{self.barraBusquedaPase.text()}%",
+            f"%{self.barraBusquedaPase.text()}%", f"%{self.barraBusquedaPase.text()}%"
         )
         )
         consulta = db.cur.fetchall()
@@ -515,9 +515,9 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             # alumno al registro histórico.
             if self.tablaListaAlumnos.cellWidget(i, 0).isChecked():
                 db.cur.execute("SELECT * FROM alumnos WHERE DNI = ?",
-                               (int(self.tablaListaAlumnos.item(i, 2).text())))
+                               (int(self.tablaListaAlumnos.item(i, 2).text()),))
                 datos = db.cur.fetchall()
-                db.cur.execute("INSERT INTO alumnos_historicos VALUES(?, ?, ? , ?, ?, ?)", (
+                db.cur.execute("INSERT INTO alumnos_historicos VALUES(?, ?, ?, ?, ?, ?)", (
                     datos[0][0], datos[0][1], datos[0][2], datos[0][3],
                     dt.date.today().strftime("%Y/%m/%d"), datos[0][4]
                 ))
@@ -528,4 +528,7 @@ class GestionRegistroAlumnosHistoricos(qtw.QWidget):
             "Pase historico grupal", "Alumnos historicos", datos[
                 0][0], f"{datosGrupales}", None
         )
+        self.mostrarDatos()
+        m.mostrarMensaje("Information", "Aviso", "Se han pasado los egresados seleccionados al registro histórico.")
+        self.menuPase.close()
         db.con.commit()
