@@ -238,8 +238,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
                     Eliminarlo eliminará toda la información relacionada, 
                     como sus turnos y sus movimientos.
                     ¿Está seguro que desea continuar y eliminar la información relacionada?
-                    """
-                                             )
+                    """)
 
         if respuesta == qtw.QMessageBox.StandardButton.Yes:
             db.cur.execute(
@@ -289,8 +288,6 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         self.entry1.editingFinished.connect(
             lambda: self.cargarDNI(self.entry1.text()))
 
-        datos = []
-
         self.entry1.setObjectName("modificar-entry")
         self.entry2.setObjectName("modificar-entry")
 
@@ -299,7 +296,7 @@ class GestionRegistroProfesoresHistoricos(qtw.QWidget):
         botonConfirmar.setWindowIcon(
             qtg.QIcon(f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png"))
         botonConfirmar.clicked.connect(
-            lambda: self.confirmarPase(datos))
+            lambda: self.confirmarPase())
 
         layoutMenuPase = qtw.QGridLayout()
         layoutMenuPase.addWidget(

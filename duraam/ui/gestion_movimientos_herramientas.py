@@ -406,8 +406,9 @@ class GestionMovimientosHerramientas(qtw.QWidget):
         # Por último, filtra la consulta por fecha. Agarra la fecha de
         # todas las filas obtenidas y verifica si estan entre el rango
         # de fechas seleccionado por el usuario.
+        fetch=db.cur.fetchall()
         consulta = []
-        for i in db.cur.fetchall():
+        for i in fetch:
             fecha = qtc.QDateTime.fromString(i[4], "dd/MM/yyyy hh:mm:ss")
             if fecha >= self.entryFechaDesde.dateTime() and fecha <= self.entryFechaHasta.dateTime():
                 consulta.append(i)

@@ -36,4 +36,4 @@ def registrarCambios(tipo: str, tablas: str, idd: any, datosViejos: str, datosNu
     # nuevos.
     db.cur.execute("INSERT INTO HISTORIAL_DE_CAMBIOS VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
                    (userId, userInfo[1], dt.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                    tipo, tablas, idd, datosViejos, datosNuevos,))
+                    tipo, tablas, str(idd), datosViejos, datosNuevos,))
