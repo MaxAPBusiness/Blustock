@@ -62,6 +62,7 @@ class MenuIzquierdo(qtw.QToolBar):
         self.setOrientation(qtc.Qt.Orientation.Vertical)
         self.setFloatable(False)
         self.setMovable(False)
+        self.setContextMenuPolicy(qtc.Qt.ContextMenuPolicy.PreventContextMenu)
 
         titulo = qtw.QLabel("Gestiones: ")
         titulo.setObjectName("gestiones-titulo")

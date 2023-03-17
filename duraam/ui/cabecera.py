@@ -40,6 +40,7 @@ class Cabecera(qtw.QToolBar):
         # setMovable solo permite moverla de borde. Nosotros ponemos
         # las dos en false.
         self.setMovable(False)
+        self.setContextMenuPolicy(qtc.Qt.ContextMenuPolicy.PreventContextMenu)
 
         pixmap = qtg.QPixmap(
             f"{os.path.abspath(os.getcwd())}/duraam/images/logo.png")
