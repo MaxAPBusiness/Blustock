@@ -1,0 +1,15 @@
+#cabecera{
+    background-color:#0d43d4;
+}
+
+#icono{
+    margin:20px 0px 20px 30px;
+}
+
+#header-label{
+    color:white;
+    font-size:60px;  
+    font-family:'Bebas Neue';
+    margin-left: 5px;
+}
+

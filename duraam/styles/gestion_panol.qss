@@ -1,0 +1,23 @@
+*{
+    font-family: "Roboto", "Arial", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+#titulo{
+    font-family: "Bebas Neue";
+    font-size: 35px;
+    margin: 0.5;
+}
+#confirmar{
+    background-color:#0d43d4; 
+    color:white;
+
+    font-size: 24px;
+    font-family: "Bebas Neue";
+
+    padding: 5px;
+    margin: 10px;
+    width: 125px;
+    max-width: 125px;
+    border-radius: 15px;
+}
