@@ -9,7 +9,7 @@
     margin: 0.5;
 }
 #confirmar{
-    background-color:#0d43d4; 
+    background-color:#72b35c;
     color:white;
 
     font-size: 24px;

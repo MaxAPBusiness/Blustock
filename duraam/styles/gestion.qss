@@ -37,7 +37,7 @@
 #agregar,
 #confirmar,
 #confirmar-grande {
-    background-color:#0d43d4; 
+    background-color:#72b35c;
     color:white;
 
     font-size: 24px;
@@ -50,22 +50,22 @@
     border-radius: 15px;
   }
 
-#agregar::hover, 
-#editar::hover, 
+#agregar::hover,
+#editar::hover,
 #eliminar::hover,
 #confirmar::hover,
 #confirmar-grande::hover,
 #usuario::hover,
 #aceptar::hover,
 #rechazar::hover {
-    background-color:rgb(20,20,200);
+    background-color:rgb(255, 0, 0);
 }
 
-#editar, 
+#editar,
 #eliminar,
 #aceptar,
 #rechazar {
-    background-color:#0d43d4; 
+    background-color:#72b35c;
     border-radius: 5px;
     color: white;
     font-weight: 800;
@@ -176,4 +176,3 @@
     width: 25px;
     height: 25px;
 }
-
