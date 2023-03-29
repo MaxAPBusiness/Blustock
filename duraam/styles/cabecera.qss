@@ -1,5 +1,5 @@
 #cabecera{
-    background-color:#72b35c;
+    background-color:#0d43d4;
 }
 
 #icono{
@@ -8,7 +8,8 @@
 
 #header-label{
     color:white;
-    font-size:60px;
+    font-size:60px;  
     font-family:'Bebas Neue';
     margin-left: 5px;
 }
+
