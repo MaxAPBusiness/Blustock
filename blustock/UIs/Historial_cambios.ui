@@ -13,6 +13,123 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;400;700&amp;display=swap');
+
+*{
+    font-family: 'Raleway-blod';
+    font-weight: 400;
+}
+
+QMenuBar{
+
+    background-color: #293045;
+    padding: 0;    
+    text-transform: capitalize;
+    font-size: 14px;
+    color:white;
+    display: flex;
+    flex-direction: column;
+
+}
+
+QMenuBar:item{
+    padding: 17px;
+    border-radius: 10px;
+
+}
+
+QMenuBar:item:selected{
+    background-color: #768AC5;
+    color:black;
+    border-radius: 5px;
+    margin: 10px;
+    
+    
+
+}
+
+QMenu{
+    background-color: #293045;
+
+    color: white;
+}
+
+QMenu:item{
+    padding: 5px;
+    border-radius: 5px;
+}
+
+QMenu:item:selected{
+    background-color: #768AC5;
+    color:white;
+
+}
+Qmenu#icon{
+   icon:size 40px; 
+    
+}
+
+
+QRadioButton:indicator{
+    border-style: solid;
+    border-color:  #293045;
+    border-radius: 6%;
+    border-width:  2px;
+    background-color: #BABFCE;
+}
+QRadioButton::indicator:checked{
+    background-color: #768AC5;
+}
+
+#label{
+    font-size: 20px;
+}
+
+QLineEdit{
+    border-radius: 5px;
+    background-color: #BABFCE;
+    
+}
+
+#title{
+    width: 100px;
+    height: 200px;
+}
+
+
+
+QPushButton{
+    border-color:#293045;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    background-color: #BABFCE;
+    color:#293045;
+
+}
+QPushButton:hover{
+    background-color:#768AC5;
+    color:aliceblue;
+}
+QPushButton:pressed {
+    background-color: #293045;
+
+}
+
+#pushButton_5{
+    padding: 10px;
+    background-color: #768AC5;
+    border-radius: 15%;
+}
+
+#pushButton_2,#pushButton_3,#pushButton_4{
+    width: 65px;
+    height: 30px;
+}
+
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -48,8 +165,9 @@
         </property>
         <property name="font">
          <font>
-          <family>Alata</family>
-          <pointsize>28</pointsize>
+          <family>Raleway-blod</family>
+          <pointsize>-1</pointsize>
+          <bold>false</bold>
          </font>
         </property>
         <property name="text">
@@ -91,14 +209,13 @@
           </property>
           <property name="font">
            <font>
-            <family>Alata</family>
+            <family>Raleway-blod</family>
             <pointsize>10</pointsize>
+            <bold>false</bold>
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: #768ac5;
-border-radius: 12px;
-border: 2px solid rgb(154, 154, 154);</string>
+           <string notr="true"/>
           </property>
           <property name="placeholderText">
            <string>Buscar...</string>
@@ -154,7 +271,7 @@ border: 2px solid rgb(154, 154, 154);</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pushButton_3">
           <property name="maximumSize">
            <size>
             <width>30</width>

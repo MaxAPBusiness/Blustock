@@ -13,6 +13,60 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;400;700&amp;display=swap');
+
+*{
+    font-family: 'Raleway-blod';
+    font-weight: 400;
+}
+
+#label{
+    font-size: 20px;
+}
+
+QLineEdit{
+    border-radius: 5px;
+    background-color: #BABFCE;
+    
+}
+
+#title{
+    width: 100px;
+    height: 200px;
+}
+
+QPushButton{
+    border-color:#293045;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    background-color: #BABFCE;
+    color:#293045;
+
+}
+QPushButton:hover{
+    background-color:#768AC5;
+    color:aliceblue;
+}
+QPushButton:pressed {
+    background-color: #293045;
+
+}
+
+#pushButton_5{
+    padding: 10px;
+    background-color: #768AC5;
+    border-radius: 15%;
+}
+
+#pushButton_2,#pushButton_3,#pushButton_4{
+    width: 20px;
+    height: 30px;
+}
+
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
