@@ -1,25 +1,29 @@
-from PyQt6 import QtWidgets, uic, QtCore,QtGui
+from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import sys
-from penegordo_ui import Ui_Inicio
+import os
 
-class Penegordo(QtWidgets.QWidget):
+os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
+class PantallaAlumnos(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("penegordo.ui",self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}penegordo.ui'), self)
 
-class Ui(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("teodio.ui",self)
-        with open('sopas (1).qss', 'r') as file:
+
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}main.ui'), self)
+        pantallaAlumnos=PantallaAlumnos()
+        self.stackedWidget.addWidget(pantallaAlumnos)
+
+        with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
-        self.inicio = Ui_Inicio()
-        self.penegordo = Penegordo()
-        self.stackedWidget.addWidget(self.penegordo)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
         self.show()
 
 app=QtWidgets.QApplication(sys.argv)
-window=Ui()
+QtGui.QFontDatabase.addApplicationFont("rsc/fonts/Oswald-VariableFont_wght.ttf")
+window=MainWindow()
 app.exec()
 print("God")
