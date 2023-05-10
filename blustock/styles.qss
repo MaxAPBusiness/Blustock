@@ -1,5 +1,5 @@
 *{
-    font-family: 'Slabo 27px', serif;
+    font-family: 'Oswald', sans-serif;
     font-weight: 400;
 }
 
@@ -61,7 +61,6 @@ QRadioButton::indicator:checked{
 
 #label{
     font-size: 35px;
-    font-family: 'Righteous', cursive;
 }
 
 #usuariosLabel{
@@ -74,15 +73,18 @@ QRadioButton::indicator:checked{
 
 #usuariosLineEdit{
     width: 170px;
+    height: 20px;
+    border-radius: 10px;
 }
 
 #passwordLineEdit{
     width: 170px;
+    height: 20px;
+    border-radius: 10px;
 }
 
 #labelprofesores{
     font-size: 26px;
-    font-family:'Slabo 27px', serif;
 }
 
 QLineEdit{
