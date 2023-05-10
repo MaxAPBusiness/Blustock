@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Slabo+27px&display=swap');
 
 *{
-    font-family: 'Oswald';
+    font-family: 'Slabo 27px', serif;
     font-weight: 400;
 }
 
@@ -61,7 +62,7 @@ QRadioButton::indicator:checked{
 }
 
 #label{
-    font-size: 20px;
+    font-size: 35px;
 }
 
 QLineEdit{
@@ -81,16 +82,16 @@ QPushButton{
     border-color:#293045;
     border-style: solid;
     border-width: 1px;
-    border-radius: 5px;
-    background-color: #ff00ea;
-    color:#293045;
+    border-radius: 6px;
+    background-color: #293045;
+    color:#ffffff;
     width: 20px;
     height: 30px;
 
 }
 QPushButton:hover{
     background-color:#768AC5;
-    color:aliceblue;
+    color:#293045;
 }
 QPushButton:pressed {
     background-color: #293045;
