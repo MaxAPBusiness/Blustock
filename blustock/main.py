@@ -2,7 +2,10 @@ from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
-import db.inicializar_bbdd as db
+from db.bbdd import BBDD
+
+bbdd=BBDD()
+bbdd.refrescarBBDD()
 
 """class PantallaAlumnos(QtWidgets.QWidget):
     def __init__(self):
@@ -33,7 +36,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()"""
 
 app=QtWidgets.QApplication(sys.argv)
-QtGui.QFontDatabase.addApplicationFont("rsc/fonts/Oswald-VariableFont_wght.ttf")
+
+for fuente in os.listdir(
+    os.path.join(os.path.abspath(os.getcwd()), f'rsc{os.sep}fonts')):
+    QtGui.QFontDatabase.addApplicationFont(
+        os.path.join(os.path.abspath(os.getcwd()),
+            f'rsc{os.sep}fonts{os.sep}{fuente}')
+        )
+    
 window=MainWindow()
 app.exec()
 print("God")
