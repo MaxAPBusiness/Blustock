@@ -5,7 +5,7 @@ import sys
 class sopas(QtWidgets.QWidget):    
     def __init__(self):
         super().__init__()
-        uic.loadUi("penegordo.ui",self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), self)
         self.login.triggered.connect(self.login)
 
     def login(self):

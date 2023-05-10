@@ -7,7 +7,7 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 class PantallaAlumnos(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}penegordo.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), self)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
