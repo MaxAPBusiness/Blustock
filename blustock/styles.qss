@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Slabo+27px&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 *{
     font-family: 'Slabo 27px', serif;
@@ -63,6 +64,28 @@ QRadioButton::indicator:checked{
 
 #label{
     font-size: 35px;
+    font-family: 'Righteous', cursive;
+}
+
+#usuariosLabel{
+    font-size: 14px;
+}
+
+#contraseALabel{
+    font-size: 14px;
+}
+
+#usuariosLineEdit{
+    width: 170px;
+}
+
+#passwordLineEdit{
+    width: 170px;
+}
+
+#labelprofesores{
+    font-size: 26px;
+    font-family:'Slabo 27px', serif;
 }
 
 QLineEdit{

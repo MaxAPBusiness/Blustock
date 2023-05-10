@@ -39,7 +39,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Sistema de gestion de pañol</string>
+      <string>Sistema de gestión de pañol</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -89,7 +89,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>60</height>
+       <height>30</height>
       </size>
      </property>
     </spacer>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>522</height>
+    <width>807</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,11 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <widget class="QWidget" name="page">
        <widget class="QWidget" name="verticalLayoutWidget">
         <property name="geometry">
@@ -31,10 +34,10 @@
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QLabel" name="label">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QLabel" name="labelprofesores">
            <property name="text">
-            <string>PROFESORES</string>
+            <string>Profesores</string>
            </property>
           </widget>
          </item>
@@ -257,7 +260,7 @@
           <x>350</x>
           <y>60</y>
           <width>401</width>
-          <height>23</height>
+          <height>24</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -270,7 +273,7 @@
          <item>
           <widget class="QRadioButton" name="radioButton">
            <property name="text">
-            <string>RadioButton</string>
+            <string>Aceptar</string>
            </property>
           </widget>
          </item>
@@ -326,6 +329,22 @@
       <widget class="QWidget" name="page_2"/>
      </widget>
     </item>
+    <item row="0" column="0">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>10</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -333,7 +352,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>801</width>
+     <width>807</width>
      <height>22</height>
     </rect>
    </property>
@@ -419,8 +438,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="logo.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
