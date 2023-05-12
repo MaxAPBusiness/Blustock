@@ -107,8 +107,7 @@ QPushButton{
     border-radius: 6px;
     background-color: #293045;
     color:#ffffff;
-    width: 20px;
-    height: 30px;
+    padding: 3px 8px;
 
 }
 QPushButton:hover{
@@ -126,7 +125,3 @@ QPushButton:pressed {
     border-radius: 15%;
 }
 
-#pushButton_2,#pushButton_3,#pushButton_4{
-    width: 20px;
-    height: 30px;
-}
