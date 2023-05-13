@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>807</width>
-    <height>526</height>
+    <width>832</width>
+    <height>545</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -153,317 +153,6 @@ QPushButton:pressed {
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="1" column="0">
-     <widget class="QStackedWidget" name="stackedWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="page">
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>771</width>
-          <height>42</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item alignment="Qt::AlignHCenter">
-          <widget class="QLabel" name="labelprofesores">
-           <property name="text">
-            <string>Profesores</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="gridLayoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>110</y>
-          <width>721</width>
-          <height>291</height>
-         </rect>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QTableWidget" name="tableWidget">
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>New Row</string>
-            </property>
-           </row>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>New Column</string>
-            </property>
-           </column>
-           <item row="1" column="0">
-            <property name="text">
-             <string>aaaaa</string>
-            </property>
-           </item>
-           <item row="2" column="0">
-            <property name="text">
-             <string>aaaa</string>
-            </property>
-           </item>
-           <item row="3" column="0">
-            <property name="text">
-             <string>aaaaa</string>
-            </property>
-           </item>
-           <item row="4" column="0">
-            <property name="text">
-             <string>aaaa</string>
-            </property>
-           </item>
-           <item row="5" column="0">
-            <property name="text">
-             <string>aaaaa</string>
-            </property>
-           </item>
-           <item row="6" column="0">
-            <property name="text">
-             <string>aaaaaa</string>
-            </property>
-           </item>
-           <item row="7" column="0">
-            <property name="text">
-             <string>aaaaaa</string>
-            </property>
-           </item>
-           <item row="8" column="0">
-            <property name="text">
-             <string>aaaaaa</string>
-            </property>
-           </item>
-           <item row="9" column="0">
-            <property name="text">
-             <string>aaaaa</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>60</y>
-          <width>291</width>
-          <height>54</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QPushButton" name="pushButton_5">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../blustock/lupa.png</normaloff>../blustock/lupa.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit">
-           <property name="echoMode">
-            <enum>QLineEdit::Normal</enum>
-           </property>
-           <property name="cursorPosition">
-            <number>0</number>
-           </property>
-           <property name="dragEnabled">
-            <bool>false</bool>
-           </property>
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-           <property name="placeholderText">
-            <string notr="true"/>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_2">
-        <property name="geometry">
-         <rect>
-          <x>350</x>
-          <y>60</y>
-          <width>401</width>
-          <height>34</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QSpinBox" name="spinBox"/>
-         </item>
-         <item>
-          <widget class="QDateTimeEdit" name="dateTimeEdit"/>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="radioButton">
-           <property name="text">
-            <string>Aceptar</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QPushButton" name="pushButton">
-        <property name="geometry">
-         <rect>
-          <x>610</x>
-          <y>410</y>
-          <width>131</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>CONFIRMAR</string>
-        </property>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_3">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>410</y>
-          <width>281</width>
-          <height>61</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QPushButton" name="pushButton_4">
-           <property name="text">
-            <string>Borrar</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>Crear</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_2">
-           <property name="text">
-            <string>Editar</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="page_2"/>
-     </widget>
-    </item>
     <item row="0" column="0">
      <spacer name="verticalSpacer">
       <property name="orientation">
@@ -480,6 +169,13 @@ QPushButton:pressed {
       </property>
      </spacer>
     </item>
+    <item row="1" column="0">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -487,79 +183,125 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>807</width>
-     <height>56</height>
+     <width>832</width>
+     <height>52</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHerramientas">
     <property name="title">
      <string>HERRAMIENTAS</string>
     </property>
-    <addaction name="actionGesti_n_de_subgrupos"/>
-    <addaction name="actionGesti_n_de_grupos"/>
-    <addaction name="actionListado"/>
-    <addaction name="actionConsultas"/>
+    <addaction name="opcionStock"/>
+    <addaction name="opcionSubgrupos"/>
+    <addaction name="opcionGrupos"/>
    </widget>
    <widget class="QMenu" name="menuPersonal">
     <property name="title">
      <string>PERSONAL</string>
     </property>
-    <addaction name="actionAlumnos"/>
-    <addaction name="actionProfesores"/>
+    <addaction name="opcionAlumnos"/>
+    <addaction name="opcionOtroPersonal"/>
    </widget>
    <widget class="QMenu" name="menuMovimientos">
     <property name="title">
      <string>MOVIMIENTOS</string>
     </property>
-    <addaction name="actionGestion_de_movimientos"/>
+    <addaction name="opcionMovimientos"/>
    </widget>
-   <widget class="QMenu" name="menuProfesor">
-    <property name="layoutDirection">
-     <enum>Qt::RightToLeft</enum>
-    </property>
+   <widget class="QMenu" name="menuTurnos">
     <property name="title">
-     <string>PROFESOR</string>
+     <string>TURNOS</string>
     </property>
+    <addaction name="opcionTurnos"/>
+   </widget>
+   <widget class="QMenu" name="menuUsuarios">
+    <property name="title">
+     <string>USUARIOS</string>
+    </property>
+    <addaction name="opcionUsuariosG"/>
+   </widget>
+   <widget class="QMenu" name="menuHISTORIAL">
+    <property name="title">
+     <string>HISTORIAL</string>
+    </property>
+    <addaction name="opcionHistorial"/>
    </widget>
    <addaction name="menuHerramientas"/>
    <addaction name="menuPersonal"/>
+   <addaction name="menuTurnos"/>
    <addaction name="menuMovimientos"/>
-   <addaction name="menuProfesor"/>
+   <addaction name="menuUsuarios"/>
+   <addaction name="menuHISTORIAL"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionGesti_n_de_subgrupos">
+  <action name="opcionSubgrupos">
    <property name="text">
     <string>Gestión de subgrupos</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
   </action>
-  <action name="actionGesti_n_de_grupos">
+  <action name="opcionGrupos">
    <property name="text">
     <string>Gestión de grupos</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
   </action>
-  <action name="actionListado">
+  <action name="opcionStock">
    <property name="text">
-    <string>Listado</string>
+    <string>Gestión de herramientas e insumos</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </action>
   <action name="actionConsultas">
    <property name="text">
     <string>Consultas</string>
    </property>
-  </action>
-  <action name="actionGestion_de_movimientos">
-   <property name="text">
-    <string>Gestion de movimientos</string>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </action>
-  <action name="actionAlumnos">
+  <action name="opcionMovimientos">
    <property name="text">
-    <string>Alumnos</string>
+    <string>Gestión de movimientos</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="opcionAlumnos">
+   <property name="text">
+    <string>Gestión de alumnos</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </action>
   <action name="actionProfesores">
    <property name="text">
     <string>Profesores</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </action>
   <action name="actionlogo">
@@ -570,6 +312,66 @@ QPushButton:pressed {
   <action name="actionaa">
    <property name="text">
     <string>aa</string>
+   </property>
+  </action>
+  <action name="opcionOtroPersonal">
+   <property name="text">
+    <string>Gestión de otro personal</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="opcionUsuarios">
+   <property name="text">
+    <string>Gestión de usuarios</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="opcionTurnos">
+   <property name="text">
+    <string>Gestión de turnos del pañol</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actiona">
+   <property name="text">
+    <string>a</string>
+   </property>
+  </action>
+  <action name="actionGesti_n_de_usuarios">
+   <property name="text">
+    <string>Gestión de usuarios</string>
+   </property>
+  </action>
+  <action name="opcionUsuariosG">
+   <property name="text">
+    <string>Gestión de usuarios</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="opcionHistorial">
+   <property name="text">
+    <string>Ver historial</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
    </property>
   </action>
  </widget>
