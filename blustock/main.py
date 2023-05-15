@@ -30,26 +30,31 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
-        pantallas=[pantallaAlumnos, pantallaGrupos, pantallaHerramientas, pantallaHistorial,
-                   pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
-                   pantallaUsuarios]
+        pantallaLogin=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
+        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+                   pantallaHistorial, pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos,
+                   pantallaTurnos, pantallaUsuarios]
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
-            pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+            try:
+                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+            except:
+                pass #¿Qué esperabas, un print, boludito?
         
-        self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
-        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(1))
-        self.opcionAlumnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(0))
-        self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
-        self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
-        self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
-        self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
-        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(3))
+        self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(3))
+        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
+        self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
+        self.opcionAlumnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+        self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
+        self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
+        self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
+        self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
+        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
 
         with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(0)
         self.show()
 
     def login(self):
