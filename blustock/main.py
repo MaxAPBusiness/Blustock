@@ -35,6 +35,7 @@ class MainWindow(QtWidgets.QMainWindow):
                    pantallaUsuarios]
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
+            pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
         
         self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
         self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
@@ -43,7 +44,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
         self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
         self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
-        self.opcionUsuarios.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
+        self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(3))
 
         with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:

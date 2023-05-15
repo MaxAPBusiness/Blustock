@@ -16,14 +16,16 @@ QMenuBar:item{
 
 }
 
+QTableWidget{ 
+    font-size:11pt;
+    font-weight: 400;
+}
+
 QMenuBar:item:selected{
     background-color: #768AC5;
     color:black;
     border-radius: 5px;
     margin: 10px;
-    
-    
-
 }
 
 QMenu{
