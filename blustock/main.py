@@ -35,7 +35,10 @@ class MainWindow(QtWidgets.QMainWindow):
                    pantallaUsuarios]
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
-            pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+            try:
+                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+            except:
+                pass
         
         self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
         self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
