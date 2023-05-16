@@ -3,6 +3,8 @@ import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
+from boton import BotonFila
+
 
 bbdd=BBDD()
 bbdd.refrescarBBDD()
@@ -30,31 +32,45 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
-        pantallaLogin=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
-        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
-                   pantallaHistorial, pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos,
-                   pantallaTurnos, pantallaUsuarios]
+        self.stackedWidget.addWidget(pantallaHistorial)
+        pantallas=[pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+                   pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
+                   pantallaUsuarios]
         for pantalla in pantallas:
+
             self.stackedWidget.addWidget(pantalla)
             try:
+                
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+                filas = pantalla.tableWidget.rowCount()
+
+                for i in range(filas):
+
+                    edit = BotonFila("editar.png")
+                    borrar = BotonFila("eliminar.png")
+                    columnas = pantalla.tableWidget.columnCount()
+                    pantalla.tableWidget.setCellWidget(i, columnas-2, edit)
+                    pantalla.tableWidget.setCellWidget(i, columnas-1, borrar)
+
+                pantalla.tableWidget.setRowHeight(0, 35)
+                pantalla.tableWidget.resizeColumnsToContents()
+                
             except:
                 pass #¿Qué esperabas, un print, boludito?
         
         self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(3))
-        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
+        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
         self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
         self.opcionAlumnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(1))
-        self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
-        self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
-        self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
-        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
+        self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
+        self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
+        self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
+        self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
+        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(0))
 
         with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
-            self.setStyleSheet(file.read())
-        self.stackedWidget.setCurrentIndex(0)
+                self.setStyleSheet(file.read())
+        self.stackedWidget.setCurrentIndex(4)
         self.show()
 
     def login(self):
@@ -76,4 +92,3 @@ for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'rsc{os.sep
     
 window=MainWindow()
 app.exec()
-print("God")
