@@ -366,7 +366,7 @@ QPushButton:pressed {
     </spacer>
    </item>
    <item alignment="Qt::AlignHCenter">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="Ingresar">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>50</horstretch>
