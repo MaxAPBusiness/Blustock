@@ -1,5 +1,4 @@
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
-import os
 import pathlib
 class BotonFila(QtWidgets.QPushButton):
 
