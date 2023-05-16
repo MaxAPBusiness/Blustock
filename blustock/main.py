@@ -13,6 +13,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}main.ui'), self)
+        self.menubar.hide()
 
         pantallaAlumnos=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}alumnos.ui'), pantallaAlumnos)
@@ -32,10 +33,14 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
-        self.stackedWidget.addWidget(pantallaHistorial)
-        pantallas=[pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+        pantallaLogin=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
+        pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
+
+        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
                    pantallaUsuarios]
+
         for pantalla in pantallas:
 
             self.stackedWidget.addWidget(pantalla)
@@ -66,21 +71,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
         self.opcionMovimientos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(4))
         self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
-        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(0))
+        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
+        self.stackedWidget.addWidget(pantallaHistorial)
 
         with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
                 self.setStyleSheet(file.read())
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(0)
         self.show()
 
     def login(self):
-        bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",(self.usuariosLineEdit.text(),))
+        """bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",(self.usuariosLineEdit.text(),))
         check = bbdd.cur.fetchall()
         if check == 1:
             bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.usuariosLineEdit.text(),self.passwordLineEdit.text(),))
             check = bbdd.cur.fetchall()
             if check == 1:
-                self.stackedWidget.setCurrentIndex(1)
+                self.stackedWidget.setCurrentIndex(1)"""
+        self.stackedWidget.setCurrentIndex(4)
+        self.menubar.show()
 
 app=QtWidgets.QApplication(sys.argv)
 
