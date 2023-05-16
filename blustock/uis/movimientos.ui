@@ -14,133 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">*{
-    font-family: 'Oswald', sans-serif;
-    font-weight: 400;
-}
-
-QMenuBar{
-    background-color: #293045;
-    padding: 0;    
-    font-size: 14px;
-    color:white;
-}
-
-QMenuBar:item{
-    padding: 17px;
-    border-radius: 10px;
-
-}
-
-QMenuBar:item:selected{
-    background-color: #768AC5;
-    color:black;
-    border-radius: 5px;
-    margin: 10px;
-    
-    
-
-}
-
-QMenu{
-    background-color: #293045;
-
-    color: white;
-}
-
-QMenu:item{
-    padding: 5px;
-    border-radius: 5px;
-}
-
-QMenu:item:selected{
-    background-color: #768AC5;
-    color:white;
-
-}
-Qmenu#icon{
-   icon:size 40px; 
-    
-}
-
-
-QRadioButton:indicator{
-    border-style: solid;
-    border-color:  #293045;
-    border-radius: 6%;
-    border-width:  2px;
-    background-color: #BABFCE;
-}
-QRadioButton::indicator:checked{
-    background-color: #768AC5;
-}
-
-#label{
-    font-size: 35px;
-}
-
-#usuariosLabel{
-    font-size: 14px;
-}
-
-#contraseALabel{
-    font-size: 14px;
-}
-
-#usuariosLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#passwordLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#labelprofesores{
-    font-size: 26px;
-}
-
-QLineEdit{
-    border-radius: 5px;
-    background-color: #BABFCE;
-    
-}
-
-#title{
-    width: 100px;
-    height: 200px;
-}
-
-
-
-QPushButton{
-    border-color:#293045;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 6px;
-    background-color: #293045;
-    color:#ffffff;
-    padding: 3px 8px;
-
-}
-QPushButton:hover{
-    background-color:#768AC5;
-    color:#293045;
-}
-QPushButton:pressed {
-    background-color: #293045;
-
-}
-
-#pushButton_5{
-    padding: 10px;
-    background-color: #768AC5;
-    border-radius: 15%;
-}
-
+   <string notr="true">/*uwu*/
 </string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -177,9 +51,7 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
-         <weight>50</weight>
+         <family>Oswald</family>
          <bold>false</bold>
         </font>
        </property>
@@ -222,8 +94,7 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>
@@ -429,6 +300,16 @@ QPushButton:pressed {
          <string>Turno de pañolero</string>
         </property>
        </column>
+       <column>
+        <property name="text">
+         <string/>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string/>
+        </property>
+       </column>
        <item row="0" column="0">
         <property name="text">
          <string>Martillo</string>
@@ -496,8 +377,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>
