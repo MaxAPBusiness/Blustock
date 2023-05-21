@@ -85,6 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchstock(self):
         bbdd.cur.execute("SELECT * FROM stock")
         datos = bbdd.cur.fetchall()
+        self.findChild(QtWidgets.QTableWidget,"stock").setRowCount(0)
 
         for row_num, row in enumerate(datos):
             self.findChild(QtWidgets.QTableWidget,"stock").insertRow(row_num)
