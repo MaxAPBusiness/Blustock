@@ -179,7 +179,6 @@ QPushButton:pressed {
         <font>
          <family>Oswald</family>
          <pointsize>-1</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -224,7 +223,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>10</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -277,16 +275,6 @@ QPushButton:pressed {
        <attribute name="verticalHeaderCascadingSectionResizes">
         <bool>false</bool>
        </attribute>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>ID</string>
@@ -337,41 +325,6 @@ QPushButton:pressed {
          <string>-</string>
         </property>
        </column>
-       <item row="0" column="1">
-        <property name="text">
-         <string/>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string/>
-        </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string/>
-        </property>
-       </item>
-       <item row="0" column="8">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="0" column="9">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
-       <item row="1" column="8">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="1" column="9">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -401,7 +354,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
