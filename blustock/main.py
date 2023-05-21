@@ -47,23 +47,11 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
-                filas = pantalla.tableWidget.rowCount()
-
-                for i in range(filas):
-
-                    edit = BotonFila("editar.png")
-                    borrar = BotonFila("eliminar.png")
-                    columnas = pantalla.tableWidget.columnCount()
-                    pantalla.tableWidget.setCellWidget(i, columnas-2, edit)
-                    pantalla.tableWidget.setCellWidget(i, columnas-1, borrar)
-
-                pantalla.tableWidget.setRowHeight(0, 35)
-                pantalla.tableWidget.resizeColumnsToContents()
                 
             except:
                 pass #¿Qué esperabas, un print, boludito?
         
-        self.opcionStock.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(3))
+        self.opcionStock.triggered.connect(self.fetchstock)
         self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
         self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
         self.opcionAlumnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(1))
@@ -80,15 +68,49 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def login(self):
-        """bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",(self.usuariosLineEdit.text(),))
-        check = bbdd.cur.fetchall()
-        if check == 1:
-            bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.usuariosLineEdit.text(),self.passwordLineEdit.text(),))
-            check = bbdd.cur.fetchall()
-            if check == 1:
-                self.stackedWidget.setCurrentIndex(1)"""
-        self.stackedWidget.setCurrentIndex(4)
-        self.menubar.show()
+        bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),))
+        check = bbdd.cur.fetchone()
+        if check[0] >= 1:
+            bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),self.findChild(QtWidgets.QLineEdit,"passwordLineEdit").text(),))
+            check = bbdd.cur.fetchone()
+            if check[0] == 1:
+                self.stackedWidget.setCurrentIndex(1)
+                self.menubar.show()
+
+            else:
+                self.findChild(QtWidgets.QLabel,"passwordState").setText("Contraseña incorrecta")
+        else:
+            self.findChild(QtWidgets.QLabel,"usuarioState").setText("Usuario incorrecto")
+
+    def fetchstock(self):
+        bbdd.cur.execute("SELECT * FROM stock")
+        datos = bbdd.cur.fetchall()
+
+        for row_num, row in enumerate(datos):
+            self.findChild(QtWidgets.QTableWidget,"stock").insertRow(row_num)
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row[0])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(row[1])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(row[2])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[3])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 4, QtWidgets.QTableWidgetItem(str(row[4])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(row[2]+row[3]+row[4])))
+            bbdd.cur.execute("select descripcion from subgrupos where id = ?",(row[5],))
+            a = bbdd.cur.fetchone()
+            bbdd.cur.execute("select descripcion from grupos where (select id_grupo from subgrupos where id = ?)",(row[5],))
+            b = bbdd.cur.fetchone()
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(b[0])))
+            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 7,QtWidgets.QTableWidgetItem(str(a[0])))
+            edit = BotonFila("editar.png")
+            borrar = BotonFila("eliminar.png")
+            self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 8, edit)
+            self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 9, borrar)
+            self.findChild(QtWidgets.QTableWidget,"stock").setRowHeight(0, 35)
+            self.findChild(QtWidgets.QTableWidget,"stock").resizeColumnsToContents()
+
+
+        self.stackedWidget.setCurrentIndex(3)
+
+    
 
 app=QtWidgets.QApplication(sys.argv)
 

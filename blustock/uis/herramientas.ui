@@ -250,7 +250,7 @@ QPushButton:pressed {
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="tableWidget">
+      <widget class="QTableWidget" name="stock">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -287,17 +287,17 @@ QPushButton:pressed {
        </column>
        <column>
         <property name="text">
-         <string>En condiciones</string>
+         <string>Condiciones</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>En reparación</string>
+         <string>Reparación</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>De baja</string>
+         <string>Baja</string>
         </property>
        </column>
        <column>
