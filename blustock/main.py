@@ -106,8 +106,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 8, edit)
             self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 9, borrar)
             self.findChild(QtWidgets.QTableWidget,"stock").setRowHeight(0, 35)
-            self.findChild(QtWidgets.QTableWidget,"stock").resizeColumnsToContents()
 
+        self.findChild(QtWidgets.QTableWidget,"stock").resizeColumnsToContents()
+        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(1,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(6,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(7,QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
 
