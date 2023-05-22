@@ -177,7 +177,7 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald</family>
+         <family>Oswald,sans-serif</family>
          <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -222,8 +222,7 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>10</pointsize>
+           <family>Oswald,sans-serif</family>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -401,7 +400,7 @@ QPushButton:pressed {
         <bool>true</bool>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
