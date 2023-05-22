@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>895</width>
+    <width>914</width>
     <height>534</height>
    </rect>
   </property>
@@ -230,7 +230,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="tableWidget">
+      <widget class="QTableWidget" name="movimientos">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -250,16 +250,11 @@
         <number>110</number>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>Herramienta</string>
@@ -310,46 +305,6 @@
          <string/>
         </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>Martillo</string>
-        </property>
-       </item>
-       <item row="0" column="1">
-        <property name="text">
-         <string>Roto</string>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string>Juan Minujin</string>
-        </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string>7 C</string>
-        </property>
-       </item>
-       <item row="0" column="4">
-        <property name="text">
-         <string>18/02/1819</string>
-        </property>
-       </item>
-       <item row="0" column="5">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item row="0" column="6">
-        <property name="text">
-         <string>Martillo de martillos</string>
-        </property>
-       </item>
-       <item row="0" column="7">
-        <property name="text">
-         <string>Ayer</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
