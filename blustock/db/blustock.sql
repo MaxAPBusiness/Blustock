@@ -1,13 +1,26 @@
 /*Este es el código SQL de la base de datos*/
 
+/*Se crea la tabla ubicaciones con su id y nombre*/
+CREATE TABLE IF NOT EXISTS ubicaciones(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion VARCHAR(40) NOT NULL
+);
+
+/*Se crea la tabla ubicaciones con su id y nombre*/
+CREATE TABLE IF NOT EXISTS clases(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion VARCHAR(40) NOT NULL
+);
+
 /*Crea la tabla de personal con su dni (PK), nombre y apellido,
 tipo, usuario y contraseña*/
 CREATE TABLE IF NOT EXISTS personal(
     dni INTEGER PRIMARY KEY,
     nombre_apellido VARCHAR(50) NOT NULL,
-    tipo VARCHAR(40) NOT NULL,
+    id_clase INTEGER NOT NULL,
     usuario VARCHAR(20) UNIQUE,
-    contrasena VARCHAR(75)
+    contrasena VARCHAR(75),
+    FOREIGN KEY(id_clase) REFERENCES clases(id) ON DELETE CASCADE
 );
 
 /*Crea la tabla de grupos con su id (PK) y su nombre*/
@@ -36,8 +49,10 @@ CREATE TABLE IF NOT EXISTS stock(
     cant_reparacion INTEGER,
     cant_baja INTEGER,
     id_subgrupo INTEGER NOT NULL,
+    id_ubi INTEGER NOT NULL,
     FOREIGN KEY(id_subgrupo) REFERENCES subgrupos(id)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+    FOREIGN KEY(id_ubi) REFERENCES ubicaciones(id) ON DELETE CASCADE
 );
 
 /*Crea la tabla de turnos con su id (PK), fecha, id del panolero
@@ -52,33 +67,48 @@ CREATE TABLE IF NOT EXISTS turnos(
     hora_egr VARCHAR(12),
     prof_ing INTEGER NOT NULL,
     prof_egr INTEGER,
+    id_ubi INTEGER NOT NULL,
     FOREIGN KEY(id_panolero) REFERENCES personal(dni)
     ON DELETE CASCADE,
-    FOREIGN KEY(prof_ing) REFERENCES personal(dni)
-    ON DELETE CASCADE,
-    FOREIGN KEY(prof_egr) REFERENCES personal(dni)
-    ON DELETE CASCADE
+    FOREIGN KEY(prof_ing) REFERENCES personal(dni) ON DELETE CASCADE,
+    FOREIGN KEY(prof_egr) REFERENCES personal(dni) ON DELETE CASCADE,
+    FOREIGN KEY(id_ubi) REFERENCES ubicaciones(id) ON DELETE CASCADE
 );
 
+/*Se crea la tabla estados con su id y nombre*/
+CREATE TABLE IF NOT EXISTS estados(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion VARCHAR(40) NOT NULL
+);
+
+/*Se crea la tabla estados con su id y nombre*/
+CREATE TABLE IF NOT EXISTS tipos_mov(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion VARCHAR(40) NOT NULL
+);
 /*Crea la tabla de movimientos con su id (PK), id del turno en el
 que se hizo el movimiento (FK), id del elemento (herramienta o
-insumo) (FK), estado del elemento, cantidad, id de la persona que 
-hizo el movimiento (FK), fecha y hora, tipo de movimiento y una
+insumo) (FK), estado del elemento (FK), cantidad, id de la persona que 
+hizo el movimiento (FK), fecha y hora, tipo de movimiento (FK) y una
 descripción opcional en la que, si volvierpn rotas las 
 herramientas, se explique por qué*/
 CREATE TABLE IF NOT EXISTS movimientos(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_turno INTEGER,
     id_elem INTEGER NOT NULL,
-    estado INTEGER NOT NULL,
+    id_estado INTEGER NOT NULL,
     cant INTEGER NOT NULL,
     id_persona INTEGER NOT NULL,
     fecha_hora VARCHAR(24) NOT NULL,
-    tipo INTEGER NOT NULL,
+    id_tipo INTEGER NOT NULL,
     descripcion VARCHAR(100),
+    id_ubi INTEGER NOT NULL,
     FOREIGN KEY(id_turno) REFERENCES turnos(id) ON DELETE CASCADE,
     FOREIGN KEY(id_elem) REFERENCES stock(id) ON DELETE CASCADE,
-    FOREIGN KEY(id_persona) REFERENCES personal(dni) ON DELETE CASCADE
+    FOREIGN KEY(id_estado) REFERENCES estados(id) ON DELETE CASCADE,
+    FOREIGN KEY(id_persona) REFERENCES personal(dni) ON DELETE CASCADE,
+    FOREIGN KEY(id_tipo) REFERENCES tipos(id) ON DELETE CASCADE,
+    FOREIGN KEY(id_ubi) REFERENCES ubicaciones(dni) ON DELETE CASCADE
 );
 
 /*Crea la tabla historial_de_cambios con los datos id_usuario,

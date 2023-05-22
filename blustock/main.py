@@ -19,8 +19,8 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}alumnos.ui'), pantallaAlumnos)
         pantallaGrupos=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}grupos.ui'), pantallaGrupos)
-        pantallaHerramientas=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}herramientas.ui'), pantallaHerramientas)
+        pantallaStock=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}herramientas.ui'), pantallaStock)
         pantallaHistorial=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}historial.ui'), pantallaHistorial)
         pantallaMovimientos=QtWidgets.QWidget()
@@ -35,12 +35,25 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
+        submenuHerramientas=QtWidgets.QWidget()
+        uic.loadUi(
+            os.path.join(
+                os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_herramienta.ui'
+            ), submenuHerramientas
+        )
+        submenuSubgrupos=QtWidgets.QWidget()
+        uic.loadUi(
+            os.path.join(
+                os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'
+            ), submenuHerramientas
+        )
         pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
 
-        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+        bbdd.cur.execute('SELECT * FROM personal WHERE curso IN ?')
+
+        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaStock,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
                    pantallaUsuarios]
-
         for pantalla in pantallas:
 
             self.stackedWidget.addWidget(pantalla)
@@ -50,7 +63,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 filas = pantalla.tableWidget.rowCount()
 
                 for i in range(filas):
-
                     edit = BotonFila("editar.png")
                     borrar = BotonFila("eliminar.png")
                     columnas = pantalla.tableWidget.columnCount()
@@ -86,8 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
             bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.usuariosLineEdit.text(),self.passwordLineEdit.text(),))
             check = bbdd.cur.fetchall()
             if check == 1:
-                self.stackedWidget.setCurrentIndex(1)"""
-        self.stackedWidget.setCurrentIndex(4)
+                self.stackedWidget.setCurrentIndex(4)"""
         self.menubar.show()
 
 app=QtWidgets.QApplication(sys.argv)
