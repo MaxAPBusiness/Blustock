@@ -178,7 +178,6 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald</family>
-         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>

@@ -178,7 +178,6 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald</family>
-         <pointsize>-1</pointsize>
          <bold>false</bold>
         </font>
        </property>
@@ -275,11 +274,6 @@ QPushButton:pressed {
        <attribute name="verticalHeaderCascadingSectionResizes">
         <bool>false</bool>
        </attribute>
-       <column>
-        <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
        <column>
         <property name="text">
          <string>Descripcion</string>

@@ -17,18 +17,9 @@ class BotonFila(QtWidgets.QPushButton):
         c = str(pathlib.Path(__file__).parent.absolute())
         path = c +'/rsc/' +str(icono)
         a = QtGui.QPixmap(path)
-        # Se cambia el tamaño del ícono. 
-        # Método setIconSize: establece el tamaño del ícono de un
-        # widget. Toma como parámetro un objeto QSize.
-        # QSize: representa un tamaño. No se porque tienen un
-        # objeto para un tamaño pero bueno. 
-        # Parámetros: 
-        #     w (int): el ancho.
-        #     h (int): el alto.
-#        self.setStyleSheet('QPushButton{border-image:url(rsc/editar.png);}')
         q.addPixmap(a)
         self.setIcon(q)
-        self.setObjectName("editar")
+        self.setObjectName(icono.split(".")[0])
         self.setCursor(QtGui.QCursor(
             QtCore.Qt.CursorShape.PointingHandCursor))
-        
+    

@@ -5,7 +5,7 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
 from boton import BotonFila
 
-
+sopas = 0
 bbdd=BBDD()
 bbdd.refrescarBBDD()
 
@@ -35,12 +35,11 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
-        pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
+        pantallaLogin.Ingresar.clicked.connect(self.login)
         submenuHerramientas=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_herramienta.ui'), submenuHerramientas)
         submenuSubgrupos=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'), submenuSubgrupos)
-        pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
 
         pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
@@ -50,12 +49,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.stackedWidget.addWidget(pantalla)
             try:
-                
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
                 
             except:
                 pass #¿Qué esperabas, un print, boludito?
         
+        self.stackedWidget.addWidget(pantallaHistorial)
         self.opcionStock.triggered.connect(self.fetchstock)
         self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
         self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
@@ -65,10 +64,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionMovimientos.triggered.connect(self.fetchmovimientos)
         self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
-        self.stackedWidget.addWidget(pantallaHistorial)
 
         with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
-                self.setStyleSheet(file.read())
+            self.setStyleSheet(file.read())
         self.stackedWidget.setCurrentIndex(0)
         self.show()
 
@@ -79,7 +77,7 @@ class MainWindow(QtWidgets.QMainWindow):
             bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),self.findChild(QtWidgets.QLineEdit,"passwordLineEdit").text(),))
             check = bbdd.cur.fetchone()
             if check[0] == 1:
-                self.stackedWidget.setCurrentIndex(1)
+                self.fetchstock()
                 self.menubar.show()
 
             else:
@@ -90,62 +88,100 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchstock(self):
         bbdd.cur.execute("SELECT * FROM stock")
         datos = bbdd.cur.fetchall()
-        self.findChild(QtWidgets.QTableWidget,"stock").setRowCount(0)
+        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+        tabla.setRowCount(0)
 
         for row_num, row in enumerate(datos):
-            self.findChild(QtWidgets.QTableWidget,"stock").insertRow(row_num)
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row[0])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(row[1])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(row[2])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[3])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 4, QtWidgets.QTableWidgetItem(str(row[4])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(row[2]+row[3]+row[4])))
+            tabla.insertRow(row_num)
+            tabla.setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row[1])))
+            tabla.setItem(row_num, 1,QtWidgets.QTableWidgetItem(str(row[2])))
+            tabla.setItem(row_num, 2, QtWidgets.QTableWidgetItem(str(row[3])))
+            tabla.setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[4])))
+            tabla.setItem(row_num, 4,QtWidgets.QTableWidgetItem(str(row[2]+row[3]+row[4])))
             bbdd.cur.execute("select descripcion from subgrupos where id = ?",(row[5],))
             a = bbdd.cur.fetchone()
             bbdd.cur.execute("select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)",(row[5],))
             b = bbdd.cur.fetchone()
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(b[0])))
-            self.findChild(QtWidgets.QTableWidget,"stock").setItem(row_num, 7,QtWidgets.QTableWidgetItem(str(a[0])))
+            tabla.setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(b[0])))
+            tabla.setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(a[0])))
             edit = BotonFila("editar.png")
             borrar = BotonFila("eliminar.png")
-            self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 8, edit)
-            self.findChild(QtWidgets.QTableWidget,"stock").setCellWidget(row_num, 9, borrar)
-            self.findChild(QtWidgets.QTableWidget,"stock").setRowHeight(0, 35)
+            tabla.setCellWidget(row_num, 7, edit)
+            tabla.setCellWidget(row_num, 8, borrar)
+            tabla.setRowHeight(0, 35)
 
-        self.findChild(QtWidgets.QTableWidget,"stock").resizeColumnsToContents()
-        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(1,QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(6,QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.findChild(QtWidgets.QTableWidget,"stock").horizontalHeader().setSectionResizeMode(7,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(5,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(6,QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
+        tabla.cellClicked.connect(lambda row: self.xd(tabla, row))
+        for i in self.findChildren(QtWidgets.QPushButton,"editar"):
+            i.clicked.connect(self.updatestock)
+        for i in self.findChildren(QtWidgets.QPushButton,"eliminar"):
+            i.clicked.connect(self.deletestock)
 
+    def xd(self,tabla,row):
+        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+        global sopas
+        sopas = tabla.item(row, 0).text()
+        print(sopas)
+
+    def updatestock(self):
+        global sopas
+        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+        index = tabla.indexAt(self.sender().pos())
+        row = index.row()
+        desc = tabla.item(row, 0).text()    
+        cond = tabla.item(row, 1).text()
+        rep = tabla.item(row, 2).text()
+        baja = tabla.item(row, 3).text()
+        subgrupo = tabla.item(row, 6).text()
+        id = bbdd.cur.execute("select id from subgrupos where descripcion = ?",(subgrupo,)).fetchone()
+        print(id[0])
+        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],sopas))
+        bbdd.con.commit()
+        self.fetchstock()
+
+    def deletestock(self):
+        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+        """        
+        header = tabla.horizontalHeaderItem(column).text()
+        text = tabla.item(row, column).text()    
+        name = tabla.item(row, 1).text()
+        apellido = tabla.item(row, 2).text()
+        numerocons = tabla.item(row, 0).text()
+        """
     def fetchalumnos(self):
         bbdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
         datos = bbdd.cur.fetchall()
-        self.findChild(QtWidgets.QTableWidget,"alumnos").setRowCount(0)
+        tabla = self.findChild(QtWidgets.QTableWidget,"alumnos")
+        tabla.setRowCount(0)
 
         for row_num, row in enumerate(datos):
-            self.findChild(QtWidgets.QTableWidget,"alumnos").insertRow(row_num)
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row_num+1)))
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(row[0])))
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(row[1])))
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[2])))
+            tabla.insertRow(row_num)
+            tabla.setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row_num+1)))
+            tabla.setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(row[0])))
+            tabla.setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(row[1])))
+            tabla.setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[2])))
             edit = BotonFila("editar.png")
             borrar = BotonFila("eliminar.png")
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setCellWidget(row_num, 4, edit)
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setCellWidget(row_num, 5, borrar)
-            self.findChild(QtWidgets.QTableWidget,"alumnos").setRowHeight(0, 35)
+            tabla.setCellWidget(row_num, 4, edit)
+            tabla.setCellWidget(row_num, 5, borrar)
+            tabla.setRowHeight(0, 35)
 
-        self.findChild(QtWidgets.QTableWidget,"alumnos").resizeColumnsToContents()
-        self.findChild(QtWidgets.QTableWidget,"alumnos").horizontalHeader().setSectionResizeMode(2,QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.findChild(QtWidgets.QTableWidget,"alumnos").horizontalHeader().setSectionResizeMode(1,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(2,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(1,QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(1)
 
     def fetchmovimientos(self):
         bbdd.cur.execute("SELECT * FROM movimientos")
         datos = bbdd.cur.fetchall()
-        self.findChild(QtWidgets.QTableWidget,"movimientos").setRowCount(0)
+        tabla = self.findChild(QtWidgets.QTableWidget,"movimientos")
+        tabla.setRowCount(0)
 
         for row_num, row in enumerate(datos):
             if row[3]==0:
@@ -161,25 +197,25 @@ class MainWindow(QtWidgets.QMainWindow):
             if row[7]==2:
                 tipo="Ingreso de materiales"
             
-            self.findChild(QtWidgets.QTableWidget,"movimientos").insertRow(row_num)
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select descripcion from stock where id=?",(row[2],)).fetchone()[0])))
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(estado)))
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select nombre_apellido from personal where dni=?",(row[5],)).fetchone()[0])))
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 3,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select tipo from personal where dni=?",(row[5],)).fetchone()[0])))            
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 4,QtWidgets.QTableWidgetItem(str(row[6])))  
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(row[4])))  
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(tipo)))
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setItem(row_num, 7,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)",(row[1],)).fetchone()[0])))
+            tabla.insertRow(row_num)
+            tabla.setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select descripcion from stock where id=?",(row[2],)).fetchone()[0])))
+            tabla.setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(estado)))
+            tabla.setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select nombre_apellido from personal where dni=?",(row[5],)).fetchone()[0])))
+            tabla.setItem(row_num, 3,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select tipo from personal where dni=?",(row[5],)).fetchone()[0])))            
+            tabla.setItem(row_num, 4,QtWidgets.QTableWidgetItem(str(row[6])))  
+            tabla.setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(row[4])))  
+            tabla.setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(tipo)))
+            tabla.setItem(row_num, 7,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)",(row[1],)).fetchone()[0])))
 
             edit = BotonFila("editar.png")
             borrar = BotonFila("eliminar.png")
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setCellWidget(row_num, 8, edit)
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setCellWidget(row_num, 9, borrar)
-            self.findChild(QtWidgets.QTableWidget,"movimientos").setRowHeight(0, 35)
+            tabla.setCellWidget(row_num, 8, edit)
+            tabla.setCellWidget(row_num, 9, borrar)
+            tabla.setRowHeight(0, 35)
 
-        self.findChild(QtWidgets.QTableWidget,"movimientos").resizeColumnsToContents()
-        self.findChild(QtWidgets.QTableWidget,"movimientos").horizontalHeader().setSectionResizeMode(2,QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.findChild(QtWidgets.QTableWidget,"movimientos").horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(2,QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(4)
 
