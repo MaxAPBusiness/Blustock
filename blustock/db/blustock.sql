@@ -1,17 +1,14 @@
 /*Este es el código SQL de la base de datos*/
-
 /*Se crea la tabla ubicaciones con su id y nombre*/
 CREATE TABLE IF NOT EXISTS ubicaciones(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     descripcion VARCHAR(40) NOT NULL
 );
-
 /*Se crea la tabla ubicaciones con su id y nombre*/
 CREATE TABLE IF NOT EXISTS clases(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     descripcion VARCHAR(40) NOT NULL
 );
-
 /*Crea la tabla de personal con su dni (PK), nombre y apellido,
 tipo, usuario y contraseña*/
 CREATE TABLE IF NOT EXISTS personal(
@@ -22,13 +19,11 @@ CREATE TABLE IF NOT EXISTS personal(
     contrasena VARCHAR(75),
     FOREIGN KEY(id_clase) REFERENCES clases(id) ON DELETE CASCADE
 );
-
 /*Crea la tabla de grupos con su id (PK) y su nombre*/
 CREATE TABLE IF NOT EXISTS grupos(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     descripcion VARCHAR(40) NOT NULL
 );
-
 /*Crea la tabla de subgrupos con su id (PK), su nombre y el grupo
 al que pertenece(FK)*/
 CREATE TABLE IF NOT EXISTS subgrupos(
@@ -37,7 +32,6 @@ CREATE TABLE IF NOT EXISTS subgrupos(
     id_grupo INTEGER NOT NULL,
     FOREIGN KEY(id_grupo) REFERENCES grupos(id) ON DELETE CASCADE
 );
-
 /*Crea la tabla de stock con el id (PK) de la herramienta o insumo,
 descripción (nombre), cantidad en condiciones, cantidad en 
 reparación, cantidad de baja (los insumos no tendrán ni cantidad
@@ -54,7 +48,6 @@ CREATE TABLE IF NOT EXISTS stock(
     ON DELETE CASCADE,
     FOREIGN KEY(id_ubi) REFERENCES ubicaciones(id) ON DELETE CASCADE
 );
-
 /*Crea la tabla de turnos con su id (PK), fecha, id del panolero
 (FK), hora de ingreso del pañolero, hora de egreso, id del 
 profesor que autorizó el ingreso (FK) e id del profesor que 
@@ -74,13 +67,11 @@ CREATE TABLE IF NOT EXISTS turnos(
     FOREIGN KEY(prof_egr) REFERENCES personal(dni) ON DELETE CASCADE,
     FOREIGN KEY(id_ubi) REFERENCES ubicaciones(id) ON DELETE CASCADE
 );
-
 /*Se crea la tabla estados con su id y nombre*/
 CREATE TABLE IF NOT EXISTS estados(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     descripcion VARCHAR(40) NOT NULL
 );
-
 /*Se crea la tabla estados con su id y nombre*/
 CREATE TABLE IF NOT EXISTS tipos_mov(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,7 +101,6 @@ CREATE TABLE IF NOT EXISTS movimientos(
     FOREIGN KEY(id_tipo) REFERENCES tipos(id) ON DELETE CASCADE,
     FOREIGN KEY(id_ubi) REFERENCES ubicaciones(dni) ON DELETE CASCADE
 );
-
 /*Crea la tabla historial_de_cambios con los datos id_usuario,
 rol (el rol del usuario), fecha_hora (la fecha y hora de la
 modificacion), tipo (el tipo de modificacion), tabla (la 

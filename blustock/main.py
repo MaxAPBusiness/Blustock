@@ -19,8 +19,8 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}alumnos.ui'), pantallaAlumnos)
         pantallaGrupos=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}grupos.ui'), pantallaGrupos)
-        pantallaStock=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}herramientas.ui'), pantallaStock)
+        pantallaHerramientas=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}herramientas.ui'), pantallaHerramientas)
         pantallaHistorial=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}historial.ui'), pantallaHistorial)
         pantallaMovimientos=QtWidgets.QWidget()
@@ -35,25 +35,12 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
-        submenuHerramientas=QtWidgets.QWidget()
-        uic.loadUi(
-            os.path.join(
-                os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_herramienta.ui'
-            ), submenuHerramientas
-        )
-        submenuSubgrupos=QtWidgets.QWidget()
-        uic.loadUi(
-            os.path.join(
-                os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'
-            ), submenuHerramientas
-        )
         pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
 
-        bbdd.cur.execute('SELECT * FROM personal WHERE curso IN ?')
-
-        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaStock,
+        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
                    pantallaUsuarios]
+
         for pantalla in pantallas:
 
             self.stackedWidget.addWidget(pantalla)
