@@ -36,6 +36,11 @@ class MainWindow(QtWidgets.QMainWindow):
         pantallaLogin=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
         pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
+        submenuHerramientas=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_herramienta.ui'), submenuHerramientas)
+        submenuSubgrupos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'), submenuSubgrupos)
+        pantallaLogin.Ingresar.clicked.connect(lambda: self.login())
 
         pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
