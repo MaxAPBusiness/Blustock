@@ -1,15 +1,40 @@
+"""El archivo principal. Genera la ventana principal y ejecuta la 
+aplicación.
+
+Clases:
+    MainWindow(qtw.QMainWindow): crea la ventana principal.
+
+Objetos:
+    app: La aplicación principal.
+"""
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
+from lib.mostrar_mensaje import MensajeEmergente
 from boton import BotonFila
 
-sopas = 0
+
 bbdd=BBDD()
 bbdd.refrescarBBDD()
 
 class MainWindow(QtWidgets.QMainWindow):
+    """Esta clase crea la ventana principal.
+    
+    Hereda: PyQt6.QtWidgets.QMainWindow
+    
+    Atributos
+    ---------
+    
+    Métodos
+    -------
+        __init__(self):
+            El constructor de la clase MainWindow.
+
+            Crea la ventana principal con una cabecera, un menú
+            izquierdo (inicialmente escondido) y una colección de
+            pantallas."""
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}main.ui'), self)
@@ -41,12 +66,11 @@ class MainWindow(QtWidgets.QMainWindow):
         submenuSubgrupos=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'), submenuSubgrupos)
 
-        pantallas=[pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+        pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
-                   pantallaUsuarios]
+                   pantallaUsuarios)
 
         for pantalla in pantallas:
-
             self.stackedWidget.addWidget(pantalla)
             try:
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
@@ -105,7 +129,9 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(b[0])))
             tabla.setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(a[0])))
             edit = BotonFila("editar.png")
+            edit.clicked.connect(lambda: self.updatestock())
             borrar = BotonFila("eliminar.png")
+            borrar.clicked.connect(self.deletestock)
             tabla.setCellWidget(row_num, 7, edit)
             tabla.setCellWidget(row_num, 8, borrar)
             tabla.setRowHeight(0, 35)
@@ -116,20 +142,17 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(6,QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
-        tabla.cellClicked.connect(lambda row: self.xd(tabla, row))
-        for i in self.findChildren(QtWidgets.QPushButton,"editar"):
-            i.clicked.connect(self.updatestock)
-        for i in self.findChildren(QtWidgets.QPushButton,"eliminar"):
-            i.clicked.connect(self.deletestock)
+        tabla.cellClicked.connect(lambda row: self.obtenerFilaEditada(tabla, row))
 
-    def xd(self,tabla,row):
+
+    def obtenerFilaEditada(self,tabla,row):
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
-        global sopas
-        sopas = tabla.item(row, 0).text()
-        print(sopas)
+        global filaEditada
+        filaEditada = tabla.item(row, 0).text()
+        print(filaEditada)
 
     def updatestock(self):
-        global sopas
+        global filaEditada
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
         index = tabla.indexAt(self.sender().pos())
         row = index.row()
@@ -140,19 +163,27 @@ class MainWindow(QtWidgets.QMainWindow):
         subgrupo = tabla.item(row, 6).text()
         id = bbdd.cur.execute("select id from subgrupos where descripcion = ?",(subgrupo,)).fetchone()
         print(id[0])
-        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],sopas))
+        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],filaEditada))
         bbdd.con.commit()
         self.fetchstock()
 
-    def deletestock(self):
-        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
-        """        
-        header = tabla.horizontalHeaderItem(column).text()
-        text = tabla.item(row, column).text()    
-        name = tabla.item(row, 1).text()
-        apellido = tabla.item(row, 2).text()
-        numerocons = tabla.item(row, 0).text()
-        """
+    def deletestock(self):   
+        mensaje=MensajeEmergente("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
+        boton=mensaje.exec()
+        print(mensaje)
+        if boton == QtWidgets.QMessageBox.StandardButton.Yes:
+            
+            tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+            index = tabla.indexAt(self.sender().pos())
+            print(index)
+            row = index.row()
+            desc = tabla.item(row, 0).text()
+            bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
+            bbdd.con.commit()
+            self.fetchstock()
+        
+
+
     def fetchalumnos(self):
         bbdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
         datos = bbdd.cur.fetchall()
