@@ -2,12 +2,12 @@
 /*Se crea la tabla ubicaciones con su id y nombre*/
 CREATE TABLE IF NOT EXISTS ubicaciones(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(40) NOT NULL
+    descripcion VARCHAR(40) UNIQUE NOT NULL
 );
 /*Se crea la tabla ubicaciones con su id y nombre*/
 CREATE TABLE IF NOT EXISTS clases(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(40) NOT NULL
+    descripcion VARCHAR(40) UNIQUE NOT NULL
 );
 /*Crea la tabla de personal con su dni (PK), nombre y apellido,
 tipo, usuario y contraseña*/
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS personal(
 /*Crea la tabla de grupos con su id (PK) y su nombre*/
 CREATE TABLE IF NOT EXISTS grupos(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(40) NOT NULL
+    descripcion VARCHAR(40) UNIQUE NOT NULL
 );
 /*Crea la tabla de subgrupos con su id (PK), su nombre y el grupo
 al que pertenece(FK)*/
@@ -38,7 +38,7 @@ reparación, cantidad de baja (los insumos no tendrán ni cantidad
 en reparación ni de baja) y el subgrupo al que pertenece (FK).*/
 CREATE TABLE IF NOT EXISTS stock(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(100) UNIQUE NOT NULL,
     cant_condiciones INTEGER NOT NULL,
     cant_reparacion INTEGER,
     cant_baja INTEGER,
@@ -70,12 +70,12 @@ CREATE TABLE IF NOT EXISTS turnos(
 /*Se crea la tabla estados con su id y nombre*/
 CREATE TABLE IF NOT EXISTS estados(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(40) NOT NULL
+    descripcion VARCHAR(40) UNIQUE NOT NULL
 );
 /*Se crea la tabla estados con su id y nombre*/
 CREATE TABLE IF NOT EXISTS tipos_mov(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion VARCHAR(40) NOT NULL
+    descripcion VARCHAR(40) UNIQUE NOT NULL
 );
 /*Crea la tabla de movimientos con su id (PK), id del turno en el
 que se hizo el movimiento (FK), id del elemento (herramienta o
