@@ -12,7 +12,7 @@ import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
-from lib.mostrar_mensaje import MensajeEmergente
+from src.mostrar_mensaje import MensajeEmergente
 from boton import BotonFila
 
 
