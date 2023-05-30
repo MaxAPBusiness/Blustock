@@ -8,6 +8,7 @@ Objetos:
     app: La aplicación principal.
 """
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
+import datetime as time
 import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
@@ -18,7 +19,6 @@ from boton import BotonFila
 
 bbdd=BBDD()
 bbdd.refrescarBBDD()
-
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
     
@@ -95,12 +95,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def login(self):
+        global usuario
         bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),))
         check = bbdd.cur.fetchone()
         if check[0] >= 1:
             bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),self.findChild(QtWidgets.QLineEdit,"passwordLineEdit").text(),))
             check = bbdd.cur.fetchone()
             if check[0] == 1:
+                usuario = bbdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),self.findChild(QtWidgets.QLineEdit,"passwordLineEdit").text(),)).fetchall()
                 self.fetchstock()
                 self.menubar.show()
 
@@ -168,6 +170,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fetchstock()
 
     def deletestock(self):   
+        global usuario
         mensaje=MensajeEmergente("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
         boton=mensaje.exec()
         print(mensaje)
@@ -178,6 +181,13 @@ class MainWindow(QtWidgets.QMainWindow):
             print(index)
             row = index.row()
             desc = tabla.item(row, 0).text()
+            cond = tabla.item(row, 1).text()
+            rep = tabla.item(row, 2).text()
+            baja = tabla.item(row, 3).text()
+            grupo = tabla.item(row, 5).text()
+            subgrupo= tabla.item(row, 6).text()
+            todo = "descripcion"+desc+"cantidad en condiciones"+cond+"cantidad en reparacion"+rep+"cantidad de herramientas dada de baja"+baja+"grupo"+grupo+"subgrupo"+subgrupo
+            bbdd.cur.execute("INSERT INTO historial_de_cambios values(?,?,?,?,?,?,?,) ", (desc,time.datetime.now(),"eliminación","stock de herramientas",row,(todo)))            
             bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
             self.fetchstock()
