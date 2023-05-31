@@ -106,33 +106,76 @@ class MainWindow(QtWidgets.QMainWindow):
             self.findChild(QtWidgets.QLabel,"usuarioState").setText("Usuario incorrecto")
 
     def fetchstock(self):
+        """Esta función obtiene los datos de la tabla stock y los
+        inserta en la tabla de la interfaz de usuario."""
+
+        # Se seleccionan los datos de la tabla de la base de datos
+        # Método execute(): ejecuta código SQL
         bbdd.cur.execute("SELECT * FROM stock")
+
+        # Método fetchall: obtiene los datos seleccionados y los
+        # transforma en una lista.
         datos = bbdd.cur.fetchall()
+
+        # Se busca la tabla de la pantalla stock para insertarle los
+        # datos.
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
         tabla.setRowCount(0)
 
+        # Bucle: por cada fila de la tabla, se obtiene el número de
+        # fila y los contenidos de la fila.
+        # Método enumerate: devuelve una lista con el número y el
+        # elemento.
         for row_num, row in enumerate(datos):
+            # Se añade la fila a la tabla.
+            # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(row_num)
+
+            # Inserta el texto en cada celda. Las celdas por defecto no
+            # tienen nada, por lo que hay que añadir primero un item
+            # que contenga el texto. No se puede establecer texto asi
+            # nomás.
+            # Método setItem(row, column, item): establece el item de
+            # una celda de una tabla.
+            # QTableWidgetItem: un item de tabla. Se puede crear con
+            # texto por defecto.
             tabla.setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(row[1])))
             tabla.setItem(row_num, 1,QtWidgets.QTableWidgetItem(str(row[2])))
             tabla.setItem(row_num, 2, QtWidgets.QTableWidgetItem(str(row[3])))
             tabla.setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[4])))
             tabla.setItem(row_num, 4,QtWidgets.QTableWidgetItem(str(row[2]+row[3]+row[4])))
+
+            # Para lo que está aca abajo propongo hacer un join para 
+            # ahorrar tiempo de proceso del programa. Si no quieren
+            # hacerlo los chicos no pasa nada, lo hago yo. - Maxi
             bbdd.cur.execute("select descripcion from subgrupos where id = ?",(row[5],))
             a = bbdd.cur.fetchone()
             bbdd.cur.execute("select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)",(row[5],))
             b = bbdd.cur.fetchone()
             tabla.setItem(row_num, 5,QtWidgets.QTableWidgetItem(str(b[0])))
             tabla.setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(a[0])))
+
+            # Se crean dos botones: uno de editar y uno de eliminar
+            # Para saber que hacen BotonFila, vayan al código de la
+            # clase.
             edit = BotonFila("editar.png")
-            edit.clicked.connect(lambda: self.updatestock())
+            edit.clicked.connect(self.updatestock)
             borrar = BotonFila("eliminar.png")
             borrar.clicked.connect(self.deletestock)
+
+            # Se añaden los botones a cada fila.
+            # Método setCellWidget(row, column, widget): añade un
+            # widget a la celda de una tabla.
             tabla.setCellWidget(row_num, 7, edit)
             tabla.setCellWidget(row_num, 8, borrar)
-            tabla.setRowHeight(0, 35)
 
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+
+        # Método setSectionResizeMode(column, ResizeMode): hace que una
+        # columna de una tabla se expanda o no automáticamente conforme
+        # se extiende la tabla.
         tabla.horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(5,QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(6,QtWidgets.QHeaderView.ResizeMode.Stretch)
@@ -142,12 +185,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def obtenerFilaEditada(self,tabla,row):
+        """Esta función imprime la fila clickeada.
+        Hay que verla después"""
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
         global filaEditada
         filaEditada = tabla.item(row, 0).text()
         print(filaEditada)
 
     def updatestock(self):
+        """Esta función permite actualizar los datos modificados en la
+        tabla"""
+        # Esta función todavía no esta terminada, cuando esté la voy a
+        # comentar. :)
         global filaEditada
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
         index = tabla.indexAt(self.sender().pos())
@@ -163,21 +212,26 @@ class MainWindow(QtWidgets.QMainWindow):
         bbdd.con.commit()
         self.fetchstock()
 
-    def deletestock(self):   
+    def deletestock(self):
+        """Esta función elimina la fila de la tabla"""   
+        # Para saber que hace la clase, entrar al archivo
+        # mensaje_emergente.py
         mensaje=MensajeEmergente("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
-        boton=mensaje.exec()
-        print(mensaje)
-        if boton == QtWidgets.QMessageBox.StandardButton.Yes:
-            
+
+        # Con esta variable guardamos el botón que presionó el usuario.
+        botonPresionado=mensaje.exec()
+
+        # Si el usuario presionó el boton si
+        if botonPresionado == QtWidgets.QMessageBox.StandardButton.Yes:
             tabla = self.findChild(QtWidgets.QTableWidget,"stock")
-            index = tabla.indexAt(self.sender().pos())
-            print(index)
-            row = index.row()
+            # Busca la fila en la que está el botón
+            row = (tabla.indexAt(self.sender().pos())).row()
             desc = tabla.item(row, 0).text()
             bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
             self.fetchstock()
-        
+        # TODO: guardar los cambios en el historial/implementar los 
+        # usuarios correctamente. 
 
 
     def fetchalumnos(self):
