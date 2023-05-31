@@ -12,7 +12,7 @@ import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
-from src.mostrar_mensaje import MensajeEmergente
+from uis.mostrar_mensaje import MensajeEmergente
 from boton import BotonFila
 
 
@@ -61,10 +61,6 @@ class MainWindow(QtWidgets.QMainWindow):
         pantallaLogin=QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
         pantallaLogin.Ingresar.clicked.connect(self.login)
-        submenuHerramientas=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_herramienta.ui'), submenuHerramientas)
-        submenuSubgrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}submenu_subgrupo.ui'), submenuSubgrupos)
 
         pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
                    pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
