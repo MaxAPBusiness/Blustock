@@ -12,12 +12,13 @@ import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
-from uis.mostrar_mensaje import MensajeEmergente
-from boton import BotonFila
+from ui.presets.mostrar_mensaje import MensajeEmergente
+from ui.presets.boton import BotonFila
 
 
 bbdd=BBDD()
 bbdd.refrescarBBDD()
+
 
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
@@ -37,29 +38,31 @@ class MainWindow(QtWidgets.QMainWindow):
             pantallas."""
     def __init__(self):
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}main.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}main.ui'), self)
         self.menubar.hide()
 
+        self.filaEditada=0
+
         pantallaAlumnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}alumnos.ui'), pantallaAlumnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}alumnos.ui'), pantallaAlumnos)
         pantallaGrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}grupos.ui'), pantallaGrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}grupos.ui'), pantallaGrupos)
         pantallaHerramientas=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}herramientas.ui'), pantallaHerramientas)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}herramientas.ui'), pantallaHerramientas)
         pantallaHistorial=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}historial.ui'), pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}historial.ui'), pantallaHistorial)
         pantallaMovimientos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}movimientos.ui'), pantallaMovimientos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}movimientos.ui'), pantallaMovimientos)
         pantallaOtroPersonal=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}otro_personal.ui'), pantallaOtroPersonal)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}otro_personal.ui'), pantallaOtroPersonal)
         pantallaSubgrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}subgrupos.ui'), pantallaSubgrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}subgrupos.ui'), pantallaSubgrupos)
         pantallaTurnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}turnos.ui'), pantallaTurnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}usuarios.ui'), pantallaUsuarios)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'uis{os.sep}login.ui'), pantallaLogin)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}login.ui'), pantallaLogin)
         pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
@@ -85,7 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), 'styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -188,16 +191,14 @@ class MainWindow(QtWidgets.QMainWindow):
         """Esta función imprime la fila clickeada.
         Hay que verla después"""
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
-        global filaEditada
-        filaEditada = tabla.item(row, 0).text()
-        print(filaEditada)
+        self.filaEditada = tabla.item(row, 0).text()
+        print(self.filaEditada)
 
     def updatestock(self):
         """Esta función permite actualizar los datos modificados en la
         tabla"""
         # Esta función todavía no esta terminada, cuando esté la voy a
-        # comentar. :)
-        global filaEditada
+        # comentar. :) Chicos: no usen esta función de ejemplo aún.
         tabla = self.findChild(QtWidgets.QTableWidget,"stock")
         index = tabla.indexAt(self.sender().pos())
         row = index.row()
@@ -208,12 +209,13 @@ class MainWindow(QtWidgets.QMainWindow):
         subgrupo = tabla.item(row, 6).text()
         id = bbdd.cur.execute("select id from subgrupos where descripcion = ?",(subgrupo,)).fetchone()
         print(id[0])
-        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],filaEditada))
+        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],self.filaEditada))
         bbdd.con.commit()
         self.fetchstock()
 
     def deletestock(self):
-        """Esta función elimina la fila de la tabla"""   
+        """Esta función elimina la fila de la tabla"""
+        #Nota: la función aún no está terminada.   
         # Para saber que hace la clase, entrar al archivo
         # mensaje_emergente.py
         mensaje=MensajeEmergente("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
@@ -230,8 +232,8 @@ class MainWindow(QtWidgets.QMainWindow):
             bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
             self.fetchstock()
-        # TODO: guardar los cambios en el historial/implementar los 
-        # usuarios correctamente. 
+        # TODO: eliminar las relaciones de clave foránea correctamente.
+        # TODO: guardar los cambios en el historial.
 
 
     def fetchalumnos(self):
@@ -302,10 +304,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
 app=QtWidgets.QApplication(sys.argv)
 
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
-            f'rsc{os.sep}fonts{os.sep}{fuente}')
+            f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
         )
     
 window=MainWindow()
