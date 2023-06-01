@@ -12,8 +12,8 @@ import sys
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from db.bbdd import BBDD
-from ui.presets.mostrar_mensaje import MensajeEmergente
-from ui.presets.boton import BotonFila
+from ui.presets.popup import PopUp
+from ui.presets.botones import BotonFila
 
 
 bbdd=BBDD()
@@ -38,31 +38,31 @@ class MainWindow(QtWidgets.QMainWindow):
             pantallas."""
     def __init__(self):
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}main.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
 
         self.filaEditada=0
 
         pantallaAlumnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}alumnos.ui'), pantallaAlumnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}alumnos.ui'), pantallaAlumnos)
         pantallaGrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}grupos.ui'), pantallaGrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}grupos.ui'), pantallaGrupos)
         pantallaHerramientas=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}herramientas.ui'), pantallaHerramientas)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}herramientas.ui'), pantallaHerramientas)
         pantallaHistorial=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}historial.ui'), pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}historial.ui'), pantallaHistorial)
         pantallaMovimientos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}movimientos.ui'), pantallaMovimientos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), pantallaMovimientos)
         pantallaOtroPersonal=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}otro_personal.ui'), pantallaOtroPersonal)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), pantallaOtroPersonal)
         pantallaSubgrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}subgrupos.ui'), pantallaSubgrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), pantallaSubgrupos)
         pantallaTurnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}turnos.ui'), pantallaTurnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}usuarios.ui'), pantallaUsuarios)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens{os.sep}login.ui'), pantallaLogin)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}login.ui'), pantallaLogin)
         pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
@@ -163,15 +163,15 @@ class MainWindow(QtWidgets.QMainWindow):
             # Se crean dos botones: uno de editar y uno de eliminar
             # Para saber que hacen BotonFila, vayan al código de la
             # clase.
-            edit = BotonFila("editar.png")
-            edit.clicked.connect(self.updatestock)
-            borrar = BotonFila("eliminar.png")
+            guardar = BotonFila("guardar")
+            guardar.clicked.connect(self.updatestock)
+            borrar = BotonFila("eliminar")
             borrar.clicked.connect(self.deletestock)
 
             # Se añaden los botones a cada fila.
             # Método setCellWidget(row, column, widget): añade un
             # widget a la celda de una tabla.
-            tabla.setCellWidget(row_num, 7, edit)
+            tabla.setCellWidget(row_num, 7, guardar)
             tabla.setCellWidget(row_num, 8, borrar)
 
         # Método setRowHeight: cambia la altura de una fila.
@@ -220,7 +220,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #Nota: la función aún no está terminada.   
         # Para saber que hace la clase, entrar al archivo
         # mensaje_emergente.py
-        mensaje=MensajeEmergente("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
+        mensaje=PopUp("Pregunta", "Atención", "¿Desea eliminar la herramienta/insumo?")
 
         # Con esta variable guardamos el botón que presionó el usuario.
         botonPresionado=mensaje.exec()

@@ -2,13 +2,13 @@
 
 Clases
 ---------
-    mostrarMensaje(QMessageBox()):
-        muestra un mensaje en la pantalla.
+    PopUp(QMessageBox()):
+        Genera un mensaje emergente.
 """
 from PyQt6.QtWidgets import QMessageBox
 from textwrap import dedent
 
-class MensajeEmergente(QMessageBox):
+class PopUp(QMessageBox):
     """Esta función genera un mensaje emergente.
 
     Parámetros
