@@ -105,6 +105,8 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.findChild(QtWidgets.QLabel,"usuarioState").setText("Usuario incorrecto")
 
+    # Estas funciones pueden funcionar sin estar en la clase. Si el
+    # archivo main se hace muy largo, podemos moverlos a módulos.
     def fetchstock(self):
         """Esta función obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario."""
