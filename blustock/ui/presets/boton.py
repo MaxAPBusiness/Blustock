@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import pathlib
+import os
 class BotonFila(QtWidgets.QPushButton):
 
     def __init__(self, icono: str):
@@ -14,8 +15,7 @@ class BotonFila(QtWidgets.QPushButton):
         # Nota: el atributo ícono de la clase es el nombre del icono
         # que se busca en la carpeta images.
         q=QtGui.QIcon()
-        c = str(pathlib.Path(__file__).parent.absolute())
-        path = c +'/rsc/' +str(icono)
+        path = f'ui{os.sep}rsc{os.sep}{icono}'
         a = QtGui.QPixmap(path)
         q.addPixmap(a)
         self.setIcon(q)
