@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>710</width>
+    <width>725</width>
     <height>500</height>
    </rect>
   </property>
@@ -178,6 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -338,7 +339,7 @@ QPushButton:pressed {
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="tableWidget">
+      <widget class="QTableWidget" name="grupos">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -369,24 +370,19 @@ QPushButton:pressed {
        </row>
        <column>
         <property name="text">
-         <string>Grupo</string>
+         <string>Descripción</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 1</string>
+         <string>-</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 2</string>
+         <string>-</string>
         </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>002</string>
-        </property>
-       </item>
        <item row="0" column="1">
         <property name="text">
          <string>Editar</string>
@@ -395,11 +391,6 @@ QPushButton:pressed {
        <item row="0" column="2">
         <property name="text">
          <string>Borrar</string>
-        </property>
-       </item>
-       <item row="1" column="0">
-        <property name="text">
-         <string>102</string>
         </property>
        </item>
        <item row="1" column="1">
