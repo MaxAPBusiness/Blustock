@@ -10,7 +10,11 @@ Objetos:
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import sys
 import os
-os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
+
+
+os.chdir( f"{os.path.dirname(__file__)}{os.sep}.." )
+
 from db.bbdd import BBDD
 from ui.presets.popup import PopUp
 from ui.presets.botones import BotonFila
@@ -38,31 +42,31 @@ class MainWindow(QtWidgets.QMainWindow):
             pantallas."""
     def __init__(self):
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
 
         self.filaEditada=0
 
         pantallaAlumnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}alumnos.ui'), pantallaAlumnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}alumnos.ui'), pantallaAlumnos)
         pantallaGrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}grupos.ui'), pantallaGrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}grupos.ui'), pantallaGrupos)
         pantallaHerramientas=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}herramientas.ui'), pantallaHerramientas)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}herramientas.ui'), pantallaHerramientas)
         pantallaHistorial=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}historial.ui'), pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}historial.ui'), pantallaHistorial)
         pantallaMovimientos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), pantallaMovimientos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}movimientos.ui'), pantallaMovimientos)
         pantallaOtroPersonal=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), pantallaOtroPersonal)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}otro_personal.ui'), pantallaOtroPersonal)
         pantallaSubgrupos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), pantallaSubgrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}subgrupos.ui'), pantallaSubgrupos)
         pantallaTurnos=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}turnos.ui'), pantallaTurnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}turnos.ui'), pantallaTurnos)
         pantallaUsuarios=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), pantallaUsuarios)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}usuarios.ui'), pantallaUsuarios)
         pantallaLogin=QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_uis{os.sep}login.ui'), pantallaLogin)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}login.ui'), pantallaLogin)
         pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
@@ -80,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.addWidget(pantallaHistorial)
         self.opcionStock.triggered.connect(self.fetchstock)
         self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionGrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(2))
+        self.opcionGrupos.triggered.connect(self.fetchGrupos)
         self.opcionAlumnos.triggered.connect(self.fetchalumnos)
         self.opcionOtroPersonal.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(5))
         self.opcionTurnos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(7))
@@ -88,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionUsuariosG.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -163,9 +167,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # Se crean dos botones: uno de editar y uno de eliminar
             # Para saber que hacen BotonFila, vayan al código de la
             # clase.
-            guardar = BotonFila("guardar")
+            guardar = BotonFila("guardar", row[0])
             guardar.clicked.connect(self.updatestock)
-            borrar = BotonFila("eliminar")
+            borrar = BotonFila("eliminar", row[0])
             borrar.clicked.connect(self.deletestock)
 
             # Se añaden los botones a cada fila.
@@ -192,7 +196,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def obtenerFilaEditada(self,tabla,row):
         """Esta función imprime la fila clickeada.
         Hay que verla después"""
-        tabla = self.findChild(QtWidgets.QTableWidget,"stock")
+        tabla = self.findChild(QtWidgets.QTableWidget,"stock") #Solo andaría con stock, lo arreglo vía la clase boton
         self.filaEditada = tabla.item(row, 0).text()
         print(self.filaEditada)
 
@@ -209,9 +213,12 @@ class MainWindow(QtWidgets.QMainWindow):
         rep = tabla.item(row, 2).text()
         baja = tabla.item(row, 3).text()
         subgrupo = tabla.item(row, 6).text()
+
+        print(self.filaEditada)
+
         id = bbdd.cur.execute("select id from subgrupos where descripcion = ?",(subgrupo,)).fetchone()
         print(id[0])
-        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",(desc,cond,rep,baja,id[0],self.filaEditada))
+        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where id = ?",(desc,cond,rep,baja,id[0],self.sender().id))
         bbdd.con.commit()
         self.fetchstock()
 
@@ -250,8 +257,8 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(row_num, 1, QtWidgets.QTableWidgetItem(str(row[0])))
             tabla.setItem(row_num, 2,QtWidgets.QTableWidgetItem(str(row[1])))
             tabla.setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(row[2])))
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
+            edit = BotonFila("editar.png", row[0])
+            borrar = BotonFila("eliminar.png", row[0])
             tabla.setCellWidget(row_num, 4, edit)
             tabla.setCellWidget(row_num, 5, borrar)
             tabla.setRowHeight(0, 35)
@@ -292,8 +299,8 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(row_num, 6,QtWidgets.QTableWidgetItem(str(tipo)))
             tabla.setItem(row_num, 7,QtWidgets.QTableWidgetItem(str(bbdd.cur.execute("select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)",(row[1],)).fetchone()[0])))
 
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
+            edit = BotonFila("editar.png", row[0])
+            borrar = BotonFila("eliminar.png", row[0])
             tabla.setCellWidget(row_num, 8, edit)
             tabla.setCellWidget(row_num, 9, borrar)
             tabla.setRowHeight(0, 35)
@@ -304,9 +311,69 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)
 
+    def fetchGrupos(self):
+        bbdd.cur.execute("SELECT * FROM grupos")
+
+        datos = bbdd.cur.fetchall()
+
+        tabla = self.findChild(QtWidgets.QTableWidget, "grupos")
+        tabla.setRowCount(0) # No me acuerdo que hacía ese
+
+        for index, row in enumerate(datos):
+            tabla.insertRow(index)
+
+            tabla.setItem(index, 0, QtWidgets.QTableWidgetItem(str(row[1])))
+
+            guardar = BotonFila("guardar", row[0])
+            guardar.clicked.connect(self.updateGrupos)
+            borrar = BotonFila("eliminar", row[0])
+            borrar.clicked.connect(self.deleteGrupos)
+
+            tabla.setCellWidget(index, 1, guardar)
+            tabla.setCellWidget(index, 2, borrar)
+
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        tabla.horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(2)
+
+        # Podríamos agregar como para saber un total de herramientas o subgrupos en el grupo
+
+    def updateGrupos(self):
+        tabla = self.findChild(QtWidgets.QTableWidget,"grupos")
+        index = tabla.indexAt(self.sender().pos())
+        row = index.row()
+        
+        desc = tabla.item(row, 0).text()
+
+        print(self.filaEditada)
+
+        bbdd.cur.execute("UPDATE grupos SET descripcion = ? where id = ?",(desc, self.sender().id))
+        
+        # TODO: No se manda al historial de cambios todavía
+        bbdd.con.commit()
+
+        self.fetchGrupos()
+
+    def deleteGrupos(self):
+        mensaje = PopUp("Pregunta", "Atención", "¿Desea eliminar el grupo?")
+
+        botonPresionado = mensaje.exec()
+
+        if botonPresionado == QtWidgets.QMessageBox.StandardButton.Yes:
+            
+            # No se si eliminar todas las herramientas y subgrupos así que queda así por ahora
+            # bbdd.cur.execute("DELETE FROM grupos WHERE id = ? ", (self.sender().id,))
+            bbdd.con.commit()
+            self.fetchGrupos()
+        
+
+
 app=QtWidgets.QApplication(sys.argv)
 
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
             f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
