@@ -33,8 +33,10 @@ class BotonFila(QtWidgets.QPushButton):
 
             Crea el boton y establece su ícono y su tamaño.
     """
-    def __init__(self, icono: str):
-        super().__init__()
+    def __init__(self, icono: str, id: int): # Agrego la id de la fila a la que le corresponde (ID en la bbdd, no índice)
+        super().__init__()   
+        self.id = id
+        
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}{icono}.png'
 
         # QPixmap: un mapa de pixeles (imagen) de qt. Puede tomar como
