@@ -356,6 +356,10 @@ class MainWindow(QtWidgets.QMainWindow):
         bbdd.con.commit()
 
         self.fetchGrupos()
+    def insertGrupos(self, descripcion): # TODO: esto no se cómo lo hacemos
+        bbdd.cur.execute("INSERT INTO grupos VALUES (NULL, ?)", (descripcion,))
+        bbdd.con.commit()
+        self.fetchGrupos()
 
     def deleteGrupos(self):
         mensaje = PopUp("Pregunta", "Atención", "¿Desea eliminar el grupo?")
@@ -368,7 +372,10 @@ class MainWindow(QtWidgets.QMainWindow):
             # bbdd.cur.execute("DELETE FROM grupos WHERE id = ? ", (self.sender().id,))
             bbdd.con.commit()
             self.fetchGrupos()
-        
+
+
+
+
 
 
 app=QtWidgets.QApplication(sys.argv)
