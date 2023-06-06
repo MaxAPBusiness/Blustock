@@ -177,13 +177,14 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald</family>
+         <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de alumnos</string>
+        <string>Gestión del personal de la institución</string>
        </property>
       </widget>
      </item>
@@ -221,8 +222,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>10</pointsize>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -267,11 +268,6 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>ID</string>
@@ -302,36 +298,6 @@ QPushButton:pressed {
          <string/>
         </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item row="0" column="1">
-        <property name="text">
-         <string>43290132</string>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string>Juan </string>
-        </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string>6°C</string>
-        </property>
-       </item>
-       <item row="0" column="4">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="0" column="5">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -346,8 +312,8 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>12</pointsize>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -377,8 +343,8 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton">
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>12</pointsize>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>

@@ -52,6 +52,7 @@
        <property name="font">
         <font>
          <family>Oswald</family>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -95,6 +96,8 @@
          <property name="font">
           <font>
            <family>Oswald</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -230,7 +233,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="movimientos">
+      <widget class="QTableWidget" name="tableWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -333,6 +336,7 @@
          <property name="font">
           <font>
            <family>Oswald</family>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>

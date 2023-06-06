@@ -65,13 +65,6 @@ QRadioButton::indicator:checked{
     font-size: 35px;
 }
 
-#usuariosLabel{
-    font-size: 14px;
-}
-
-#contraseALabel{
-    font-size: 14px;
-}
 
 #usuariosLineEdit{
     width: 170px;
@@ -100,6 +93,15 @@ QLineEdit{
     height: 200px;
 }
 
+#passwordState, #usuarioState{
+    color: red;
+}
+
+#showPass{
+    border-style:transparent;
+    border-width:0;
+    background-color:transparent;
+}
 
 
 QPushButton{
@@ -126,4 +128,3 @@ QPushButton:pressed {
     background-color: #768AC5;
     border-radius: 15%;
 }
-

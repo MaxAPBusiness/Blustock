@@ -177,12 +177,14 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald</family>
+         <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de herramientas</string>
+        <string>Gestión de herramientas e insumos</string>
        </property>
       </widget>
      </item>
@@ -195,6 +197,12 @@ QPushButton:pressed {
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
          </property>
          <property name="text">
           <string/>
@@ -220,8 +228,9 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>10</pointsize>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -249,7 +258,7 @@ QPushButton:pressed {
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="stock">
+      <widget class="QTableWidget" name="tableWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -346,8 +355,9 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald</family>
+           <family>Oswald,sans-serif</family>
            <pointsize>12</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>

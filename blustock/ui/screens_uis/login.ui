@@ -14,138 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">*{
-    font-family: 'Oswald', sans-serif;
-    font-weight: 400;
-}
-
-QMenuBar{
-    background-color: #293045;
-    padding: 0;    
-    font-size: 14px;
-    color:white;
-}
-
-QMenuBar:item{
-    padding: 17px;
-    border-radius: 10px;
-
-}
-
-QMenuBar:item:selected{
-    background-color: #768AC5;
-    color:black;
-    border-radius: 5px;
-    margin: 10px;
-    
-    
-
-}
-
-QMenu{
-    background-color: #293045;
-
-    color: white;
-}
-
-QMenu:item{
-    padding: 5px;
-    border-radius: 5px;
-}
-
-QMenu:item:selected{
-    background-color: #768AC5;
-    color:white;
-
-}
-Qmenu#icon{
-   icon:size 40px; 
-    
-}
-
-
-QRadioButton:indicator{
-    border-style: solid;
-    border-color:  #293045;
-    border-radius: 6%;
-    border-width:  2px;
-    background-color: #BABFCE;
-}
-QRadioButton::indicator:checked{
-    background-color: #768AC5;
-}
-
-#label{
-    font-size: 35px;
-}
-
-#usuariosLabel{
-    font-size: 14px;
-}
-
-#contraseALabel{
-    font-size: 14px;
-}
-
-#usuariosLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#passwordLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#labelprofesores{
-    font-size: 26px;
-}
-
-QLineEdit{
-    border-radius: 5px;
-    background-color: #BABFCE;
-    
-}
-
-#title{
-    width: 100px;
-    height: 200px;
-}
-
-
-
-QPushButton{
-    border-color:#293045;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 6px;
-    background-color: #293045;
-    color:#ffffff;
-    height: 30px;
-    padding: 0px 4px;
-
-}
-QPushButton:hover{
-    background-color:#768AC5;
-    color:#293045;
-}
-QPushButton:pressed {
-    background-color: #293045;
-
-}
-
-#pushButton_5{
-    padding: 10px;
-    background-color: #768AC5;
-    border-radius: 15%;
-}
-
-#pushButton_2, #pushButton_3, #pushButton_4{
-    height: 30px;
-}
-</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,0,0,0,1,0">
    <item>
@@ -164,7 +33,7 @@ QPushButton:pressed {
      </property>
     </spacer>
    </item>
-   <item>
+   <item alignment="Qt::AlignHCenter">
     <widget class="QLabel" name="label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -173,7 +42,10 @@ QPushButton:pressed {
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Sistema de gestión de pañol</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#53618b;&quot;&gt;BLU&lt;/span&gt;&lt;span style=&quot; color:#000000;&quot;&gt;STOCK&lt;/span&gt;: Sistema de gestión del pañol&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -196,7 +68,7 @@ QPushButton:pressed {
      </property>
     </spacer>
    </item>
-   <item>
+   <item alignment="Qt::AlignHCenter">
     <widget class="QLabel" name="label_2">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -204,8 +76,15 @@ QPushButton:pressed {
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>20</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
      <property name="text">
-      <string>INICIO DE SESION:</string>
+      <string>Inicia sesión</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -229,90 +108,68 @@ QPushButton:pressed {
     </spacer>
    </item>
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <property name="fieldGrowthPolicy">
-      <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+    <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0,0,0,0">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <property name="labelAlignment">
-      <set>Qt::AlignCenter</set>
+     <property name="horizontalSpacing">
+      <number>0</number>
      </property>
-     <property name="formAlignment">
-      <set>Qt::AlignHCenter|Qt::AlignTop</set>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="usuariosLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="2" column="4">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-       <property name="maximumSize">
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
         <size>
-         <width>2000</width>
-         <height>2000</height>
+         <width>10</width>
+         <height>20</height>
         </size>
        </property>
-       <property name="text">
-        <string>Usuario: </string>
-       </property>
-      </widget>
+      </spacer>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="usuariosLineEdit">
+     <item row="1" column="0">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="usuarioState">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="maximumSize">
         <size>
-         <width>2000</width>
-         <height>2000</height>
+         <width>200</width>
+         <height>200</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <family>Oswald</family>
-         <bold>false</bold>
-         <stylestrategy>PreferDefault</stylestrategy>
-        </font>
-       </property>
-       <property name="frame">
+       <property name="acceptDrops">
         <bool>false</bool>
        </property>
-       <property name="cursorPosition">
-        <number>0</number>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="placeholderText">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="contraseALabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>2000</width>
-         <height>2000</height>
-        </size>
-       </property>
        <property name="text">
-        <string>Contraseña: </string>
+        <string>Usuario incorrecto</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="2" column="3">
       <widget class="QLineEdit" name="passwordLineEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -322,12 +179,20 @@ QPushButton:pressed {
        </property>
        <property name="maximumSize">
         <size>
-         <width>2000</width>
-         <height>2000</height>
+         <width>200</width>
+         <height>200</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
        </property>
        <property name="inputMethodHints">
         <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
+       </property>
+       <property name="maxLength">
+        <number>20</number>
        </property>
        <property name="frame">
         <bool>false</bool>
@@ -346,8 +211,38 @@ QPushButton:pressed {
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="usuarioState">
+     <item row="2" column="1" alignment="Qt::AlignRight">
+      <widget class="QLabel" name="contraseALabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>2000</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Contraseña: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="indent">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" alignment="Qt::AlignRight">
+      <widget class="QLabel" name="usuariosLabel">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -357,12 +252,90 @@ QPushButton:pressed {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>2000</height>
+        </size>
+       </property>
+       <property name="sizeIncrement">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
        <property name="text">
+        <string>Usuario: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="indent">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLineEdit" name="usuariosLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Oswald</family>
+         <pointsize>11</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+         <stylestrategy>PreferDefault</stylestrategy>
+        </font>
+       </property>
+       <property name="maxLength">
+        <number>20</number>
+       </property>
+       <property name="frame">
+        <bool>false</bool>
+       </property>
+       <property name="cursorPosition">
+        <number>0</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="dragEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="placeholderText">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="3" column="3">
       <widget class="QLabel" name="passwordState">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -370,10 +343,58 @@ QPushButton:pressed {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Contraseña incorrecta</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QPushButton" name="showPass">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="text">
         <string/>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
+     </item>
+     <item row="1" column="6">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="2">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -407,6 +428,13 @@ QPushButton:pressed {
        <height>35</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Ingresar</string>
      </property>
@@ -427,6 +455,11 @@ QPushButton:pressed {
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>usuariosLineEdit</tabstop>
+  <tabstop>passwordLineEdit</tabstop>
+  <tabstop>Ingresar</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
