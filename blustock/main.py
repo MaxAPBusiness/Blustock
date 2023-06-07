@@ -15,6 +15,7 @@ import datetime as time
 import sys
 import os
 import types
+from textwrap import dedent
 
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
@@ -182,7 +183,9 @@ class MainWindow(QtWidgets.QMainWindow):
         boton.setIconSize(QtCore.QSize(25, 25))
     
     def generarBotones(self, save: types.FunctionType, delete: types.FunctionType,
-                    table: QtWidgets.QTableWidget, row: types.FunctionType):
+                    table: QtWidgets.QTableWidget, row: int):
+        """Este método genera botones para guardar cambios y eliminar
+        filas y los inserta en una fila de una tabla de la UI"""
         # Se crean dos botones: uno de editar y uno de eliminar
         # Para saber que hacen BotonFila, vayan al código de la
         # clase.
@@ -198,7 +201,7 @@ class MainWindow(QtWidgets.QMainWindow):
         table.setCellWidget(row, 8, borrar)
     
     def insertStock(self):
-        """Esta función inserta una nueva fila en la tabla stock"""
+        """Este método inserta una nueva fila en la tabla stock"""
         tabla=self.pantallaStock.tableWidget
         row=tabla.rowCount()
         tabla.insertRow(row)
@@ -209,7 +212,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos moverlos a módulos.
     def fetchstock(self):
-        """Esta función obtiene los datos de la tabla stock y los
+        """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario."""
         tabla = self.pantallaStock.tableWidget
 
@@ -229,7 +232,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # fila y los contenidos de la fila.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
-        for row_num, row in enumerate(datos):
+        for row_num, row_data in enumerate(datos):
             # Se añade la fila a la tabla.
             # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(row_num)
@@ -243,29 +246,31 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                row_num, 0, QtWidgets.QTableWidgetItem(str(row[1])))
+                row_num, 0, QtWidgets.QTableWidgetItem(str(row_data[1])))
             tabla.setItem(
-                row_num, 1, QtWidgets.QTableWidgetItem(str(row[2])))
+                row_num, 1, QtWidgets.QTableWidgetItem(str(row_data[2])))
             tabla.setItem(
-                row_num, 2, QtWidgets.QTableWidgetItem(str(row[3])))
+                row_num, 2, QtWidgets.QTableWidgetItem(str(row_data[3])))
             tabla.setItem(
-                row_num, 3, QtWidgets.QTableWidgetItem(str(row[4])))
-            tabla.setItem(
-                row_num, 4, QtWidgets.QTableWidgetItem(str(row[2]+row[3]+row[4])))
+                row_num, 3, QtWidgets.QTableWidgetItem(str(row_data[4])))
+            # Se calcula el total de stock, sumando las herramientas o
+            # insumos en condiciones, reparación y de baja.
+            total=row_data[2]+row_data[3]+row_data[4]
+            tabla.setItem(row_num, 4, QtWidgets.QTableWidgetItem(str(total)))
 
             # Para lo que está aca abajo propongo hacer un join para
-            # ahorrar tiempo de proceso del programa. Si no quieren
-            # hacerlo los chicos no pasa nada, lo hago yo. - Maxi
+            # ahorrar tiempo de proceso del programa. Además,
+            # capacitaríamos a los chicos en algo fundamental de base
+            # de datos. - Maxi
             bbdd.cur.execute(
-                "select descripcion from subgrupos where id = ?", (row[5],))
-            a = bbdd.cur.fetchone()
+                "select descripcion from subgrupos where id = ?", (row_data[5],))
+            subgrupo = bbdd.cur.fetchone()[0]
             bbdd.cur.execute(
-                "select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)", (row[5],))
-            b = bbdd.cur.fetchone()
+                "select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)", (row_data[5],))
+            grupo = bbdd.cur.fetchone()[0]
+            tabla.setItem(row_num, 5, QtWidgets.QTableWidgetItem(str(grupo)))
             tabla.setItem(
-                row_num, 5, QtWidgets.QTableWidgetItem(str(b[0])))
-            tabla.setItem(
-                row_num, 6, QtWidgets.QTableWidgetItem(str(a[0])))
+                row_num, 6, QtWidgets.QTableWidgetItem(str(subgrupo)))
 
             self.generarBotones(self.saveStock, self.deletestock, tabla, row_num)
 
@@ -288,45 +293,77 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda row: self.obtenerFilaEditada(tabla, row))
 
     def obtenerFilaEditada(self, tabla, row):
-        """Esta función imprime la fila clickeada.
+        """Esta método imprime la fila clickeada.
         Hay que verla después"""
         self.filaEditada = self.pantallaStock.tableWidget.item(row, 0).text()
+        print(self.filaEditada)
 
     def saveStock(self):
-        """Esta función guarda los cambios hechos en la tabla de la ui
+        """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla de la base de datos"""
-        # Esta función todavía no esta terminada, cuando esté la voy a
-        # comentar. :) Chicos: no usen esta función de ejemplo aún.
-        index = self.pantallaStock.tableWidget.indexAt(self.sender().pos())
-        row = index.row()
-        desc = self.pantallaStock.tableWidget.item(row, 0).text()
-        cond = self.pantallaStock.tableWidget.item(row, 1).text()
-        rep = self.pantallaStock.tableWidget.item(row, 2).text()
-        baja = self.pantallaStock.tableWidget.item(row, 3).text()
-        subgrupo = self.pantallaStock.tableWidget.item(row, 6).text()
-        idd= bbdd.cur.execute(
-            "select id from subgrupos where descripcion = ?", (subgrupo,)).fetchone()
-        if not idd:
-            popup=PopUp("Error", "Error", 
-                        "El subgrupo ingresado no está registrado. Regístrelo")
-        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where descripcion = ?",
-                         (desc, cond, rep, baja, id[0], self.filaEditada))
-        bbdd.con.commit()
-        self.fetchstock()
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NPTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup=PopUp("Pregunta", info)
+        if popup==QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene la fila en la que está el boton.
+            index = self.pantallaStock.tableWidget.indexAt(self.sender().pos())
+            row = index.row()
+
+            # Se obtiene el texto de todas las celdas.
+            desc = self.pantallaStock.tableWidget.item(row, 0).text()
+            cond = self.pantallaStock.tableWidget.item(row, 1).text()
+            rep = self.pantallaStock.tableWidget.item(row, 2).text()
+            baja = self.pantallaStock.tableWidget.item(row, 3).text()
+            grupo = self.pantallaStock.tableWidget.item(row, 5).text()
+            subgrupo = self.pantallaStock.tableWidget.item(row, 6).text()
+
+            # Verificamos que el grupo esté registrado.
+            idGrupo= bbdd.cur.execute(
+                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
+            ).fetchone()
+            # Si no lo está...
+            if not idGrupo:
+                # Muestra un mensaje de error al usuario y termina la
+                # función.
+                info = """El grupo ingresado no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info)
+            
+            # Verificamos que el subgrupo esté registrado y que
+            # coincida con el grupo ingresado.
+            idSubgrupo= bbdd.cur.execute(
+            "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
+            (subgrupo, idGrupo)
+            ).fetchone()
+            if not idSubgrupo:
+                info="""El subgrupo ingresado no está registrado o no
+                pertenece al grupo ingresado. Regístrelo o asegúrese que esté
+                relacionado al grupo e ingrese nuevamente."""
+                return PopUp("Error", info) 
+            print(self.filaEditada)           # Guardamos los datos de la fila en 
+            bbdd.cur.execute(
+                """UPDATE stock
+                SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+                cant_baja = ?, id_subgrupo = ?
+                WHERE descripcion = ?""",
+                (desc, cond, rep, baja, idSubgrupo, self.filaEditada,)
+            )
+            bbdd.con.commit()
+            self.fetchstock()
 
     def deletestock(self):
-        """Esta función elimina la fila de la tabla"""
-        # Nota: la función aún no está terminada.
-        # Para saber que hace la clase, entrar al archivo
-        # mensaje_emergente.py
-        mensaje = PopUp("Pregunta", "Atención",
-                        "¿Desea eliminar la herramienta/insumo?")
+        """Este método elimina una fila de una tabla de la base de
+        datos."""
+        # Con esta variable guardamos el botón que presionó el usuario
+        # a la vez que ejecutamos la ventana emergente.
+        popup=PopUp("Error", "¿Desea eliminar la herramienta/insumo?")
 
-        # Con esta variable guardamos el botón que presionó el usuario.
-        botonPresionado = mensaje.exec()
-
-        # Si el usuario presionó el boton si
-        if botonPresionado == QtWidgets.QMessageBox.StandardButton.Yes:
+        # Si el usuario presionó el boton sí
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Busca la fila en la que está el botón
             row = (self.pantallaStock.tableWidget.indexAt(self.sender().pos())).row()
             desc = self.pantallaStock.tableWidget.item(row, 0).text()
@@ -335,7 +372,7 @@ class MainWindow(QtWidgets.QMainWindow):
             baja = self.pantallaStock.tableWidget.item(row, 3).text()
             grupo = self.pantallaStock.tableWidget.item(row, 5).text()
             subgrupo= self.pantallaStock.tableWidget.item(row, 6).text()
-            todo = "descripcion: "+desc+", cantidad en condiciones: "+cond+", cantidad en reparacion: "+rep+", cantidad de herramientas dada de baja: "+baja+", grupo: "+grupo+", subgrupo: "+subgrupo
+            todo = f"descripcion: {desc}, cantidad en condiciones: {cond}, cantidad en reparacion: {rep}, cantidad de herramientas dada de baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
             bbdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ", (self.usuario,time.datetime.now(),"eliminación","stock de herramientas",row,todo))            
             bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
