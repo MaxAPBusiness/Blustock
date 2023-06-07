@@ -11,6 +11,7 @@ from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
 from db.bbdd import BBDD
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
+import datetime as time
 import sys
 import os
 import types
@@ -97,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 pixmap=QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
             except Exception as e:
-                print(e)  # Si, puse el print al final
+                pass  # Si, puse el print al final #No,no pusiste el print al final
 
         self.opcionStock.triggered.connect(self.fetchstock)
         self.opcionSubgrupos.triggered.connect(
@@ -144,6 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QLineEdit, "usuariosLineEdit").text(), self.findChild(QtWidgets.QLineEdit, "passwordLineEdit").text(),))
             check = bbdd.cur.fetchone()
             if check[0] == 1:
+                self.usuario = bbdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?",(self.findChild(QtWidgets.QLineEdit,"usuariosLineEdit").text(),self.findChild(QtWidgets.QLineEdit,"passwordLineEdit").text(),)).fetchall()[0][0]
                 self.fetchstock()
                 self.menubar.show()
 
@@ -289,7 +291,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Esta función imprime la fila clickeada.
         Hay que verla después"""
         self.filaEditada = self.pantallaStock.tableWidget.item(row, 0).text()
-        print(self.filaEditada)
 
     def saveStock(self):
         """Esta función guarda los cambios hechos en la tabla de la ui
@@ -326,13 +327,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Si el usuario presionó el boton si
         if botonPresionado == QtWidgets.QMessageBox.StandardButton.Yes:
-            self.pantallaStock.tableWidget = self.findChild(
-                QtWidgets.QTableWidget, "stock")
             # Busca la fila en la que está el botón
             row = (self.pantallaStock.tableWidget.indexAt(self.sender().pos())).row()
             desc = self.pantallaStock.tableWidget.item(row, 0).text()
-            bbdd.cur.execute(
-                "DELETE FROM stock WHERE descripcion = ?", (desc,))
+            cond = self.pantallaStock.tableWidget.item(row, 1).text()
+            rep = self.pantallaStock.tableWidget.item(row, 2).text()
+            baja = self.pantallaStock.tableWidget.item(row, 3).text()
+            grupo = self.pantallaStock.tableWidget.item(row, 5).text()
+            subgrupo= self.pantallaStock.tableWidget.item(row, 6).text()
+            todo = "descripcion: "+desc+", cantidad en condiciones: "+cond+", cantidad en reparacion: "+rep+", cantidad de herramientas dada de baja: "+baja+", grupo: "+grupo+", subgrupo: "+subgrupo
+            bbdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ", (self.usuario,time.datetime.now(),"eliminación","stock de herramientas",row,todo))            
+            bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
             self.fetchstock()
         # TODO: eliminar las relaciones de clave foránea correctamente.
