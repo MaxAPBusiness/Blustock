@@ -14,6 +14,14 @@ from PyQt6 import QtWidgets, QtCore, QtGui, uic
 import datetime as time
 import sys
 import os
+
+
+
+os.chdir( f"{os.path.dirname(__file__)}{os.sep}.." )
+
+from db.bbdd import BBDD
+from ui.presets.popup import PopUp
+from ui.presets.botones import BotonFila
 import types
 from textwrap import dedent
 
@@ -90,6 +98,36 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaOtroPersonal, self.pantallaSubgrupos, 
                     self.pantallaTurnos, self.pantallaUsuarios,
                     self.pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        self.menubar.hide()
+
+        self.filaEditada=0
+
+        pantallaAlumnos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}alumnos.ui'), pantallaAlumnos)
+        pantallaGrupos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}grupos.ui'), pantallaGrupos)
+        pantallaHerramientas=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}herramientas.ui'), pantallaHerramientas)
+        pantallaHistorial=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}historial.ui'), pantallaHistorial)
+        pantallaMovimientos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}movimientos.ui'), pantallaMovimientos)
+        pantallaOtroPersonal=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}otro_personal.ui'), pantallaOtroPersonal)
+        pantallaSubgrupos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}subgrupos.ui'), pantallaSubgrupos)
+        pantallaTurnos=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}turnos.ui'), pantallaTurnos)
+        pantallaUsuarios=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}usuarios.ui'), pantallaUsuarios)
+        pantallaLogin=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}screens_uis{os.sep}login.ui'), pantallaLogin)
+        pantallaLogin.Ingresar.clicked.connect(self.login)
+
+        pantallas=(pantallaLogin, pantallaAlumnos, pantallaGrupos, pantallaHerramientas,
+                   pantallaMovimientos, pantallaOtroPersonal, pantallaSubgrupos, pantallaTurnos,
+                   pantallaUsuarios)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
@@ -102,10 +140,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass  # Si, puse el print al final #No,no pusiste el print al final
 
         self.opcionStock.triggered.connect(self.fetchstock)
-        self.opcionSubgrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionGrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(2))
+        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
+        self.opcionGrupos.triggered.connect(self.fetchGrupos)
         self.opcionAlumnos.triggered.connect(self.fetchalumnos)
         self.opcionOtroPersonal.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(5))
@@ -117,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
 
         self.pantallaLogin.passwordState.hide()
@@ -374,47 +410,13 @@ class MainWindow(QtWidgets.QMainWindow):
             index = self.pantallaStock.tableWidget.indexAt(self.sender().pos())
             row = index.row()
 
-            # Se obtiene el texto de todas las celdas.
-            desc = self.pantallaStock.tableWidget.item(row, 0).text()
-            cond = self.pantallaStock.tableWidget.item(row, 1).text()
-            rep = self.pantallaStock.tableWidget.item(row, 2).text()
-            baja = self.pantallaStock.tableWidget.item(row, 3).text()
-            grupo = self.pantallaStock.tableWidget.item(row, 5).text()
-            subgrupo = self.pantallaStock.tableWidget.item(row, 6).text()
+        print(self.filaEditada)
 
-            # Verificamos que el grupo esté registrado.
-            idGrupo= bbdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
-            ).fetchone()
-            # Si no lo está...
-            if not idGrupo:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
-                info = """El grupo ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info)
-            
-            # Verificamos que el subgrupo esté registrado y que
-            # coincida con el grupo ingresado.
-            idSubgrupo= bbdd.cur.execute(
-            "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
-            (subgrupo, idGrupo)
-            ).fetchone()
-            if not idSubgrupo:
-                info="""El subgrupo ingresado no está registrado o no
-                pertenece al grupo ingresado. Regístrelo o asegúrese que esté
-                relacionado al grupo e ingrese nuevamente."""
-                return PopUp("Error", info) 
-            print(self.filaEditada)           # Guardamos los datos de la fila en 
-            bbdd.cur.execute(
-                """UPDATE stock
-                SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                cant_baja = ?, id_subgrupo = ?
-                WHERE descripcion = ?""",
-                (desc, cond, rep, baja, idSubgrupo, self.filaEditada,)
-            )
-            bbdd.con.commit()
-            self.fetchstock()
+        id = bbdd.cur.execute("select id from subgrupos where descripcion = ?",(subgrupo,)).fetchone()
+        print(id[0])
+        bbdd.cur.execute("Update stock set descripcion = ?,cant_condiciones = ?,cant_reparacion=?,cant_baja = ?,id_subgrupo = ? where id = ?",(desc,cond,rep,baja,id[0],self.sender().id))
+        bbdd.con.commit()
+        self.fetchstock()
 
     def deletestock(self):
         """Este método elimina una fila de una tabla de la base de
@@ -512,11 +514,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
                 "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
 
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
-            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
-            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 9, borrar)
-            self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
+            edit = BotonFila("editar.png", row[0])
+            borrar = BotonFila("eliminar.png", row[0])
+            tabla.setCellWidget(row_num, 8, edit)
+            tabla.setCellWidget(row_num, 9, borrar)
+            tabla.setRowHeight(0, 35)
 
         self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
         self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
@@ -527,9 +529,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(4)
 
 
-app = QtWidgets.QApplication(sys.argv)
-
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
                      f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
