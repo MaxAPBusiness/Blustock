@@ -9,13 +9,13 @@ class BBDD():
     def __init__(self):
         # Se conecta a la base de datos
         self.con = db.Connection(
-            f"{os.getcwd()}{os.sep}blustock{os.sep}db{os.sep}blustock.sqlite3")
+            f"{os.path.abspath(os.getcwd())}{os.sep}db{os.sep}blustock.sqlite3")
         # Crea el cursor
         self.cur = self.con.cursor()
         
     def refrescarBBDD(self):
         # Abre el archivo blustock.sql
-        with open(f"{os.path.abspath(os.getcwd())}{os.sep}blustock{os.sep}db{os.sep}blustock.sql", 'r', encoding='utf-8') as codigoSQL:
+        with open(f"{os.path.abspath(os.getcwd())}{os.sep}db{os.sep}blustock.sql", 'r', encoding='utf-8') as codigoSQL:
             # Con la función split, separa cada statement (es decir, cada código) en una lista.
             # Recorre la lista y ejecuta cada código.
             for statement in codigoSQL.read().split(';'):
