@@ -185,7 +185,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def generarBotones(self, save: types.FunctionType, delete: types.FunctionType,
                     table: QtWidgets.QTableWidget, row: int):
         """Este método genera botones para guardar cambios y eliminar
-        filas y los inserta en una fila de una tabla de la UI"""
+        filas y los inserta en una fila de una tabla de la UI
+        """
         # Se crean dos botones: uno de editar y uno de eliminar
         # Para saber que hacen BotonFila, vayan al código de la
         # clase.
@@ -201,24 +202,83 @@ class MainWindow(QtWidgets.QMainWindow):
         table.setCellWidget(row, 8, borrar)
     
     def insertStock(self):
-        """Este método inserta una nueva fila en la tabla stock"""
+        """Este método inserta una nueva fila en la tabla stock.
+        
+        Si la fila anterior fue recientemente ingresada y los datos no
+        fueron modificados, en vez de añadir una nueva fila se le
+        muestra un mensaje al usuario pidiéndole que ingrese los datos
+        primero.
+        """
+        # Guardamos la tabla que vamos a modificar en una variable para
+        # simplificar el código (en vez de escribir toooodo el nombre 
+        # de la tabla, al guardarla en una variable podemos
+        # directamente escribir solamente el nombre de la variable y
+        # no escribir todo el nombre de la tabla).
         tabla=self.pantallaStock.tableWidget
-        row=tabla.rowCount()
-        tabla.insertRow(row)
-        self.generarBotones(self.saveStock, self.deletestock, tabla, row)
+
+        # Las filas en la tabla se ingresan escribiendo el índice en
+        # el que queremos que se ingresen. Para ingresar la fila al
+        # final, tenemos que saber el índice del final. Para obtenerlo,
+        # contamos la cantidad de filas: por ejemplo, si queremos
+        # agregar una fila al final y la tabla tiene 5 filas, si las
+        # contamos vamos a obtener el número 5; si usamos ese número 
+        # como índice para agregar la fila, la fila se va a agregar al
+        # final.
+        indiceFinal=tabla.rowCount()
+
+        # Antes de agregar la fila, queremos comprobar que la última
+        # fila de la tabla no tenga campos vacíos. Esto lo hacemos
+        # para que el usuario no pueda ingresar múltiples filas vacías
+        # haciendo que el sistema detecte si la fila anterior está
+        # vacía.
+        ultimaFila = tabla.indexAt(indiceFinal - 1).row()
+
+        # Obtenemos los datos de los cuatro campos que no deben estar
+        # vacíos y los insertamos a todos en una lista.
+        desc = tabla.item(ultimaFila, 0).text()
+        cond = tabla.item(ultimaFila, 1).text()
+        grupo = tabla.item(ultimaFila, 5).text()
+        subgrupo = tabla.item(ultimaFila, 6).text()
+        datosRequeridos=(desc, cond, grupo, subgrupo)
+
+        # Si alguno de los datos esta vacío...
+        if "" in datosRequeridos:
+            # Se informa al usuario y termina la función antes de
+            # ingresar la fila.
+            mensaje="""   Ha agregado una fila y todavía no ha ingresado los
+            datos. Ingreselos, guarde los cambios e intente nuevamente."""
+            return PopUp("Error", mensaje)
+
+        # Se añade la fila al final.
+        tabla.insertRow(indiceFinal)
+        # Se añaden campos de texto en todas las celdas ya que por
+        # defecto no vienen.
+        for numCol in tabla.columnCount() - 2:
+            tabla.setItem(ultimaFila, numCol, QtWidgets.QTableWidgetItem()) 
+        self.generarBotones(self.saveStock, self.deletestock, tabla, ultimaFila)
+
 
         
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos moverlos a módulos.
-    def fetchstock(self):
+    def fetchstock(self, busqueda):
         """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario."""
+        inserta en la tabla de la interfaz de usuario.
+        """
         tabla = self.pantallaStock.tableWidget
 
         # Se seleccionan los datos de la tabla de la base de datos
         # Método execute(): ejecuta código SQL
-        bbdd.cur.execute("SELECT * FROM stock")
+        sql="""SELECT s.descripcion, s.cant_condiciones, s.cant_reparacion,
+               s.cant_baja, sub.descripcion, u.descripcion
+               FROM stock s
+               JOIN subgrupos sub
+               ON s.id_subgrupo = sub.id
+               JOIN ubicaciones u
+               ON s.id_ubi=u.id_ubi
+               """
+        bbdd.cur.execute("SELECT * FROM stock""")
 
         # Método fetchall: obtiene los datos seleccionados y los
         # transforma en una lista.
@@ -232,47 +292,48 @@ class MainWindow(QtWidgets.QMainWindow):
         # fila y los contenidos de la fila.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
-        for row_num, row_data in enumerate(datos):
+        for rowNum, rowData in enumerate(datos):
             # Se añade la fila a la tabla.
             # Método insertRow(int): inserta una fila en una QTable.
-            tabla.insertRow(row_num)
+            tabla.insertRow(rowNum)
 
             # Inserta el texto en cada celda. Las celdas por defecto no
             # tienen nada, por lo que hay que añadir primero un item
             # que contenga el texto. No se puede establecer texto asi
             # nomás.
-            # Método setItem(row, column, item): establece el item de
+            # Método setIt
+            # em(row, column, item): establece el item de
             # una celda de una tabla.
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                row_num, 0, QtWidgets.QTableWidgetItem(str(row_data[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                row_num, 1, QtWidgets.QTableWidgetItem(str(row_data[2])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                row_num, 2, QtWidgets.QTableWidgetItem(str(row_data[3])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
-                row_num, 3, QtWidgets.QTableWidgetItem(str(row_data[4])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            total=row_data[2]+row_data[3]+row_data[4]
-            tabla.setItem(row_num, 4, QtWidgets.QTableWidgetItem(str(total)))
+            total=rowData[2]+rowData[3]+rowData[4]
+            tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
 
             # Para lo que está aca abajo propongo hacer un join para
             # ahorrar tiempo de proceso del programa. Además,
             # capacitaríamos a los chicos en algo fundamental de base
             # de datos. - Maxi
             bbdd.cur.execute(
-                "select descripcion from subgrupos where id = ?", (row_data[5],))
+                "select descripcion from subgrupos where id = ?", (rowData[5],))
             subgrupo = bbdd.cur.fetchone()[0]
             bbdd.cur.execute(
-                "select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)", (row_data[5],))
+                "select descripcion from grupos where id=(select id_grupo from subgrupos where id = ?)", (rowData[5],))
             grupo = bbdd.cur.fetchone()[0]
-            tabla.setItem(row_num, 5, QtWidgets.QTableWidgetItem(str(grupo)))
+            tabla.setItem(rowNum, 5, QtWidgets.QTableWidgetItem(str(grupo)))
             tabla.setItem(
-                row_num, 6, QtWidgets.QTableWidgetItem(str(subgrupo)))
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(subgrupo)))
 
-            self.generarBotones(self.saveStock, self.deletestock, tabla, row_num)
+            self.generarBotones(self.saveStock, self.deletestock, tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -290,19 +351,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(3)
         tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
+            lambda: self.obtenerFilaEditada(tabla, rowNum))
 
     def obtenerFilaEditada(self, tabla, row):
         """Esta método imprime la fila clickeada.
         Hay que verla después"""
-        self.filaEditada = self.pantallaStock.tableWidget.item(row, 0).text()
+        self.filaEditada = tabla.item(row, 0).text()
         print(self.filaEditada)
 
     def saveStock(self):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla de la base de datos"""
         # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NPTA: Esos tabs en el string son para mantener la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         info = """        Esta acción no se puede deshacer.
@@ -360,7 +421,10 @@ class MainWindow(QtWidgets.QMainWindow):
         datos."""
         # Con esta variable guardamos el botón que presionó el usuario
         # a la vez que ejecutamos la ventana emergente.
-        popup=PopUp("Error", "¿Desea eliminar la herramienta/insumo?")
+        mensaje="""    Eliminar la herramienta/insumo eliminará también todos
+        los registros relacionados (movimientos y reparaciones).
+        ¿Desea eliminar la herramienta/insumo?"""
+        popup=PopUp("Aviso", mensaje)
 
         # Si el usuario presionó el boton sí
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -372,12 +436,14 @@ class MainWindow(QtWidgets.QMainWindow):
             baja = self.pantallaStock.tableWidget.item(row, 3).text()
             grupo = self.pantallaStock.tableWidget.item(row, 5).text()
             subgrupo= self.pantallaStock.tableWidget.item(row, 6).text()
-            todo = f"descripcion: {desc}, cantidad en condiciones: {cond}, cantidad en reparacion: {rep}, cantidad de herramientas dada de baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
+            todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
             bbdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ", (self.usuario,time.datetime.now(),"eliminación","stock de herramientas",row,todo))            
+            idStock=bbdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,))
+            bbdd.cur.execute("DELETE FROM movimientos WHERE id_elem = ?", (idStock,))
+            bbdd.cur.execute("DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock,))
             bbdd.cur.execute("DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
             self.fetchstock()
-        # TODO: eliminar las relaciones de clave foránea correctamente.
         # TODO: guardar los cambios en el historial.
 
     def fetchalumnos(self):
@@ -385,20 +451,20 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = bbdd.cur.fetchall()
         self.pantallaAlumnos.tableWidget.setRowCount(0)
 
-        for row_num, row in enumerate(datos):
-            self.pantallaAlumnos.tableWidget.insertRow(row_num)
+        for rowNum, row in enumerate(datos):
+            self.pantallaAlumnos.tableWidget.insertRow(rowNum)
             self.pantallaAlumnos.tableWidget.setItem(
-                row_num, 0, QtWidgets.QTableWidgetItem(str(row_num+1)))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowNum+1)))
             self.pantallaAlumnos.tableWidget.setItem(
-                row_num, 1, QtWidgets.QTableWidgetItem(str(row[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(row[0])))
             self.pantallaAlumnos.tableWidget.setItem(
-                row_num, 2, QtWidgets.QTableWidgetItem(str(row[1])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(row[1])))
             self.pantallaAlumnos.tableWidget.setItem(
-                row_num, 3, QtWidgets.QTableWidgetItem(str(row[2])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(row[2])))
             edit = BotonFila("editar.png")
             borrar = BotonFila("eliminar.png")
-            self.pantallaAlumnos.tableWidget.setCellWidget(row_num, 4, edit)
-            self.pantallaAlumnos.tableWidget.setCellWidget(row_num, 5, borrar)
+            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 4, edit)
+            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 5, borrar)
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
         self.pantallaAlumnos.tableWidget.resizeColumnsToContents()
@@ -414,7 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = bbdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
 
-        for row_num, row in enumerate(datos):
+        for rowNum, row in enumerate(datos):
             if row[3] == 0:
                 estado = "Baja"
             if row[3] == 1:
@@ -428,28 +494,28 @@ class MainWindow(QtWidgets.QMainWindow):
             if row[7] == 2:
                 tipo = "Ingreso de materiales"
 
-            self.pantallaMovimientos.tableWidget.insertRow(row_num)
-            self.pantallaMovimientos.tableWidget.setItem(row_num, 0, QtWidgets.QTableWidgetItem(str(
+            self.pantallaMovimientos.tableWidget.insertRow(rowNum)
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
                 bbdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
-                row_num, 1, QtWidgets.QTableWidgetItem(str(estado)))
-            self.pantallaMovimientos.tableWidget.setItem(row_num, 2, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
                 "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
-            self.pantallaMovimientos.tableWidget.setItem(row_num, 3, QtWidgets.QTableWidgetItem(str(
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
                 bbdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
-                row_num, 4, QtWidgets.QTableWidgetItem(str(row[6])))
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(row[6])))
             self.pantallaMovimientos.tableWidget.setItem(
-                row_num, 5, QtWidgets.QTableWidgetItem(str(row[4])))
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(row[4])))
             self.pantallaMovimientos.tableWidget.setItem(
-                row_num, 6, QtWidgets.QTableWidgetItem(str(tipo)))
-            self.pantallaMovimientos.tableWidget.setItem(row_num, 7, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
                 "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
 
             edit = BotonFila("editar.png")
             borrar = BotonFila("eliminar.png")
-            self.pantallaMovimientos.tableWidget.setCellWidget(row_num, 8, edit)
-            self.pantallaMovimientos.tableWidget.setCellWidget(row_num, 9, borrar)
+            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
+            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 9, borrar)
             self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
 
         self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
