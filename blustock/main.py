@@ -262,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos moverlos a módulos.
-    def fetchstock(self, busqueda):
+    def fetchstock(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
