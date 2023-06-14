@@ -216,6 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
+
     def insertStock(self):
         """Este método inserta una nueva fila en la tabla stock.
 
@@ -248,22 +249,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # vacía.
         ultimaFila = indiceFinal-1
 
-        # Obtenemos los datos de los cuatro campos que no deben estar
-        # vacíos y los insertamos a todos en una lista.
-        desc = tabla.item(ultimaFila, 0).text()
-        cond = tabla.item(ultimaFila, 1).text()
-        grupo = tabla.item(ultimaFila, 5).text()
-        subgrupo = tabla.item(ultimaFila, 6).text()
-        ubicacion = tabla.item(ultimaFila, 7).text()
-        datosRequeridos = (desc, cond, grupo, subgrupo, ubicacion)
-
-        # Si alguno de los datos esta vacío...
-        if "" in datosRequeridos:
-            # Se informa al usuario y termina la función antes de
-            # ingresar la fila.
-            mensaje = """   Ha agregado una fila y todavía no ha ingresado los
-            datos. Ingreselos, guarde los cambios e intente nuevamente."""
-            return PopUp("Error", mensaje)
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        iCampos=(0, 1, 5, 6, 7)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(ultimaFila, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Ha agregado una fila y todavía no ha ingresado los
+                datos. Ingreselos, guarde los cambios e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
         tabla.insertRow(indiceFinal)
@@ -376,7 +372,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # sino le da ansiedad.
         info = """        Esta acción no se puede deshacer.
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
-        popup = PopUp("Pregunta", info)
+        popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Se obtiene la fila en la que está el boton.
             index = self.pantallaStock.tableWidget.indexAt(self.sender().pos())
@@ -391,38 +387,40 @@ class MainWindow(QtWidgets.QMainWindow):
             subgrupo = self.pantallaStock.tableWidget.item(row, 6).text()
 
             # Verificamos que el grupo esté registrado.
-            idGrupo = bbdd.cur.execute(
+            idGrupo=bbdd.cur.execute(
                 "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
             ).fetchone()
             # Si no lo está...
             if not idGrupo:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """El grupo ingresado no está registrado.
+                info = """        El grupo ingresado no está registrado.
                 Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info)
+                return PopUp("Error", info).exec()
 
             # Verificamos que el subgrupo esté registrado y que
             # coincida con el grupo ingresado.
-            idSubgrupo = bbdd.cur.execute(
+            idSubgrupo=bbdd.cur.execute(
                 "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
-                (subgrupo, idGrupo)
+                (subgrupo, idGrupo[0],)
             ).fetchone()
             if not idSubgrupo:
                 info = """El subgrupo ingresado no está registrado o no
                 pertenece al grupo ingresado. Regístrelo o asegúrese que esté
                 relacionado al grupo e ingrese nuevamente."""
-                return PopUp("Error", info)
+                return PopUp("Error", info).exec()
             # Guardamos los datos de la fila en
             bbdd.cur.execute(
                 """UPDATE stock
                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
                 cant_baja = ?, id_subgrupo = ?
                 WHERE descripcion = ?""",
-                (desc, cond, rep, baja, idSubgrupo, self.filaEditada,)
+                (desc, cond, rep, baja, idSubgrupo[0], self.filaEditada,)
             )
             bbdd.con.commit()
             self.fetchstock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
 
     def deletestock(self):
         """Este método elimina una fila de una tabla de la base de
@@ -432,7 +430,7 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = """    Eliminar la herramienta/insumo eliminará también todos
         los registros relacionados (movimientos y reparaciones).
         ¿Desea eliminar la herramienta/insumo?"""
-        popup = PopUp("Aviso", mensaje)
+        popup = PopUp("Aviso", mensaje).exec()
 
         # Si el usuario presionó el boton sí
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
