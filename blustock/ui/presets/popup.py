@@ -58,5 +58,3 @@ class PopUp(QMessageBox):
         # Tiene un dedent para quitar la identación del código y que se
         # muestre bien, sino tiene márgen de más.
         self.setInformativeText(dedent(info))
-        # Se ejecuta la ventana emergente.
-        self.exec()
