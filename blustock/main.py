@@ -16,6 +16,11 @@ import types
 import sys
 import os
 
+from db.bbdd import BBDD
+from ui.presets.popup import PopUp
+from ui.presets.botones import BotonFila
+import types
+from textwrap import dedent
 
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
@@ -102,10 +107,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass  # Si, puse el print al final #No,no pusiste el print al final
 
         self.opcionStock.triggered.connect(self.fetchstock)
-        self.opcionSubgrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionGrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(2))
+        self.opcionSubgrupos.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(6))
+        self.opcionGrupos.triggered.connect(self.fetchGrupos)
         self.opcionAlumnos.triggered.connect(self.fetchalumnos)
         self.opcionOtroPersonal.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(5))
@@ -117,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
 
         self.pantallaLogin.passwordState.hide()
@@ -540,9 +543,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(4)
 
 
-app = QtWidgets.QApplication(sys.argv)
-
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
                      f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
