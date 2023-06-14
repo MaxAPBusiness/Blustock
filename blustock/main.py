@@ -246,7 +246,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # para que el usuario no pueda ingresar múltiples filas vacías
         # haciendo que el sistema detecte si la fila anterior está
         # vacía.
-        ultimaFila = tabla.indexAt(indiceFinal - 1).row()
+        ultimaFila = indiceFinal-1
 
         # Obtenemos los datos de los cuatro campos que no deben estar
         # vacíos y los insertamos a todos en una lista.
@@ -269,10 +269,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.insertRow(indiceFinal)
         # Se añaden campos de texto en todas las celdas ya que por
         # defecto no vienen.
-        for numCol in tabla.columnCount() - 2:
-            tabla.setItem(ultimaFila, numCol, QtWidgets.QTableWidgetItem())
+        for numCol in range(tabla.columnCount() - 2):
+            tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem())
         self.generarBotones(
-            self.saveStock, self.deletestock, tabla, ultimaFila)
+            self.saveStock, self.deletestock, tabla, indiceFinal)
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos crear la API del programa
@@ -290,20 +290,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Se seleccionan los datos de la tabla de la base de datos
         # Método execute(): ejecuta código SQL
-        query = """SELECT s.descripcion, s.cant_condiciones, s.cant_reparacion,
-               s.cant_baja, sub.descripcion, g.descripcion, u.descripcion
-               FROM stock s
-               JOIN subgrupos sub
-               ON s.id_subgrupo = sub.id
-               JOIN grupos g
-               ON sub.id_grupo=g.id
-               JOIN ubicaciones u
-               ON s.id_ubi=u.id
-               WHERE s.descripcion LIKE ? OR s.cant_condiciones LIKE ? OR 
-               s.cant_reparacion LIKE ? OR s.cant_baja LIKE ? OR
-               sub.descripcion LIKE ? OR g.descripcion LIKE ? OR
-               u.descripcion LIKE ?"""
-        bbdd.cur.execute(query, busqueda)
+        with open(f"middleware{os.sep}stock.sql", "r") as sql:
+            query = sql.read()
+            bbdd.cur.execute(query, busqueda)
 
         # Método fetchall: obtiene los datos seleccionados y los
         # transforma en una lista.
@@ -425,7 +414,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 relacionado al grupo e ingrese nuevamente."""
                 return PopUp("Error", info)
             # Guardamos los datos de la fila en
-            print(self.filaEditada)
             bbdd.cur.execute(
                 """UPDATE stock
                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
