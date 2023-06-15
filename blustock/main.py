@@ -275,31 +275,32 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
+        # Se guardan la tabla y la barra de búsqueda de la pantalla
+        # stock en variables para que el código se simplifique y se
+        # haga más legible.
         tabla = self.pantallaStock.tableWidget
         barraBusqueda = self.pantallaStock.lineEdit
 
-        # Se seleccionan los datos de la tabla de la base de datos
+        # Se obtienen los datos de la base de datos
         datos=dal.obtenerDatos("stock", barraBusqueda.text())
 
-        # Se busca la tabla de la pantalla stock para insertarle los
-        # datos.
+        # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
 
         # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de la fila.
+        # fila y los contenidos de ésta.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
         for rowNum, rowData in enumerate(datos):
-            # Se añade la fila a la tabla.
+            # Se añade una fila a la tabla.
             # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(rowNum)
 
             # Inserta el texto en cada celda. Las celdas por defecto no
             # tienen nada, por lo que hay que añadir primero un item
             # que contenga el texto. No se puede establecer texto asi
-            # nomás.
-            # Método setIt
-            # em(row, column, item): establece el item de
+            # nomás, tira error.
+            # Método setItem(row, column, item): establece el item de
             # una celda de una tabla.
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
@@ -323,6 +324,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
 
+            # Se generan e insertan los botones en la fila.
             self.generarBotones(
                 self.saveStock, self.deleteStock, tabla, rowNum)
 

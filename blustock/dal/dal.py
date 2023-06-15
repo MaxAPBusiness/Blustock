@@ -50,12 +50,12 @@ class DAL():
             # Si se han aportado filtros extra...
             if filtrosExtra:
                 # Obtenemos la cantidad de filtros extra aportados
-                cantCamposFiltroExtra=len(filtrosExtra)
+                cantFiltrosExtra=len(filtrosExtra)
                 # Insertamos los filtros extra en la lista de filtros
                 filtro.extend(filtrosExtra)
             else:
                 # Se establece que la cantidad de filtros extra es 0
-                cantCamposFiltroExtra=0
+                cantFiltrosExtra=0
             # Cada "?" en el código sql indica que usaremos un dato de
             # python. Para aplicar la búsqueda en la obtención
             # correctamente, debemos ver si algún campo de la tabla 
@@ -72,7 +72,7 @@ class DAL():
             # filtros extra, y va a haber un "?" por cada filtro extra,
             # la cantidad de comparaciones de búsqueda se obtiene
             # contando los "?" y restando la cantidad de filtros extra.
-            for i in range(query.count('?')-cantCamposFiltroExtra):
+            for i in range(query.count('?')-cantFiltrosExtra):
                 filtro.append(f"%{busqueda}%")
             # Consulta los datos y los devuelve.
             return bdd.cur.execute(query, filtro).fetchall()
