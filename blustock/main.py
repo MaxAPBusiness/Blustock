@@ -7,22 +7,19 @@ Clases:
 Objetos:
     app: La aplicación principal.
 """
+import os
+os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
-from db.bbdd import BBDD
+from db.bdd import bdd
+from dal.dal import dal
 import datetime as time
 import types
 import sys
-import os
-import types
-from textwrap import dedent
 
-os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
-
-
-bbdd = BBDD()
-bbdd.refrescarBBDD()
+bdd.refrescarBDD()
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -140,15 +137,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def login(self):
-        bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",
+        bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",
                          (self.findChild(QtWidgets.QLineEdit, "usuariosLineEdit").text(),))
-        check = bbdd.cur.fetchone()
+        check = bdd.cur.fetchone()
         if check[0] >= 1:
-            bbdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
+            bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
                 QtWidgets.QLineEdit, "usuariosLineEdit").text(), self.findChild(QtWidgets.QLineEdit, "passwordLineEdit").text(),))
-            check = bbdd.cur.fetchone()
+            check = bdd.cur.fetchone()
             if check[0] == 1:
-                self.usuario = bbdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
+                self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
                     QtWidgets.QLineEdit, "usuariosLineEdit").text(), self.findChild(QtWidgets.QLineEdit, "passwordLineEdit").text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
@@ -280,20 +277,9 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaStock.tableWidget
         barraBusqueda = self.pantallaStock.lineEdit
-        busqueda = (f"%{barraBusqueda.text()}%", f"%{barraBusqueda.text()}%",
-                    f"%{barraBusqueda.text()}%", f"%{barraBusqueda.text()}%",
-                    f"%{barraBusqueda.text()}%", f"%{barraBusqueda.text()}%",
-                    f"%{barraBusqueda.text()}%",)
 
         # Se seleccionan los datos de la tabla de la base de datos
-        # Método execute(): ejecuta código SQL
-        with open(f"middleware{os.sep}queries{os.sep}select{os.sep}stock.sql", "r") as sql:
-            query = sql.read()
-            bbdd.cur.execute(query, busqueda)
-
-        # Método fetchall: obtiene los datos seleccionados y los
-        # transforma en una lista.
-        datos = bbdd.cur.fetchall()
+        datos=dal.obtenerDatos("stock", barraBusqueda.text())
 
         # Se busca la tabla de la pantalla stock para insertarle los
         # datos.
@@ -355,8 +341,8 @@ class MainWindow(QtWidgets.QMainWindow):
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
-        tabla.cellClicked.connect(
-            lambda: self.obtenerFilaEditada(tabla, (tabla.sender().pos()).row()))
+        #tabla.cellClicked.connect(
+        #    lambda: self.obtenerFilaEditada(tabla, tabla.sender().pos().y))
 
     def obtenerFilaEditada(self, tabla, row):
         """Esta método imprime la fila clickeada.
@@ -401,7 +387,7 @@ class MainWindow(QtWidgets.QMainWindow):
             subgrupo = tabla.item(row, 6).text()
 
             # Verificamos que el grupo esté registrado.
-            idGrupo=bbdd.cur.execute(
+            idGrupo=bdd.cur.execute(
                 "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
             ).fetchone()
             # Si no lo está...
@@ -414,7 +400,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Verificamos que el subgrupo esté registrado y que
             # coincida con el grupo ingresado.
-            idSubgrupo=bbdd.cur.execute(
+            idSubgrupo=bdd.cur.execute(
                 "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
                 (subgrupo, idGrupo[0],)
             ).fetchone()
@@ -424,14 +410,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 relacionado al grupo e ingrese nuevamente."""
                 return PopUp("Error", info).exec()
             # Guardamos los datos de la fila en
-            bbdd.cur.execute(
+            bdd.cur.execute(
                 """UPDATE stock
                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
                 cant_baja = ?, id_subgrupo = ?
                 WHERE descripcion = ?""",
                 (desc, cond, rep, baja, idSubgrupo[0], self.filaEditada,)
             )
-            bbdd.con.commit()
+            bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
@@ -453,22 +439,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 return tabla.removeRow(row)
             
         desc = tabla.item(row, 0).text()
-        idStock = bbdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()
+        idStock = bdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()
         if not idStock:
             mensaje = """        La herramienta/insumo no está registrada.
             Por favor, regístrela primero antes de eliminarla"""
             return PopUp("Advertencia", mensaje).exec()
 
-        movsRel=bbdd.cur.execute(
-            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock,)).fetchone()
-        repRel=bbdd.cur.execute(
-            "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock,)).fetchone()
+        movsRel=bdd.cur.execute(
+            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock[0],)).fetchone()
+        repRel=bdd.cur.execute(
+            "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
         if movsRel or repRel:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
             esta herramienta/insumo."""
             return PopUp("Advertencia", mensaje).exec()
+        
+        descRepetida=tabla.findItems(tabla.item(row, 0).text(), QtCore.Qt.MatchFlag.MatchFixedString)
+        if len(descRepetida) > 1:
+            return tabla.removeRow(row)
+
         
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar la herramienta/insumo?"""
@@ -486,17 +477,17 @@ class MainWindow(QtWidgets.QMainWindow):
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
             todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
-            bbdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
+            bdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
                              (self.usuario, time.datetime.now(), "eliminación", "stock de herramientas", row, todo))
-            bbdd.cur.execute(
+            bdd.cur.execute(
                 "DELETE FROM stock WHERE descripcion = ?", (desc,))
-            bbdd.con.commit()
+            bdd.con.commit()
             self.fetchStock()
         # TODO: guardar los cambios en el historial.
 
     def fetchalumnos(self):
-        bbdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
-        datos = bbdd.cur.fetchall()
+        bdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
+        datos = bdd.cur.fetchall()
         self.pantallaAlumnos.tableWidget.setRowCount(0)
 
         for rowNum, row in enumerate(datos):
@@ -524,8 +515,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
 
     def fetchmovimientos(self):
-        bbdd.cur.execute("SELECT * FROM movimientos")
-        datos = bbdd.cur.fetchall()
+        bdd.cur.execute("SELECT * FROM movimientos")
+        datos = bdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
 
         for rowNum, row in enumerate(datos):
@@ -544,20 +535,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.pantallaMovimientos.tableWidget.insertRow(rowNum)
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
-                bbdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
+                bdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
                 "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
-                bbdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
+                bdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 4, QtWidgets.QTableWidgetItem(str(row[6])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(row[4])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bbdd.cur.execute(
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
                 "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
 
             edit = BotonFila("editar.png")
