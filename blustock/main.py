@@ -428,10 +428,23 @@ class MainWindow(QtWidgets.QMainWindow):
         datos."""
         # Con esta variable guardamos el botón que presionó el usuario
         # a la vez que ejecutamos la ventana emergente.
-        mensaje = """    Eliminar la herramienta/insumo eliminará también todos
-        los registros relacionados (movimientos y reparaciones).
+        row = (self.pantallaStock.tableWidget.indexAt(self.sender().pos())).row()
+        desc = self.pantallaStock.tableWidget.item(row, 0).text()
+        idStock = bbdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()[0]
+        movsRel=bbdd.cur.execute(
+            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock,)).fetchone()
+        repRel=bbdd.cur.execute(
+            "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock,)).fetchone()
+        if movsRel or repRel:
+            mensaje = """        La herramienta/insumo tiene movimientos o un
+            seguimiento de reparación relacionados. Por motivos de seguridad,
+            debe eliminar primero los registros relacionados antes de eliminar
+            esta herramienta/insumo."""
+            return PopUp("Advertencia", mensaje).exec()
+        
+        mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar la herramienta/insumo?"""
-        popup = PopUp("Aviso", mensaje).exec()
+        popup = PopUp("Pregunta", mensaje).exec()
 
         # Si el usuario presionó el boton sí
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -447,12 +460,6 @@ class MainWindow(QtWidgets.QMainWindow):
             todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
             bbdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
                              (self.usuario, time.datetime.now(), "eliminación", "stock de herramientas", row, todo))
-            idStock = bbdd.cur.execute(
-                "SELECT id FROM stock WHERE descripcion = ?", (desc,))
-            bbdd.cur.execute(
-                "DELETE FROM movimientos WHERE id_elem = ?", (idStock,))
-            bbdd.cur.execute(
-                "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock,))
             bbdd.cur.execute(
                 "DELETE FROM stock WHERE descripcion = ?", (desc,))
             bbdd.con.commit()
