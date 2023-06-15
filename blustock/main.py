@@ -281,7 +281,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaStock.tableWidget
         barraBusqueda = self.pantallaStock.lineEdit
 
-        # Se obtienen los datos de la base de datos
+        # Se obtienen los datos de la base de datos pasando como
+        # parámetro la tabla de la que queremos obtener los daots y 
+        # el texto de la barra de búsqueda mediante el cual queremos
+        # filtrarlos.
         datos=dal.obtenerDatos("stock", barraBusqueda.text())
 
         # Se refresca la tabla, eliminando todas las filas anteriores.
@@ -324,7 +327,10 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
 
-            # Se generan e insertan los botones en la fila.
+            # Se generan e insertan los botones en la fila, pasando
+            # como parámetros las funciones que queremos que los
+            # botones tengan y la tabla y la fila de la tabla en la que
+            # queremos que se inserten.
             self.generarBotones(
                 self.saveStock, self.deleteStock, tabla, rowNum)
 
