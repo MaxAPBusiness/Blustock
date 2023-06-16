@@ -273,7 +273,7 @@ QPushButton:pressed {
        </column>
        <column>
         <property name="text">
-         <string>Nombre y apellido</string>
+         <string>Nombre y Apellido</string>
         </property>
        </column>
        <column>

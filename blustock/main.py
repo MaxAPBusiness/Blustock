@@ -631,12 +631,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
 
-            # esto creo que no va, no tengo nada para sacar totales
-            #-----------------------------------------------------------------------
-            # total = rowData[1]+rowData[2]+rowData[3]
-            # tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
-            #-----------------------------------------------------------------------
-
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
