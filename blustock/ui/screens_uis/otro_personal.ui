@@ -273,22 +273,12 @@ QPushButton:pressed {
        </column>
        <column>
         <property name="text">
-         <string>Nombre y Apellido</string>
+         <string>Nombre y apellido</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Cargo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Usuario</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Contraseña</string>
+         <string>Descripción</string>
         </property>
        </column>
        <column>

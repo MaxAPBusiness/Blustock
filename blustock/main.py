@@ -607,6 +607,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # fila y los contenidos de ésta.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
+        print("Los datos son: ",datos)
         for rowNum, rowData in enumerate(datos):
             # Se añade una fila a la tabla.
             # Método insertRow(int): inserta una fila en una QTable.
@@ -626,12 +627,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            
-            #el usuario y contraseña se muestran?
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
             
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
@@ -656,12 +651,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # Método setSectionResizeMode(column, ResizeMode): hace que una
         # columna de una tabla se expanda o no automáticamente conforme
         # se extiende la tabla.
+
+        # cuál tendria que poner que no se expanda
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(5)
         tabla.cellClicked.connect(
