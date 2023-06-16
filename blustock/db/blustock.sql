@@ -101,6 +101,21 @@ CREATE TABLE IF NOT EXISTS movimientos(
     FOREIGN KEY(id_tipo) REFERENCES tipos(id) ON DELETE CASCADE,
     FOREIGN KEY(id_ubi) REFERENCES ubicaciones(dni) ON DELETE CASCADE
 );
+/*Crea la tabla reparaciones con los campos id, id_herramienta (el id
+de la herramienta vinculada al seguimiento), la cantidad, el id del
+usuario que mandó a reparar la herramienta, el lugar de reparación, la
+fecha de envío y la fecha de regreso.*/
+CREATE TABLE IF NOT EXISTS reparaciones(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_herramienta INTEGER NOT NULL,
+    cant INTEGER NOT NULL,
+    id_usuario INTEGER NOT NULL,
+    destino VARCHAR(50) NOT NULL,
+    fecha_envio VARCHAR(24) NOT NULL,
+    fecha_regreso VARCHAR(24),
+    FOREIGN KEY(id_herramienta) REFERENCES stock(id) ON DELETE CASCADE,
+    FOREIGN KEY(id_usuario) REFERENCES personal(dni) ON DELETE CASCADE
+);
 /*Crea la tabla historial_de_cambios con los datos id_usuario,
 rol (el rol del usuario), fecha_hora (la fecha y hora de la
 modificacion), tipo (el tipo de modificacion), tabla (la 
@@ -115,4 +130,4 @@ CREATE TABLE IF NOT EXISTS historial_de_cambios(
     id_fila VARCHAR(4),
     datos_viejos VARCHAR(400),
     datos_nuevos VARCHAR(400)
-)
+);
