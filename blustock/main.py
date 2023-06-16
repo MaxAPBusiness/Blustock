@@ -105,8 +105,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionGrupos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(2))
         self.opcionAlumnos.triggered.connect(self.fetchalumnos)
-        self.opcionOtroPersonal.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(5))
+        self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
         self.opcionTurnos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(7))
         self.opcionMovimientos.triggered.connect(lambda:self.stackedWidget.setCurrentIndex(4))
@@ -584,7 +583,91 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)"""
 
+# --------------- lo que modifique está abajo --------------------------#
+    def fetchOtroPersonal(self):
+        """Este método obtiene los datos de la tabla stock y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+        # Se guardan la tabla y la barra de búsqueda de la pantalla
+        # stock en variables para que el código se simplifique y se
+        # haga más legible.
+        tabla = self.pantallaOtroPersonal.tableWidget
+        barraBusqueda = self.pantallaOtroPersonal.lineEdit
 
+        # Se obtienen los datos de la base de datos pasando como
+        # parámetro la tabla de la que queremos obtener los daots y 
+        # el texto de la barra de búsqueda mediante el cual queremos
+        # filtrarlos.
+        datos=dal.obtenerDatos("otro_personal", barraBusqueda.text())
+
+        # Se refresca la tabla, eliminando todas las filas anteriores.
+        tabla.setRowCount(0)
+
+        # Bucle: por cada fila de la tabla, se obtiene el número de
+        # fila y los contenidos de ésta.
+        # Método enumerate: devuelve una lista con el número y el
+        # elemento.
+        for rowNum, rowData in enumerate(datos):
+            # Se añade una fila a la tabla.
+            # Método insertRow(int): inserta una fila en una QTable.
+            tabla.insertRow(rowNum)
+
+            # Inserta el texto en cada celda. Las celdas por defecto no
+            # tienen nada, por lo que hay que añadir primero un item
+            # que contenga el texto. No se puede establecer texto asi
+            # nomás, tira error.
+            # Método setItem(row, column, item): establece el item de
+            # una celda de una tabla.
+            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
+            # texto por defecto.
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            
+            #el usuario y contraseña se muestran?
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            
+            # Se calcula el total de stock, sumando las herramientas o
+            # insumos en condiciones, reparación y de baja.
+
+            # esto creo que no va, no tengo nada para sacar totales
+            #-----------------------------------------------------------------------
+            # total = rowData[1]+rowData[2]+rowData[3]
+            # tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
+            #-----------------------------------------------------------------------
+
+            # Se generan e insertan los botones en la fila, pasando
+            # como parámetros las funciones que queremos que los
+            # botones tengan y la tabla y la fila de la tabla en la que
+            # queremos que se inserten.
+            self.generarBotones(
+                self.saveOtroPersonal, self.deleteOtroPersonal, tabla, rowNum)
+
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Método setSectionResizeMode(column, ResizeMode): hace que una
+        # columna de una tabla se expanda o no automáticamente conforme
+        # se extiende la tabla.
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(5)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+
+        lambda: self.stackedWidget.setCurrentIndex(5)
 app = QtWidgets.QApplication(sys.argv)
 
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
