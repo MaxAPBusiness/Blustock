@@ -8,7 +8,7 @@ Objetos:
     app: La aplicación principal.
 """
 import os
-os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+os.chdir(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.boton import BotonFila
@@ -41,8 +41,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        ui_dir = f"{os.getcwd()}{os.sep}blustock{os.sep}ui{os.sep}"
+
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
 
         self.filaEditada = 0
@@ -50,36 +51,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos = QtWidgets.QWidget()
         uic.loadUi(
             os.path.join(
-                os.path.abspath(os.getcwd()),
-                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
+                ui_dir,
+                f'screens_uis{os.sep}alumnos.ui'
             ), self.pantallaAlumnos)
         self.pantallaGrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}grupos.ui'), self.pantallaGrupos)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}grupos.ui'), self.pantallaGrupos)
         self.pantallaStock = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}stock.ui'), self.pantallaStock)
         self.pantallaHistorial = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
         self.pantallaMovimientos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
         self.pantallaOtroPersonal = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
         self.pantallaSubgrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
         self.pantallaTurnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
         self.pantallaUsuarios = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(
-            os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
         self.pantallaLogin = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
+        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}login.ui'), self.pantallaLogin)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
@@ -115,7 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
+        with open(os.path.join(ui_dir, f'styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
 
         self.pantallaLogin.passwordState.hide()
@@ -588,77 +580,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)
 
-    def fetchGrupos(self):
-        bbdd.cur.execute("SELECT * FROM grupos")
 
-        datos = bbdd.cur.fetchall()
+app = QtWidgets.QApplication(sys.argv)
 
-        tabla = self.findChild(QtWidgets.QTableWidget, "grupos")
-        tabla.setRowCount(0) # No me acuerdo que hacía ese
-
-        for index, row in enumerate(datos):
-            tabla.insertRow(index)
-
-            tabla.setItem(index, 0, QtWidgets.QTableWidgetItem(str(row[1])))
-
-            guardar = BotonFila("guardar", row[0])
-            guardar.clicked.connect(self.updateGrupos)
-            borrar = BotonFila("eliminar", row[0])
-            borrar.clicked.connect(self.deleteGrupos)
-
-            tabla.setCellWidget(index, 1, guardar)
-            tabla.setCellWidget(index, 2, borrar)
-
-        tabla.setRowHeight(0, 35)
-        tabla.resizeColumnsToContents()
-
-        tabla.horizontalHeader().setSectionResizeMode(0,QtWidgets.QHeaderView.ResizeMode.Stretch)
-
-        self.stackedWidget.setCurrentIndex(2)
-
-        # Podríamos agregar como para saber un total de herramientas o subgrupos en el grupo
-
-    def updateGrupos(self):
-        tabla = self.findChild(QtWidgets.QTableWidget,"grupos")
-        index = tabla.indexAt(self.sender().pos())
-        row = index.row()
-        
-        desc = tabla.item(row, 0).text()
-
-        print(self.filaEditada)
-
-        bbdd.cur.execute("UPDATE grupos SET descripcion = ? where id = ?",(desc, self.sender().id))
-        
-        # TODO: No se manda al historial de cambios todavía
-        bbdd.con.commit()
-
-        self.fetchGrupos()
-    def insertGrupos(self, descripcion): # TODO: esto no se cómo lo hacemos
-        bbdd.cur.execute("INSERT INTO grupos VALUES (NULL, ?)", (descripcion,))
-        bbdd.con.commit()
-        self.fetchGrupos()
-
-    def deleteGrupos(self):
-        # ?
-        mensaje = PopUp("Pregunta", "Atención", "¿Desea eliminar el grupo?")
-
-        botonPresionado = mensaje.exec()
-
-        if botonPresionado == QtWidgets.QMessageBox.StandardButton.Yes:
-            
-            # No se si eliminar todas las herramientas y subgrupos así que queda así por ahora
-            # bbdd.cur.execute("DELETE FROM grupos WHERE id = ? ", (self.sender().id,))
-            bbdd.con.commit()
-            self.fetchGrupos()
-
-
-
-
-
-
-app=QtWidgets.QApplication(sys.argv)
-
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.getcwd(), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
                      f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
