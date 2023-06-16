@@ -589,13 +589,13 @@ class MainWindow(QtWidgets.QMainWindow):
         inserta en la tabla de la interfaz de usuario.
         """
         # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # stock en variables para que el código se simplifique y se
+        # OtroPersonal en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
 
         # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los daots y 
+        # parámetro la tabla de la que queremos obtener los datos y 
         # el texto de la barra de búsqueda mediante el cual queremos
         # filtrarlos.
         datos=dal.obtenerDatos("otro_personal", barraBusqueda.text())
@@ -621,15 +621,16 @@ class MainWindow(QtWidgets.QMainWindow):
             # una celda de una tabla.
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
+
+            # DNI
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            # Nombre y Apellido
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            # Descripción
             tabla.setItem(
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            
-            # Se calcula el total de stock, sumando las herramientas o
-            # insumos en condiciones, reparación y de baja.
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
