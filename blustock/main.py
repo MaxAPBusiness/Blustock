@@ -12,6 +12,7 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.boton import BotonFila
+from ui.presets.Toolbotoon import toolboton
 from ui.presets.popup import PopUp
 from db.bdd import bdd
 from dal.dal import dal
@@ -44,9 +45,15 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
-
         self.filaEditada = 0
-
+        a=QtWidgets.QMenu()
+        b=QtGui.QAction("sopas",a)
+        a.addAction(b)
+        boton = toolboton("usuario")
+        boton.setMenu(a)
+        boton.setIconSize(QtCore.QSize(60,55))
+        self.menubar.setCornerWidget(boton)
+        self.menubar.adjustSize()
         self.pantallaAlumnos = QtWidgets.QWidget()
         uic.loadUi(
             os.path.join(
@@ -508,8 +515,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(row[1])))
             self.pantallaAlumnos.tableWidget.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(row[2])))
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
+            edit = BotonFila("guardar")
+            borrar = BotonFila("eliminar")
             self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 4, edit)
             self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 5, borrar)
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
@@ -559,8 +566,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
                 "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
 
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
+            edit = BotonFila("guardar")
+            borrar = BotonFila("eliminar")
             self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
             self.pantallaMovimientos.tableWidget.setCellWidget(
                 rowNum, 9, borrar)
