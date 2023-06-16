@@ -625,6 +625,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fetchGrupos()
 
     def deleteGrupos(self):
+        # ?
         mensaje = PopUp("Pregunta", "Atención", "¿Desea eliminar el grupo?")
 
         botonPresionado = mensaje.exec()
