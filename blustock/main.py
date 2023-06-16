@@ -131,7 +131,10 @@ class MainWindow(QtWidgets.QMainWindow):
             )
         )
 
-        self.pantallaStock.pushButton_2.clicked.connect(self.insertStock)
+        self.pantallaStock.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaStock.tableWidget, 
+                                      self.saveStock, self.deleteStock, 
+                                      (0, 1, 5, 6, 7)))
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -215,20 +218,32 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
 
-    def insertStock(self):
+    def insertarFilas(self, tabla: QtWidgets.QTableWidget,
+                      funcGuardar: types.FunctionType,
+                      funcEliminar: types.FunctionType,
+                      camposObligatorios: tuple | None = None):
         """Este método inserta una nueva fila en la tabla stock.
 
         Si la fila anterior fue recientemente ingresada y los datos no
         fueron modificados, en vez de añadir una nueva fila se le
         muestra un mensaje al usuario pidiéndole que ingrese los datos
         primero.
+
+        Parámetros
+        ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla a la que se le van a insertar los elementos.
+            camposObligatorios: tuple
+                Los campos de la fil anterior que se van a verificar
+                para que no estén en blanco, evitando así que se puedan
+                insertar múltiples filas en blanco.
+            funcGuardar: types.FunctionType
+                La función guardar que el botón guardar de la fila
+                ejecutará.
+            funcEliminar: types.FunctionType
+                La función eliminar que el botón eliminar de la fila
+                ejecutará.
         """
-        # Guardamos la tabla que vamos a modificar en una variable para
-        # simplificar el código (en vez de escribir toooodo el nombre
-        # de la tabla, al guardarla en una variable podemos
-        # directamente escribir solamente el nombre de la variable y
-        # no escribir todo el nombre de la tabla).
-        tabla = self.pantallaStock.tableWidget
 
         # Las filas en la tabla se ingresan escribiendo el índice en
         # el que queremos que se ingresen. Para ingresar la fila al
@@ -247,10 +262,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # vacía.
         ultimaFila = indiceFinal-1
 
-        # Obtenemos los indices de los campos que no podemos dejar vacíos.
-        iCampos=(0, 1, 5, 6, 7)
         # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
+        for iCampo in camposObligatorios:
             # Si el campo está vacio...
             if tabla.item(ultimaFila, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
@@ -266,7 +279,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for numCol in range(tabla.columnCount() - 2):
             tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
         self.generarBotones(
-            self.saveStock, self.deleteStock, tabla, indiceFinal)
+            funcGuardar, funcEliminar, tabla, indiceFinal)
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos crear la API del programa
@@ -290,8 +303,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
 
-        # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de ésta.
+        # Bucle: por cada fila de los datos obtenidos de la tabla de la
+        # base de datos, se obtiene el número de fila y los contenidos
+        # de ésta.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
         for rowNum, rowData in enumerate(datos):
@@ -456,7 +470,7 @@ class MainWindow(QtWidgets.QMainWindow):
         movsRel=bdd.cur.execute(
             "SELECT * FROM movimientos WHERE id_elem = ?", (idStock[0],)).fetchone()
         repRel=bdd.cur.execute(
-            "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
+            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
         if movsRel or repRel:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
