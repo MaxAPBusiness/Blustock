@@ -108,8 +108,16 @@ class DAL():
             bdd.cur.execute(queryFile.text(), (usuario, time.datetime.now(), tipo, tabla, fila, datosViejos))
             bdd.con.commit()
     
-    def eliminarStock(self, idd):
-        bdd.cur.execute("DELETE FROM stock WHERE id = ?", (idd,))
+    def verifRelSubgrupos(self, idd: int) -> bool:
+        stockRel=bdd.cur.execute(
+            "SELECT * FROM stock WHERE id_subgrupo = ?", (idd,)).fetchone()
+        if stockRel:
+            return True
+        else:
+            return False
+    
+    def eliminarDatos(self, tabla, idd):
+        bdd.cur.execute("DELETE FROM ? WHERE id = ?", (tabla, idd,))
         bdd.con.commit()
 
 

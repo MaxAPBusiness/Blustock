@@ -1,5 +1,5 @@
-SELECT s.id, s.descripcion, s.cant_condiciones, s.cant_reparacion, s.cant_baja, 
-g.descripcion, sub.descripcion, u.descripcion
+SELECT s.id, s.descripcion, s.cant_condiciones, s.cant_reparacion,
+s.cant_baja, g.descripcion, sub.descripcion, u.descripcion
 FROM stock s
 JOIN subgrupos sub ON s.id_subgrupo = sub.id
 JOIN grupos g ON sub.id_grupo=g.id
