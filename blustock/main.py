@@ -192,13 +192,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Parámetros
         ----------
-            funcGuardar : types.FunctionType
+            funcGuardar: types.FunctionType
                 La función que estará vinculada al botón guardar.
-            funcEliminar : types.FunctionType
+            funcEliminar: types.FunctionType
                 La función que estará vinculada al botón eliminar.
-            tabla : QtWidgets.QTableWidget
+            tabla: QtWidgets.QTableWidget
                 La tabla a la que se le añadirán los botones.
-            numFila : int
+            numFila: int
                 La fila en la que se insertarán los botones.
         """
         # Se crean dos botones: uno de editar y uno de eliminar
@@ -268,8 +268,9 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(ultimaFila, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Ha agregado una fila y todavía no ha ingresado los
-                datos. Ingreselos, guarde los cambios e intente nuevamente."""
+                mensaje = """       Ha agregado una fila y todavía no ha
+                ingresado los datos de la fila anterior. Ingreselos, guarde
+                los cambios e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
