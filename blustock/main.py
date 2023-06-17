@@ -356,15 +356,17 @@ class MainWindow(QtWidgets.QMainWindow):
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
+        self.row=None
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
 
     def obtenerFilaEditada(self, tabla, row):
         """Esta método imprime la fila clickeada.
         Hay que verla después"""
-        print(row)
-        self.filaEditada = tabla.item(row, 0).text()
-        print(self.filaEditada)
+        if self.row != row:
+            self.row=row
+            self.filaEditada = tabla.item(row, 0).text()
+            print(self.filaEditada)
 
     def saveStock(self):
         """Este método guarda los cambios hechos en la tabla de la ui
