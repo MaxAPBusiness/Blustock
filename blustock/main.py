@@ -323,31 +323,31 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            total = rowData[1]+rowData[2]+rowData[3]
+            total = rowData[2]+rowData[3]+rowData[4]
             tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
 
             tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[5])))
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
             tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
+                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
             self.generarBotones(
-                self.saveStock, self.deleteStock, tabla, rowNum)
+                lambda: self.saveStock(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -374,7 +374,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filaEditada = tabla.item(row, 0).text()
         print(self.filaEditada)
 
-    def saveStock(self):
+    def saveStock(self, idd: int | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla de la base de datos"""
         # Se pregunta al usuario si desea guardar los cambios en la
@@ -437,8 +437,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 """UPDATE stock
                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
                 cant_baja = ?, id_subgrupo = ?
-                WHERE descripcion = ?""",
-                (desc, cond, rep, baja, idSubgrupo[0], self.filaEditada,)
+                WHERE id = ?""",
+                (desc, cond, rep, baja, idSubgrupo[0], idd,)
             )
             bdd.con.commit()
             self.fetchStock()
