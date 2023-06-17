@@ -46,7 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
         self.filaEditada = 0
-        boton = toolboton("usuario")
+        boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
         self.menubar.adjustSize()

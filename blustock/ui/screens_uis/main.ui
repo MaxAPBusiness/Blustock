@@ -57,7 +57,9 @@
      <string>HERRAMIENTAS</string>
     </property>
     <addaction name="opcionStock"/>
+    <addaction name="separator"/>
     <addaction name="opcionSubgrupos"/>
+    <addaction name="separator"/>
     <addaction name="opcionGrupos"/>
    </widget>
    <widget class="QMenu" name="menuPersonal">
@@ -65,6 +67,7 @@
      <string>PERSONAL</string>
     </property>
     <addaction name="opcionAlumnos"/>
+    <addaction name="separator"/>
     <addaction name="opcionOtroPersonal"/>
    </widget>
    <widget class="QMenu" name="menuMovimientos">
@@ -72,6 +75,8 @@
      <string>MOVIMIENTOS</string>
     </property>
     <addaction name="opcionMovimientos"/>
+    <addaction name="separator"/>
+    <addaction name="actionGenerar_movimiento"/>
    </widget>
    <widget class="QMenu" name="menuTurnos">
     <property name="title">

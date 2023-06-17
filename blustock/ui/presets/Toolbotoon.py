@@ -33,10 +33,10 @@ class toolboton(QtWidgets.QToolButton):
 
             Crea el boton y establece su ícono y su tamaño.
     """
-    def __init__(self, icono: str):
+    def __init__(self, icono: str,nw):
         super().__init__()
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}{icono}.png'
-
+        self.nw=nw
         # QPixmap: un mapa de pixeles (imagen) de qt. Puede tomar como
         # parámetro el path de la imagen.
         pixmap = QtGui.QPixmap(path)
@@ -56,19 +56,28 @@ class toolboton(QtWidgets.QToolButton):
         self.setCursor(QtGui.QCursor(
             QtCore.Qt.CursorShape.PointingHandCursor))
         self.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
-        a=QtWidgets.QMenu()
+        a=QtWidgets.QMenu(title="sopas")
         b=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}salida.png'),"Cerrar sesion",a)
         c=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'),"Terminar turno",a)
         d=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}turno.png'),"Iniciar turno",a)
-
+        b.triggered.connect(self.inicio)
+        c.triggered.connect(lambda: nw.stackedWidget.setCurrentIndex(1))
+        d.triggered.connect(lambda: nw.stackedWidget.setCurrentIndex(2))
         a.addAction(d)
+        a.addSeparator()
         a.addAction(c)
+        a.addSeparator()
         a.addAction(b)
-
         self.setMenu(a)
-
+        
         # Define the style for the popup menu using QSS
         menu_style = """
+            *{
+                font-family: 'Oswald', sans-serif;
+                font-weight: 400;
+                font-size: 15px;
+            }
+
             QMenu {
                 background-color: #293045;
                 color:white;
@@ -83,3 +92,10 @@ class toolboton(QtWidgets.QToolButton):
         # Apply the style to the popup menu
         self.menu().setStyleSheet(menu_style)
 
+
+    def inicio(self):
+        self.nw.findChild(QtWidgets.QLineEdit, "usuariosLineEdit").clear()
+        self.nw.findChild(QtWidgets.QLineEdit, "passwordLineEdit").clear()
+        self.nw.menubar.hide()
+        self.nw.stackedWidget.setCurrentIndex(0)
+    
