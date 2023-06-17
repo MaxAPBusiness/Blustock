@@ -445,54 +445,54 @@ class MainWindow(QtWidgets.QMainWindow):
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
-    def deleteStock(self):
+    def deleteStock(self, idd: int | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
-        datos."""
+        datos
+        
+        Parámetros
+        ----------
+        idd: int | None = None
+            El número que relaciona la fila de la tabla de la UI con la
+            fila de la tabla de la base de datos.
+            Default: None
+        """
         # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaStock.tableWidget
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        iCampos=(0, 1, 5, 6, 7)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                return tabla.removeRow(row)
-            
-        desc = tabla.item(row, 0).text()
-        idStock = bdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()
-        if not idStock:
-            mensaje = """        La herramienta/insumo no está registrada.
-            Por favor, regístrela primero antes de eliminarla"""
-            return PopUp("Advertencia", mensaje).exec()
-
-        movsRel=bdd.cur.execute(
-            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock[0],)).fetchone()
-        repRel=bdd.cur.execute(
-            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
-        if movsRel or repRel:
+        # Si no se pasó el argumento idd, significa que la fila no está
+        # relacionada con la base de datos. Eso significa que la fila
+        # se insertó en la tabla de la UI, pero aún no se guardaron los
+        # cambios en la base de datos. En ese caso...
+        if not idd:
+            # ...solo debemos sacarla de la UI.
+            return tabla.removeRow(row)
+        # Si está relacionada con la base de datos, antes de eliminar,
+        # tenemos que verificar que la PK de la fila no
+        # tenga relaciones foráneas con otras tablas. Si llegase a
+        # tener, no podemos permitir una eliminación normal por dos
+        # motivos. El primero, necesitamos registrar todos los campos
+        # eliminados en el historial, y eliminar todo de una nos
+        # complica registrar que tablas se eliminaron. El segundo, si
+        # un profe se equivoca y elimina todo, no hay vuelta atrás.
+        # Para esta verificación, llamamos a la función del dal.
+        hayRelacion = dal.verifRelStock(idd)
+        if hayRelacion:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
             esta herramienta/insumo."""
-            return PopUp("Advertencia", mensaje).exec()
+            return PopUp('Advertencia', mensaje).exec()
         
-        descRepetida=tabla.findItems(tabla.item(row, 0).text(), QtCore.Qt.MatchFlag.MatchFixedString)
-        if len(descRepetida) > 1:
-            return tabla.removeRow(row)
-
-        
+        # Si no está relacionado, pregunta al usuario si confirma
+        # eliminar la fila y le advierte que la acción no se puede
+        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar la herramienta/insumo?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí
+        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Busca la fila en la que está el botón
-            row = (tabla.indexAt(
-                self.sender().pos())).row()
             desc = tabla.item(row, 0).text()
             cond = tabla.item(row, 1).text()
             rep = tabla.item(row, 2).text()
@@ -500,13 +500,9 @@ class MainWindow(QtWidgets.QMainWindow):
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
             todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
-            bdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
-                             (self.usuario, time.datetime.now(), "eliminación", "stock de herramientas", row, todo))
-            bdd.cur.execute(
-                "DELETE FROM stock WHERE descripcion = ?", (desc,))
-            bdd.con.commit()
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, todo)
+            dal.eliminarStock(idd)
             self.fetchStock()
-        # TODO: guardar los cambios en el historial.
 
     def fetchalumnos(self):
         bdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
