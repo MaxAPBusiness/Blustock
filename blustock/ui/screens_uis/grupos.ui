@@ -177,7 +177,8 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
+         <family>Oswald</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -221,7 +222,7 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
@@ -251,7 +252,7 @@ QPushButton:pressed {
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="grupos">
+      <widget class="QTableWidget" name="tableWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -285,26 +286,6 @@ QPushButton:pressed {
          <string>-</string>
         </property>
        </column>
-       <item row="0" column="1">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
-       <item row="1" column="1">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="1" column="2">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -332,7 +313,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <weight>50</weight>
            <bold>false</bold>
           </font>

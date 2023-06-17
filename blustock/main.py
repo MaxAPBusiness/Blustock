@@ -94,9 +94,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionStock.triggered.connect(self.fetchStock)
         self.opcionSubgrupos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(6))
-        self.opcionGrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(2))
-        self.opcionAlumnos.triggered.connect(self.fetchalumnos)
+        self.opcionGrupos.triggered.connect(self.fetchGrupos)
+        self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
         self.opcionOtroPersonal.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(5))
         self.opcionTurnos.triggered.connect(
@@ -499,34 +498,60 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchStock()
         # TODO: guardar los cambios en el historial.
 
-    def fetchalumnos(self):
-        bdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
-        datos = bdd.cur.fetchall()
-        self.pantallaAlumnos.tableWidget.setRowCount(0)
+    def fetchAlumnos(self):
+        """Este método obtiene los datos de la tabla personal y los
+        inserta en la tabla de la interfaz de usuario.
+        """
 
-        for rowNum, row in enumerate(datos):
-            self.pantallaAlumnos.tableWidget.insertRow(rowNum)
-            self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowNum+1)))
-            self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(row[0])))
-            self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(row[1])))
-            self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(row[2])))
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
-            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 4, edit)
-            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 5, borrar)
-            self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
+        tabla = self.pantallaAlumnos.tableWidget
+        barraBusqueda = self.pantallaAlumnos.lineEdit
 
-        self.pantallaAlumnos.tableWidget.resizeColumnsToContents()
-        self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
+    
+        datos=dal.obtenerDatos("alumnos", barraBusqueda.text())
+
+        tabla.setRowCount(0)
+
+        
+
+        for rowNum, rowData in enumerate(datos):
+            tabla.insertRow(rowNum)
+
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowNum)))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[2])))
+          
+
+            self.generarBotones(
+                self.saveAlumnos, self.deleteAlumnos, tabla, rowNum)
+
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Esto lo hacían ustedes creo
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(1)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+
+    def saveAlumnos(self):
+        # No implementado, cuando esté deleteStock completo lo adapto
+        pass
+    def deleteAlumnos(self):
+        # No implementado, cuando esté deleteStock completo lo adapto
+        pass
+
 
     def fetchmovimientos(self):
         bdd.cur.execute("SELECT * FROM movimientos")
@@ -580,6 +605,56 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)
 
+
+    def fetchGrupos(self): 
+        """Este método obtiene los datos de la tabla grupos y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+
+        tabla = self.pantallaGrupos.tableWidget
+        barraBusqueda = self.pantallaGrupos.lineEdit
+
+        datos = dal.obtenerDatos("grupos", barraBusqueda.text())
+
+        tabla.setRowCount(0)
+
+        for rowNum, rowData in enumerate(datos):
+
+            tabla.insertRow(rowNum)
+
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+  
+            # Podría mostrarse la cantidad de herramientas en el grupo o algo
+            # +-------------+-----------+--------------+
+            # | descripcion | subgrupos | herramientas |
+            # | Martillos   |     3     |      23      |
+            # +-------------+-----------+--------------+
+            # pero alto viaje
+
+            self.generarBotones(
+                self.saveGrupos, self.deleteGrupos, tabla, rowNum)
+
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # Esto lo dejo tachado que lo acomodaban ustedes
+
+        self.stackedWidget.setCurrentIndex(2)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+
+    def saveGrupos(self):
+        # No implementado, cuando esté saveStock completo lo adapto
+        pass
+
+    def deleteGrupos(self):
+        # No implementado, cuando esté deleteStock completo lo adapto
+        pass
+
+    
 
 app = QtWidgets.QApplication(sys.argv)
 
