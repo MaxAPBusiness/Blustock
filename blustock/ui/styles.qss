@@ -9,7 +9,7 @@
     margin:5px
 }
 #usuario::menu-indicator{
-    image:none
+    image:none;
 }
 
 #usuario:hover,pressed{

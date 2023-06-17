@@ -51,19 +51,35 @@ class toolboton(QtWidgets.QToolButton):
         # parámetro un objeto QIcon.
         self.setIcon(i)
         self.setObjectName(icono)
-
         # Método setCursor: cambia la forma del cursor cuando pasa por
         # encima del widget.
         self.setCursor(QtGui.QCursor(
             QtCore.Qt.CursorShape.PointingHandCursor))
         self.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
         a=QtWidgets.QMenu()
-        b=QtGui.QAction("Cerrar sesion",a)
-        c=QtGui.QAction("Terminar turno",a)
-        d=QtGui.QAction("Iniciar turno",a)
-        a.addAction(b)
-        a.addAction(c)
+        b=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}salida.png'),"Cerrar sesion",a)
+        c=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'),"Terminar turno",a)
+        d=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}turno.png'),"Iniciar turno",a)
+
         a.addAction(d)
+        a.addAction(c)
+        a.addAction(b)
 
         self.setMenu(a)
+
+        # Define the style for the popup menu using QSS
+        menu_style = """
+            QMenu {
+                background-color: #293045;
+                color:white;
+            }
+            QMenu::item:selected {
+                background-color: #768AC5;
+                color:black;
+                border-radius: 5px;
+            }
+        """
+
+        # Apply the style to the popup menu
+        self.menu().setStyleSheet(menu_style)
 

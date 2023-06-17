@@ -177,9 +177,8 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
+         <family>Oswald</family>
          <pointsize>-1</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -228,9 +227,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -283,6 +281,11 @@ QPushButton:pressed {
        <attribute name="verticalHeaderCascadingSectionResizes">
         <bool>false</bool>
        </attribute>
+       <column>
+        <property name="text">
+         <string>Id</string>
+        </property>
+       </column>
        <column>
         <property name="text">
          <string>Descripción</string>
@@ -360,9 +363,8 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
