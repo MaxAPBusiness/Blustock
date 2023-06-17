@@ -93,13 +93,11 @@ CREATE TABLE IF NOT EXISTS movimientos(
     fecha_hora VARCHAR(24) NOT NULL,
     id_tipo INTEGER NOT NULL,
     descripcion VARCHAR(100),
-    id_ubi INTEGER NOT NULL,
     FOREIGN KEY(id_turno) REFERENCES turnos(id) ON DELETE CASCADE,
     FOREIGN KEY(id_elem) REFERENCES stock(id) ON DELETE CASCADE,
     FOREIGN KEY(id_estado) REFERENCES estados(id) ON DELETE CASCADE,
     FOREIGN KEY(id_persona) REFERENCES personal(dni) ON DELETE CASCADE,
-    FOREIGN KEY(id_tipo) REFERENCES tipos(id) ON DELETE CASCADE,
-    FOREIGN KEY(id_ubi) REFERENCES ubicaciones(dni) ON DELETE CASCADE
+    FOREIGN KEY(id_tipo) REFERENCES tipos(id) ON DELETE CASCADE
 );
 /*Crea la tabla reparaciones con los campos id, id_herramienta (el id
 de la herramienta vinculada al seguimiento), la cantidad, el id del

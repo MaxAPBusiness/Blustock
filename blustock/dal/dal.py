@@ -7,6 +7,8 @@ Clases
 """
 import os
 from db.bdd import bdd
+from ui.presets.popup import PopUp
+from datetime import time
 
 class DAL():
     """Esta clase contiene métodos que gestionan el envío de datos
@@ -15,7 +17,9 @@ class DAL():
     Métodos
     ---------
         obtenerDatos(self, tabla: str, busqueda: str, 
-        filtrosExtra: list | tuple | dict | None = None):
+        filtrosExtra: list | tuple | dict | None = None) -> list:
+            Obtiene datos de la base de datos y los devuelve en forma
+            de lista.
     """
     def obtenerDatos(self, tabla: str, busqueda: str, 
         filtrosExtra: list | tuple | dict | None = None) -> list:
@@ -76,6 +80,37 @@ class DAL():
                 filtro.append(f"%{busqueda}%")
             # Consulta los datos y los devuelve.
             return bdd.cur.execute(query, filtro).fetchall()
+
+    def verifRelStock(self, idd: int) -> bool:
+        """Esta función verifica si la PK de una fila de la tabla stock
+        está relacionada con otras tablas.
+        
+        Parámetros
+        ----------
+            idd: int
+                El id de la fila que queremos verificar
+        
+        Devuelve
+        --------
+            - bool: si encontró o no una relación.
+        """
+        movsRel=bdd.cur.execute(
+            "SELECT * FROM movimientos WHERE id_elem = ?", (idd,)).fetchone()
+        repRel=bdd.cur.execute(
+            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idd,)).fetchone()
+        if movsRel or repRel:
+            return True
+        else:
+            return False
+    
+    def insertarHistorial(self, usuario, tipo, tabla, fila, datosViejos):
+        with open(f"dal{os.sep}queries{os.sep}insert{os.sep}historial.sql", "r") as queryFile:
+            bdd.cur.execute(queryFile.text(), (usuario, time.datetime.now(), tipo, tabla, fila, datosViejos))
+            bdd.con.commit()
+    
+    def eliminarStock(self, idd):
+        bdd.cur.execute("DELETE FROM stock WHERE id = ?", (idd,))
+        bdd.con.commit()
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder

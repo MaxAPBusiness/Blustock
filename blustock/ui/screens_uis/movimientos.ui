@@ -260,6 +260,16 @@
        </attribute>
        <column>
         <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Herramienta</string>
         </property>
        </column>
@@ -270,32 +280,42 @@
        </column>
        <column>
         <property name="text">
-         <string>Nombre y Apellido</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Clase</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Fecha</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Cantidad</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Tipo</string>
+         <string>Persona</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Turno de pañolero</string>
+         <string>Motivo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Fecha y Hora</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Turno</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ubicación</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Pañorelo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Profesor a cargo del turno</string>
         </property>
        </column>
        <column>

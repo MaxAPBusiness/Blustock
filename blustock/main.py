@@ -112,7 +112,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.stackedWidget.setCurrentIndex(5))
         self.opcionTurnos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(7))
-        self.opcionMovimientos.triggered.connect(self.fetchmovimientos)
+        self.opcionMovimientos.triggered.connect(lambda:self.stackedWidget.setCurrentIndex(4))
         self.opcionUsuariosG.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(
@@ -134,7 +134,10 @@ class MainWindow(QtWidgets.QMainWindow):
             )
         )
 
-        self.pantallaStock.pushButton_2.clicked.connect(self.insertStock)
+        self.pantallaStock.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaStock.tableWidget, 
+                                      self.saveStock, self.deleteStock, 
+                                      (0, 1, 5, 6, 7)))
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -192,13 +195,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Parámetros
         ----------
-            funcGuardar : types.FunctionType
+            funcGuardar: types.FunctionType
                 La función que estará vinculada al botón guardar.
-            funcEliminar : types.FunctionType
+            funcEliminar: types.FunctionType
                 La función que estará vinculada al botón eliminar.
-            tabla : QtWidgets.QTableWidget
+            tabla: QtWidgets.QTableWidget
                 La tabla a la que se le añadirán los botones.
-            numFila : int
+            numFila: int
                 La fila en la que se insertarán los botones.
         """
         # Se crean dos botones: uno de editar y uno de eliminar
@@ -218,20 +221,32 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
 
-    def insertStock(self):
+    def insertarFilas(self, tabla: QtWidgets.QTableWidget,
+                      funcGuardar: types.FunctionType,
+                      funcEliminar: types.FunctionType,
+                      camposObligatorios: tuple | None = None):
         """Este método inserta una nueva fila en la tabla stock.
 
         Si la fila anterior fue recientemente ingresada y los datos no
         fueron modificados, en vez de añadir una nueva fila se le
         muestra un mensaje al usuario pidiéndole que ingrese los datos
         primero.
+
+        Parámetros
+        ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla a la que se le van a insertar los elementos.
+            camposObligatorios: tuple
+                Los campos de la fil anterior que se van a verificar
+                para que no estén en blanco, evitando así que se puedan
+                insertar múltiples filas en blanco.
+            funcGuardar: types.FunctionType
+                La función guardar que el botón guardar de la fila
+                ejecutará.
+            funcEliminar: types.FunctionType
+                La función eliminar que el botón eliminar de la fila
+                ejecutará.
         """
-        # Guardamos la tabla que vamos a modificar en una variable para
-        # simplificar el código (en vez de escribir toooodo el nombre
-        # de la tabla, al guardarla en una variable podemos
-        # directamente escribir solamente el nombre de la variable y
-        # no escribir todo el nombre de la tabla).
-        tabla = self.pantallaStock.tableWidget
 
         # Las filas en la tabla se ingresan escribiendo el índice en
         # el que queremos que se ingresen. Para ingresar la fila al
@@ -250,16 +265,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # vacía.
         ultimaFila = indiceFinal-1
 
-        # Obtenemos los indices de los campos que no podemos dejar vacíos.
-        iCampos=(0, 1, 5, 6, 7)
         # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
+        for iCampo in camposObligatorios:
             # Si el campo está vacio...
             if tabla.item(ultimaFila, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Ha agregado una fila y todavía no ha ingresado los
-                datos. Ingreselos, guarde los cambios e intente nuevamente."""
+                mensaje = """       Ha agregado una fila y todavía no ha
+                ingresado los datos de la fila anterior. Ingreselos, guarde
+                los cambios e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
@@ -269,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for numCol in range(tabla.columnCount() - 2):
             tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
         self.generarBotones(
-            self.saveStock, self.deleteStock, tabla, indiceFinal)
+            funcGuardar, funcEliminar, tabla, indiceFinal)
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos crear la API del programa
@@ -293,8 +307,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
 
-        # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de ésta.
+        # Bucle: por cada fila de los datos obtenidos de la tabla de la
+        # base de datos, se obtiene el número de fila y los contenidos
+        # de ésta.
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
         for rowNum, rowData in enumerate(datos):
@@ -441,54 +456,54 @@ class MainWindow(QtWidgets.QMainWindow):
             PopUp("Aviso", info).exec()
             self.row = None
 
-    def deleteStock(self):
+    def deleteStock(self, idd: int | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
-        datos."""
-        # Con esta variable guardamos el botón que presionó el usuario
-        # a la vez que ejecutamos la ventana emergente.
+        datos
+        
+        Parámetros
+        ----------
+        idd: int | None = None
+            El número que relaciona la fila de la tabla de la UI con la
+            fila de la tabla de la base de datos.
+            Default: None
+        """
+        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaStock.tableWidget
+        # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        iCampos=(0, 1, 5, 6, 7)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                return tabla.removeRow(row)
-            
-        desc = tabla.item(row, 0).text()
-        idStock = bdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()
-        if not idStock:
-            mensaje = """        La herramienta/insumo no está registrada.
-            Por favor, regístrela primero antes de eliminarla"""
-            return PopUp("Advertencia", mensaje).exec()
-
-        movsRel=bdd.cur.execute(
-            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock[0],)).fetchone()
-        repRel=bdd.cur.execute(
-            "DELETE FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
-        if movsRel or repRel:
+        # Si no se pasó el argumento idd, significa que la fila no está
+        # relacionada con la base de datos. Eso significa que la fila
+        # se insertó en la tabla de la UI, pero aún no se guardaron los
+        # cambios en la base de datos. En ese caso...
+        if not idd:
+            # ...solo debemos sacarla de la UI.
+            return tabla.removeRow(row)
+        # Si está relacionada con la base de datos, antes de eliminar,
+        # tenemos que verificar que la PK de la fila no
+        # tenga relaciones foráneas con otras tablas. Si llegase a
+        # tener, no podemos permitir una eliminación normal por dos
+        # motivos. El primero, necesitamos registrar todos los campos
+        # eliminados en el historial, y eliminar todo de una nos
+        # complica registrar que tablas se eliminaron. El segundo, si
+        # un profe se equivoca y elimina todo, no hay vuelta atrás.
+        # Para esta verificación, llamamos a la función del dal.
+        hayRelacion = dal.verifRelStock(idd)
+        if hayRelacion:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
             esta herramienta/insumo."""
-            return PopUp("Advertencia", mensaje).exec()
+            return PopUp('Advertencia', mensaje).exec()
         
-        descRepetida=tabla.findItems(tabla.item(row, 0).text(), QtCore.Qt.MatchFlag.MatchFixedString)
-        if len(descRepetida) > 1:
-            return tabla.removeRow(row)
-
-        
+        # Si no está relacionado, pregunta al usuario si confirma
+        # eliminar la fila y le advierte que la acción no se puede
+        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar la herramienta/insumo?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí
+        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Busca la fila en la que está el botón
-            row = (tabla.indexAt(
-                self.sender().pos())).row()
             desc = tabla.item(row, 0).text()
             cond = tabla.item(row, 1).text()
             rep = tabla.item(row, 2).text()
@@ -496,13 +511,9 @@ class MainWindow(QtWidgets.QMainWindow):
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
             todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
-            bdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
-                             (self.usuario, time.datetime.now(), "eliminación", "stock de herramientas", row, todo))
-            bdd.cur.execute(
-                "DELETE FROM stock WHERE descripcion = ?", (desc,))
-            bdd.con.commit()
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, todo)
+            dal.eliminarStock(idd)
             self.fetchStock()
-        # TODO: guardar los cambios en el historial.
 
     def fetchalumnos(self):
         bdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
@@ -533,48 +544,32 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(1)
 
-    def fetchmovimientos(self):
+    """def fetchmovimientos(self):
         bdd.cur.execute("SELECT * FROM movimientos")
         datos = bdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
 
-        for rowNum, row in enumerate(datos):
-            if row[3] == 0:
-                estado = "Baja"
-            if row[3] == 1:
-                estado = "Condiciones"
-            if row[3] == 2:
-                estado = "Reparacion"
-            if row[7] == 0:
-                tipo = "Devolucion"
-            if row[7] == 1:
-                tipo = "Retiro"
-            if row[7] == 2:
-                tipo = "Ingreso de materiales"
+        for rowNum, rowData in enumerate(datos):
 
             self.pantallaMovimientos.tableWidget.insertRow(rowNum)
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
-                bdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
+                bdd.cur.execute("select descripcion from stock where id=?", (rowData[2],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
-                "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
-                bdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(rowDataNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
+                "select nombre_apellido from personal where dni=?", (rowData[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(rowDataNum, 3, QtWidgets.QTableWidgetItem(str(
+                bdd.cur.execute("select tipo from personal where dni=?", (rowData[5],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(row[6])))
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[6])))
             self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(row[4])))
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
             self.pantallaMovimientos.tableWidget.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
                 "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
 
-            edit = BotonFila("guardar")
-            borrar = BotonFila("eliminar")
-            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
-            self.pantallaMovimientos.tableWidget.setCellWidget(
-                rowNum, 9, borrar)
+            self.generarBotones(self.saveStock, self.deleteStock, tabla, rowNum)
             self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
 
         self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
@@ -583,7 +578,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(4)"""
 
 
 app = QtWidgets.QApplication(sys.argv)
