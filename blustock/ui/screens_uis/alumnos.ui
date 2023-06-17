@@ -54,7 +54,6 @@
        <property name="font">
         <font>
          <family>Oswald</family>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -99,7 +98,6 @@
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -175,11 +173,6 @@
        </attribute>
        <column>
         <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>DNI</string>
         </property>
        </column>
@@ -219,7 +212,6 @@
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -256,7 +248,6 @@
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>

@@ -505,24 +505,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchStock()
 
     def fetchalumnos(self):
-        bdd.cur.execute("SELECT * FROM personal where tipo!='profesor'")
-        datos = bdd.cur.fetchall()
+        tabla = self.pantallaAlumnos.tableWidget
+        barraBusqueda = self.pantallaAlumnos.lineEdit
+        datos=dal.obtenerDatos("alumnos", barraBusqueda.text())
         self.pantallaAlumnos.tableWidget.setRowCount(0)
 
-        for rowNum, row in enumerate(datos):
+        for rowNum, rowData in enumerate(datos):
             self.pantallaAlumnos.tableWidget.insertRow(rowNum)
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowNum+1)))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(row[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(row[1])))
-            self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(row[2])))
-            edit = BotonFila("editar.png")
-            borrar = BotonFila("eliminar.png")
-            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 4, edit)
-            self.pantallaAlumnos.tableWidget.setCellWidget(rowNum, 5, borrar)
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            self.generarBotones(
+                lambda: self.saveStock(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
+
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
         self.pantallaAlumnos.tableWidget.resizeColumnsToContents()
