@@ -100,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.stackedWidget.setCurrentIndex(5))
         self.opcionTurnos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(7))
-        self.opcionMovimientos.triggered.connect(lambda:self.stackedWidget.setCurrentIndex(4))
+        self.opcionMovimientos.triggered.connect(self.fetchMovimientos)
         self.opcionUsuariosG.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(8))
         self.opcionHistorial.triggered.connect(
@@ -546,49 +546,73 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda row: self.obtenerFilaEditada(tabla, row))
 
     def saveAlumnos(self):
-        # No implementado, cuando esté deleteStock completo lo adapto
+        # No implementado, cuando esté saveStock completo lo adapto
         pass
     def deleteAlumnos(self):
         # No implementado, cuando esté deleteStock completo lo adapto
         pass
 
 
-    """def fetchmovimientos(self):
-        bdd.cur.execute("SELECT * FROM movimientos")
-        datos = bdd.cur.fetchall()
-        self.pantallaMovimientos.tableWidget.setRowCount(0)
+    def fetchMovimientos(self):
+
+        """Este método obtiene los datos de la tabla movimientos y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+
+        tabla = self.pantallaMovimientos.tableWidget
+        barraBusqueda = self.pantallaMovimientos.lineEdit
+
+        datos=dal.obtenerDatos("movimientos", barraBusqueda.text())
 
         for rowNum, rowData in enumerate(datos):
+            tabla.insertRow(rowNum)
 
-            self.pantallaMovimientos.tableWidget.insertRow(rowNum)
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
-                bdd.cur.execute("select descripcion from stock where id=?", (rowData[2],)).fetchone()[0])))
-            self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
-            self.pantallaMovimientos.tableWidget.setItem(rowDataNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
-                "select nombre_apellido from personal where dni=?", (rowData[5],)).fetchone()[0])))
-            self.pantallaMovimientos.tableWidget.setItem(rowDataNum, 3, QtWidgets.QTableWidgetItem(str(
-                bdd.cur.execute("select tipo from personal where dni=?", (rowData[5],)).fetchone()[0])))
-            self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
-            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
-                "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
+            tabla.setItem(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
+            tabla.setItem(
+                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
+            tabla.setItem(
+                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
 
-            self.generarBotones(self.saveStock, self.deleteStock, tabla, rowNum)
-            self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
 
-        self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
-        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
+            self.generarBotones(
+                self.saveMovimientos, self.deleteMovimientos, tabla, rowNum)
+
+        
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Esto lo hacían ustedes o entendí eso
+        tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        self.stackedWidget.setCurrentIndex(4)
 
-        self.stackedWidget.setCurrentIndex(4)"""
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
 
+    def saveMovimientos(self):
+        # No implementado, cuando esté saveStock completo lo adapto
+        pass
+    def deleteMovimientos(self):
+        # No implementado, cuando esté deleteStock completo lo adapto
+        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
