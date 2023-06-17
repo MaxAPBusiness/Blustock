@@ -5,7 +5,7 @@ JOIN stock s ON s.id=m.id_elem
 JOIN estados e ON e.id =m.id_estado
 JOIN personal p ON p.dni = m.id_persona
 JOIN tipos_mov t ON t.id=m.id_tipo
-JOIN ubicaiones u ON u.id=m.id_ubi
+JOIN ubicaciones u ON u.id=m.id_ubi
 WHERE m.id_turno LIKE ?
 OR s.descripcion LIKE ?
 OR e.descripcion LIKE ?
