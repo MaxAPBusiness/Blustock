@@ -47,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.hide()
         self.filaEditada = 0
         boton = toolboton("usuario")
-        boton.setIconSize(QtCore.QSize(60,55))
+        boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
         self.menubar.adjustSize()
         self.pantallaAlumnos = QtWidgets.QWidget()
@@ -318,17 +318,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            total = rowData[1]+rowData[2]+rowData[3]
-            tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
+            total = rowData[2]+rowData[3]+rowData[4]
+            tabla.setItem(rowNum, 5, QtWidgets.QTableWidgetItem(str(total)))
 
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
             tabla.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
                 rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
+            tabla.setItem(
+                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[7])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -337,6 +339,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.generarBotones(
                 self.saveStock, self.deleteStock, tabla, rowNum)
 
+        tabla.setColumnHidden(0,True)
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -345,11 +348,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # columna de una tabla se expanda o no automáticamente conforme
         # se extiende la tabla.
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
         self.row=None
@@ -375,7 +380,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla=self.pantallaStock.tableWidget
         index = tabla.indexAt(self.sender().pos())
         row = index.row()
-        iCampos=(0, 1, 5, 6, 7)
+        iCampos=(1, 2, 6, 7, 8)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
             # Si el campo está vacio...
