@@ -260,6 +260,11 @@
        </attribute>
        <column>
         <property name="text">
+         <string>Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Herramienta</string>
         </property>
        </column>
@@ -270,12 +275,17 @@
        </column>
        <column>
         <property name="text">
-         <string>Nombre y Apellido</string>
+         <string>Cantidad</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Clase</string>
+         <string>Pañolero</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Motivo</string>
         </property>
        </column>
        <column>
@@ -285,17 +295,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Cantidad</string>
+         <string>Turno</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Tipo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Turno de pañolero</string>
+         <string>Ubicación</string>
         </property>
        </column>
        <column>
