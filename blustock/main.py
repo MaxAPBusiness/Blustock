@@ -46,11 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
         self.filaEditada = 0
-        a=QtWidgets.QMenu()
-        b=QtGui.QAction("sopas",a)
-        a.addAction(b)
         boton = toolboton("usuario")
-        boton.setMenu(a)
         boton.setIconSize(QtCore.QSize(60,55))
         self.menubar.setCornerWidget(boton)
         self.menubar.adjustSize()
@@ -438,6 +434,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            self.row = None
 
     def deleteStock(self):
         """Este método elimina una fila de una tabla de la base de

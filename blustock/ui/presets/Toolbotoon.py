@@ -57,3 +57,13 @@ class toolboton(QtWidgets.QToolButton):
         self.setCursor(QtGui.QCursor(
             QtCore.Qt.CursorShape.PointingHandCursor))
         self.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
+        a=QtWidgets.QMenu()
+        b=QtGui.QAction("Cerrar sesion",a)
+        c=QtGui.QAction("Terminar turno",a)
+        d=QtGui.QAction("Iniciar turno",a)
+        a.addAction(b)
+        a.addAction(c)
+        a.addAction(d)
+
+        self.setMenu(a)
+
