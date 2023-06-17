@@ -244,6 +244,16 @@
     </font>
    </property>
   </action>
+  <action name="actionGenerar_movimiento">
+   <property name="text">
+    <string>Generar ingreso</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
