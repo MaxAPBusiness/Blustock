@@ -346,6 +346,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
+            print(rowData[0])
             self.generarBotones(
                 lambda: self.saveStock(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
 
@@ -377,6 +378,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def saveStock(self, idd: int | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla de la base de datos"""
+        print(idd)
         # Se pregunta al usuario si desea guardar los cambios en la
         # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
@@ -476,7 +478,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # complica registrar que tablas se eliminaron. El segundo, si
         # un profe se equivoca y elimina todo, no hay vuelta atrás.
         # Para esta verificación, llamamos a la función del dal.
-        hayRelacion = dal.verifRelStock(idd)
+        hayRelacion = dal.verifElimStock(idd)
         if hayRelacion:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
@@ -493,14 +495,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Obtenemos los datos para guardarlos en el historial.
             desc = tabla.item(row, 0).text()
             cond = tabla.item(row, 1).text()
             rep = tabla.item(row, 2).text()
             baja = tabla.item(row, 3).text()
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
-            todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, todo)
+            ubi = tabla.item(row, 7).text()
+
+            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+
+            # Insertamos los datos en el historial para que quede registro.
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+            # Eliminamos los datos
             dal.eliminarStock(idd)
             self.fetchStock()
 
