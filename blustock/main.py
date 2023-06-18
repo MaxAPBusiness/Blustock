@@ -44,8 +44,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        self.contador2=0
+        self.contador=0
+        self.cofre = []
         self.menubar.hide()
-        self.filaEditada = 0
         boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
@@ -373,16 +375,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(3)
         self.row=None
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
+        tabla.cellClicked.connect(lambda row: self.obtenerFilaEditada(tabla, row))
+        tabla.cellChanged.connect(lambda row, col: self.porfavor(tabla,row,col))
+
+
 
     def obtenerFilaEditada(self, tabla, row):
         """Esta método imprime la fila clickeada.
         Hay que verla después"""
         if self.row != row:
             self.row=row
-            self.filaEditada = tabla.item(row, 0).text()
-            print(self.filaEditada)
+            filaEditada = tabla.item(row, 1).text()
+            if filaEditada in self.cofre:
+                self.cofre.remove(filaEditada) 
+                self.cofre.append(filaEditada) 
+            else:
+                self.cofre.append(filaEditada) 
+
+    
+    def porfavor(self,tabla, row,col):
+        if col == 1 and self.contador==self.contador2:
+            self.contador2+=1
+            self.cofre.append(int(tabla.item(row, 0).text()))
+            self.cofre.append(tabla.item(row, 1).text())
 
     def saveStock(self):
         """Este método guarda los cambios hechos en la tabla de la ui
@@ -412,12 +427,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
 
             # Se obtiene el texto de todas las celdas.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
+            cond = tabla.item(row, 2).text()
+            rep = tabla.item(row, 3).text()
+            baja = tabla.item(row, 4).text()
+            grupo = tabla.item(row, 6).text()
+            subgrupo = tabla.item(row, 7).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
@@ -443,18 +457,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 relacionado al grupo e ingrese nuevamente."""
                 return PopUp("Error", info).exec()
             # Guardamos los datos de la fila en
+            index = self.cofre[::-1]
+            for i in range(len(index)):
+                if type(index[i])==int:
+                    datonuevo = index[i-1]
+                    datoViejo=index[i+1]
+                    break
+
             bdd.cur.execute(
                 """UPDATE stock
                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
                 cant_baja = ?, id_subgrupo = ?
                 WHERE descripcion = ?""",
-                (desc, cond, rep, baja, idSubgrupo[0], self.filaEditada,)
+                (datonuevo, cond, rep, baja, idSubgrupo[0], datoViejo,)
             )
             bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
             self.row = None
+            self.cofre=[]
+            self.contador+=1
 
     def deleteStock(self, idd: int | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
