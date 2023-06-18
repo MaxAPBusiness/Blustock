@@ -21,7 +21,6 @@ import sys
 
 bdd.refrescarBDD()
 
-
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
 
@@ -451,76 +450,6 @@ class MainWindow(QtWidgets.QMainWindow):
             PopUp("Aviso", info).exec()
 
     def deleteStock(self, datos: list) -> None:
-    
-        """Este método elimina una fila de una tabla de la base de
-        datos
-        
-        Parámetros
-        ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
-        """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
-        tabla=self.pantallaStock.tableWidget
-        # Obtenemos la fila que se va a eliminar.
-        row = (tabla.indexAt(self.sender().pos())).row()
-        if row == len(datos):
-            idd=None
-        else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
-        if not idd:
-            # ...solo debemos sacarla de la UI.
-            return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
-        hayRelacion = dal.verifElimStock(idd)
-        if hayRelacion:
-            mensaje = """        La herramienta/insumo tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            esta herramienta/insumo."""
-            return PopUp('Advertencia', mensaje).exec()
-        
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar la herramienta/insumo?"""
-        popup = PopUp("Pregunta", mensaje).exec()
-
-        # Si el usuario presionó el boton sí...
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Obtenemos los datos para guardarlos en el historial.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
-
-            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-            # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-            # Eliminamos los datos
-            dal.eliminarDatos(idd)
-            self.fetchStock()
-
-    def deleteStock(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -616,7 +545,57 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(1)
 
-    """def fetchmovimientos(self):
+    def fetchmovimientos(self):
+        bdd.cur.execute("SELECT * FROM movimientos")
+        datos = bdd.cur.fetchall()
+        self.pantallaMovimientos.tableWidget.setRowCount(0)
+
+        for rowNum, row in enumerate(datos):
+            if row[3] == 0:
+                estado = "Baja"
+            if row[3] == 1:
+                estado = "Condiciones"
+            if row[3] == 2:
+                estado = "Reparacion"
+            if row[7] == 0:
+                tipo = "Devolucion"
+            if row[7] == 1:
+                tipo = "Retiro"
+            if row[7] == 2:
+                tipo = "Ingreso de materiales"
+
+            self.pantallaMovimientos.tableWidget.insertRow(rowNum)
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
+                bdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
+                "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
+                bdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(row[6])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(row[4])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
+                "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
+
+            edit = BotonFila("editar.png")
+            borrar = BotonFila("eliminar.png")
+            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
+            self.pantallaMovimientos.tableWidget.setCellWidget(
+                rowNum, 9, borrar)
+            self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
+
+        self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
+        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(4)
         bdd.cur.execute("SELECT * FROM movimientos")
         datos = bdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
@@ -650,7 +629,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        self.stackedWidget.setCurrentIndex(4)"""
+        self.stackedWidget.setCurrentIndex(4)
 
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
