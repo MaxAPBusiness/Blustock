@@ -509,7 +509,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # Eliminamos los datos
-            dal.eliminarStock(idd)
+            dal.eliminarDatos(idd)
             self.fetchStock()
 
     def fetchalumnos(self):

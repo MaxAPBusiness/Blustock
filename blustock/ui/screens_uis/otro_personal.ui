@@ -178,6 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -269,22 +270,17 @@ QPushButton:pressed {
        </property>
        <column>
         <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>DNI</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Nombre y Apellido</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Curso</string>
+         <string>Clase</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>DNI</string>
         </property>
        </column>
        <column>

@@ -1,4 +1,4 @@
-SELECT s.id, s.descripcion, g.descripcion
+SELECT s.descripcion, g.descripcion
 FROM subgrupos s
 JOIN grupos g
 ON s.id_grupo=g.id

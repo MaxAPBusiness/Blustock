@@ -178,6 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -292,37 +293,42 @@ QPushButton:pressed {
        </column>
        <column>
         <property name="text">
-         <string>Fecha</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Alumno</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Horario de ingreso</string>
+         <string>Fecha</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Horario de egreso</string>
+         <string>Horario Ingreso</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Profesor de egreso</string>
+         <string>Horario Egreso</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 1</string>
+         <string>Profesor responsable ingreso</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 2</string>
+         <string>Profesor responsable egreso</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string/>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string/>
         </property>
        </column>
       </widget>
