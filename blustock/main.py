@@ -806,7 +806,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Método enumerate: devuelve una lista con el número y el
         # elemento.
         for rowNum, rowData in enumerate(datos):
-            print("datarow", rowData)
             # Se añade una fila a la tabla.
             # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(rowNum)
@@ -820,9 +819,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -882,7 +881,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # complica registrar que tablas se eliminaron. El segundo, si
         # un profe se equivoca y elimina todo, no hay vuelta atrás.
         # Para esta verificación, llamamos a la función del dal.
-        hayRelacion = dal.verifElimubGrupos(idd)
+        hayRelacion = dal.verifElimSubgrupos(idd)
         if hayRelacion:
             mensaje = """        El subgrupo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
@@ -915,6 +914,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # Eliminamos los datos
             dal.eliminarDatos(idd)
             self.fetchStock()
+
 app = QtWidgets.QApplication(sys.argv)
 
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
