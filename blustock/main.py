@@ -348,7 +348,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # queremos que se inserten.
             print(rowData[0])
             self.generarBotones(
-                lambda: self.saveStock(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
+                lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -375,10 +375,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filaEditada = tabla.item(row, 0).text()
         print(self.filaEditada)
 
-    def saveStock(self, idd: int | None = None):
+    def saveStock(self, datos: list):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla de la base de datos"""
-        print(idd)
+        
         # Se pregunta al usuario si desea guardar los cambios en la
         # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
@@ -402,6 +402,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            
 
             # Se obtiene el texto de todas las celdas.
             desc = tabla.item(row, 0).text()
@@ -434,6 +435,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 pertenece al grupo ingresado. Regístrelo o asegúrese que esté
                 relacionado al grupo e ingrese nuevamente."""
                 return PopUp("Error", info).exec()
+            if row == len(datos):
+                return
+            else:
+                idd=datos[row][0]
             # Guardamos los datos de la fila en
             bdd.cur.execute(
                 """UPDATE stock
@@ -447,7 +452,7 @@ class MainWindow(QtWidgets.QMainWindow):
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
-    def deleteStock(self, idd: int | None = None) -> None:
+    def deleteStock(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -462,6 +467,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla=self.pantallaStock.tableWidget
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
+        if row == len(datos):
+            idd=None
+        else:
+            idd=datos[row][0]
         # Si no se pasó el argumento idd, significa que la fila no está
         # relacionada con la base de datos. Eso significa que la fila
         # se insertó en la tabla de la UI, pero aún no se guardaron los
