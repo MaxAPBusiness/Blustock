@@ -671,20 +671,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # DNI
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
             # Nombre y Apellido
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
             # Descripción
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
+
+            # fijarse que no existe la función saveOtroPersonal
             self.generarBotones(
-                self.saveOtroPersonal, self.deleteOtroPersonal, tabla, rowNum)
+                self.saveStock, self.deleteOtroPersonal, tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -695,12 +697,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # se extiende la tabla.
 
         # cuál tendria que poner que no se expanda
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(5)
         tabla.cellClicked.connect(
@@ -827,8 +829,10 @@ class MainWindow(QtWidgets.QMainWindow):
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
+
+            # fijarse que no existe la función saveSubgrupos
             self.generarBotones(
-                self.saveStock, self.deleteStock, tabla, rowNum)
+                self.saveStock, self.deleteSubGrupos, tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
