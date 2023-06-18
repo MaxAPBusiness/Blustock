@@ -37,7 +37,7 @@
     <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>-1</number>
+       <number>0</number>
       </property>
      </widget>
     </item>
@@ -57,7 +57,9 @@
      <string>HERRAMIENTAS</string>
     </property>
     <addaction name="opcionStock"/>
+    <addaction name="separator"/>
     <addaction name="opcionSubgrupos"/>
+    <addaction name="separator"/>
     <addaction name="opcionGrupos"/>
    </widget>
    <widget class="QMenu" name="menuPersonal">
@@ -65,6 +67,7 @@
      <string>PERSONAL</string>
     </property>
     <addaction name="opcionAlumnos"/>
+    <addaction name="separator"/>
     <addaction name="opcionOtroPersonal"/>
    </widget>
    <widget class="QMenu" name="menuMovimientos">
@@ -72,6 +75,8 @@
      <string>MOVIMIENTOS</string>
     </property>
     <addaction name="opcionMovimientos"/>
+    <addaction name="separator"/>
+    <addaction name="actionGenerar_movimiento"/>
    </widget>
    <widget class="QMenu" name="menuTurnos">
     <property name="title">
@@ -232,6 +237,16 @@
   <action name="opcionHistorial">
    <property name="text">
     <string>Ver historial</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionGenerar_movimiento">
+   <property name="text">
+    <string>Generar ingreso</string>
    </property>
    <property name="font">
     <font>

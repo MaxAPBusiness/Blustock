@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>719</width>
-    <height>547</height>
+    <width>710</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -143,7 +143,7 @@ QPushButton:pressed {
 
 </string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_3">
+  <layout class="QHBoxLayout" name="horizontalLayout_4">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -177,14 +177,13 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald</family>
-         <pointsize>-1</pointsize>
+         <family>Oswald,sans-serif</family>
          <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de alumnos</string>
+        <string>Gestión de grupos</string>
        </property>
       </widget>
      </item>
@@ -202,7 +201,7 @@ QPushButton:pressed {
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>lupa.png</pixmap>
+          <pixmap>Nueva carpeta/lupa.png</pixmap>
          </property>
         </widget>
        </item>
@@ -222,8 +221,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>10</pointsize>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -268,29 +267,12 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>DNI</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Nombre y Apellido</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Curso</string>
+         <string>Grupo</string>
         </property>
        </column>
        <column>
@@ -303,36 +285,6 @@ QPushButton:pressed {
          <string/>
         </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item row="0" column="1">
-        <property name="text">
-         <string>43290132</string>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string>Juan </string>
-        </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string>6°C</string>
-        </property>
-       </item>
-       <item row="0" column="4">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="0" column="5">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -344,11 +296,23 @@ QPushButton:pressed {
         <number>60</number>
        </property>
        <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald</family>
-           <pointsize>12</pointsize>
+           <family>Oswald,sans-serif</family>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -373,24 +337,6 @@ QPushButton:pressed {
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="font">
-          <font>
-           <family>Oswald</family>
-           <pointsize>12</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Pase anual</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>

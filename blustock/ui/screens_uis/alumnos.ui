@@ -6,145 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>759</width>
-    <height>475</height>
+    <width>705</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">*{
-    font-family: 'Oswald', sans-serif;
-    font-weight: 400;
-}
-
-QMenuBar{
-    background-color: #293045;
-    padding: 0;    
-    font-size: 14px;
-    color:white;
-}
-
-QMenuBar:item{
-    padding: 17px;
-    border-radius: 10px;
-
-}
-
-QMenuBar:item:selected{
-    background-color: #768AC5;
-    color:black;
-    border-radius: 5px;
-    margin: 10px;
-    
-    
-
-}
-
-QMenu{
-    background-color: #293045;
-
-    color: white;
-}
-
-QMenu:item{
-    padding: 5px;
-    border-radius: 5px;
-}
-
-QMenu:item:selected{
-    background-color: #768AC5;
-    color:white;
-
-}
-Qmenu#icon{
-   icon:size 40px; 
-    
-}
-
-
-QRadioButton:indicator{
-    border-style: solid;
-    border-color:  #293045;
-    border-radius: 6%;
-    border-width:  2px;
-    background-color: #BABFCE;
-}
-QRadioButton::indicator:checked{
-    background-color: #768AC5;
-}
-
-#label{
-    font-size: 35px;
-}
-
-#usuariosLabel{
-    font-size: 14px;
-}
-
-#contraseALabel{
-    font-size: 14px;
-}
-
-#usuariosLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#passwordLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#labelprofesores{
-    font-size: 26px;
-}
-
-QLineEdit{
-    border-radius: 5px;
-    background-color: #BABFCE;
-    
-}
-
-#title{
-    width: 100px;
-    height: 200px;
-}
-
-
-
-QPushButton{
-    border-color:#293045;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 6px;
-    background-color: #293045;
-    color:#ffffff;
-    padding: 3px 8px;
-
-}
-QPushButton:hover{
-    background-color:#768AC5;
-    color:#293045;
-}
-QPushButton:pressed {
-    background-color: #293045;
-
-}
-
-#pushButton_5{
-    padding: 10px;
-    background-color: #768AC5;
-    border-radius: 15%;
-}
-
-</string>
+   <string notr="true"/>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_3">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>8</number>
+   </property>
+   <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
       <number>20</number>
@@ -177,14 +53,13 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
+         <family>Oswald</family>
          <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de herramientas</string>
+        <string>Gestión de alumnos</string>
        </property>
       </widget>
      </item>
@@ -222,7 +97,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -264,28 +140,39 @@ QPushButton:pressed {
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>
        </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>false</bool>
+       </property>
+       <property name="showGrid">
+        <bool>true</bool>
+       </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderCascadingSectionResizes">
+        <bool>false</bool>
+       </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
-       <attribute name="verticalHeaderCascadingSectionResizes">
-        <bool>false</bool>
-       </attribute>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>ID</string>
@@ -293,84 +180,29 @@ QPushButton:pressed {
        </column>
        <column>
         <property name="text">
-         <string>Descripcion</string>
+         <string>DNI</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>En condiciones</string>
+         <string>Nombre y Apellido</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>En reparación</string>
+         <string>Curso</string>
         </property>
        </column>
        <column>
-        <property name="text">
-         <string>De baja</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Total</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Grupo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Subgrupo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>-</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>-</string>
-        </property>
-       </column>
-       <item row="0" column="1">
         <property name="text">
          <string/>
         </property>
-       </item>
-       <item row="0" column="2">
+       </column>
+       <column>
         <property name="text">
          <string/>
         </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string/>
-        </property>
-       </item>
-       <item row="0" column="8">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="0" column="9">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
-       <item row="1" column="8">
-        <property name="text">
-         <string>Editar</string>
-        </property>
-       </item>
-       <item row="1" column="9">
-        <property name="text">
-         <string>Borrar</string>
-        </property>
-       </item>
+       </column>
       </widget>
      </item>
      <item>
@@ -382,26 +214,17 @@ QPushButton:pressed {
         <number>60</number>
        </property>
        <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
+           <pointsize>12</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Agregar</string>
@@ -420,6 +243,30 @@ QPushButton:pressed {
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>Oswald</family>
+           <pointsize>12</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Pase anual</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

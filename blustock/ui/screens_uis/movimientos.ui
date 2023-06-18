@@ -6,21 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>705</width>
-    <height>496</height>
+    <width>914</width>
+    <height>534</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">/*uwu*/
+</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>8</number>
-   </property>
-   <item row="0" column="0">
+  <layout class="QHBoxLayout" name="horizontalLayout_4">
+   <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
       <number>20</number>
@@ -59,7 +57,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Gestión de alumnos</string>
+        <string>Gestión de movimientos del pañol</string>
        </property>
       </widget>
      </item>
@@ -98,7 +96,7 @@
          <property name="font">
           <font>
            <family>Oswald</family>
-           <pointsize>10</pointsize>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -127,6 +125,114 @@
       </layout>
      </item>
      <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="topMargin">
+        <number>20</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Persona:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <item>
+          <property name="text">
+           <string>Todos</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="maximumSize">
+          <size>
+           <width>35</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Desde:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="dateTimeEdit"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="maximumSize">
+          <size>
+           <width>32</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Hasta:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="dateTimeEdit_2"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Herramienta:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox_2">
+         <item>
+          <property name="text">
+           <string>Todas</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Estado:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox_3">
+         <item>
+          <property name="text">
+           <string>Cualquiera</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="QTableWidget" name="tableWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -140,32 +246,11 @@
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>
        </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>false</bool>
-       </property>
-       <property name="showGrid">
-        <bool>true</bool>
-       </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-       <property name="cornerButtonEnabled">
-        <bool>false</bool>
-       </property>
-       <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>false</bool>
+       <attribute name="horizontalHeaderDefaultSectionSize">
+        <number>110</number>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
@@ -173,16 +258,6 @@
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
-       <row>
-        <property name="text">
-         <string>Nueva fila</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>Nueva fila</string>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>ID</string>
@@ -190,17 +265,57 @@
        </column>
        <column>
         <property name="text">
-         <string>DNI</string>
+         <string>Tipo</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Nombre y Apellido</string>
+         <string>Herramienta</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Curso</string>
+         <string>Estado</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Cantidad</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Persona</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Motivo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Fecha y Hora</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Turno</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ubicación</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Pañorelo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Profesor a cargo del turno</string>
         </property>
        </column>
        <column>
@@ -213,46 +328,6 @@
          <string/>
         </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string>a</string>
-        </property>
-       </item>
-       <item row="0" column="1">
-        <property name="text">
-         <string>b</string>
-        </property>
-       </item>
-       <item row="0" column="2">
-        <property name="text">
-         <string>c</string>
-        </property>
-       </item>
-       <item row="0" column="3">
-        <property name="text">
-         <string>d</string>
-        </property>
-       </item>
-       <item row="1" column="0">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item row="1" column="1">
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item row="1" column="2">
-        <property name="text">
-         <string>3</string>
-        </property>
-       </item>
-       <item row="1" column="3">
-        <property name="text">
-         <string>4</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -264,11 +339,23 @@
         <number>60</number>
        </property>
        <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
            <family>Oswald</family>
-           <pointsize>12</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -293,30 +380,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <family>Oswald</family>
-           <pointsize>12</pointsize>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Pase anual</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>

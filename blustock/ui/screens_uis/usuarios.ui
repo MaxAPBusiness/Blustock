@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>710</width>
-    <height>500</height>
+    <width>738</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -143,7 +143,7 @@ QPushButton:pressed {
 
 </string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_4">
+  <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -177,14 +177,13 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
+         <family>Oswald</family>
          <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de grupos</string>
+        <string>Gestión de usuarios</string>
        </property>
       </widget>
      </item>
@@ -202,7 +201,7 @@ QPushButton:pressed {
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>Nueva carpeta/lupa.png</pixmap>
+          <pixmap>lupa.png</pixmap>
          </property>
         </widget>
        </item>
@@ -222,7 +221,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
+           <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -236,104 +236,17 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="topMargin">
-          <number>20</number>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="bottomMargin">
-          <number>20</number>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
          </property>
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="maximumSize">
-            <size>
-             <width>35</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_7">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Ordenar por: </string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Nombre</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox_2">
-           <property name="text">
-            <string>x</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>30</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>^</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -354,17 +267,6 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <row>
         <property name="text">
          <string/>
@@ -372,45 +274,60 @@ QPushButton:pressed {
        </row>
        <column>
         <property name="text">
-         <string>Grupo</string>
+         <string>DNI</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 1</string>
+         <string>Nombre y Apellido</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Boton 2</string>
+         <string>Usuario</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Contraseña</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string/>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string/>
         </property>
        </column>
        <item row="0" column="0">
         <property name="text">
-         <string>002</string>
+         <string>43290132</string>
         </property>
        </item>
        <item row="0" column="1">
         <property name="text">
-         <string>Editar</string>
+         <string>Juan </string>
         </property>
        </item>
        <item row="0" column="2">
         <property name="text">
-         <string>Borrar</string>
+         <string>Profesor</string>
         </property>
        </item>
-       <item row="1" column="0">
+       <item row="0" column="3">
         <property name="text">
-         <string>102</string>
+         <string>contraseña_segura</string>
         </property>
        </item>
-       <item row="1" column="1">
+       <item row="0" column="4">
         <property name="text">
          <string>Editar</string>
         </property>
        </item>
-       <item row="1" column="2">
+       <item row="0" column="5">
         <property name="text">
          <string>Borrar</string>
         </property>
@@ -426,7 +343,7 @@ QPushButton:pressed {
         <number>60</number>
        </property>
        <item>
-        <spacer name="horizontalSpacer_3">
+        <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -442,7 +359,8 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
+           <pointsize>12</pointsize>
            <weight>50</weight>
            <bold>false</bold>
           </font>
@@ -456,7 +374,7 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
+        <spacer name="horizontalSpacer_3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

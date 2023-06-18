@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
-    <height>490</height>
+    <width>759</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -143,7 +143,7 @@ QPushButton:pressed {
 
 </string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -177,14 +177,13 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
+         <family>Oswald</family>
          <pointsize>-1</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Historial de cambios</string>
+        <string>Gestión de herramientas e insumos</string>
        </property>
       </widget>
      </item>
@@ -198,11 +197,17 @@ QPushButton:pressed {
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
          <property name="text">
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>Nueva carpeta/lupa.png</pixmap>
+          <pixmap>lupa.png</pixmap>
          </property>
         </widget>
        </item>
@@ -222,8 +227,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
+           <pointsize>11</pointsize>
            <bold>false</bold>
           </font>
          </property>
@@ -248,126 +253,6 @@ QPushButton:pressed {
          </property>
         </spacer>
        </item>
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Ordenar por:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox">
-         <property name="text">
-          <string>Usuario</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_2">
-         <property name="text">
-          <string>Fecha</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_3">
-         <property name="text">
-          <string>Tipo</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_4">
-         <property name="text">
-          <string>Tabla</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_3">
-         <property name="maximumSize">
-          <size>
-           <width>30</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="text">
-          <string> ^ </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Usuario:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Desde:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDateEdit" name="dateEdit"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Hasta:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDateEdit" name="dateEdit_2"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Tipo:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox_3"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Tabla:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox_2"/>
-       </item>
       </layout>
      </item>
      <item>
@@ -387,18 +272,6 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="horizontalHeaderDefaultSectionSize">
-        <number>110</number>
-       </attribute>
-       <attribute name="horizontalHeaderHighlightSections">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-        <bool>true</bool>
-       </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
@@ -408,86 +281,112 @@ QPushButton:pressed {
        <attribute name="verticalHeaderCascadingSectionResizes">
         <bool>false</bool>
        </attribute>
-       <attribute name="verticalHeaderHighlightSections">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderStretchLastSection">
-        <bool>false</bool>
-       </attribute>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string/>
-        </property>
-       </row>
        <column>
         <property name="text">
-         <string>Nombre y apellido</string>
+         <string>Id</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Usuario</string>
+         <string>Descripción</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Fecha y hora</string>
+         <string>Condiciones</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Descripcion</string>
+         <string>Reparación</string>
         </property>
        </column>
-       <item row="0" column="0">
+       <column>
         <property name="text">
-         <string>AAAAA</string>
+         <string>Baja</string>
         </property>
-       </item>
-       <item row="0" column="1">
+       </column>
+       <column>
         <property name="text">
-         <string>admin12345</string>
+         <string>Total</string>
         </property>
-       </item>
-       <item row="0" column="2">
+       </column>
+       <column>
         <property name="text">
-         <string>17/04/2023</string>
+         <string>Grupo</string>
         </property>
-       </item>
-       <item row="0" column="3">
+       </column>
+       <column>
         <property name="text">
-         <string>Agregó a la tabla Grupos la fila de id A con los datos A.</string>
+         <string>Subgrupo</string>
         </property>
-       </item>
-       <item row="1" column="0">
+       </column>
+       <column>
         <property name="text">
-         <string>AAAAA</string>
+         <string>Ubicación</string>
         </property>
-       </item>
-       <item row="1" column="1">
+       </column>
+       <column>
         <property name="text">
-         <string>admin12345</string>
+         <string>-</string>
         </property>
-       </item>
-       <item row="1" column="2">
+       </column>
+       <column>
         <property name="text">
-         <string>17/04/2023</string>
+         <string>-</string>
         </property>
-       </item>
-       <item row="1" column="3">
-        <property name="text">
-         <string>Editó la fila de id J de la tabla Subgrupos, reemplazando los datos('JJ', 'A') con los datos ('JJ', 'A').</string>
-        </property>
-       </item>
+       </column>
       </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>60</number>
+       </property>
+       <property name="rightMargin">
+        <number>60</number>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="font">
+          <font>
+           <family>Oswald</family>
+           <pointsize>12</pointsize>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Agregar</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
