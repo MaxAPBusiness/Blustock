@@ -97,6 +97,10 @@ for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'rsc{os.sep
         os.path.join(os.path.abspath(os.getcwd()),
             f'rsc{os.sep}fonts{os.sep}{fuente}')
         )
-    
+def abrir_archivo_ui():
+    ventana_ui = uic.loadUi("uis/C-Movimiento.ui")
+    ventana_ui.show()
+agregar=QtWidgets.QPushButton("pushButton_2")
+agregar.clicked.connect(abrir_archivo_ui)   
 window=MainWindow()
 app.exec()
