@@ -586,6 +586,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
+        
     def saveAlumnos(self):
         # No implementado, cuando esté saveStock completo lo adapto
         pass
@@ -1162,7 +1163,7 @@ class MainWindow(QtWidgets.QMainWindow):
         bdd.cur.execute("SELECT * FROM movimientos")
         datos = bdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
->>>>>>> conectar-base
+
 
         for rowNum, rowData in enumerate(datos):
 
@@ -1181,7 +1182,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.generarBotones(
                 self.saveGrupos, self.deleteGrupos, tabla, rowNum)
 
-<<<<<<< HEAD
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
@@ -1492,7 +1492,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # Eliminamos los datos
             dal.eliminarDatos(idd)
             self.fetchStock()
->>>>>>> conectar-base
+
 
 app = QtWidgets.QApplication(sys.argv)
 
