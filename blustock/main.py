@@ -581,7 +581,67 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
+    def saveAlumnos(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
         
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1, 2)
+
+        for iCampo in iCampos:
+            if tabla.item(row, iCampo).text() == "":
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+        
+        try:
+            dni = int(tabla.item(row, 2).text())
+        except:
+            mensaje = """       Los datos ingresados no son válidos.
+            Por favor, ingreselos correctamente."""
+            return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            nombre = tabla.item(row, 0).text()
+            clase= tabla.item(row, 1).text()
+
+            idClase=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+            ).fetchone()
+            if not idClase:
+                info = """        El curso ingresado no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, idClase, dni,)
+                )
+            else:
+                idd=datos[row][0]
+                bdd.cur.execute(
+                    """UPDATE alumnos
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase, dni, idd,)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
+         
 
     def deleteAlumnos(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -712,8 +772,8 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda row: self.obtenerFilaEditada(tabla, row))
 
     def saveMovimientos(self):
-        # No implementado, cuando esté saveStock completo lo adapto
-        pass
+        print("No implementado")
+
     def deleteMovimientos(self):
         # No implementado, cuando esté deleteStock completo lo adapto
         pass
@@ -756,68 +816,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(2)
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
-
-    
-    def saveAlumnos(self, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla alumnos de la base de datos.
-        
-        Parámetros
-        ----------
-            datos: list | None = None
-                Los datos de la tabla alumnos, que se usarán para
-                obtener el id de la fila en la tabla.
-        """
-        tabla=self.pantallaAlumnos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        iCampos=(0, 1, 2)
-
-        for iCampo in iCampos:
-            if tabla.item(row, iCampo).text() == "":
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
-        
-        try:
-            dni = int(tabla.item(row, 2).text())
-        except:
-            mensaje = """       Los datos ingresados no son válidos.
-            Por favor, ingreselos correctamente."""
-            return PopUp("Error", mensaje).exec()
-
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 0).text()
-            clase= tabla.item(row, 1).text()
-
-            idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
-            ).fetchone()
-            if not idClase:
-                info = """        El curso ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info).exec()
-
-            if datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase, dni,)
-                )
-            else:
-                idd=datos[row][0]
-                bdd.cur.execute(
-                    """UPDATE alumnos
-                    SET nombre_apellido=?, id_clase=?, dni=?
-                    WHERE id = ?""",
-                    (nombre, idClase, dni, idd,)
-                )
-            bdd.con.commit()
-            # self.fetchStock()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-    
     def saveGrupos(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla grupos de la base de datos.
@@ -853,157 +851,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
-    
-    def saveOtroPersonal(self, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla personal de la base de datos.
-        
-        Parámetros
-        ----------
-            datos: list | None = None
-                Los datos de la tabla personal, que se usarán para
-                obtener el id de la fila en la tabla.
-        """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        iCampos=(0, 1, 2)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
-        
-        try:
-            dni = int(tabla.item(row, 2).text())
-        except:
-            mensaje = """       Los datos ingresados no son válidos.
-            Por favor, ingreselos correctamente."""
-            return PopUp("Error", mensaje).exec()
-
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
-            nombre = tabla.item(row, 0).text()
-            clase= tabla.item(row, 1).text()
-
-            # Verificamos que el grupo esté registrado.
-            idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
-            ).fetchone()
-            # Si no lo está...
-            if not idClase:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
-                info = """        La clase ingresada no está registrado.
-                Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info).exec()
-
-            if datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase, dni,)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE alumnos
-                    SET nombre_apellido=?, id_clase=?, dni=?
-                    WHERE id = ?""",
-                    (nombre, idClase, dni, idd,)
-                )
-            bdd.con.commit()
-            # self.fetchStock()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-    
-    def saveSubgrupos(self, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla subgrupos de la base de datos.
-        
-        Parámetros
-        ----------
-            datos: list | None = None
-                Los datos de la tabla subgrupos, que se usarán para
-                obtener el id de la fila en la tabla.
-        """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        iCampos=(0, 1)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
-
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
-            subgrupo = tabla.item(row, 0).text()
-            grupo= tabla.item(row, 1).text()
-
-            # Verificamos que el grupo esté registrado.
-            idGrupo=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (grupo,)
-            ).fetchone()
-            # Si no lo está...
-            if not idGrupo:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
-                info = """        El grupo ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info).exec()
-
-            if datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?)",
-                    (subgrupo, idGrupo)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE subgrupos
-                    SET descripcion=?, id_grupo=?
-                    WHERE id = ?""",
-                    (subgrupo, grupo, idd)
-                )
-            bdd.con.commit()
-            # self.fetchStock()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-    
-   
-
-
-    
-    def saveGrupos(self):
-        # No implementado, cuando esté saveStock completo lo adapto
-        pass
     def deleteGrupos(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
@@ -1063,6 +910,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)
 
+    
+    
+    
+   
+   
+
+
+    
+    
+    
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -1140,7 +997,81 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda row: self.obtenerFilaEditada(tabla, row))
 
         lambda: self.stackedWidget.setCurrentIndex(5)
+    def saveOtroPersonal(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla personal de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla personal, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1, 2)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+        
+        try:
+            dni = int(tabla.item(row, 2).text())
+        except:
+            mensaje = """       Los datos ingresados no son válidos.
+            Por favor, ingreselos correctamente."""
+            return PopUp("Error", mensaje).exec()
 
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            nombre = tabla.item(row, 0).text()
+            clase= tabla.item(row, 1).text()
+
+            # Verificamos que el grupo esté registrado.
+            idClase=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+            ).fetchone()
+            # Si no lo está...
+            if not idClase:
+                # Muestra un mensaje de error al usuario y termina la
+                # función.
+                info = """        La clase ingresada no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, idClase, dni,)
+                )
+            else:
+                idd=datos[row][0]
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE alumnos
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase, dni, idd,)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
     def deleteOtroPersonal(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos 
@@ -1280,7 +1211,74 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda row: self.obtenerFilaEditada(tabla, row))
         
         lambda: self.stackedWidget.setCurrentIndex(6)
+    def saveSubgrupos(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
 
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            subgrupo = tabla.item(row, 0).text()
+            grupo= tabla.item(row, 1).text()
+
+            # Verificamos que el grupo esté registrado.
+            idGrupo=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (grupo,)
+            ).fetchone()
+            # Si no lo está...
+            if not idGrupo:
+                # Muestra un mensaje de error al usuario y termina la
+                # función.
+                info = """        El grupo ingresado no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?)",
+                    (subgrupo, idGrupo)
+                )
+            else:
+                idd=datos[row][0]
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE subgrupos
+                    SET descripcion=?, id_grupo=?
+                    WHERE id = ?""",
+                    (subgrupo, grupo, idd)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+ 
     def deleteSubGrupos(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
