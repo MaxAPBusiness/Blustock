@@ -1,3 +1,7 @@
+ debajo de linea 1185 o def saveSubgrupos(self, datos: list | None = None):
+ 
+ 
+ 
  # def saveUbicaciones(self, datos: list | None = None):
     #     """Este método guarda los cambios hechos en la tabla de la ui
     #     en la tabla ubicaciones de la base de datos.
