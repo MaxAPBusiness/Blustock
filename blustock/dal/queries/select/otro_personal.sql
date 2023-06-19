@@ -1,4 +1,4 @@
-SELECT p.nombre_apellido, c.descripcion, p.dni 
+SELECT p.id, p.nombre_apellido, c.descripcion, p.dni 
 FROM personal p
 JOIN clases c ON c.id = p.id_clase
 WHERE c.descripcion NOT IN (

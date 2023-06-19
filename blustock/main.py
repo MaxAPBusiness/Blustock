@@ -1013,7 +1013,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
+        tabla=self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0, 1, 2)
         # Por cada campo que no debe ser nulo...
@@ -1053,7 +1053,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if datos:
+            if not datos:
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                     (nombre, idClase, dni,)
@@ -1062,10 +1062,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 idd=datos[row][0]
                 # Guardamos los datos de la fila en
                 bdd.cur.execute(
-                    """UPDATE alumnos
+                    """UPDATE personal
                     SET nombre_apellido=?, id_clase=?, dni=?
                     WHERE id = ?""",
-                    (nombre, idClase, dni, idd,)
+                    (nombre, idClase[0], dni, idd,)
                 )
             bdd.con.commit()
             # self.fetchStock()
@@ -1250,7 +1250,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (grupo,)
+                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
             ).fetchone()
             # Si no lo está...
             if not idGrupo:
@@ -1260,9 +1260,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if datos:
+            if not datos:
                 bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?)",
+                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                     (subgrupo, idGrupo)
                 )
             else:
@@ -1272,7 +1272,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     """UPDATE subgrupos
                     SET descripcion=?, id_grupo=?
                     WHERE id = ?""",
-                    (subgrupo, grupo, idd)
+                    (subgrupo, idGrupo[0], idd)
                 )
             bdd.con.commit()
             # self.fetchStock()

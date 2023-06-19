@@ -281,7 +281,7 @@ class DAL():
             bool: si encontró o no una relación.
         """
         movsRel=bdd.cur.execute(
-            "SELECT * FROM stock WHERE id_persona = ?", (idd,)).fetchone()
+            "SELECT * FROM movimientos WHERE id_persona = ?", (idd,)).fetchone()
         if movsRel:
             return True
         else:
@@ -297,7 +297,7 @@ class DAL():
             idd: str
                 El id de la fila que se va a eliminar.
         """
-        bdd.cur.execute("DELETE FROM ? WHERE id = ?", (tabla, idd,))
+        bdd.cur.execute(f"DELETE FROM {tabla} WHERE id = ?", (idd,))
         bdd.con.commit()
 
 
