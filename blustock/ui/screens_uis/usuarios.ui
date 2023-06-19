@@ -178,7 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald</family>
-         <weight>50</weight>
+         <pointsize>-1</pointsize>
          <bold>false</bold>
         </font>
        </property>
@@ -223,7 +223,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -267,6 +266,9 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <row>
         <property name="text">
          <string/>
@@ -366,7 +368,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
