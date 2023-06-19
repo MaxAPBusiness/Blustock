@@ -1,8 +1,8 @@
-SELECT p.nombre, p.usuario, c.descripcion, p.dni 
+SELECT p.nombre_apellido, p.usuario, c.descripcion, p.dni 
 FROM personal p
-JOIN clases c ON c.id = p.id_clase
+JOIN clases c ON c.descripcion = p.id_clase
 WHERE p.usuario IS NOT NULL
-AND (p.nombre LIKE ?
+AND (p.nombre_apellido LIKE ?
 OR p.usuario LIKE ?
 OR c.descripcion LIKE ?
 OR p.dni LIKE ?);
