@@ -684,7 +684,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
+        tabla=self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0, 1, 2)
         # Por cada campo que no debe ser nulo...
@@ -724,19 +724,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if datos:
+            if not datos:
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase, dni,)
+                    (nombre, idClase[0], dni,)
                 )
             else:
                 idd=datos[row][0]
                 # Guardamos los datos de la fila en
                 bdd.cur.execute(
-                    """UPDATE alumnos
+                    """UPDATE personal
                     SET nombre_apellido=?, id_clase=?, dni=?
                     WHERE id = ?""",
-                    (nombre, idClase, dni, idd,)
+                    (nombre, idClase[0], dni, idd,)
                 )
             bdd.con.commit()
             # self.fetchStock()
@@ -759,7 +759,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
+        tabla=self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0, 1)
         # Por cada campo que no debe ser nulo...
@@ -782,7 +782,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (grupo,)
+                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
             ).fetchone()
             # Si no lo está...
             if not idGrupo:
@@ -792,10 +792,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if datos:
+            if not datos:
                 bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?)",
-                    (subgrupo, idGrupo)
+                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
+                    (subgrupo, idGrupo[0])
                 )
             else:
                 idd=datos[row][0]
@@ -804,11 +804,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     """UPDATE subgrupos
                     SET descripcion=?, id_grupo=?
                     WHERE id = ?""",
-                    (subgrupo, grupo, idd)
+                    (subgrupo, idGrupo[0], idd)
                 )
             bdd.con.commit()
             # self.fetchStock()
             info = "Los datos se han guardado con éxito."
+            self.fetchSubgrupos()
             PopUp("Aviso", info).exec()
     
     # def saveUbicaciones(self, datos: list | None = None):
@@ -1012,30 +1013,17 @@ class MainWindow(QtWidgets.QMainWindow):
     #         PopUp("Aviso", info).exec()
 
 
-    def fetchmovimientos(self):
+    """def fetchmovimientos(self):
         bdd.cur.execute("SELECT * FROM movimientos")
         datos = bdd.cur.fetchall()
         self.pantallaMovimientos.tableWidget.setRowCount(0)
 
         for rowNum, row in enumerate(datos):
-            if row[3] == 0:
-                estado = "Baja"
-            if row[3] == 1:
-                estado = "Condiciones"
-            if row[3] == 2:
-                estado = "Reparacion"
-            if row[7] == 0:
-                tipo = "Devolucion"
-            if row[7] == 1:
-                tipo = "Retiro"
-            if row[7] == 2:
-                tipo = "Ingreso de materiales"
-
             self.pantallaMovimientos.tableWidget.insertRow(rowNum)
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
                 bdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(row[3])))
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
                 "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
             self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
@@ -1096,7 +1084,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(4)"""
 
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
@@ -1138,13 +1126,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # DNI
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             # Nombre y Apellido
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             # Descripción
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -1153,7 +1141,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # fijarse que no existe la función saveOtroPersonal
             self.generarBotones(
-                self.saveStock, self.deleteOtroPersonal, tabla, rowNum)
+                lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -1172,10 +1160,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #     4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(5)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
 
-        lambda: self.stackedWidget.setCurrentIndex(5)
 
     def deleteOtroPersonal(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1232,7 +1217,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # no lo borro pero lo comento
 
-        # if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
         #     # Obtenemos los datos para guardarlos en el historial.
         #     desc = tabla.item(row, 0).text()
         #     cond = tabla.item(row, 1).text()
@@ -1245,10 +1230,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
 
         #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+        #    dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
         #     # Eliminamos los datos
-        #     dal.eliminarDatos(idd)
-        #     self.fetchStock()
+             dal.eliminarDatos('personal', idd)
+             self.fetchOtroPersonal()
 
     # y que onda con el save
     def fetchSubgrupos(self):
@@ -1288,9 +1273,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -1299,7 +1284,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # fijarse que no existe la función saveSubgrupos
             self.generarBotones(
-                self.saveStock, self.deleteSubGrupos, tabla, rowNum)
+                lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -1312,12 +1297,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # 0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(6)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
-        
-        lambda: self.stackedWidget.setCurrentIndex(6)
 
-    def deleteSubGrupos(self, datos: list) -> None:
+    def deleteSubgrupos(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -1331,7 +1312,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaSubgrupos.tableWidget
         # Obtenemos la fila que se va a eliminar.
-        row = (tabla.indexAt(self.sender().pos())).row()
+        row = tabla.indexAt(self.sender().pos()).row()
         if row == len(datos):
             idd=None
         else:
@@ -1369,22 +1350,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Obtenemos los datos para guardarlos en el historial.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
-
-            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-            # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # Eliminamos los datos
-            dal.eliminarDatos(idd)
-            self.fetchStock()
+            dal.eliminarDatos("subgrupos", idd)
+            self.fetchSubgrupos()
 
 app = QtWidgets.QApplication(sys.argv)
 
