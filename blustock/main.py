@@ -17,6 +17,7 @@ from db.bdd import bdd
 from dal.dal import dal
 import datetime as time
 import types
+import sqlite3
 import sys
 
 bdd.refrescarBDD()
@@ -107,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
         self.opcionGrupos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(2))
-        self.opcionAlumnos.triggered.connect(self.fetchalumnos)
+        self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
         self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
         self.opcionTurnos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(7))
@@ -137,6 +138,17 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaStock.tableWidget, 
                                       self.saveStock, self.deleteStock, 
                                       (0, 1, 5, 6, 7)))
+        self.pantallaOtroPersonal.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(
+                self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
+                self.deleteOtroPersonal, (0, 1, 2)
+                )
+            )
+        self.pantallaSubgrupos.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
+                                      self.saveSubgrupos,
+                                      self.deleteSubgrupos, (0, 1)))
+        
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -263,17 +275,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # haciendo que el sistema detecte si la fila anterior está
         # vacía.
         ultimaFila = indiceFinal-1
-
-        # Por cada campo que no debe ser nulo...
-        for iCampo in camposObligatorios:
-            # Si el campo está vacio...
-            if tabla.item(ultimaFila, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = """       Ha agregado una fila y todavía no ha
-                ingresado los datos de la fila anterior. Ingreselos, guarde
-                los cambios e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
+        if ultimaFila >= 0:
+            # Por cada campo que no debe ser nulo...
+            for iCampo in camposObligatorios:
+                # Si el campo está vacio...
+                if tabla.item(ultimaFila, iCampo).text() == "":
+                    # Le pide al usuario que termine de llenar los campos
+                    # y corta la función.
+                    mensaje = """       Ha agregado una fila y todavía no ha
+                    ingresado los datos de la fila anterior. Ingreselos, guarde
+                    los cambios e intente nuevamente."""
+                    return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
         tabla.insertRow(indiceFinal)
@@ -456,21 +468,26 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
                 return PopUp("Error", info).exec()
             
-            if not datos:
-                bdd.cur.execute(
-                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?)",
-                    (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE stock
-                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                    cant_baja = ?, id_subgrupo = ?, id_ubi=?
-                    WHERE id = ?""",
-                    (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?)",
+                        (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE stock
+                        SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+                        cant_baja = ?, id_subgrupo = ?, id_ubi=?
+                        WHERE id = ?""",
+                        (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
+                    )
+            except sqlite3.IntegrityError:
+                info = """La herramienta que desea ingresar ya está ingresada.
+                Ingrese otra información o revise la información ya ingresada"""
+                return PopUp("Error", info).exec()
             bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
@@ -545,7 +562,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.eliminarDatos(idd)
             self.fetchStock()
 
-    def fetchalumnos(self):
+    def fetchAlumnos(self):
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
         datos=dal.obtenerDatos("alumnos", barraBusqueda.text())
@@ -554,13 +571,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             self.pantallaAlumnos.tableWidget.insertRow(rowNum)
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             self.pantallaAlumnos.tableWidget.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
             self.generarBotones(
-                lambda: self.saveStock(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
+                lambda: self.saveAlumnos(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
@@ -614,21 +631,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase, dni,)
-                )
-            else:
-                idd=datos[row][0]
-                bdd.cur.execute(
-                    """UPDATE alumnos
-                    SET nombre_apellido=?, id_clase=?, dni=?
-                    WHERE id = ?""",
-                    (nombre, idClase, dni, idd,)
-                )
+            try:
+                if datos:
+                    bdd.cur.execute(
+                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                        (nombre, dni, idClase[0],)
+                    )
+                else:
+                    idd=datos[row][0]
+                    bdd.cur.execute(
+                        """UPDATE alumnos
+                        SET nombre_apellido=?, id_clase=?, dni=?
+                        WHERE id = ?""",
+                        (nombre, dni, idClase[0], idd,)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El dni ingresado ya está registrado.
+                Regístre uno nuevo o revise la información ya ingresada."""
+                PopUp("Error", info).exec()
+                self.fetchAlumnos()
+
             bdd.con.commit()
-            # self.fetchStock()
+            self.fetchAlumnos()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
     
@@ -664,7 +688,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     (grupo, idd,)
                 )
             bdd.con.commit()
-            # self.fetchStock()
+
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
     
@@ -724,22 +748,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if not datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase[0], dni,)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE personal
-                    SET nombre_apellido=?, id_clase=?, dni=?
-                    WHERE id = ?""",
-                    (nombre, idClase[0], dni, idd,)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                        (nombre, dni, idClase[0],)
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE personal
+                        SET nombre_apellido=?, id_clase=?, dni=?
+                        WHERE id = ?""",
+                        (nombre, dni, idClase[0], idd,)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El dni ingresado ya está registrado.
+                Ingrese uno nuevo o revise la información ya ingresada."""
+                return PopUp("Error", info).exec()
             bdd.con.commit()
-            # self.fetchStock()
+            self.fetchOtroPersonal()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
     
@@ -792,22 +821,26 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if not datos:
-                bdd.cur.execute(
-                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
-                    (subgrupo, idGrupo[0])
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE subgrupos
-                    SET descripcion=?, id_grupo=?
-                    WHERE id = ?""",
-                    (subgrupo, idGrupo[0], idd)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
+                        (subgrupo, idGrupo[0])
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE subgrupos
+                        SET descripcion=?, id_grupo=?
+                        WHERE id = ?""",
+                        (subgrupo, idGrupo[0], idd)
+                    )
+            except sqlite3.IntegrityError:
+                info = """El subgrupo ingresado ya está registrado en el grupo.
+                Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."""
+                return PopUp("Error", info).exec()
             bdd.con.commit()
-            # self.fetchStock()
             info = "Los datos se han guardado con éxito."
             self.fetchSubgrupos()
             PopUp("Aviso", info).exec()
