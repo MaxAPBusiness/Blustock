@@ -8,7 +8,7 @@ Objetos:
     app: La aplicación principal.
 """
 import os
-os.chdir(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}..")
+os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.boton import BotonFila
@@ -38,11 +38,11 @@ class MainWindow(QtWidgets.QMainWindow):
             izquierdo (inicialmente escondido) y una colección de
             pantallas."""
 
+
     def __init__(self):
         super().__init__()
-        ui_dir = f"{os.getcwd()}{os.sep}blustock{os.sep}ui{os.sep}"
-
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}main.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
 
         self.filaEditada = 0
@@ -50,8 +50,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos = QtWidgets.QWidget()
         uic.loadUi(
             os.path.join(
-                ui_dir,
-                f'screens_uis{os.sep}alumnos.ui'
+                os.path.abspath(os.getcwd()),
+                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
             ), self.pantallaAlumnos)
         
         self.pantallaGrupos = QtWidgets.QWidget()
@@ -63,21 +63,21 @@ class MainWindow(QtWidgets.QMainWindow):
         
 
         self.pantallaStock = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}stock.ui'), self.pantallaStock)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sstock.ui'), self.pantallaStock)
         self.pantallaHistorial = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}shistorial.ui'), self.pantallaHistorial)
         self.pantallaMovimientos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}smovimientos.ui'), self.pantallaMovimientos)
         self.pantallaOtroPersonal = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sotro_personal.ui'), self.pantallaOtroPersonal)
         self.pantallaSubgrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}ssubgrupos.ui'), self.pantallaSubgrupos)
         self.pantallaTurnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sturnos.ui'), self.pantallaTurnos)
         self.pantallaUsuarios = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}susuarios.ui'), self.pantallaUsuarios)
         self.pantallaLogin = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}login.ui'), self.pantallaLogin)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}slogin.ui'), self.pantallaLogin)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
@@ -109,7 +109,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(ui_dir, f'styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
 
         self.pantallaLogin.passwordState.hide()
@@ -1599,7 +1599,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 app = QtWidgets.QApplication(sys.argv)
 
-for fuente in os.listdir(os.path.join(os.getcwd(), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
                      f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
