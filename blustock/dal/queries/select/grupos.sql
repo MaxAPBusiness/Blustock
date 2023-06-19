@@ -1,0 +1,1 @@
+SELECT descripcion FROM grupos WHERE descripcion LIKE ?;

@@ -260,6 +260,11 @@
        </attribute>
        <column>
         <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Tipo</string>
         </property>
        </column>
@@ -280,7 +285,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Pañolero</string>
+         <string>Persona</string>
         </property>
        </column>
        <column>
@@ -290,7 +295,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Fecha</string>
+         <string>Fecha y Hora</string>
         </property>
        </column>
        <column>
@@ -301,6 +306,16 @@
        <column>
         <property name="text">
          <string>Ubicación</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Pañorelo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Profesor a cargo del turno</string>
         </property>
        </column>
        <column>

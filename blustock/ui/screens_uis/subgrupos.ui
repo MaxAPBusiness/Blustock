@@ -178,6 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -284,12 +285,12 @@ QPushButton:pressed {
        </attribute>
        <column>
         <property name="text">
-         <string>Grupo</string>
+         <string>Subgrupo</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Subgrupo</string>
+         <string>Grupo</string>
         </property>
        </column>
        <column>

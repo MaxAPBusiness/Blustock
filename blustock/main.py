@@ -21,7 +21,6 @@ import sys
 
 bdd.refrescarBDD()
 
-
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
 
@@ -54,8 +53,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 ui_dir,
                 f'screens_uis{os.sep}alumnos.ui'
             ), self.pantallaAlumnos)
+        
         self.pantallaGrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}grupos.ui'), self.pantallaGrupos)
+        
+        pathGrupos=os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
+        
+        uic.loadUi(pathGrupos, self.pantallaGrupos)
+        
+
         self.pantallaStock = QtWidgets.QWidget()
         uic.loadUi(os.path.join(ui_dir, f'screens_uis{os.sep}stock.ui'), self.pantallaStock)
         self.pantallaHistorial = QtWidgets.QWidget()
@@ -92,12 +98,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass  # Si, puse el print al final #No,no pusiste el print al final
 
         self.opcionStock.triggered.connect(self.fetchStock)
-        self.opcionSubgrupos.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(6))
+
+        self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
         self.opcionGrupos.triggered.connect(self.fetchGrupos)
         self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
-        self.opcionOtroPersonal.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(5))
+        self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
         self.opcionTurnos.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(7))
         self.opcionMovimientos.triggered.connect(self.fetchMovimientos)
@@ -183,13 +188,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Parámetros
         ----------
-            funcGuardar : types.FunctionType
+            funcGuardar: types.FunctionType
                 La función que estará vinculada al botón guardar.
-            funcEliminar : types.FunctionType
+            funcEliminar: types.FunctionType
                 La función que estará vinculada al botón eliminar.
-            tabla : QtWidgets.QTableWidget
+            tabla: QtWidgets.QTableWidget
                 La tabla a la que se le añadirán los botones.
-            numFila : int
+            numFila: int
                 La fila en la que se insertarán los botones.
         """
         # Se crean dos botones: uno de editar y uno de eliminar
@@ -259,8 +264,9 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(ultimaFila, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Ha agregado una fila y todavía no ha ingresado los
-                datos. Ingreselos, guarde los cambios e intente nuevamente."""
+                mensaje = """       Ha agregado una fila y todavía no ha
+                ingresado los datos de la fila anterior. Ingreselos, guarde
+                los cambios e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
@@ -274,6 +280,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos crear la API del programa
+    def obtenerTotal(self, tabla, row, cantCond: int, cantRep: int | None = None, cantBaja: int | None = None):
+        if cantRep:
+            tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(cantCond + cantRep + cantBaja)))
+        else:
+            tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(cantCond)))
 
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -313,31 +324,31 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            total = rowData[1]+rowData[2]+rowData[3]
-            tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(total)))
+            self.obtenerTotal(tabla, rowNum, rowData[2], rowData[3], rowData[4])
 
             tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[5])))
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
             tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
+                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
+            print(rowData[0])
             self.generarBotones(
-                self.saveStock, self.deleteStock, tabla, rowNum)
+                lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -354,27 +365,25 @@ class MainWindow(QtWidgets.QMainWindow):
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(3)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
 
-    def obtenerFilaEditada(self, tabla, row):
-        """Esta método imprime la fila clickeada.
-        Hay que verla después"""
-        print(row)
-        self.filaEditada = tabla.item(row, 0).text()
-        print(self.filaEditada)
-
-    def saveStock(self):
+    def saveStock(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla de la base de datos"""
+        en la tabla stock de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla stock, que se usarán para obtener
+                el id de la fila en la tabla.
+        """
+        
         # Se pregunta al usuario si desea guardar los cambios en la
         # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaStock.tableWidget
-        index = tabla.indexAt(self.sender().pos())
-        row = index.row()
+        row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0, 1, 5, 6, 7)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -386,18 +395,30 @@ class MainWindow(QtWidgets.QMainWindow):
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
 
+        try:
+            cond = int(tabla.item(row, 1).text())
+
+            rep = tabla.item(row, 2).text()
+            baja = tabla.item(row, 3).text()
+            if rep != "" or baja != "":
+                rep = int(rep)
+                baja = int(baja)
+        except:
+            mensaje = """       Los datos ingresados no son válidos.
+            Por favor, ingrese los datos correctamente."""
+            return PopUp("Error", mensaje).exec()
+
         info = """        Esta acción no se puede deshacer.
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            
 
             # Se obtiene el texto de todas las celdas.
             desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
+            ubi = tabla.item(row, 7).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
@@ -422,81 +443,102 @@ class MainWindow(QtWidgets.QMainWindow):
                 pertenece al grupo ingresado. Regístrelo o asegúrese que esté
                 relacionado al grupo e ingrese nuevamente."""
                 return PopUp("Error", info).exec()
-            # Guardamos los datos de la fila en
-            bdd.cur.execute(
-                """UPDATE stock
-                SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                cant_baja = ?, id_subgrupo = ?
-                WHERE descripcion = ?""",
-                (desc, cond, rep, baja, idSubgrupo[0], self.filaEditada,)
-            )
+            
+            idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion = ?",
+                                  (ubi,)).fetchone()
+            if not idUbi:
+                info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
+                return PopUp("Error", info).exec()
+            
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?)",
+                    (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
+                )
+            else:
+                idd=datos[row][0]
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE stock
+                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+                    cant_baja = ?, id_subgrupo = ?, id_ubi=?
+                    WHERE id = ?""",
+                    (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
+                )
             bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
-    def deleteStock(self):
+    def deleteStock(self, datos: list) -> None:
         """Este método elimina una fila de una tabla de la base de
-        datos."""
+        datos
+        
+        Parámetros
+        ----------
+        idd: int | None = None
+            El número que relaciona la fila de la tabla de la UI con la
+            fila de la tabla de la base de datos.
+            Default: None
+        """
         # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaStock.tableWidget
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        iCampos=(0, 1, 5, 6, 7)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                return tabla.removeRow(row)
-            
-        desc = tabla.item(row, 0).text()
-        idStock = bdd.cur.execute("SELECT id FROM stock WHERE descripcion = ?", (desc,)).fetchone()
-        if not idStock:
-            mensaje = """        La herramienta/insumo no está registrada.
-            Por favor, regístrela primero antes de eliminarla"""
-            return PopUp("Advertencia", mensaje).exec()
-
-        movsRel=bdd.cur.execute(
-            "SELECT * FROM movimientos WHERE id_elem = ?", (idStock[0],)).fetchone()
-        repRel=bdd.cur.execute(
-            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idStock[0],)).fetchone()
-        if movsRel or repRel:
+        if datos:
+            idd=None
+        else:
+            idd=datos[row][0]
+        # Si no se pasó el argumento idd, significa que la fila no está
+        # relacionada con la base de datos. Eso significa que la fila
+        # se insertó en la tabla de la UI, pero aún no se guardaron los
+        # cambios en la base de datos. En ese caso...
+        if not idd:
+            # ...solo debemos sacarla de la UI.
+            return tabla.removeRow(row)
+        # Si está relacionada con la base de datos, antes de eliminar,
+        # tenemos que verificar que la PK de la fila no
+        # tenga relaciones foráneas con otras tablas. Si llegase a
+        # tener, no podemos permitir una eliminación normal por dos
+        # motivos. El primero, necesitamos registrar todos los campos
+        # eliminados en el historial, y eliminar todo de una nos
+        # complica registrar que tablas se eliminaron. El segundo, si
+        # un profe se equivoca y elimina todo, no hay vuelta atrás.
+        # Para esta verificación, llamamos a la función del dal.
+        hayRelacion = dal.verifElimStock(idd)
+        if hayRelacion:
             mensaje = """        La herramienta/insumo tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
             esta herramienta/insumo."""
-            return PopUp("Advertencia", mensaje).exec()
+            return PopUp('Advertencia', mensaje).exec()
         
-        descRepetida=tabla.findItems(tabla.item(row, 0).text(), QtCore.Qt.MatchFlag.MatchFixedString)
-        if len(descRepetida) > 1:
-            return tabla.removeRow(row)
-
-        
+        # Si no está relacionado, pregunta al usuario si confirma
+        # eliminar la fila y le advierte que la acción no se puede
+        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar la herramienta/insumo?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí
+        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Busca la fila en la que está el botón
-            row = (tabla.indexAt(
-                self.sender().pos())).row()
+            # Obtenemos los datos para guardarlos en el historial.
             desc = tabla.item(row, 0).text()
             cond = tabla.item(row, 1).text()
             rep = tabla.item(row, 2).text()
             baja = tabla.item(row, 3).text()
             grupo = tabla.item(row, 5).text()
             subgrupo = tabla.item(row, 6).text()
-            todo = f"desc: {desc}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, grupo: {grupo}, subgrupo: {subgrupo}"
-            bdd.cur.execute("INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) values(?,?,?,?,?,?) ",
-                             (self.usuario, time.datetime.now(), "eliminación", "stock de herramientas", row, todo))
-            bdd.cur.execute(
-                "DELETE FROM stock WHERE descripcion = ?", (desc,))
-            bdd.con.commit()
+            ubi = tabla.item(row, 7).text()
+
+            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+
+            # Insertamos los datos en el historial para que quede registro.
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+            # Eliminamos los datos
+            dal.eliminarDatos(idd)
             self.fetchStock()
-        # TODO: guardar los cambios en el historial.
+
 
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
@@ -544,7 +586,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
-
     def saveAlumnos(self):
         # No implementado, cuando esté saveStock completo lo adapto
         pass
@@ -626,6 +667,503 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowCount(0)
 
+    
+    def saveAlumnos(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1, 2)
+
+        for iCampo in iCampos:
+            if tabla.item(row, iCampo).text() == "":
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+        
+        try:
+            dni = int(tabla.item(row, 2).text())
+        except:
+            mensaje = """       Los datos ingresados no son válidos.
+            Por favor, ingreselos correctamente."""
+            return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            nombre = tabla.item(row, 0).text()
+            clase= tabla.item(row, 1).text()
+
+            idClase=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+            ).fetchone()
+            if not idClase:
+                info = """        El curso ingresado no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, idClase, dni,)
+                )
+            else:
+                idd=datos[row][0]
+                bdd.cur.execute(
+                    """UPDATE alumnos
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase, dni, idd,)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
+    def saveGrupos(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla grupos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla grupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        tabla=self.pantallaStock.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        if tabla.item(row, 0).text() == "":
+            mensaje = """       Hay campos en blanco que son obligatorios.
+            Ingreselos e intente nuevamente."""
+            return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            grupo = tabla.item(row, 0).text()
+            
+            if datos:
+                bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo))
+            else:
+                idd=datos[row][0]
+                bdd.cur.execute(
+                    """UPDATE grupos SET descripcion = ? WHERE id = ?""",
+                    (grupo, idd,)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
+    def saveOtroPersonal(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla personal de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla personal, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1, 2)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+        
+        try:
+            dni = int(tabla.item(row, 2).text())
+        except:
+            mensaje = """       Los datos ingresados no son válidos.
+            Por favor, ingreselos correctamente."""
+            return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            nombre = tabla.item(row, 0).text()
+            clase= tabla.item(row, 1).text()
+
+            # Verificamos que el grupo esté registrado.
+            idClase=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+            ).fetchone()
+            # Si no lo está...
+            if not idClase:
+                # Muestra un mensaje de error al usuario y termina la
+                # función.
+                info = """        La clase ingresada no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, idClase, dni,)
+                )
+            else:
+                idd=datos[row][0]
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE alumnos
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase, dni, idd,)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
+    def saveSubgrupos(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0, 1)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            subgrupo = tabla.item(row, 0).text()
+            grupo= tabla.item(row, 1).text()
+
+            # Verificamos que el grupo esté registrado.
+            idGrupo=bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion = ?", (grupo,)
+            ).fetchone()
+            # Si no lo está...
+            if not idGrupo:
+                # Muestra un mensaje de error al usuario y termina la
+                # función.
+                info = """        El grupo ingresado no está registrado.
+                Regístrelo e ingrese nuevamente"""
+                return PopUp("Error", info).exec()
+
+            if datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?)",
+                    (subgrupo, idGrupo)
+                )
+            else:
+                idd=datos[row][0]
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE subgrupos
+                    SET descripcion=?, id_grupo=?
+                    WHERE id = ?""",
+                    (subgrupo, grupo, idd)
+                )
+            bdd.con.commit()
+            # self.fetchStock()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+    
+    # def saveUbicaciones(self, datos: list | None = None):
+    #     """Este método guarda los cambios hechos en la tabla de la ui
+    #     en la tabla ubicaciones de la base de datos.
+        
+    #     Parámetros
+    #     ----------
+    #         datos: list | None = None
+    #             Los datos de la tabla ubicaciones, que se usarán para obtener
+    #             el id de la fila en la tabla.
+    #     """
+        
+    #     # Se pregunta al usuario si desea guardar los cambios en la
+    #     # tabla. NOTA: Esos tabs en el string son para mantener la
+    #     # misma identación en todas las líneas así dedent funciona,
+    #     # sino le da ansiedad.
+    #     # Obtenemos los ids de los campos que no podemos dejar vacíos.
+    #     tabla=self.pantallaUbicaciones.tableWidget
+    #     row = tabla.indexAt(self.sender().pos()).row()
+    #     iCampos=(0, 1, 5, 6, 7)
+    #     # Por cada campo que no debe ser nulo...
+    #     for iCampo in iCampos:
+    #         # Si el campo está vacio...
+    #         if tabla.item(row, iCampo).text() == "":
+    #             # Le pide al usuario que termine de llenar los campos
+    #             # y corta la función.
+    #             mensaje = """       Hay campos en blanco que son obligatorios.
+    #             Ingreselos e intente nuevamente."""
+    #             return PopUp("Error", mensaje).exec()
+
+    #     try:
+    #         cond = int(tabla.item(row, 1).text())
+    #         rep = int(tabla.item(row, 2).text())
+    #         baja = int(tabla.item(row, 3).text())
+    #     except:
+    #         mensaje = """       Los datos ingresados no son válidos.
+    #         Por favor, ingrese los datos correctamente."""
+    #         return PopUp("Error", mensaje).exec()
+
+    #     info = """        Esta acción no se puede deshacer.
+    #     ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+    #     popup = PopUp("Pregunta", info).exec()
+    #     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            
+
+    #         # Se obtiene el texto de todas las celdas.
+    #         desc = tabla.item(row, 0).text()
+    #         grupo = tabla.item(row, 5).text()
+    #         subgrupo = tabla.item(row, 6).text()
+    #         ubi = tabla.item(row, 7).text()
+
+    #         # Verificamos que el grupo esté registrado.
+    #         idGrupo=bdd.cur.execute(
+    #             "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
+    #         ).fetchone()
+    #         # Si no lo está...
+    #         if not idGrupo:
+    #             # Muestra un mensaje de error al usuario y termina la
+    #             # función.
+    #             info = """        El grupo ingresado no está registrado.
+    #             Regístrelo e ingrese nuevamente"""
+    #             return PopUp("Error", info).exec()
+
+    #         # Verificamos que el subgrupo esté registrado y que
+    #         # coincida con el grupo ingresado.
+    #         idSubgrupo=bdd.cur.execute(
+    #             "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
+    #             (subgrupo, idGrupo[0],)
+    #         ).fetchone()
+    #         if not idSubgrupo:
+    #             info = """El subgrupo ingresado no está registrado o no
+    #             pertenece al grupo ingresado. Regístrelo o asegúrese que esté
+    #             relacionado al grupo e ingrese nuevamente."""
+    #             return PopUp("Error", info).exec()
+            
+    #         idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion = ?",
+    #                               (ubi,)).fetchone()
+    #         if not idUbi:
+    #             info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
+    #             return PopUp("Error", info).exec()
+            
+    #         if datos:
+    #             bdd.cur.execute(
+    #                 "INSERT INTO ubicaciones VALUES(NULL, ?, ?, ?, ?, ?)",
+    #                 (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
+    #             )
+    #         else:
+    #             idd=datos[row][0]
+    #             # Guardamos los datos de la fila en
+    #             bdd.cur.execute(
+    #                 """UPDATE ubicaciones
+    #                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+    #                 cant_baja = ?, id_subgrupo = ?, id_ubi=?
+    #                 WHERE id = ?""",
+    #                 (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
+    #             )
+    #         bdd.con.commit()
+    #         self.fetchUbicaciones()
+    #         info = "Los datos se han guardado con éxito."
+    #         PopUp("Aviso", info).exec()
+
+    # def saveClases(self, datos: list | None = None):
+    #     """Este método guarda los cambios hechos en la tabla de la ui
+    #     en la tabla clases de la base de datos.
+        
+    #     Parámetros
+    #     ----------
+    #         datos: list | None = None
+    #             Los datos de la tabla clases, que se usarán para 
+    #             obtener el id de la fila en la tabla.
+    #     """
+        
+    #     # Se pregunta al usuario si desea guardar los cambios en la
+    #     # tabla. NOTA: Esos tabs en el string son para mantener la
+    #     # misma identación en todas las líneas así dedent funciona,
+    #     # sino le da ansiedad.
+    #     # Obtenemos los ids de los campos que no podemos dejar vacíos.
+    #     tabla=self.pantallaStock.tableWidget
+    #     row = tabla.indexAt(self.sender().pos()).row()
+    #     iCampos=(0, 1, 5, 6, 7)
+    #     # Por cada campo que no debe ser nulo...
+    #     for iCampo in iCampos:
+    #         # Si el campo está vacio...
+    #         if tabla.item(row, iCampo).text() == "":
+    #             # Le pide al usuario que termine de llenar los campos
+    #             # y corta la función.
+    #             mensaje = """       Hay campos en blanco que son obligatorios.
+    #             Ingreselos e intente nuevamente."""
+    #             return PopUp("Error", mensaje).exec()
+
+    #     try:
+    #         cond = int(tabla.item(row, 1).text())
+    #         rep = int(tabla.item(row, 2).text())
+    #         baja = int(tabla.item(row, 3).text())
+    #     except:
+    #         mensaje = """       Los datos ingresados no son válidos.
+    #         Por favor, ingrese los datos correctamente."""
+    #         return PopUp("Error", mensaje).exec()
+
+    #     info = """        Esta acción no se puede deshacer.
+    #     ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+    #     popup = PopUp("Pregunta", info).exec()
+    #     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            
+
+    #         # Se obtiene el texto de todas las celdas.
+    #         desc = tabla.item(row, 0).text()
+    #         grupo = tabla.item(row, 5).text()
+    #         subgrupo = tabla.item(row, 6).text()
+    #         ubi = tabla.item(row, 7).text()
+
+    #         # Verificamos que el grupo esté registrado.
+    #         idGrupo=bdd.cur.execute(
+    #             "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
+    #         ).fetchone()
+    #         # Si no lo está...
+    #         if not idGrupo:
+    #             # Muestra un mensaje de error al usuario y termina la
+    #             # función.
+    #             info = """        El grupo ingresado no está registrado.
+    #             Regístrelo e ingrese nuevamente"""
+    #             return PopUp("Error", info).exec()
+
+    #         # Verificamos que el subgrupo esté registrado y que
+    #         # coincida con el grupo ingresado.
+    #         idSubgrupo=bdd.cur.execute(
+    #             "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
+    #             (subgrupo, idGrupo[0],)
+    #         ).fetchone()
+    #         if not idSubgrupo:
+    #             info = """El subgrupo ingresado no está registrado o no
+    #             pertenece al grupo ingresado. Regístrelo o asegúrese que esté
+    #             relacionado al grupo e ingrese nuevamente."""
+    #             return PopUp("Error", info).exec()
+            
+    #         idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion = ?",
+    #                               (ubi,)).fetchone()
+    #         if not idUbi:
+    #             info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
+    #             return PopUp("Error", info).exec()
+            
+    #         if datos:
+    #             bdd.cur.execute(
+    #                 "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?)",
+    #                 (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
+    #             )
+    #         else:
+    #             idd=datos[row][0]
+    #             # Guardamos los datos de la fila en
+    #             bdd.cur.execute(
+    #                 """UPDATE stock
+    #                 SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+    #                 cant_baja = ?, id_subgrupo = ?, id_ubi=?
+    #                 WHERE id = ?""",
+    #                 (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
+    #             )
+    #         bdd.con.commit()
+    #         self.fetchStock()
+    #         info = "Los datos se han guardado con éxito."
+    #         PopUp("Aviso", info).exec()
+
+
+    def fetchmovimientos(self):
+        bdd.cur.execute("SELECT * FROM movimientos")
+        datos = bdd.cur.fetchall()
+        self.pantallaMovimientos.tableWidget.setRowCount(0)
+
+        for rowNum, row in enumerate(datos):
+            if row[3] == 0:
+                estado = "Baja"
+            if row[3] == 1:
+                estado = "Condiciones"
+            if row[3] == 2:
+                estado = "Reparacion"
+            if row[7] == 0:
+                tipo = "Devolucion"
+            if row[7] == 1:
+                tipo = "Retiro"
+            if row[7] == 2:
+                tipo = "Ingreso de materiales"
+
+            self.pantallaMovimientos.tableWidget.insertRow(rowNum)
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 0, QtWidgets.QTableWidgetItem(str(
+                bdd.cur.execute("select descripcion from stock where id=?", (row[2],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(estado)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
+                "select nombre_apellido from personal where dni=?", (row[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(
+                bdd.cur.execute("select tipo from personal where dni=?", (row[5],)).fetchone()[0])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(row[6])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(row[4])))
+            self.pantallaMovimientos.tableWidget.setItem(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(tipo)))
+            self.pantallaMovimientos.tableWidget.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(bdd.cur.execute(
+                "select nombre_apellido from personal where dni=(select id_panolero from turnos where id =?)", (row[1],)).fetchone()[0])))
+
+            edit = BotonFila("editar.png")
+            borrar = BotonFila("eliminar.png")
+            self.pantallaMovimientos.tableWidget.setCellWidget(rowNum, 8, edit)
+            self.pantallaMovimientos.tableWidget.setCellWidget(
+                rowNum, 9, borrar)
+            self.pantallaMovimientos.tableWidget.setRowHeight(0, 35)
+
+        self.pantallaMovimientos.tableWidget.resizeColumnsToContents()
+        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaMovimientos.tableWidget.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(4)
+        bdd.cur.execute("SELECT * FROM movimientos")
+        datos = bdd.cur.fetchall()
+        self.pantallaMovimientos.tableWidget.setRowCount(0)
+>>>>>>> conectar-base
+
         for rowNum, rowData in enumerate(datos):
 
             tabla.insertRow(rowNum)
@@ -643,6 +1181,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.generarBotones(
                 self.saveGrupos, self.deleteGrupos, tabla, rowNum)
 
+<<<<<<< HEAD
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
@@ -663,6 +1202,297 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     
+
+        self.stackedWidget.setCurrentIndex(4)
+
+# --------------- lo que modifique está abajo --------------------------#
+    def fetchOtroPersonal(self):
+        """Este método obtiene los datos de la tabla stock y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+        # Se guardan la tabla y la barra de búsqueda de la pantalla
+        # OtroPersonal en variables para que el código se simplifique y se
+        # haga más legible.
+        tabla = self.pantallaOtroPersonal.tableWidget
+        barraBusqueda = self.pantallaOtroPersonal.lineEdit
+
+        # Se obtienen los datos de la base de datos pasando como
+        # parámetro la tabla de la que queremos obtener los datos y 
+        # el texto de la barra de búsqueda mediante el cual queremos
+        # filtrarlos.
+        datos=dal.obtenerDatos("otro_personal", barraBusqueda.text())
+
+        # Se refresca la tabla, eliminando todas las filas anteriores.
+        tabla.setRowCount(0)
+
+        # Bucle: por cada fila de la tabla, se obtiene el número de
+        # fila y los contenidos de ésta.
+        # Método enumerate: devuelve una lista con el número y el
+        # elemento.
+        for rowNum, rowData in enumerate(datos):
+            # Se añade una fila a la tabla.
+            # Método insertRow(int): inserta una fila en una QTable.
+            tabla.insertRow(rowNum)
+
+            # Inserta el texto en cada celda. Las celdas por defecto no
+            # tienen nada, por lo que hay que añadir primero un item
+            # que contenga el texto. No se puede establecer texto asi
+            # nomás, tira error.
+            # Método setItem(row, column, item): establece el item de
+            # una celda de una tabla.
+            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
+            # texto por defecto.
+
+            # DNI
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            # Nombre y Apellido
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            # Descripción
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+
+            # Se generan e insertan los botones en la fila, pasando
+            # como parámetros las funciones que queremos que los
+            # botones tengan y la tabla y la fila de la tabla en la que
+            # queremos que se inserten.
+
+            # fijarse que no existe la función saveOtroPersonal
+            self.generarBotones(
+                self.saveStock, self.deleteOtroPersonal, tabla, rowNum)
+
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Método setSectionResizeMode(column, ResizeMode): hace que una
+        # columna de una tabla se expanda o no automáticamente conforme
+        # se extiende la tabla.
+
+        # cuál tendria que poner que no se expanda
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # tabla.horizontalHeader().setSectionResizeMode(
+        #     4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(5)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+
+        lambda: self.stackedWidget.setCurrentIndex(5)
+
+    def deleteOtroPersonal(self, datos: list) -> None:
+        """Este método elimina una fila de una tabla de la base de
+        datos 
+        
+        Parámetros
+        ----------
+        idd: int | None = None
+            El número que relaciona la fila de la tabla de la UI con la
+            fila de la tabla de la base de datos.
+            Default: None
+        """
+        # Obtenemos la tabla a la que vamos a realizarle la eliminación
+        tabla=self.pantallaOtroPersonal.tableWidget
+        # Obtenemos la fila que se va a eliminar.
+        row = (tabla.indexAt(self.sender().pos())).row()
+        if row == len(datos):
+            idd=None
+        else:
+            idd=datos[row][0]
+        # Si no se pasó el argumento idd, significa que la fila no está
+        # relacionada con la base de datos. Eso significa que la fila
+        # se insertó en la tabla de la UI, pero aún no se guardaron los
+        # cambios en la base de datos. En ese caso...
+        if not idd:
+            # ...solo debemos sacarla de la UI.
+            return tabla.removeRow(row)
+        # Si está relacionada con la base de datos, antes de eliminar,
+        # tenemos que verificar que la PK de la fila no
+        # tenga relaciones foráneas con otras tablas. Si llegase a
+        # tener, no podemos permitir una eliminación normal por dos
+        # motivos. El primero, necesitamos registrar todos los campos
+        # eliminados en el historial, y eliminar todo de una nos
+        # complica registrar que tablas se eliminaron. El segundo, si
+        # un profe se equivoca y elimina todo, no hay vuelta atrás.
+        # Para esta verificación, llamamos a la función del dal.
+        hayRelacion = dal.verifElimOtroPersonal(idd)
+        if hayRelacion:
+            # el personal o la persona?
+            mensaje = """        El personal tiene movimientos o un
+            seguimiento de reparación relacionados. Por motivos de seguridad,
+            debe eliminar primero los registros relacionados antes de eliminar
+            al personal."""
+            return PopUp('Advertencia', mensaje).exec()
+        
+        # Si no está relacionado, pregunta al usuario si confirma
+        # eliminar la fila y le advierte que la acción no se puede
+        # deshacer.
+        mensaje = """        Esta acción no se puede deshacer.
+        ¿Desea eliminar el personal?"""
+        popup = PopUp("Pregunta", mensaje).exec()
+
+        # Si el usuario presionó el boton sí...
+
+        # no lo borro pero lo comento
+
+        # if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+        #     # Obtenemos los datos para guardarlos en el historial.
+        #     desc = tabla.item(row, 0).text()
+        #     cond = tabla.item(row, 1).text()
+        #     rep = tabla.item(row, 2).text()
+        #     baja = tabla.item(row, 3).text()
+        #     grupo = tabla.item(row, 5).text()
+        #     subgrupo = tabla.item(row, 6).text()
+        #     ubi = tabla.item(row, 7).text()
+
+        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+
+        #     # Insertamos los datos en el historial para que quede registro.
+        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+        #     # Eliminamos los datos
+        #     dal.eliminarDatos(idd)
+        #     self.fetchStock()
+
+    # y que onda con el save
+    def fetchSubgrupos(self):
+        """Este método obtiene los datos de la tabla stock y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+        # Se guardan la tabla y la barra de búsqueda de la pantalla
+        # stock en variables para que el código se simplifique y se
+        # haga más legible.
+        tabla = self.pantallaSubgrupos.tableWidget
+        barraBusqueda = self.pantallaSubgrupos.lineEdit
+
+        # Se obtienen los datos de la base de datos pasando como
+        # parámetro la tabla de la que queremos obtener los datos y 
+        # el texto de la barra de búsqueda mediante el cual queremos
+        # filtrarlos.
+        datos=dal.obtenerDatos("subgrupos", barraBusqueda.text())
+
+        # Se refresca la tabla, eliminando todas las filas anteriores.
+        tabla.setRowCount(0)
+
+        # Bucle: por cada fila de la tabla, se obtiene el número de
+        # fila y los contenidos de ésta.
+        # Método enumerate: devuelve una lista con el número y el
+        # elemento.
+        for rowNum, rowData in enumerate(datos):
+            # Se añade una fila a la tabla.
+            # Método insertRow(int): inserta una fila en una QTable.
+            tabla.insertRow(rowNum)
+
+            # Inserta el texto en cada celda. Las celdas por defecto no
+            # tienen nada, por lo que hay que añadir primero un item
+            # que contenga el texto. No se puede establecer texto asi
+            # nomás, tira error.
+            # Método setItem(row, column, item): establece el item de
+            # una celda de una tabla.
+            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
+            # texto por defecto.
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+
+            # Se generan e insertan los botones en la fila, pasando
+            # como parámetros las funciones que queremos que los
+            # botones tengan y la tabla y la fila de la tabla en la que
+            # queremos que se inserten.
+
+            # fijarse que no existe la función saveSubgrupos
+            self.generarBotones(
+                self.saveStock, self.deleteSubGrupos, tabla, rowNum)
+
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Método setSectionResizeMode(column, ResizeMode): hace que una
+        # columna de una tabla se expanda o no automáticamente conforme
+        # se extiende la tabla.
+        # tabla.horizontalHeader().setSectionResizeMode(
+        # 0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(6)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+        
+        lambda: self.stackedWidget.setCurrentIndex(6)
+
+    def deleteSubGrupos(self, datos: list) -> None:
+        """Este método elimina una fila de una tabla de la base de
+        datos
+        
+        Parámetros
+        ----------
+        idd: int | None = None
+            El número que relaciona la fila de la tabla de la UI con la
+            fila de la tabla de la base de datos.
+            Default: None
+        """
+        # Obtenemos la tabla a la que vamos a realizarle la eliminación
+        tabla=self.pantallaSubgrupos.tableWidget
+        # Obtenemos la fila que se va a eliminar.
+        row = (tabla.indexAt(self.sender().pos())).row()
+        if row == len(datos):
+            idd=None
+        else:
+            idd=datos[row][0]
+        # Si no se pasó el argumento idd, significa que la fila no está
+        # relacionada con la base de datos. Eso significa que la fila
+        # se insertó en la tabla de la UI, pero aún no se guardaron los
+        # cambios en la base de datos. En ese caso...
+        if not idd:
+            # ...solo debemos sacarla de la UI.
+            return tabla.removeRow(row)
+        # Si está relacionada con la base de datos, antes de eliminar,
+        # tenemos que verificar que la PK de la fila no
+        # tenga relaciones foráneas con otras tablas. Si llegase a
+        # tener, no podemos permitir una eliminación normal por dos
+        # motivos. El primero, necesitamos registrar todos los campos
+        # eliminados en el historial, y eliminar todo de una nos
+        # complica registrar que tablas se eliminaron. El segundo, si
+        # un profe se equivoca y elimina todo, no hay vuelta atrás.
+        # Para esta verificación, llamamos a la función del dal.
+        hayRelacion = dal.verifElimSubgrupos(idd)
+        if hayRelacion:
+            mensaje = """        El subgrupo tiene movimientos o un
+            seguimiento de reparación relacionados. Por motivos de seguridad,
+            debe eliminar primero los registros relacionados antes de eliminar
+            esta herramienta/insumo."""
+            return PopUp('Advertencia', mensaje).exec()
+        
+        # Si no está relacionado, pregunta al usuario si confirma
+        # eliminar la fila y le advierte que la acción no se puede
+        # deshacer.
+        mensaje = """        Esta acción no se puede deshacer.
+        ¿Desea eliminar el subgrupo?"""
+        popup = PopUp("Pregunta", mensaje).exec()
+
+        # Si el usuario presionó el boton sí...
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Obtenemos los datos para guardarlos en el historial.
+            desc = tabla.item(row, 0).text()
+            cond = tabla.item(row, 1).text()
+            rep = tabla.item(row, 2).text()
+            baja = tabla.item(row, 3).text()
+            grupo = tabla.item(row, 5).text()
+            subgrupo = tabla.item(row, 6).text()
+            ubi = tabla.item(row, 7).text()
+
+            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+
+            # Insertamos los datos en el historial para que quede registro.
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+            # Eliminamos los datos
+            dal.eliminarDatos(idd)
+            self.fetchStock()
+>>>>>>> conectar-base
 
 app = QtWidgets.QApplication(sys.argv)
 
