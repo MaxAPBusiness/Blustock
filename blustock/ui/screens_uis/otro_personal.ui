@@ -177,9 +177,7 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
-         <weight>50</weight>
+         <family>Oswald</family>
          <bold>false</bold>
         </font>
        </property>
@@ -222,8 +220,7 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>
@@ -264,9 +261,24 @@ QPushButton:pressed {
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>
        </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
          <string>Nombre y Apellido</string>
@@ -306,8 +318,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>
@@ -336,8 +347,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>

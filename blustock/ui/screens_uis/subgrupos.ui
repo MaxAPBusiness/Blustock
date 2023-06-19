@@ -177,9 +177,7 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
-         <weight>50</weight>
+         <family>Oswald</family>
          <bold>false</bold>
         </font>
        </property>
@@ -222,9 +220,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -267,6 +264,15 @@ QPushButton:pressed {
        </property>
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
@@ -330,8 +336,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
-           <weight>50</weight>
+           <family>Oswald</family>
            <bold>false</bold>
           </font>
          </property>

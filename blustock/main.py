@@ -11,6 +11,7 @@ import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
+from PyQt6.QtCore import Qt
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
 from db.bdd import bdd
@@ -45,9 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
-
-        self.filaEditada = 0
-
+        
         self.pantallaAlumnos = QtWidgets.QWidget()
         uic.loadUi(
             os.path.join(
@@ -107,7 +106,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass  # Si, puse el print al final #No,no pusiste el print al final
 
         self.opcionStock.triggered.connect(self.fetchStock)
-
         self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
         self.opcionGrupos.triggered.connect(self.fetchGrupos)
         self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
@@ -345,10 +343,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            if type(rowData[2]) != type(int):
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            if type(rowData[2]) != type(int):
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
             self.obtenerTotal(tabla, rowNum, rowData[2], rowData[3], rowData[4])
@@ -359,6 +365,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
             tabla.setItem(
                 rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -579,17 +589,19 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowNum)))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[2])))
-          
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             self.generarBotones(
                 self.saveAlumnos, self.deleteAlumnos, tabla, rowNum)
+            
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -604,8 +616,7 @@ class MainWindow(QtWidgets.QMainWindow):
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(1)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
+
     def saveAlumnos(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla alumnos de la base de datos.
@@ -759,28 +770,36 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaMovimientos.lineEdit
 
         datos=dal.obtenerDatos("movimientos", barraBusqueda.text())
+        tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[4])))
             tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[6])))
             tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[7])))
             tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
+                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[8])))
             tabla.setItem(
-                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
+                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[9])))
+            tabla.setItem(
+                rowNum, 9, QtWidgets.QTableWidgetItem(str(rowData[10])))
+
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
 
             self.generarBotones(
@@ -790,18 +809,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Esto lo hacían ustedes o entendí eso
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        
+
         self.stackedWidget.setCurrentIndex(4)
 
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
 
     def saveMovimientos(self):
         print("No implementado")
@@ -833,21 +843,22 @@ class MainWindow(QtWidgets.QMainWindow):
             # | descripcion | subgrupos | herramientas |
             # | Martillos   |     3     |      23      |
             # +-------------+-----------+--------------+
-            # pero alto viaje
 
             self.generarBotones(
                 self.saveGrupos, self.deleteGrupos, tabla, rowNum)
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        # Esto lo dejo tachado que lo acomodaban ustedes
 
         self.stackedWidget.setCurrentIndex(2)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
     def saveGrupos(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla grupos de la base de datos.
@@ -941,10 +952,6 @@ class MainWindow(QtWidgets.QMainWindow):
     
 
         self.stackedWidget.setCurrentIndex(4)
-
-    
-    
-    
    
    
 
@@ -991,44 +998,42 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # DNI
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             # Nombre y Apellido
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
             # Descripción
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
-
+            
             # fijarse que no existe la función saveOtroPersonal
             self.generarBotones(
-                self.saveStock, self.deleteOtroPersonal, tabla, rowNum)
+                self.saveOtroPersonal, self.deleteOtroPersonal, tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Método setSectionResizeMode(column, ResizeMode): hace que una
-        # columna de una tabla se expanda o no automáticamente conforme
-        # se extiende la tabla.
-
-        # cuál tendria que poner que no se expanda
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(5)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
 
-        lambda: self.stackedWidget.setCurrentIndex(5)
     def saveOtroPersonal(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla personal de la base de datos.
@@ -1451,80 +1456,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)"""
 
-# --------------- lo que modifique está abajo --------------------------#
-    def fetchOtroPersonal(self):
-        """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario.
-        """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # OtroPersonal en variables para que el código se simplifique y se
-        # haga más legible.
-        tabla = self.pantallaOtroPersonal.tableWidget
-        barraBusqueda = self.pantallaOtroPersonal.lineEdit
-
-        # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los datos y 
-        # el texto de la barra de búsqueda mediante el cual queremos
-        # filtrarlos.
-        datos=dal.obtenerDatos("otro_personal", barraBusqueda.text())
-
-        # Se refresca la tabla, eliminando todas las filas anteriores.
-        tabla.setRowCount(0)
-
-        # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de ésta.
-        # Método enumerate: devuelve una lista con el número y el
-        # elemento.
-        for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
-            tabla.insertRow(rowNum)
-
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            # Método setItem(row, column, item): establece el item de
-            # una celda de una tabla.
-            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
-            # texto por defecto.
-
-            # DNI
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            # Nombre y Apellido
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            # Descripción
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
-
-            # fijarse que no existe la función saveOtroPersonal
-            self.generarBotones(
-                lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
-
-        # Método setRowHeight: cambia la altura de una fila.
-        tabla.setRowHeight(0, 35)
-        tabla.resizeColumnsToContents()
-
-        # Método setSectionResizeMode(column, ResizeMode): hace que una
-        # columna de una tabla se expanda o no automáticamente conforme
-        # se extiende la tabla.
-
-        # cuál tendria que poner que no se expanda
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        # tabla.horizontalHeader().setSectionResizeMode(
-        #     4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-
-        self.stackedWidget.setCurrentIndex(5)
 
 
     def deleteOtroPersonal(self, datos: list) -> None:
@@ -1638,10 +1569,10 @@ class MainWindow(QtWidgets.QMainWindow):
             # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
             # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
@@ -1649,21 +1580,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # fijarse que no existe la función saveSubgrupos
             self.generarBotones(
-                self.saveStock, self.deleteSubGrupos, tabla, rowNum)
+                self.saveSubgrupos, self.deleteSubGrupos, tabla, rowNum)
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Método setSectionResizeMode(column, ResizeMode): hace que una
-        # columna de una tabla se expanda o no automáticamente conforme
-        # se extiende la tabla.
-        # tabla.horizontalHeader().setSectionResizeMode(
-        # 0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(6)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
         
         lambda: self.stackedWidget.setCurrentIndex(6)
     def saveSubgrupos(self, datos: list | None = None):
@@ -1682,7 +1614,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaAlumnos.tableWidget
+        tabla=self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0, 1)
         # Por cada campo que no debe ser nulo...
@@ -1839,6 +1771,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.generarBotones(
                 self.saveTurnos, self.deleteTurnos, tabla, rowNum) # NOne es saveTurno y deleteTurno
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -1853,8 +1789,6 @@ class MainWindow(QtWidgets.QMainWindow):
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(7)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
         
     def saveTurnos(self):
         pass
