@@ -86,13 +86,17 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
+        self.newTurno = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}C-Turno.ui'), self.newTurno)
+        
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
                      self.pantallaMovimientos,
                      self.pantallaOtroPersonal, self.pantallaSubgrupos,
                      self.pantallaTurnos, self.pantallaUsuarios,
-                     self.pantallaHistorial)
+                     self.pantallaHistorial, self.newTurno)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
