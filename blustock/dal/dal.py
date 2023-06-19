@@ -45,7 +45,7 @@ class DAL():
         """
         # Abriendo el archivo sql con la consulta usando la tabla
         # pedida...
-        with open(f"{os.getcwd()}{os.sep}blustock{os.sep}dal{os.sep}queries{os.sep}{tabla}.sql", 'r') as queryText:
+        with open(f"{os.getcwd()}{os.sep}blustock{os.sep}dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
             # Obtenemos y guardamos el código sql como texto
             query=queryText.read()
             # Inicializamos la lista con los filtros que se usarán en
