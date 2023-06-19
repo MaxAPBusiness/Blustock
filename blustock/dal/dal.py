@@ -79,6 +79,7 @@ class DAL():
             for i in range(query.count('?')-cantFiltrosExtra):
                 filtro.append(f"%{busqueda}%")
             # Consulta los datos y los devuelve.
+            print(query,filtro)
             return bdd.cur.execute(query, filtro).fetchall()
 
     def insertarHistorial(self, usuario: int, tipo: str, tabla: str,
