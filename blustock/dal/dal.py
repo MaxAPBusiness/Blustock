@@ -45,7 +45,7 @@ class DAL():
         """
         # Abriendo el archivo sql con la consulta usando la tabla
         # pedida...
-        with open(f"{os.getcwd()}{os.sep}blustock{os.sep}dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
+        with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
             # Obtenemos y guardamos el código sql como texto
             query=queryText.read()
             # Inicializamos la lista con los filtros que se usarán en
@@ -79,6 +79,7 @@ class DAL():
             for i in range(query.count('?')-cantFiltrosExtra):
                 filtro.append(f"%{busqueda}%")
             # Consulta los datos y los devuelve.
+            print(query,filtro)
             return bdd.cur.execute(query, filtro).fetchall()
 
     def insertarHistorial(self, usuario: int, tipo: str, tabla: str,

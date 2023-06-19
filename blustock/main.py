@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-            f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+                   f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
         self.menubar.hide()
 
         self.filaEditada = 0
@@ -63,21 +63,29 @@ class MainWindow(QtWidgets.QMainWindow):
         
 
         self.pantallaStock = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sstock.ui'), self.pantallaStock)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
         self.pantallaHistorial = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}shistorial.ui'), self.pantallaHistorial)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
         self.pantallaMovimientos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}smovimientos.ui'), self.pantallaMovimientos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
         self.pantallaOtroPersonal = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sotro_personal.ui'), self.pantallaOtroPersonal)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
         self.pantallaSubgrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}ssubgrupos.ui'), self.pantallaSubgrupos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
         self.pantallaTurnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}sturnos.ui'), self.pantallaTurnos)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
         self.pantallaUsuarios = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}susuarios.ui'), self.pantallaUsuarios)
+        uic.loadUi(os.path.join(os.path.abspath(
+            os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
         self.pantallaLogin = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}screens_ui{os.sep}slogin.ui'), self.pantallaLogin)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
@@ -109,7 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(
             lambda: self.stackedWidget.setCurrentIndex(9))
 
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}styles.qss'), 'r') as file:
+        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
 
         self.pantallaLogin.passwordState.hide()
@@ -1599,7 +1607,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 app = QtWidgets.QApplication(sys.argv)
 
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'blustock{os.sep}ui{os.sep}rsc{os.sep}fonts')):
+for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
                      f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
