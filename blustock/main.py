@@ -11,7 +11,6 @@ import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
-from PyQt6.QtCore import Qt
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
 from db.bdd import bdd
@@ -368,7 +367,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             # Se generan e insertan los botones en la fila, pasando
             # como parámetros las funciones que queremos que los
@@ -601,7 +600,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -799,7 +798,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
 
             self.generarBotones(
@@ -849,7 +848,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -1009,7 +1008,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
 
             # Se generan e insertan los botones en la fila, pasando
@@ -1312,7 +1311,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -1502,7 +1501,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
