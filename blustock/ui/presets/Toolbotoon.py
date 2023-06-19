@@ -11,7 +11,7 @@ Clases
 """
 from PyQt6 import QtWidgets, QtCore, QtGui
 import os
-
+from ui.presets.turnos import nuu
 
 class toolboton(QtWidgets.QToolButton):
     """Esta clase genera un botón que se ubicará en las filas de las
@@ -26,6 +26,7 @@ class toolboton(QtWidgets.QToolButton):
         icono : str
             El ícono del botón.
 
+            
     Métodos
     -------
         __init__(self):
@@ -62,7 +63,7 @@ class toolboton(QtWidgets.QToolButton):
         d=QtGui.QAction(QtGui.QIcon(f'ui{os.sep}rsc{os.sep}icons{os.sep}turno.png'),"Iniciar turno",a)
         b.triggered.connect(self.inicio)
         c.triggered.connect(lambda: nw.stackedWidget.setCurrentIndex(1))
-        d.triggered.connect(lambda: nw.stackedWidget.setCurrentIndex(2))
+        d.triggered.connect(self.poronga)
         a.addAction(d)
         a.addSeparator()
         a.addAction(c)
@@ -99,3 +100,6 @@ class toolboton(QtWidgets.QToolButton):
         self.nw.menubar.hide()
         self.nw.stackedWidget.setCurrentIndex(0)
     
+    def poronga(self):
+            popup = nuu()
+            popup.exec()
