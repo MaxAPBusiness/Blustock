@@ -81,28 +81,6 @@ class DAL():
             # Consulta los datos y los devuelve.
             return bdd.cur.execute(query, filtro).fetchall()
 
-    def verifRelStock(self, idd: int) -> bool:
-        """Esta función verifica si la PK de una fila de la tabla stock
-        está relacionada con otras tablas.
-        
-        Parámetros
-        ----------
-            idd: int
-                El id de la fila que queremos verificar
-        
-        Devuelve
-        --------
-            bool: si encontró o no una relación.
-        """
-        movsRel=bdd.cur.execute(
-            "SELECT * FROM movimientos WHERE id_elem = ?", (idd,)).fetchone()
-        repRel=bdd.cur.execute(
-            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idd,)).fetchone()
-        if movsRel or repRel:
-            return True
-        else:
-            return False
-    
     def insertarHistorial(self, usuario: int, tipo: str, tabla: str,
                           fila: int, datosViejos: str | None = None,
                           datosNuevos: str | None = None):
@@ -131,6 +109,28 @@ class DAL():
                    datosViejos, datosNuevos)
             bdd.cur.execute(queryFile.text(), datos)
             bdd.con.commit()
+    
+    def verifElimStock(self, idd: int) -> bool:
+        """Esta función verifica si la PK de una fila de la tabla stock
+        está relacionada con otras tablas.
+        
+        Parámetros
+        ----------
+            idd: int
+                El id de la fila que queremos verificar
+        
+        Devuelve
+        --------
+            bool: si encontró o no una relación.
+        """
+        movsRel=bdd.cur.execute(
+            "SELECT * FROM movimientos WHERE id_elem = ?", (idd,)).fetchone()
+        repRel=bdd.cur.execute(
+            "SELECT * FROM reparaciones WHERE id_herramienta = ?", (idd,)).fetchone()
+        if movsRel or repRel:
+            return True
+        else:
+            return False
     
     def verifElimSubgrupos(self, idd: int) -> bool:
         """Este método verifica si la PK de una fila de la tabla
