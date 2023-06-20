@@ -1,5 +1,5 @@
 SELECT m.id, ti.descripcion, s.descripcion, e.descripcion, m.cant,
-p.nombre_apellido, m.fecha_hora, m.id_turno, u.descripcion,
+(CASE WHEN m.descripcion IS NULL THEN ' - ' ELSE m.descripcion END) motivo, p.nombre_apellido, m.fecha_hora, m.id_turno, u.descripcion,
 (SELECT p.nombre_apellido WHERE tu.id_panolero = p.id) panolero,
 (select p.nombre_apellido WHERE tu.id_prof_ing = p.id) prof
 FROM movimientos m
@@ -19,4 +19,5 @@ OR ti.descripcion LIKE ?
 OR u.descripcion LIKE ?
 OR m.id LIKE ?
 OR panolero LIKE ?
-OR prof LIKE ?;
+OR prof LIKE ?
+OR motivo LIKE ?;
