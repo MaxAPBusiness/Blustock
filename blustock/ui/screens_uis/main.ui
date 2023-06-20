@@ -43,7 +43,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHerramientas">
@@ -103,9 +103,9 @@
    <addaction name="menuTurnos"/>
    <addaction name="menuMovimientos"/>
    <addaction name="menuUsuarios"/>
-   <addaction name="menuHISTORIAL"/>
    <addaction name="menuTalleres"/>
    <addaction name="menuCLASES"/>
+   <addaction name="menuHISTORIAL"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="opcionSubgrupos">

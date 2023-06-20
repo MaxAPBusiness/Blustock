@@ -1,1 +1,1 @@
-INSERT INTO historial_de_cambios(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) VALUES(?,?,?,?,?,?)
+INSERT INTO historial(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) VALUES(?,?,?,?,?,?)
