@@ -161,6 +161,10 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
                                       self.saveSubgrupos,
                                       self.deleteSubgrupos, (0, 1)))
+        self.pantallaGrupos.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaGrupos.tableWidget,
+                                      self.saveGrupos,
+                                      self.deleteGrupos, (0,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
@@ -559,10 +563,14 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla=self.pantallaStock.tableWidget
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        if datos:
+
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
         # Si no se pasó el argumento idd, significa que la fila no está
         # relacionada con la base de datos. Eso significa que la fila
         # se insertó en la tabla de la UI, pero aún no se guardaron los
@@ -848,16 +856,10 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-  
-            # Podría mostrarse la cantidad de herramientas en el grupo o algo
-            # +-------------+-----------+--------------+
-            # | descripcion | subgrupos | herramientas |
-            # | Martillos   |     3     |      23      |
-            # +-------------+-----------+--------------+
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             self.generarBotones(
-                self.saveGrupos, self.deleteGrupos, tabla, rowNum)
+                lambda: self.saveGrupos(datos), lambda:self.deleteGrupos(datos), tabla, rowNum)
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
@@ -881,7 +883,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla grupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla=self.pantallaStock.tableWidget
+        tabla=self.pantallaGrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         if tabla.item(row, 0).text() == "":
             mensaje = """       Hay campos en blanco que son obligatorios.
@@ -894,14 +896,19 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             grupo = tabla.item(row, 0).text()
             
-            if datos:
-                bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo))
-            else:
-                idd=datos[row][0]
-                bdd.cur.execute(
-                    """UPDATE grupos SET descripcion = ? WHERE id = ?""",
-                    (grupo, idd,)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo,))
+                else:
+                    idd=datos[row][0]
+                    bdd.cur.execute(
+                        """UPDATE grupos SET descripcion = ? WHERE id = ?""",
+                        (grupo, idd,)
+                    )
+            except sqlite3.IntegrityError:
+                mensaje = """       El grupo que desea ingresar ya está ingresado.
+                Ingrese otro grupo o revise los datos ya ingresados."""
+                return PopUp("Error", mensaje).exec()
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
@@ -944,9 +951,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            print("Me dijieron que no lo hacía")
-
-        self.fetchGrupos()
+            dal.eliminarDatos('grupos', idd)
+            self.fetchGrupos()
     
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
