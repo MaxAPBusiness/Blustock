@@ -93,10 +93,10 @@ class MainWindow(QtWidgets.QMainWindow):
                    f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
         self.pantallaReparaciones = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaReparaciones)
+                   f'ui{os.sep}screens_uis{os.sep}reparaciones.ui'), self.pantallaReparaciones)
         self.pantallaUbicaciones = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaUbicaciones)
+                   f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
         
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
@@ -1666,13 +1666,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
+            
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-            self.generarBotones(
-                self.saveReparaciones, self.deleteReparaciones, tabla, rowNum)
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
