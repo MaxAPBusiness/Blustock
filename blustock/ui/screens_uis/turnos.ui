@@ -51,7 +51,6 @@
        <property name="font">
         <font>
          <family>Oswald</family>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -96,7 +95,6 @@
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -143,14 +141,14 @@
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>20</number>
+       </attribute>
        <attribute name="horizontalHeaderDefaultSectionSize">
         <number>80</number>
        </attribute>
        <attribute name="horizontalHeaderHighlightSections">
         <bool>false</bool>
-       </attribute>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>20</number>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
@@ -170,17 +168,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Fecha</string>
+         <string>Fecha y hora de ingreso</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Horario de Ingreso</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Horario de Egreso</string>
+         <string>Fecha y hora de egreso</string>
         </property>
        </column>
        <column>
@@ -191,6 +184,11 @@
        <column>
         <property name="text">
          <string>Profesor Responsable del Egreso</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Taller</string>
         </property>
        </column>
       </widget>

@@ -196,8 +196,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
-                if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
-                    texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
+                if bdd.cur.execute("select count(*) from turnos WHERE fecha_egr is null").fetchall()[0][0] != 0:
+                    texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE fecha_egr is null").fetchall()[0][0])) 
                     self.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
                     self.labela.show()
                 else:
@@ -1404,9 +1404,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
+            print(rowData)
             for cellNum, cellData in enumerate(rowData):
                 item=QtWidgets.QTableWidgetItem(str(cellData))
-                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
 
