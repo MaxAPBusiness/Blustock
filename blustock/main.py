@@ -43,7 +43,6 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
-        self.labela.hide()
         boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
@@ -127,6 +126,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionUsuarios.triggered.connect(self.fetchUsuarios)
         self.GestionUbicaciones.triggered.connect(self.fetchUbicaciones)
         self.GestionClases.triggered.connect(self.fetchClases)
+        self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
+
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
 
@@ -196,12 +197,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
-                if bdd.cur.execute("select count(*) from turnos WHERE fecha_egr is null").fetchall()[0][0] != 0:
-                    texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE fecha_egr is null").fetchall()[0][0])) 
-                    self.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
-                    self.labela.show()
-                else:
-                    pass
 
             else:
                 self.pantallaLogin.passwordState.show()
@@ -267,6 +262,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
+    def realizarMovimiento(self):
+        pass
 
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
                       funcGuardar: types.FunctionType,
