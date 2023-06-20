@@ -47,20 +47,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.hide()
         
         self.pantallaAlumnos = QtWidgets.QWidget()
-        uic.loadUi(
-            os.path.join(
-                os.path.abspath(os.getcwd()),
-                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
-            ), self.pantallaAlumnos)
-        
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )),f'ui{os.sep}screens_uis{os.sep}alumnos.ui'), self.pantallaAlumnos) 
         self.pantallaGrupos = QtWidgets.QWidget()
-        
-        pathGrupos=os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
-        
-        uic.loadUi(pathGrupos, self.pantallaGrupos)
-        
-
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )),f'ui{os.sep}screens_uis{os.sep}grupos.ui'), self.pantallaGrupos)
+        self.pantallaClases = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
+        self.pantallaReparaciones = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}reparaciones.ui'), self.pantallaReparaciones)
+        self.pantallaUbicaciones = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
+        )), f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
         self.pantallaStock = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
         )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
@@ -86,13 +86,15 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
+        
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
-                     self.pantallaMovimientos,
-                     self.pantallaOtroPersonal, self.pantallaSubgrupos,
-                     self.pantallaTurnos, self.pantallaUsuarios,
-                     self.pantallaHistorial)
+                     self.pantallaMovimientos, self.pantallaOtroPersonal,
+                     self.pantallaSubgrupos, self.pantallaTurnos,
+                     self.pantallaUsuarios, self.pantallaHistorial,
+                     self.pantallaClases,self.pantallaReparaciones,
+                     self.pantallaUbicaciones)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
@@ -111,9 +113,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
         self.opcionTurnos.triggered.connect(self.fetchTurnos)
         self.opcionMovimientos.triggered.connect(self.fetchMovimientos)
-        self.opcionUsuariosG.triggered.connect(self.fetchUsuarios)
-        self.opcionHistorial.triggered.connect(
-            lambda: self.stackedWidget.setCurrentIndex(9))
+        self.opcionUsuarios.triggered.connect(self.fetchUsuarios)
+        self.GestionUbicaciones.triggered.connect(self.fetchUbicaciones)
+        self.GestionClases.triggered.connect(self.fetchClases)
+        self.GestionReparacion.triggered.connect(self.fetchReparaciones)
+        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
 
         with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
@@ -1711,8 +1715,134 @@ class MainWindow(QtWidgets.QMainWindow):
             # dal.eliminarDatos(idd)
             print("ME DIJERON QUE NO LO HAGA")
         self.fetchUsuarios()
+    
+    def fetchClases(self):
+        
+        tabla = self.pantallaClases.tableWidget
+        barraBusqueda = self.pantallaClases.lineEdit
+
+        datos=dal.obtenerDatos("clases", barraBusqueda.text())
+        tabla.setRowCount(0)
+
+        for rowNum, rowData in enumerate(datos):
+
+            tabla.insertRow(rowNum)
+
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+            self.generarBotones(
+                self.saveClases, self.deleteClases, tabla, rowNum)
+
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        self.stackedWidget.setCurrentIndex(10)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+        
+    def saveClases(self):
+        pass
+    def deleteClases(self):
+        pass
+
+    def fetchUbicaciones(self):
+        
+        tabla = self.pantallaUbicaciones.tableWidget
+        barraBusqueda = self.pantallaUbicaciones.lineEdit
+
+        datos=dal.obtenerDatos("ubicaciones", barraBusqueda.text())
+
+        tabla.setRowCount(0)
+
+        for rowNum, rowData in enumerate(datos):
+
+            tabla.insertRow(rowNum)
+
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+            self.generarBotones(
+                self.saveUbicaciones, self.deleteUbicaciones, tabla, rowNum)
+
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
 
+        self.stackedWidget.setCurrentIndex(12)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+    
+    def saveUbicaciones(self):
+        pass
+    def deleteUbicaciones(self):
+        pass   
+
+    def fetchReparaciones(self):
+        
+        tabla = self.pantallaReparaciones.tableWidget
+        barraBusqueda = self.pantallaReparaciones.lineEdit
+
+        datos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
+        tabla.setRowCount(0)
+
+        for rowNum, rowData in enumerate(datos):
+
+            tabla.insertRow(rowNum)
+
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
+            tabla.setItem(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+            self.generarBotones(
+                self.saveReparaciones, self.deleteReparaciones, tabla, rowNum)
+        
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        self.stackedWidget.setCurrentIndex(11)
+        tabla.cellClicked.connect(
+            lambda row: self.obtenerFilaEditada(tabla, row))
+
+    def saveReparaciones(self):
+        pass
+    def deleteReparaciones(self):
+        pass
 app = QtWidgets.QApplication(sys.argv)
 
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):

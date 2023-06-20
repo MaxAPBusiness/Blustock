@@ -19,25 +19,9 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>10</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>-1</number>
       </property>
      </widget>
     </item>
@@ -59,6 +43,7 @@
     <addaction name="opcionStock"/>
     <addaction name="opcionSubgrupos"/>
     <addaction name="opcionGrupos"/>
+    <addaction name="GestionReparacion"/>
    </widget>
    <widget class="QMenu" name="menuPersonal">
     <property name="title">
@@ -83,7 +68,7 @@
     <property name="title">
      <string>USUARIOS</string>
     </property>
-    <addaction name="opcionUsuariosG"/>
+    <addaction name="opcionUsuarios"/>
    </widget>
    <widget class="QMenu" name="menuHISTORIAL">
     <property name="title">
@@ -91,12 +76,26 @@
     </property>
     <addaction name="opcionHistorial"/>
    </widget>
+   <widget class="QMenu" name="menuTalleres">
+    <property name="title">
+     <string>UBICACIONES</string>
+    </property>
+    <addaction name="GestionUbicaciones"/>
+   </widget>
+   <widget class="QMenu" name="menuCLASES">
+    <property name="title">
+     <string>CLASES</string>
+    </property>
+    <addaction name="GestionClases"/>
+   </widget>
    <addaction name="menuHerramientas"/>
    <addaction name="menuPersonal"/>
    <addaction name="menuTurnos"/>
    <addaction name="menuMovimientos"/>
    <addaction name="menuUsuarios"/>
    <addaction name="menuHISTORIAL"/>
+   <addaction name="menuTalleres"/>
+   <addaction name="menuCLASES"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="opcionSubgrupos">
@@ -169,29 +168,9 @@
     </font>
    </property>
   </action>
-  <action name="actionlogo">
-   <property name="text">
-    <string>logo</string>
-   </property>
-  </action>
-  <action name="actionaa">
-   <property name="text">
-    <string>aa</string>
-   </property>
-  </action>
   <action name="opcionOtroPersonal">
    <property name="text">
     <string>Gestión de otro personal</string>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>11</pointsize>
-    </font>
-   </property>
-  </action>
-  <action name="opcionUsuarios">
-   <property name="text">
-    <string>Gestión de usuarios</string>
    </property>
    <property name="font">
     <font>
@@ -209,17 +188,7 @@
     </font>
    </property>
   </action>
-  <action name="actiona">
-   <property name="text">
-    <string>a</string>
-   </property>
-  </action>
-  <action name="actionGesti_n_de_usuarios">
-   <property name="text">
-    <string>Gestión de usuarios</string>
-   </property>
-  </action>
-  <action name="opcionUsuariosG">
+  <action name="opcionUsuarios">
    <property name="text">
     <string>Gestión de usuarios</string>
    </property>
@@ -232,6 +201,36 @@
   <action name="opcionHistorial">
    <property name="text">
     <string>Ver historial</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="GestionReparacion">
+   <property name="text">
+    <string>Gestión de herramientas en reparacion</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="GestionUbicaciones">
+   <property name="text">
+    <string>Gestión de ubicaciones</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="GestionClases">
+   <property name="text">
+    <string>Gestion de clases</string>
    </property>
    <property name="font">
     <font>

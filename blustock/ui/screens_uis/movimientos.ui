@@ -24,13 +24,13 @@
       <number>20</number>
      </property>
      <property name="leftMargin">
-      <number>30</number>
+      <number>5</number>
      </property>
      <property name="topMargin">
       <number>30</number>
      </property>
      <property name="rightMargin">
-      <number>30</number>
+      <number>5</number>
      </property>
      <property name="bottomMargin">
       <number>30</number>
