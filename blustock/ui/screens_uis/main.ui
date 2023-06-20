@@ -66,6 +66,7 @@
     <property name="title">
      <string>MOVIMIENTOS</string>
     </property>
+    <addaction name="realizarMovimientos"/>
     <addaction name="opcionMovimientos"/>
    </widget>
    <widget class="QMenu" name="menuTurnos">
@@ -241,6 +242,16 @@
   <action name="GestionClases">
    <property name="text">
     <string>Gestion de clases</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="realizarMovimientos">
+   <property name="text">
+    <string>Realizar movimientos</string>
    </property>
    <property name="font">
     <font>
