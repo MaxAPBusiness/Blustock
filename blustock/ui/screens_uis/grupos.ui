@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>710</width>
+    <width>725</width>
     <height>500</height>
    </rect>
   </property>
@@ -177,7 +177,7 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
+         <family>Oswald</family>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -221,7 +221,7 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>11</pointsize>
            <weight>50</weight>
            <bold>false</bold>
@@ -272,17 +272,17 @@ QPushButton:pressed {
        </attribute>
        <column>
         <property name="text">
-         <string>Grupo</string>
+         <string>Descripción</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string/>
+         <string>-</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string/>
+         <string>-</string>
         </property>
        </column>
       </widget>
@@ -312,7 +312,7 @@ QPushButton:pressed {
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <weight>50</weight>
            <bold>false</bold>
           </font>

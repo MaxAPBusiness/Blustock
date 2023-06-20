@@ -178,7 +178,6 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald</family>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -223,7 +222,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -267,6 +265,9 @@ QPushButton:pressed {
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <row>
         <property name="text">
          <string/>
@@ -280,6 +281,11 @@ QPushButton:pressed {
        <column>
         <property name="text">
          <string>Nombre y Apellido</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Descripción</string>
         </property>
        </column>
        <column>
@@ -312,22 +318,22 @@ QPushButton:pressed {
          <string>Juan </string>
         </property>
        </item>
-       <item row="0" column="2">
+       <item row="0" column="3">
         <property name="text">
          <string>Profesor</string>
         </property>
        </item>
-       <item row="0" column="3">
+       <item row="0" column="4">
         <property name="text">
          <string>contraseña_segura</string>
         </property>
        </item>
-       <item row="0" column="4">
+       <item row="0" column="5">
         <property name="text">
          <string>Editar</string>
         </property>
        </item>
-       <item row="0" column="5">
+       <item row="0" column="6">
         <property name="text">
          <string>Borrar</string>
         </property>
@@ -361,7 +367,6 @@ QPushButton:pressed {
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
