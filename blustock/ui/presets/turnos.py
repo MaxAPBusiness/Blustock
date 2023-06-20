@@ -18,7 +18,7 @@ class nuu(QDialog):
     def __init__(self,usuario):
         self.usuario = usuario
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'Turno.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'cargar_turno.ui'), self)
 
         for i in dal.obtenerDatos("clases",""):
             self.cursoComboBox.addItem(i[1])
