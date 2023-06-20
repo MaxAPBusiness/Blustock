@@ -164,6 +164,10 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaGrupos.tableWidget,
                                       self.saveGrupos,
                                       self.deleteGrupos, (0,)))
+        self.pantallaAlumnos.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaAlumnos.tableWidget,
+                                      self.saveAlumnos,
+                                      self.deleteAlumnos, (0, 1, 2)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
@@ -623,7 +627,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # Eliminamos los datos
-            dal.eliminarDatos(idd)
+            dal.eliminarDatos('stock', idd)
             self.fetchStock()
 
     def fetchAlumnos(self):
@@ -650,7 +654,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             self.generarBotones(
-                lambda: self.saveAlumnos(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
+                lambda: self.saveAlumnos(datos), lambda: self.deleteAlumnos(datos), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
@@ -709,7 +713,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             try:
-                if datos:
+                if not datos:
                     bdd.cur.execute(
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
@@ -717,10 +721,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
-                        """UPDATE alumnos
+                        """UPDATE personal
                         SET nombre_apellido=?, id_clase=?, dni=?
                         WHERE id = ?""",
-                        (nombre, dni, idClase[0], idd,)
+                        (nombre, idClase[0], dni, idd,)
                     )
             except sqlite3.IntegrityError:
                 info = """        El dni ingresado ya está registrado.
@@ -773,7 +777,6 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            print("ME DIJIERON QUE ESTO NO")
         #     # Obtenemos los datos para guardarlos en el historial.
         #     desc = tabla.item(row, 0).text()
         #     cond = tabla.item(row, 1).text()
@@ -788,8 +791,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #     # Insertamos los datos en el historial para que quede registro.
         #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
         #     # Eliminamos los datos
-        #     dal.eliminarDatos(idd)
-        self.fetchAlumnos()
+            dal.eliminarDatos('personal', idd)
+            self.fetchAlumnos()
 
 
 
