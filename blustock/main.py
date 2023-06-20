@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaStock.tableWidget, 
                                       self.saveStock, self.deleteStock, 
-                                      (0, 1, 5, 6, 7)))
+                                      (0, 1, 5, 6, 7), (4,)))
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
@@ -315,7 +315,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # Se añaden campos de texto en todas las celdas ya que por
         # defecto no vienen.
         for numCol in range(tabla.columnCount() - 2):
-            tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
+            if camposNoEditables:
+                if numCol not in camposNoEditables:
+                    tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
+                else:
+                    campoNoEditable=QtWidgets.QTableWidgetItem("")
+                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                    tabla.setItem(indiceFinal, numCol, campoNoEditable)
+            else:
+                tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
         self.generarBotones(
             funcGuardar, funcEliminar, tabla, indiceFinal)
 
@@ -329,10 +337,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 cantRep=tabla.item(row, 2).text()
                 cantBaja=tabla.item(row, 3).text()
                 if cantRep == "" or cantBaja == "":
-                    total=cantCond
+                    total=QtWidgets.QTableWidgetItem(str(cantCond))
                 else:
-                    total=cantCond + int(cantRep) + int(cantBaja)
-                tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total)))
+                    total=QtWidgets.QTableWidgetItem(str(cantCond + int(cantRep) + int(cantBaja)))
+                total.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                tabla.setItem(row, 4, total)
             except Exception as e:
                 print(e)
                 mensaje = """       Ha agregado una fila y todavía no ha
@@ -396,12 +405,13 @@ class MainWindow(QtWidgets.QMainWindow):
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
             if rowData[3] != "":
-                tabla.setItem(
-                    rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4])))
+                total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4]))
             else:
-                tabla.setItem(
-                    rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            
+                total=QtWidgets.QTableWidgetItem(str(rowData[2]))
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+
+
+            tabla.setItem(rowNum, 4, total)
 
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
@@ -1640,8 +1650,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def deleteUbicaciones(self):
         pass   
 
-    def fetchReparaciones(self):
-        
+    def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
         barraBusqueda = self.pantallaReparaciones.lineEdit
 
