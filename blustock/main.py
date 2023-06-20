@@ -1404,7 +1404,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-            print(rowData)
             for cellNum, cellData in enumerate(rowData):
                 item=QtWidgets.QTableWidgetItem(str(cellData))
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
