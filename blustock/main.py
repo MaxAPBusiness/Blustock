@@ -168,6 +168,10 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaAlumnos.tableWidget,
                                       self.saveAlumnos,
                                       self.deleteAlumnos, (0, 1, 2)))
+        self.pantallaUbicaciones.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
+                                      self.saveUbicaciones,
+                                      self.deleteUbicaciones, (0,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
@@ -811,11 +815,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def fetchMovimientos(self):
-
         """Este método obtiene los datos de la tabla movimientos y los
         inserta en la tabla de la interfaz de usuario.
         """
-
         tabla = self.pantallaMovimientos.tableWidget
         barraBusqueda = self.pantallaMovimientos.lineEdit
 
@@ -824,37 +826,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[7])))
-            tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[8])))
-            tabla.setItem(
-                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[9])))
-            tabla.setItem(
-                rowNum, 9, QtWidgets.QTableWidgetItem(str(rowData[10])))
-
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-
-            self.generarBotones(
-                self.saveMovimientos, self.deleteMovimientos, tabla, rowNum)
-
+            for cellNum, cellData in enumerate(rowData):
+                item=QtWidgets.QTableWidgetItem(str(cellData))
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                tabla.setItem(rowNum, cellNum, item)
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -1599,7 +1575,6 @@ class MainWindow(QtWidgets.QMainWindow):
         pass
 
     def fetchUbicaciones(self):
-        
         tabla = self.pantallaUbicaciones.tableWidget
         barraBusqueda = self.pantallaUbicaciones.lineEdit
 
@@ -1612,34 +1587,114 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             self.generarBotones(
-                self.saveUbicaciones, self.deleteUbicaciones, tabla, rowNum)
+                lambda: self.saveUbicaciones(datos), lambda:self.deleteUbicaciones(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-
 
         self.stackedWidget.setCurrentIndex(12)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
     
-    def saveUbicaciones(self):
-        pass
-    def deleteUbicaciones(self):
-        pass   
+    def saveUbicaciones(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaUbicaciones.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0,)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
 
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            ubicacion = tabla.item(row, 0).text()
+
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO ubicaciones VALUES(NULL, ?)",
+                        (ubicacion,)
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE ubicaciones
+                        SET descripcion=?
+                        WHERE id = ?""",
+                        (ubicacion, idd)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El subgrupo ingresado ya está registrado en ese grupo.
+                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                return PopUp("Error", info).exec()
+
+            bdd.con.commit()
+            self.fetchUbicaciones()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+
+    def deleteUbicaciones(self, datos: list | None = None) -> None:
+        tabla=self.pantallaUbicaciones.tableWidget
+        row = (tabla.indexAt(self.sender().pos())).row()
+
+        if not datos:
+            idd=None
+        else:
+            if row == len(datos):
+                idd=None
+            else:
+                idd=datos[row][0]
+        
+        if not idd:
+            return tabla.removeRow(row)
+        
+        hayRelacion = dal.verifElimUbi(idd)
+        if hayRelacion:
+            mensaje = """        La ubicacion tiene relaciones. Por motivos de seguridad,
+            debe eliminar primero los registros relacionados antes de eliminar
+            esta ubicacion."""
+            return PopUp('Advertencia', mensaje).exec()
+        mensaje = """        Esta acción no se puede deshacer.
+        ¿Desea eliminar la ubicacion?"""
+        popup = PopUp("Pregunta", mensaje).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            des = tabla.item(row, 0).text()
+            datosEliminados = f"ubi: {des}"
+            dal.insertarHistorial(self.usuario, "eliminación", "ubicaciones", row, datosEliminados)
+            dal.eliminarDatos('ubicaciones', idd)
+            self.fetchUbicaciones()
     def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
         barraBusqueda = self.pantallaReparaciones.lineEdit

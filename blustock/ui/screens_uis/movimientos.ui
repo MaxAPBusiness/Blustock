@@ -52,11 +52,12 @@
        <property name="font">
         <font>
          <family>Oswald</family>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de movimientos del pañol</string>
+        <string>Listado de Movimientos</string>
        </property>
       </widget>
      </item>
@@ -96,6 +97,7 @@
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -258,6 +260,16 @@
        </attribute>
        <column>
         <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Herramienta</string>
         </property>
        </column>
@@ -273,12 +285,12 @@
        </column>
        <column>
         <property name="text">
-         <string>Persona</string>
+         <string>Motivo</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Motivo</string>
+         <string>Persona</string>
         </property>
        </column>
        <column>
@@ -304,16 +316,6 @@
        <column>
         <property name="text">
          <string>Profesor a cargo del turno</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string/>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string/>
         </property>
        </column>
       </widget>
@@ -344,6 +346,7 @@
          <property name="font">
           <font>
            <family>Oswald</family>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
