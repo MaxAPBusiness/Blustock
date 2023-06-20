@@ -29,7 +29,7 @@ class nuu(QDialog):
         self.alumnoComboBox.clear()
 
         for i in dal.obtenerDatos("alumnos",self.cursoComboBox.currentText(),):
-            print(i)
-            self.alumnoComboBox.addItem(i[0])
+
+            self.alumnoComboBox.addItem(i[1])
 
 
