@@ -396,10 +396,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+
+            if type(rowData[3]) != type(rowData[2]):
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            if type(rowData[4]) != type(rowData[2]):
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
             if rowData[3] != "":
