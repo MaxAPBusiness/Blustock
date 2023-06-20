@@ -13,6 +13,7 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
+from ui.presets.Toolbotoon import toolboton
 from db.bdd import bdd
 from dal.dal import dal
 import datetime as time
@@ -43,6 +44,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        boton = toolboton("usuario",self)
+        boton.setIconSize(QtCore.QSize(60,40))
+        self.menubar.setCornerWidget(boton)
+
         self.menubar.hide()
         
         self.pantallaAlumnos = QtWidgets.QWidget()
@@ -1478,9 +1483,13 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(8)
 
@@ -1661,6 +1670,16 @@ class MainWindow(QtWidgets.QMainWindow):
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(11)
         tabla.cellClicked.connect(

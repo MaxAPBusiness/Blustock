@@ -78,7 +78,10 @@ class toolboton(QtWidgets.QToolButton):
                 font-weight: 400;
                 font-size: 15px;
             }
+            Qtoolbutton{
+                background-color: #293045;
 
+            }
             QMenu {
                 background-color: #293045;
                 color:white;

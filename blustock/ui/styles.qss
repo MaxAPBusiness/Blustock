@@ -3,6 +3,23 @@
     font-weight: 400;
 }
 
+#usuario{
+    border:none;
+    background-color: #293045;
+    padding-right:0px;
+    margin:5px
+}
+#usuario::menu-indicator{
+    image:none;
+}
+
+#usuario:hover,pressed{
+    padding-right:0px;
+    background-color: #768AC5;
+    color:black;
+    border-radius: 5px;
+}
+
 QMenuBar{
     background-color: #293045;
     padding: 0;    
