@@ -39,7 +39,6 @@ class MainWindow(QtWidgets.QMainWindow):
             izquierdo (inicialmente escondido) y una colección de
             pantallas."""
 
-
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
@@ -47,20 +46,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.hide()
         
         self.pantallaAlumnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )),f'ui{os.sep}screens_uis{os.sep}alumnos.ui'), self.pantallaAlumnos) 
+        uic.loadUi(
+            os.path.join(
+                os.path.abspath(os.getcwd()),
+                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
+            ), self.pantallaAlumnos)
+        
         self.pantallaGrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )),f'ui{os.sep}screens_uis{os.sep}grupos.ui'), self.pantallaGrupos)
-        self.pantallaClases = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
-        self.pantallaReparaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}reparaciones.ui'), self.pantallaReparaciones)
-        self.pantallaUbicaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
+        
+        pathGrupos=os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
+        
+        uic.loadUi(pathGrupos, self.pantallaGrupos)
+        
         self.pantallaStock = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
         )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
@@ -85,8 +83,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaLogin = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
-        self.pantallaLogin.Ingresar.clicked.connect(self.login)
+        self.pantallaClases = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
+        self.pantallaReparaciones = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaReparaciones)
+        self.pantallaUbicaciones = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaUbicaciones)
         
+        self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
@@ -158,24 +165,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def login(self):
         bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",
-                         (self.findChild(QtWidgets.QLineEdit, "usuariosLineEdit").text(),))
+                         (self.pantallaLogin.usuariosLineEdit.text(),))
         check = bdd.cur.fetchone()
         if check[0] >= 1:
-            bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
-                QtWidgets.QLineEdit, "usuariosLineEdit").text(), self.findChild(QtWidgets.QLineEdit, "passwordLineEdit").text(),))
+            bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ? and contrasena = ?", (
+                self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),))
             check = bdd.cur.fetchone()
             if check[0] == 1:
-                self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (self.findChild(
-                    QtWidgets.QLineEdit, "usuariosLineEdit").text(), self.findChild(QtWidgets.QLineEdit, "passwordLineEdit").text(),)).fetchall()[0][0]
+                self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (
+                    self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
 
             else:
-                self.findChild(QtWidgets.QLabel, "passwordState").show()
-                self.findChild(QtWidgets.QLabel, "usuarioState").hide()
+                self.pantallaLogin.passwordState.show()
+                self.pantallaLogin.usuarioState.hide()
         else:
-            self.findChild(QtWidgets.QLabel, "usuarioState").show()
-            self.findChild(QtWidgets.QLabel, "passwordState").hide()
+            self.pantallaLogin.usuarioState.show()
+            self.pantallaLogin.passwordState.hide()
 
     def mostrarContrasena(self, boton, entry: QtWidgets.QLineEdit):
         """Este método muestra o esconde lo ingresado en el campo de
@@ -373,18 +380,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            if type(rowData[2]) != type(int):
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(str(0)))
-            else:
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            if type(rowData[2]) != type(int):
-                tabla.setItem(
-                    rowNum, 3, QtWidgets.QTableWidgetItem(str(0)))
-            else:
-                tabla.setItem(
-                    rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
             if rowData[3] != "":
@@ -394,7 +393,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(
                     rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[2])))
             
-            tabla.item(rowNum, 4).setReadOnly(True)
+
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
@@ -410,6 +409,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
+            print(rowData[0])
             self.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
@@ -539,7 +539,7 @@ class MainWindow(QtWidgets.QMainWindow):
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
-    def deleteStock(self, datos: list) -> None:
+    def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -608,7 +608,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.eliminarDatos(idd)
             self.fetchStock()
 
-
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
         inserta en la tabla de la interfaz de usuario.
@@ -633,12 +632,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             self.generarBotones(
-                self.saveAlumnos, self.deleteAlumnos, tabla, rowNum)
-            
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                lambda: self.saveAlumnos(rowData[0]), lambda: self.deleteStock(rowData[0]), tabla, rowNum)
+
+            self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -649,11 +645,9 @@ class MainWindow(QtWidgets.QMainWindow):
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(1)
-
+    
     def saveAlumnos(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla alumnos de la base de datos.
@@ -723,7 +717,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
          
 
-    def deleteAlumnos(self, datos: list) -> None:
+    def deleteAlumnos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -734,30 +728,20 @@ class MainWindow(QtWidgets.QMainWindow):
             fila de la tabla de la base de datos.
             Default: None
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaAlumnos.tableWidget
-        # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        if datos:
+
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
+
         if not idd:
-            # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
+
         hayRelacion = dal.verifElimAlumnos(idd)
         if hayRelacion:
             mensaje = """        La alumno/a tiene movimientos o un
@@ -766,16 +750,10 @@ class MainWindow(QtWidgets.QMainWindow):
             este alumno/a."""
             return PopUp('Advertencia', mensaje).exec()
         
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar el alumno/a?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-
-        # ME DIJIERON QUE ESTO NO
-        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             print("ME DIJIERON QUE ESTO NO")
         #     # Obtenemos los datos para guardarlos en el historial.
@@ -848,14 +826,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.stackedWidget.setCurrentIndex(4)
-
-
-    def saveMovimientos(self):
-        print("No implementado")
-
-    def deleteMovimientos(self):
-        # No implementado, cuando esté deleteStock completo lo adapto
-        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
@@ -930,7 +900,8 @@ class MainWindow(QtWidgets.QMainWindow):
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
-    def deleteGrupos(self, datos: list) -> None:
+
+    def deleteGrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -941,30 +912,20 @@ class MainWindow(QtWidgets.QMainWindow):
             fila de la tabla de la base de datos.
             Default: None
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaGrupos.tableWidget
-        # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        if datos:
+
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
+
         if not idd:
-            # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
+
         hayRelacion = dal.verifElimGrupos(idd)
         if hayRelacion:
             mensaje = """        El grupo tiene movimientos o un
@@ -973,27 +934,14 @@ class MainWindow(QtWidgets.QMainWindow):
             este grupo."""
             return PopUp('Advertencia', mensaje).exec()
         
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar el grupo?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             print("Me dijieron que no lo hacía")
-        self.fetchStock()
 
-    
-
-        self.stackedWidget.setCurrentIndex(4)
-   
-   
-
-
-    
-    
+        self.fetchGrupos()
     
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
@@ -1126,20 +1074,25 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if not datos:
-                bdd.cur.execute(
-                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                    (nombre, idClase, dni,)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE personal
-                    SET nombre_apellido=?, id_clase=?, dni=?
-                    WHERE id = ?""",
-                    (nombre, idClase[0], dni, idd,)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                        (nombre, dni, idClase[0],)
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE personal
+                        SET nombre_apellido=?, id_clase=?, dni=?
+                        WHERE id = ?""",
+                        (nombre, dni, idClase[0], idd,)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El dni ingresado ya está registrado.
+                Ingrese uno nuevo o revise la información ya ingresada."""
+                return PopUp("Error", info).exec()
             bdd.con.commit()
             self.fetchOtroPersonal()
             info = "Los datos se han guardado con éxito."
@@ -1217,12 +1170,9 @@ class MainWindow(QtWidgets.QMainWindow):
             info = "Los datos se han guardado con éxito."
             self.fetchSubgrupos()
             PopUp("Aviso", info).exec()
-    
 
 
-
-
-    def deleteOtroPersonal(self, datos: list) -> None:
+    def deleteOtroPersonal(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos 
         
@@ -1233,42 +1183,27 @@ class MainWindow(QtWidgets.QMainWindow):
             fila de la tabla de la base de datos.
             Default: None
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaOtroPersonal.tableWidget
-        # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        if row == len(datos):
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
+
         if not idd:
-            # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
+
         hayRelacion = dal.verifElimOtroPersonal(idd)
         if hayRelacion:
-            # el personal o la persona?
             mensaje = """        El personal tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
-            al personal."""
+            el personal."""
             return PopUp('Advertencia', mensaje).exec()
-        
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
+
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar el personal?"""
         popup = PopUp("Pregunta", mensaje).exec()
@@ -1293,64 +1228,31 @@ class MainWindow(QtWidgets.QMainWindow):
         #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
         #     # Eliminamos los datos
         #     dal.eliminarDatos(idd)
-        #     self.fetchStock()
+        self.fetchOtroPersonal()
 
-    # y que onda con el save
     def fetchSubgrupos(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # stock en variables para que el código se simplifique y se
-        # haga más legible.
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
-
-        # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los datos y 
-        # el texto de la barra de búsqueda mediante el cual queremos
-        # filtrarlos.
         datos=dal.obtenerDatos("subgrupos", barraBusqueda.text())
-
-        # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
-
-        # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de ésta.
-        # Método enumerate: devuelve una lista con el número y el
-        # elemento.
         for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(rowNum)
-
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            # Método setItem(row, column, item): establece el item de
-            # una celda de una tabla.
-            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
-            # texto por defecto.
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
 
-            # fijarse que no existe la función saveSubgrupos
             self.generarBotones(
-                self.saveSubgrupos, self.deleteSubGrupos, tabla, rowNum)
+                lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
+            
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
@@ -1411,26 +1313,32 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
-            if not datos:
-                bdd.cur.execute(
-                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
-                    (subgrupo, idGrupo)
-                )
-            else:
-                idd=datos[row][0]
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE subgrupos
-                    SET descripcion=?, id_grupo=?
-                    WHERE id = ?""",
-                    (subgrupo, idGrupo[0], idd)
-                )
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
+                        (subgrupo, idGrupo[0])
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE subgrupos
+                        SET descripcion=?, id_grupo=?
+                        WHERE id = ?""",
+                        (subgrupo, idGrupo[0], idd)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El subgrupo ingresado ya está registrado en ese grupo.
+                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                return PopUp("Error", info).exec()
+
             bdd.con.commit()
             # self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
  
-    def deleteSubGrupos(self, datos: list) -> None:
+    def deleteSubgrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -1441,30 +1349,19 @@ class MainWindow(QtWidgets.QMainWindow):
             fila de la tabla de la base de datos.
             Default: None
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaSubgrupos.tableWidget
-        # Obtenemos la fila que se va a eliminar.
-        row = (tabla.indexAt(self.sender().pos())).row()
-        if row == len(datos):
+        row = tabla.indexAt(self.sender().pos()).row()
+
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
+
         if not idd:
-            # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
         hayRelacion = dal.verifElimSubgrupos(idd)
         if hayRelacion:
             mensaje = """        El subgrupo tiene movimientos o un
@@ -1473,31 +1370,13 @@ class MainWindow(QtWidgets.QMainWindow):
             este subgrupo."""
             return PopUp('Advertencia', mensaje).exec()
         
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar el subgrupo?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Obtenemos los datos para guardarlos en el historial.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
-
-            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-            # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-            # Eliminamos los datos
-            dal.eliminarDatos(idd)
-            self.fetchStock()
+            dal.eliminarDatos('subgrupos', idd)
+            self.fetchSubgrupos()
 
     def fetchTurnos(self):
 
@@ -1553,80 +1432,9 @@ class MainWindow(QtWidgets.QMainWindow):
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(7)
-        
-    def saveTurnos(self):
-        pass
 
-    def deleteTurnos(self, datos: list) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
-        
-        Parámetros
-        ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
-        """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
-        tabla=self.pantallaStock.tableWidget
-        # Obtenemos la fila que se va a eliminar.
-        row = (tabla.indexAt(self.sender().pos())).row()
-        if datos:
-            idd=None
-        else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
-        if not idd:
-            # ...solo debemos sacarla de la UI.
-            return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
-        hayRelacion = dal.verifElimTurnos(idd)
-        if hayRelacion:
-            mensaje = """        El turno tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            este turno."""
-            return PopUp('Advertencia', mensaje).exec()
-        
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el turno?"""
-        popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí...
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # # Obtenemos los datos para guardarlos en el historial.
-            # desc = tabla.item(row, 0).text()
-            # cond = tabla.item(row, 1).text()
-            # rep = tabla.item(row, 2).text()
-            # baja = tabla.item(row, 3).text()
-            # grupo = tabla.item(row, 5).text()
-            # subgrupo = tabla.item(row, 6).text()
-            # ubi = tabla.item(row, 7).text()
-
-            # datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-            # # Insertamos los datos en el historial para que quede registro.
-            # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-            # # Eliminamos los datos
-            # dal.eliminarDatos(idd)
-            print("Me dijieron que no lo haga")
-        self.fetchTurnos()
-
+    # y que onda con el save
     def fetchUsuarios(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
@@ -1679,7 +1487,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def saveUsuarios(self):
         print("No implementado")
 
-    def deleteUsuarios(self, datos: list) -> None:
+    def deleteUsuarios(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
         datos
         
@@ -1690,46 +1498,32 @@ class MainWindow(QtWidgets.QMainWindow):
             fila de la tabla de la base de datos.
             Default: None
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
         tabla=self.pantallaUsuarios.tableWidget
-        # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
-        if datos:
+
+        if not datos:
             idd=None
         else:
-            idd=datos[row][0]
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+            if row == len(datos):
+                idd = None
+            else:
+                idd=datos[row][0]
+
         if not idd:
-            # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        # Si está relacionada con la base de datos, antes de eliminar,
-        # tenemos que verificar que la PK de la fila no
-        # tenga relaciones foráneas con otras tablas. Si llegase a
-        # tener, no podemos permitir una eliminación normal por dos
-        # motivos. El primero, necesitamos registrar todos los campos
-        # eliminados en el historial, y eliminar todo de una nos
-        # complica registrar que tablas se eliminaron. El segundo, si
-        # un profe se equivoca y elimina todo, no hay vuelta atrás.
-        # Para esta verificación, llamamos a la función del dal.
-        hayRelacion = dal.verifElimStock(idd)
+
+        hayRelacion = dal.verifElimUsuario(idd)
         if hayRelacion:
             mensaje = """        El usuario tiene movimientos o un
             seguimiento de reparación relacionados. Por motivos de seguridad,
             debe eliminar primero los registros relacionados antes de eliminar
             este usuario."""
             return PopUp('Advertencia', mensaje).exec()
-        
-        # Si no está relacionado, pregunta al usuario si confirma
-        # eliminar la fila y le advierte que la acción no se puede
-        # deshacer.
+
         mensaje = """        Esta acción no se puede deshacer.
         ¿Desea eliminar el usuario?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # # Obtenemos los datos para guardarlos en el historial.
             # desc = tabla.item(row, 0).text()
@@ -1872,10 +1666,6 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
 
-    def saveReparaciones(self):
-        pass
-    def deleteReparaciones(self):
-        pass
 app = QtWidgets.QApplication(sys.argv)
 
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
