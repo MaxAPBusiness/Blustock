@@ -1,1 +1,1 @@
-SELECT descripcion FROM grupos WHERE descripcion LIKE ?;
+SELECT * FROM grupos WHERE descripcion LIKE ?;
