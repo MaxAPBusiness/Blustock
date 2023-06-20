@@ -109,11 +109,11 @@ class toolboton(QtWidgets.QToolButton):
             popup = nuu(self.nw.usuario)
             popup.exec()
             texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
-            self.nv.label.setText(str("El pañolero de turno es:"+texto[0][1]))
-            self.nv.label.show()
+            self.nw.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
+            self.nw.labela.show()
 
 
     def anda(self):
             popup=sii(self.nw.usuario)
             popup.exec()
-            self.nv.label.hide()
+            self.nw.labela.hide()
