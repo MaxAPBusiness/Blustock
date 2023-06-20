@@ -43,6 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        self.label.hide()
         boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
@@ -188,6 +189,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
+                if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
+                    texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
+                    self.label.setText(str("El pañolero de turno es:"+texto[0][1]))
+                    self.label.show()
+                else:
+                    pass
 
             else:
                 self.pantallaLogin.passwordState.show()
@@ -855,6 +862,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.stackedWidget.setCurrentIndex(4)
+
+    def saveMovimientos(self):
+        pass
+    def deleteMovimientos(self):
+        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
