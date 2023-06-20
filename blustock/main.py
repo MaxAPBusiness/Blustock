@@ -347,11 +347,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 ingresado los datos de la fila anterior. Ingreselos, guarde
                 los cambios e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
-
-
-        
-        print(row)
-
+            
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
