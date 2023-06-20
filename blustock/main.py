@@ -173,6 +173,10 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
                                       self.saveUbicaciones,
                                       self.deleteUbicaciones, (0,)))
+        self.pantallaClases.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaClases.tableWidget,
+                                      self.saveClases,
+                                      self.deleteClases, (0,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
@@ -1536,7 +1540,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fetchUsuarios()
     
     def fetchClases(self):
-        
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
 
@@ -1544,36 +1547,25 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
-
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             self.generarBotones(
-                self.saveClases, self.deleteClases, tabla, rowNum)
+                lambda: self.saveClases(datos), lambda: self.deleteClases(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(10)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
-        
-    def saveClases(self):
-        pass
-    def deleteClases(self):
-        pass
 
     def fetchUbicaciones(self):
         tabla = self.pantallaUbicaciones.tableWidget
@@ -1696,6 +1688,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, "eliminación", "ubicaciones", row, datosEliminados)
             dal.eliminarDatos('ubicaciones', idd)
             self.fetchUbicaciones()
+
     def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
         barraBusqueda = self.pantallaReparaciones.lineEdit
@@ -1743,6 +1736,98 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(11)
         tabla.cellClicked.connect(
             lambda row: self.obtenerFilaEditada(tabla, row))
+    
+    def saveClases(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+        
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        
+        # Se pregunta al usuario si desea guardar los cambios en la
+        # tabla. NOTA: Esos tabs en el string son para mantener la
+        # misma identación en todas las líneas así dedent funciona,
+        # sino le da ansiedad.
+        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        tabla=self.pantallaClases.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        iCampos=(0,)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo).text() == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = """       Hay campos en blanco que son obligatorios.
+                Ingreselos e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+
+        info = """        Esta acción no se puede deshacer.
+        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Se obtiene el texto de todas las celdas.
+            clase = tabla.item(row, 0).text()
+
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO clases VALUES(NULL, ?)",
+                        (clase,)
+                    )
+                else:
+                    idd=datos[row][0]
+                    # Guardamos los datos de la fila en
+                    bdd.cur.execute(
+                        """UPDATE clases
+                        SET descripcion=?
+                        WHERE id = ?""",
+                        (clase, idd)
+                    )
+            except sqlite3.IntegrityError:
+                info = """        El subgrupo ingresado ya está registrado en ese grupo.
+                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                return PopUp("Error", info).exec()
+
+            bdd.con.commit()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+
+    def deleteClases(self, datos: list | None = None):
+        tabla=self.pantallaClases.tableWidget
+        row = (tabla.indexAt(self.sender().pos())).row()
+
+        if not datos:
+            idd=None
+        else:
+            if row == len(datos):
+                idd=None
+            else:
+                idd=datos[row][0]
+
+        if not idd:
+            return tabla.removeRow(row)
+        
+        hayRelacion = dal.verifElimClases(idd)
+        if hayRelacion:
+            mensaje = """        La clase tiene relaciones. Por motivos de seguridad,
+            debe eliminar primero los registros relacionados antes de eliminar
+            esta clase."""
+            return PopUp('Advertencia', mensaje).exec()
+        
+        mensaje = """        Esta acción no se puede deshacer.
+        ¿Desea eliminar la clase?"""
+        popup = PopUp("Pregunta", mensaje).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            des = tabla.item(row, 0).text()
+            datosEliminados = f"des: {des}"
+            dal.insertarHistorial(self.usuario, "eliminación", "clases", row, datosEliminados)
+            dal.eliminarDatos('clases', idd)
+            tabla.removeRow(row)
 
 app = QtWidgets.QApplication(sys.argv)
 
