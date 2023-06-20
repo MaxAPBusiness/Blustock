@@ -1,1 +1,2 @@
-SELECT * FROM ubicaciones;
+SELECT * FROM ubicaciones
+WHERE descripcion LIKE ?;

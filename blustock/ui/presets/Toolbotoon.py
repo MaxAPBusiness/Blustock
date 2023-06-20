@@ -104,5 +104,5 @@ class toolboton(QtWidgets.QToolButton):
         self.nw.stackedWidget.setCurrentIndex(0)
     
     def poronga(self):
-            popup = nuu()
+            popup = nuu(self.nw.usuario)
             popup.exec()

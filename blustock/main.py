@@ -16,7 +16,6 @@ from ui.presets.popup import PopUp
 from ui.presets.Toolbotoon import toolboton
 from db.bdd import bdd
 from dal.dal import dal
-import datetime as time
 import types
 import sqlite3
 import sys
