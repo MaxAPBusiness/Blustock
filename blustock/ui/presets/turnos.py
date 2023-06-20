@@ -40,12 +40,22 @@ class nuu(QDialog):
 
 
     def turno(self):
-        profe = dal.obtenerDatos("usuarios",self.usuario,)
-        alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
-        panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
-        fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
-        bdd.con.commit()
+        if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
+            profe = dal.obtenerDatos("usuarios",self.usuario,)
+            alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
+            panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
+            fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha_ing, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
+            bdd.con.commit()
+            mensaje = """       El turno se cargo
+                con exito."""
+            return PopUp("aviso", mensaje).exec()
+
+        else:
+            mensaje = """       Ya hay ningun turno activo
+                en este momento."""
+            return PopUp("Error", mensaje).exec()
+
 
 class sii(QDialog):
     def __init__(self,usuario):
@@ -76,7 +86,6 @@ class sii(QDialog):
     def cerrar(self):
 
         if self.contrasenaLineEdit.text()== dal.obtenerDatos("usuarios",self.usuario,)[0][5]:
-            print(bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall())
             if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
                 profe = dal.obtenerDatos("usuarios",self.usuario,)
                 hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")

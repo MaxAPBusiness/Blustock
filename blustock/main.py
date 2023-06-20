@@ -43,6 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        self.label.hide()
         boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
@@ -192,6 +193,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
                 self.menubar.show()
+                if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
+                    texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
+                    self.label.setText(str("El pañolero de turno es:"+texto[0][1]))
+                    self.label.show()
+                else:
+                    pass
 
             else:
                 self.pantallaLogin.passwordState.show()
@@ -400,10 +407,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+
+            if type(rowData[3]) != type(rowData[2]):
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            if type(rowData[4]) != type(rowData[2]):
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(0)))
+            else:
+                tabla.setItem(
+                    rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
             if rowData[3] != "":
@@ -821,6 +838,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.stackedWidget.setCurrentIndex(4)
+
+    def saveMovimientos(self):
+        pass
+    def deleteMovimientos(self):
+        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los

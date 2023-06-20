@@ -12,7 +12,8 @@ Clases
 from PyQt6 import QtWidgets, QtCore, QtGui
 import os
 from ui.presets.turnos import nuu,sii
-from ui.presets.popup import PopUp
+from dal.dal import dal
+from db.bdd import bdd
 
 class toolboton(QtWidgets.QToolButton):
     """Esta clase genera un botón que se ubicará en las filas de las
@@ -107,7 +108,12 @@ class toolboton(QtWidgets.QToolButton):
     def poronga(self):
             popup = nuu(self.nw.usuario)
             popup.exec()
+            texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
+            self.nv.label.setText(str("El pañolero de turno es:"+texto[0][1]))
+            self.nv.label.show()
+
 
     def anda(self):
-         popup=sii(self.nw.usuario)
-         popup.exec()
+            popup=sii(self.nw.usuario)
+            popup.exec()
+            self.nv.label.hide()
