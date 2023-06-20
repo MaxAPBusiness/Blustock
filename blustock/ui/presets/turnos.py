@@ -44,7 +44,7 @@ class nuu(QDialog):
         alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
         panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
         fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
+        bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha_ing, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
         bdd.con.commit()
 
 class sii(QDialog):
