@@ -1,4 +1,4 @@
-SELECT p.dni, p.nombre_apellido, c.descripcion, p.usuario, p.contrasena  
+SELECT p.id,p.dni, p.nombre_apellido, c.descripcion, p.usuario, p.contrasena  
 FROM personal p
 JOIN clases c ON c.id = p.id_clase
 WHERE p.usuario IS NOT NULL

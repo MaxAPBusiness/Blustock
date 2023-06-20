@@ -1,1 +1,2 @@
-SELECT * FROM clases;
+SELECT * FROM clases
+WHERE descripcion LIKE ?;
