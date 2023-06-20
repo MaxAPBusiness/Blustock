@@ -1020,9 +1020,8 @@ class MainWindow(QtWidgets.QMainWindow):
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
             
-            # fijarse que no existe la función saveOtroPersonal
             self.generarBotones(
-                self.saveOtroPersonal, self.deleteOtroPersonal, tabla, rowNum)
+                lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
@@ -1227,11 +1226,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea eliminar el personal?"""
         popup = PopUp("Pregunta", mensaje).exec()
 
-        # Si el usuario presionó el boton sí...
-
-        # no lo borro pero lo comento
-
-        # if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
         #     # Obtenemos los datos para guardarlos en el historial.
         #     desc = tabla.item(row, 0).text()
         #     cond = tabla.item(row, 1).text()
@@ -1246,8 +1241,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #     # Insertamos los datos en el historial para que quede registro.
         #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
         #     # Eliminamos los datos
-        #     dal.eliminarDatos(idd)
-        self.fetchOtroPersonal()
+            dal.eliminarDatos('personal', idd)
+            self.fetchOtroPersonal()
 
     def fetchSubgrupos(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -1429,10 +1424,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            
 
-            self.generarBotones(
-                self.saveTurnos, self.deleteTurnos, tabla, rowNum) # NOne es saveTurno y deleteTurno
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
