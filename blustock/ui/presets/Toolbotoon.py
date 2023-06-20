@@ -108,9 +108,10 @@ class toolboton(QtWidgets.QToolButton):
     def poronga(self):
             popup = nuu(self.nw.usuario)
             popup.exec()
-            texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
-            self.nw.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
-            self.nw.labela.show()
+            if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
+                texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
+                self.nw.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
+                self.nw.labela.show()
 
 
     def anda(self):

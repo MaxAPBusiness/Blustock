@@ -40,7 +40,7 @@ class nuu(QDialog):
 
 
     def turno(self):
-        if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
+        if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] == 0:
             profe = dal.obtenerDatos("usuarios",self.usuario,)
             alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
             panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
@@ -52,7 +52,7 @@ class nuu(QDialog):
             return PopUp("aviso", mensaje).exec()
 
         else:
-            mensaje = """       Ya hay ningun turno activo
+            mensaje = """       Ya hay un turno activo
                 en este momento."""
             return PopUp("Error", mensaje).exec()
 
