@@ -115,7 +115,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
             except Exception as e:
-                pass  # Si, puse el print al final #No,no pusiste el print al final
+                pass 
 
         self.opcionStock.triggered.connect(self.fetchStock)
         self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
@@ -333,7 +333,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     total=cantCond + int(cantRep) + int(cantBaja)
                 tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total)))
             except Exception as e:
-                print(e)
                 mensaje = """       Ha agregado una fila y todavía no ha
                 ingresado los datos de la fila anterior. Ingreselos, guarde
                 los cambios e intente nuevamente."""
@@ -341,7 +340,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         
-        print(row)
 
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -417,7 +415,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # como parámetros las funciones que queremos que los
             # botones tengan y la tabla y la fila de la tabla en la que
             # queremos que se inserten.
-            print(rowData[0])
             self.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
