@@ -718,6 +718,11 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = """       Los datos ingresados no son válidos.
             Por favor, ingreselos correctamente."""
             return PopUp("Error", mensaje).exec()
+        
+        if dni > 10**10:
+            mensaje = """       El dni ingresado es muy largo.
+            Por favor, reduzca los dígitos del dni ingresado."""
+            return PopUp("Error", mensaje).exec()
 
         info = """        Esta acción no se puede deshacer.
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
@@ -1069,6 +1074,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             mensaje = """       Los datos ingresados no son válidos.
             Por favor, ingreselos correctamente."""
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**10:
+            mensaje = """       El dni ingresado es muy largo.
+            Por favor, reduzca los dígitos del dni ingresado."""
             return PopUp("Error", mensaje).exec()
 
         info = """        Esta acción no se puede deshacer.
