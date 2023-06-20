@@ -1393,42 +1393,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchSubgrupos()
 
     def fetchTurnos(self):
-
         """Este método obtiene los datos de la tabla turnos y los
         inserta en la tabla de la interfaz de usuario.
         """
-
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
 
-    
         datos=dal.obtenerDatos("turnos", barraBusqueda.text())
 
         tabla.setRowCount(0)
 
-
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
-
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            for cellNum, cellData in enumerate(rowData):
+                item=QtWidgets.QTableWidgetItem(str(cellData))
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                tabla.setItem(rowNum, cellNum, item)
 
         # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
