@@ -8,7 +8,7 @@ Clases
 import os
 from db.bdd import bdd
 from ui.presets.popup import PopUp
-from datetime import time
+from datetime import datetime
 
 class DAL():
     """Esta clase contiene métodos que gestionan el envío de datos
@@ -105,9 +105,10 @@ class DAL():
                 Default: None
         """
         with open(f"dal{os.sep}queries{os.sep}insert{os.sep}historial.sql", "r") as queryFile:
-            datos=(usuario, time.datetime.now(), tipo, tabla, fila,
-                   datosViejos, datosNuevos)
-            bdd.cur.execute(queryFile.text(), datos)
+            query=queryFile.read()
+            datos=(usuario, datetime.now(), tipo, tabla, fila,
+                   datosViejos)
+            bdd.cur.execute(query, datos)
             bdd.con.commit()
     
     def verifElimStock(self, idd: int) -> bool:
@@ -230,7 +231,7 @@ class DAL():
         turnosRel=bdd.cur.execute(
             "SELECT * FROM turnos WHERE id_panolero = ?", (idd,)).fetchone()
         movsRel=bdd.cur.execute(
-            "SELECT * FROM stock WHERE id_persona = ?", (idd,)).fetchone()
+            "SELECT * FROM movimientos WHERE id_persona = ?", (idd,)).fetchone()
         if turnosRel or movsRel:
             return True
         else:

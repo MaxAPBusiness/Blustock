@@ -177,7 +177,9 @@ QPushButton:pressed {
        </property>
        <property name="font">
         <font>
-         <family>Oswald</family>
+         <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -220,7 +222,8 @@ QPushButton:pressed {
          </property>
          <property name="font">
           <font>
-           <family>Oswald</family>
+           <family>Oswald,sans-serif</family>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -315,10 +318,24 @@ QPushButton:pressed {
         <number>60</number>
        </property>
        <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald</family>
+           <family>Oswald,sans-serif</family>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -342,22 +359,6 @@ QPushButton:pressed {
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="font">
-          <font>
-           <family>Oswald</family>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Pase anual</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>
