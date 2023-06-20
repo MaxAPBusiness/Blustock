@@ -43,11 +43,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
-        self.label.hide()
+        self.labela.hide()
         boton = toolboton("usuario",self)
         boton.setIconSize(QtCore.QSize(60,40))
         self.menubar.setCornerWidget(boton)
-
         self.menubar.hide()
         
         self.pantallaAlumnos = QtWidgets.QWidget()
@@ -191,8 +190,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.menubar.show()
                 if bdd.cur.execute("select count(*) from turnos WHERE hora_egr is null").fetchall()[0][0] != 0:
                     texto = dal.obtenerDatos("alumnos", (bdd.cur.execute("select id_panolero from turnos WHERE hora_egr is null").fetchall()[0][0])) 
-                    self.label.setText(str("El pañolero de turno es:"+texto[0][1]))
-                    self.label.show()
+                    self.labela.setText(str("El pañolero de turno es:"+texto[0][1]))
+                    self.labela.show()
                 else:
                     pass
 
