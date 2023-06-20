@@ -148,6 +148,8 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
                                       self.saveSubgrupos,
                                       self.deleteSubgrupos, (0, 1)))
+
+        self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(0)
@@ -235,7 +237,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
                       funcGuardar: types.FunctionType,
                       funcEliminar: types.FunctionType,
-                      camposObligatorios: tuple | None = None):
+                      camposObligatorios: tuple | None = None, 
+                      camposNoEditables: tuple | None = None):
         """Este método inserta una nueva fila en la tabla stock.
 
         Si la fila anterior fue recientemente ingresada y los datos no
@@ -258,7 +261,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 La función eliminar que el botón eliminar de la fila
                 ejecutará.
         """
-
+        try:
+            tabla.disconnect()
+        except:
+            pass
         # Las filas en la tabla se ingresan escribiendo el índice en
         # el que queremos que se ingresen. Para ingresar la fila al
         # final, tenemos que saber el índice del final. Para obtenerlo,
@@ -298,11 +304,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Estas funciones pueden funcionar sin estar en la clase. Si el
     # archivo main se hace muy largo, podemos crear la API del programa
-    def obtenerTotal(self, tabla, row, cantCond: int, cantRep: int | None = None, cantBaja: int | None = None):
-        if cantRep:
-            tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(cantCond + cantRep + cantBaja)))
-        else:
-            tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(cantCond)))
+    def actualizarTotal(self, row, col):
+        if col in (1, 2, 3):
+            try:
+                tabla=self.pantallaStock.tableWidget
+                cantCond=int(tabla.item(row, 1).text())
+                cantRep=tabla.item(row, 2).text()
+                cantBaja=tabla.item(row, 3).text()
+                if cantRep == "" or cantBaja == "":
+                    total=cantCond
+                else:
+                    total=cantCond + int(cantRep) + int(cantBaja)
+                tabla.setItem(row, 4, QtWidgets.QTableWidgetItem(str(total)))
+            except Exception as e:
+                print(e)
+                mensaje = """       Ha agregado una fila y todavía no ha
+                ingresado los datos de la fila anterior. Ingreselos, guarde
+                los cambios e intente nuevamente."""
+                return PopUp("Error", mensaje).exec()
+
+
+        
+        print(row)
 
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -312,6 +335,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
+        try:
+            tabla.disconnect()
+        except:
+            pass
         barraBusqueda = self.pantallaStock.lineEdit
 
         # Se obtienen los datos de la base de datos pasando como
@@ -351,8 +378,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            self.obtenerTotal(tabla, rowNum, rowData[2], rowData[3], rowData[4])
-
+            if rowData[3] != "":
+                tabla.setItem(
+                    rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4])))
+            else:
+                tabla.setItem(
+                    rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            
+            tabla.item(rowNum, 4).setReadOnly(True)
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
@@ -382,6 +415,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        tabla.cellChanged.connect(self.actualizarTotal)
         self.stackedWidget.setCurrentIndex(3)
 
     def saveStock(self, datos: list | None = None):
@@ -688,7 +722,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     (grupo, idd,)
                 )
             bdd.con.commit()
-
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
     
