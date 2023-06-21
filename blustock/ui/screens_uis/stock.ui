@@ -135,27 +135,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="listaUbi"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Grupo: </string>
-         </property>
+        <widget class="QComboBox" name="listaUbi">
+         <item>
+          <property name="text">
+           <string>Todas</string>
+          </property>
+         </item>
         </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="listaGrupo"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Subgrupo: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="listaSubgrupo"/>
        </item>
       </layout>
      </item>

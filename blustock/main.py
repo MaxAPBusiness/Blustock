@@ -181,6 +181,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        self.pantallaStock.listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
@@ -385,7 +386,19 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
         barraBusqueda = self.pantallaStock.lineEdit
-
+        listaUbi=self.pantallaStock.listaUbi
+        ubiSeleccionada=listaUbi.currentText()
+        listaUbi.disconnect()
+        ubis=bdd.cur.execute("""SELECT DISTINCT u.descripcion
+                                FROM stock s
+                                JOIN ubicaciones u
+                                ON u.id=s.id_ubi""").fetchone()
+        listaUbi.clear()
+        listaUbi.addItem("Todas")
+        for ubi in ubis:
+            listaUbi.addItem(ubi)
+        listaUbi.setCurrentIndex(listaUbi.findData(ubiSeleccionada))
+        
         # Se obtienen los datos de la base de datos pasando como
         # parámetro la tabla de la que queremos obtener los daots y 
         # el texto de la barra de búsqueda mediante el cual queremos
