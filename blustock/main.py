@@ -223,6 +223,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.setDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.desdeFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchReparaciones)
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchReparaciones)
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
@@ -1473,7 +1484,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowCount(0)
 
-        datos=dal.obtenerDatos("turnos", barraBusqueda.text(), filtro)
+        desdeFecha= self.pantallaReparaciones.desdeFecha
+        hastaFecha= self.pantallaReparaciones.hastaFecha
+
+        datosCrudos=dal.obtenerDatos("turnos", barraBusqueda.text(), filtro)
+        datos=[]
+        for rowData in datosCrudos:
+            fecha=QtCore.QDate.fromString(rowData[2][:10], 'yyyy/MM/dd')
+            if fecha >= desdeFecha.date() and fecha <= hastaFecha.date():    
+                datos.append(rowData)
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
