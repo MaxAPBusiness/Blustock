@@ -51,6 +51,7 @@
     </property>
     <addaction name="opcionAlumnos"/>
     <addaction name="opcionOtroPersonal"/>
+    <addaction name="GestionClases"/>
    </widget>
    <widget class="QMenu" name="menuMovimientos">
     <property name="title">
@@ -83,19 +84,12 @@
     </property>
     <addaction name="GestionUbicaciones"/>
    </widget>
-   <widget class="QMenu" name="menuCLASES">
-    <property name="title">
-     <string>CLASES</string>
-    </property>
-    <addaction name="GestionClases"/>
-   </widget>
    <addaction name="menuHerramientas"/>
    <addaction name="menuPersonal"/>
    <addaction name="menuTurnos"/>
    <addaction name="menuMovimientos"/>
    <addaction name="menuUsuarios"/>
    <addaction name="menuTalleres"/>
-   <addaction name="menuCLASES"/>
    <addaction name="menuHISTORIAL"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -231,7 +225,7 @@
   </action>
   <action name="GestionClases">
    <property name="text">
-    <string>Gestion de clases</string>
+    <string>Gestion de Clases de Personal</string>
    </property>
    <property name="font">
     <font>
