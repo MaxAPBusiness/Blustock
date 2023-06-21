@@ -19,6 +19,8 @@ from dal.dal import dal
 import types
 import sqlite3
 import sys
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 bdd.refrescarBDD()
 
@@ -179,7 +181,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.deleteClases, (0,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
-        
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.pantallaStock.listaUbi.currentIndexChanged.connect(self.fetchStock)
         
@@ -188,7 +189,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
         self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
+
         self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
+        self.pantallaReparaciones.hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.desdeFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.hastaFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.desdeFecha.dateChanged.connect(self.fetchReparaciones)
+        self.pantallaReparaciones.hastaFecha.dateChanged.connect(self.fetchReparaciones)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
@@ -381,14 +412,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
-        try:
-            tabla.disconnect()
-        except Exception as e:
-            print(e)
+        tabla.disconnect()
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi=self.pantallaStock.listaUbi
-        ubiSeleccionada=listaUbi.currentText()
         listaUbi.disconnect()
+        ubiSeleccionada=listaUbi.currentText()
         ubis=bdd.cur.execute("""SELECT DISTINCT u.descripcion
                                 FROM stock s
                                 JOIN ubicaciones u
@@ -397,10 +425,7 @@ class MainWindow(QtWidgets.QMainWindow):
         listaUbi.addItem("Todas")
         for ubi in ubis:
             listaUbi.addItem(ubi[0])
-        try:
-            listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
-        except Exception as e:
-            print(e)
+        listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
         
         if ubiSeleccionada == "Todas":
             filtroUbi=None
@@ -1730,8 +1755,22 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
         barraBusqueda = self.pantallaReparaciones.lineEdit
+        desdeFecha= self.pantallaReparaciones.desdeFecha
+        hastaFecha= self.pantallaReparaciones.hastaFecha
 
-        datos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
+        datosCrudos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
+        datos=[]
+        for rowData in datosCrudos:
+            fechaEnvio=QtCore.QDate.fromString(rowData[5], 'yyyy/MM/dd')
+            fechaRegreso=QtCore.QDate.fromString(rowData[6], 'yyyy/MM/dd')
+            if (
+                fechaEnvio >= desdeFecha.date()
+                and fechaEnvio <= hastaFecha.date()
+                ) or (
+                fechaRegreso >= desdeFecha.date()
+                and fechaRegreso <= hastaFecha.date()
+                ):
+                datos.append(rowData)
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):

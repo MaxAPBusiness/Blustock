@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>793</width>
-    <height>569</height>
+    <width>940</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -132,9 +132,19 @@
         </widget>
        </item>
        <item>
-        <widget class="QDateEdit" name="dateEdit">
+        <widget class="QDateEdit" name="desdeFecha">
+         <property name="minimumDate">
+          <date>
+           <year>1999</year>
+           <month>9</month>
+           <day>1</day>
+          </date>
+         </property>
+         <property name="currentSection">
+          <enum>QDateTimeEdit::YearSection</enum>
+         </property>
          <property name="displayFormat">
-          <string>yyyy/M/d</string>
+          <string>yyyy/MM/dd</string>
          </property>
         </widget>
        </item>
@@ -146,7 +156,18 @@
         </widget>
        </item>
        <item>
-        <widget class="QDateEdit" name="dateEdit_2"/>
+        <widget class="QDateEdit" name="hastaFecha">
+         <property name="minimumDate">
+          <date>
+           <year>2000</year>
+           <month>9</month>
+           <day>1</day>
+          </date>
+         </property>
+         <property name="displayFormat">
+          <string>yyyy/MM/dd</string>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3"/>
