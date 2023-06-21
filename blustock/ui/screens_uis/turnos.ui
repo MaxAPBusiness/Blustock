@@ -51,6 +51,7 @@
        <property name="font">
         <font>
          <family>Oswald</family>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -95,6 +96,7 @@
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -120,6 +122,26 @@
         </spacer>
        </item>
        <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>ID: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Fecha: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="dateEdit"/>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3"/>
        </item>
       </layout>
@@ -141,14 +163,14 @@
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>20</number>
-       </attribute>
        <attribute name="horizontalHeaderDefaultSectionSize">
         <number>80</number>
        </attribute>
        <attribute name="horizontalHeaderHighlightSections">
         <bool>false</bool>
+       </attribute>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>20</number>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
         <bool>false</bool>
@@ -173,7 +195,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Fecha y hora de egreso</string>
+         <string>Hora de egreso</string>
         </property>
        </column>
        <column>

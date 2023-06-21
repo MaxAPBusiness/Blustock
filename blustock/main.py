@@ -181,6 +181,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
+        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
+        self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
+        self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
+        self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
+        self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
+        self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
+        self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
+        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
+
         self.stackedWidget.setCurrentIndex(0)
         self.show()
 
