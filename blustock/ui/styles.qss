@@ -2,6 +2,23 @@
     font-family: 'Oswald', sans-serif;
     font-weight: 400;
 }
+QComboBox{
+    border-radius: 5px;
+    background-color: #BABFCE;
+
+}
+QSpinBox{
+    border-radius: 5px;
+    background-color: #BABFCE;
+}
+QSpinBox::up-button {
+    width: 22px;
+}
+
+QSpinBox::down-button {
+    width: 22px; 
+}
+
 #usuario{
     border:none;
     background-color: #293045;
@@ -11,7 +28,6 @@
 #usuario::menu-indicator{
     image:none;
 }
-
 #usuario:hover,pressed{
     padding-right:0px;
     background-color: #768AC5;

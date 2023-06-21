@@ -16,6 +16,7 @@ from ui.presets.popup import PopUp
 from ui.presets.Toolbotoon import toolboton
 from db.bdd import bdd
 from dal.dal import dal
+import datetime as time
 import types
 import sqlite3
 import sys
@@ -95,7 +96,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUbicaciones = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
-        
+        self.pantallaNmovimiento = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui'), self.pantallaNmovimiento)
+
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
@@ -104,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
                      self.pantallaSubgrupos, self.pantallaTurnos,
                      self.pantallaUsuarios, self.pantallaHistorial,
                      self.pantallaClases,self.pantallaReparaciones,
-                     self.pantallaUbicaciones)
+                     self.pantallaUbicaciones,self.pantallaNmovimiento)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
@@ -127,7 +131,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.GestionUbicaciones.triggered.connect(self.fetchUbicaciones)
         self.GestionClases.triggered.connect(self.fetchClases)
         self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
-
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
         self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
 
@@ -261,9 +264,51 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
+    
+    def sopas(self):
+        self.pantallaNmovimiento.alumnoComboBox.clear()
+        for i in dal.obtenerDatos("alumnos",self.pantallaNmovimiento.cursoComboBox.currentText(),):
+            print(i)
+            self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
+
 
     def realizarMovimiento(self):
-        pass
+        for i in dal.obtenerDatos("tipos_mov",""):
+            self.pantallaNmovimiento.tipoDeMovimientoComboBox.addItem(i[1])
+        
+        for i in dal.obtenerDatos("stock",""):
+            self.pantallaNmovimiento.herramientaComboBox.addItem(i[1])
+
+        for i in dal.obtenerDatos("estados",""):
+            self.pantallaNmovimiento.estadoComboBox.addItem(i[1])
+        
+        for i in dal.obtenerDatos("clases",""):
+            self.pantallaNmovimiento.cursoComboBox.addItem(i[1])
+        
+        self.pantallaNmovimiento.cursoComboBox.currentTextChanged.connect(self.sopas)
+        self.pantallaNmovimiento.pushButton.clicked.connect(self.saveMovimiento)
+
+        self.stackedWidget.setCurrentIndex(13)
+
+    def saveMovimiento(self):
+        turno = bdd.cur.execute("select id from turnos where fecha_egr IS NULL").fetchall()
+        tipo = dal.obtenerDatos("tipos_mov",self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText())
+        herramienta = dal.obtenerDatos("stock",self.pantallaNmovimiento.herramientaComboBox.currentText())
+        cant = self.pantallaNmovimiento.cantidadSpinBox.value()
+        estado = dal.obtenerDatos("estados",self.pantallaNmovimiento.estadoComboBox.currentText())
+        persona = dal.obtenerDatos("personas",self.pantallaNmovimiento.alumnoComboBox.currentText())
+        descripcion = self.pantallaNmovimiento.descripcionLineEdit.text()
+        fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        if cant == 0:
+            mensaje = """       Por favor ingrese un valor 
+            mayor a 0."""
+            return PopUp("Error", mensaje).exec()
+        else:
+            bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",(turno[0][0],herramienta[0][0],estado[0][0],cant,persona[0][0],fecha,tipo[0][0],descripcion))
+            bdd.con.commit()
+            mensaje = """       Movimiento cargado con exito."""
+            return PopUp("Aviso", mensaje).exec()
+
 
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
                       funcGuardar: types.FunctionType,
@@ -334,7 +379,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
                 else:
                     campoNoEditable=QtWidgets.QTableWidgetItem("")
-                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
                     tabla.setItem(indiceFinal, numCol, campoNoEditable)
             else:
                 tabla.setItem(indiceFinal, numCol, QtWidgets.QTableWidgetItem(""))
@@ -354,7 +399,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     total=QtWidgets.QTableWidgetItem(str(cantCond))
                 else:
                     total=QtWidgets.QTableWidgetItem(str(cantCond + int(cantRep) + int(cantBaja)))
-                total.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
                 tabla.setItem(row, 4, total)
             except Exception as e:
                 mensaje = """       Ha agregado una fila y todavía no ha
@@ -427,7 +472,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4]))
             else:
                 total=QtWidgets.QTableWidgetItem(str(rowData[2]))
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
 
 
             tabla.setItem(rowNum, 4, total)
@@ -834,7 +879,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
                 item=QtWidgets.QTableWidgetItem(str(cellData))
-                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
         
@@ -846,6 +891,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def saveMovimientos(self):
         pass
+
     def deleteMovimientos(self):
         pass
 
