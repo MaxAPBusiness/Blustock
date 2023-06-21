@@ -220,6 +220,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         self.pantallaReparaciones.desdeFecha.dateChanged.connect(self.fetchReparaciones)
         self.pantallaReparaciones.hastaFecha.dateChanged.connect(self.fetchReparaciones)
+
+        self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
+        self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
@@ -1461,10 +1465,15 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
-
-        datos=dal.obtenerDatos("turnos", barraBusqueda.text())
+        nId = self.pantallaTurnos.nId
+        if nId.value():
+            filtro=(nId.value(),)
+        else:
+            filtro=None
 
         tabla.setRowCount(0)
+
+        datos=dal.obtenerDatos("turnos", barraBusqueda.text(), filtro)
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
