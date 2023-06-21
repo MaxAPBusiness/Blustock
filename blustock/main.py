@@ -182,6 +182,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
         self.pantallaStock.listaUbi.currentIndexChanged.connect(self.fetchStock)
+        
         self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
@@ -191,7 +192,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
-
         self.stackedWidget.setCurrentIndex(0)
         self.show()
 
@@ -383,8 +383,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaStock.tableWidget
         try:
             tabla.disconnect()
-        except:
-            pass
+        except Exception as e:
+            print(e)
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi=self.pantallaStock.listaUbi
         ubiSeleccionada=listaUbi.currentText()
@@ -392,18 +392,26 @@ class MainWindow(QtWidgets.QMainWindow):
         ubis=bdd.cur.execute("""SELECT DISTINCT u.descripcion
                                 FROM stock s
                                 JOIN ubicaciones u
-                                ON u.id=s.id_ubi""").fetchone()
+                                ON u.id=s.id_ubi""").fetchall()
         listaUbi.clear()
         listaUbi.addItem("Todas")
         for ubi in ubis:
-            listaUbi.addItem(ubi)
-        listaUbi.setCurrentIndex(listaUbi.findData(ubiSeleccionada))
+            listaUbi.addItem(ubi[0])
+        try:
+            listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
+        except Exception as e:
+            print(e)
+        
+        if ubiSeleccionada == "Todas":
+            filtroUbi=None
+        else:
+            filtroUbi=(ubiSeleccionada,)
         
         # Se obtienen los datos de la base de datos pasando como
         # parámetro la tabla de la que queremos obtener los daots y 
         # el texto de la barra de búsqueda mediante el cual queremos
         # filtrarlos.
-        datos=dal.obtenerDatos("stock", barraBusqueda.text())
+        datos=dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
 
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
@@ -488,6 +496,7 @@ class MainWindow(QtWidgets.QMainWindow):
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         tabla.cellChanged.connect(self.actualizarTotal)
+        listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(3)
 
     def saveStock(self, datos: list | None = None):
