@@ -84,8 +84,8 @@ class DAL():
         return [["-" if cellData == None else cellData for cellData in rowData] for rowData in datos]
 
     def insertarHistorial(self, usuario: int, tipo: str, tabla: str,
-                          fila: int, datosViejos: str | None = None,
-                          datosNuevos: str | None = None):
+                          fila: int, datosViejos: list | None = None,
+                          datosNuevos: list | None = None):
         """Este método inserta información sobre cambios realizados a
         la base de datos en la tabla historial.
 
@@ -108,8 +108,11 @@ class DAL():
         """
         idTipo=bdd.cur.execute('SELECT id FROM tipos_cambio WHERE descripcion=?', (tipo,)).fetchone()[0]
         idTabla=bdd.cur.execute('SELECT id FROM tablas WHERE descripcion=?', (tabla,)).fetchone()[0]
-        datos=(usuario, datetime.now(), idTipo, idTabla, fila,
-                datosViejos, datosNuevos,)
+        if datosViejos:
+            datosViejos=f'{datosViejos}'
+        if datosNuevos:
+            datosNuevos=f'{datosNuevos}'
+        datos=(usuario, datetime.now(), idTipo, idTabla, fila, datosViejos, datosNuevos,)
         bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
         bdd.con.commit()
     

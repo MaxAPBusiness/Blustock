@@ -685,6 +685,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
                 return PopUp("Error", info).exec()
             
+            datosNuevos=[desc, ubi, cond, rep, baja, prest, grupo, subgrupo]
             try:
                 if not datos:
                     idd=None
@@ -692,7 +693,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0],)
                     )
-                    tipo='Inserción'
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'stock', desc, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -703,19 +704,12 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0], idd,)
                     )
-                    tipo='Edición'
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'stock', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """La herramienta que desea ingresar ya está ingresada.
                 Ingrese otra información o revise la información ya ingresada"""
                 return PopUp("Error", info).exec()
-            
-            if idd:
-                datosViejos=[fila for fila in datos if fila[0] == idd]
-                datosViejosStr=f"ubi: {datosViejos[8]}, cant cond: {datosViejos[2]}, cant rep: {datosViejos[3]}, cant baja: {datosViejos[4]}, cant prest: {datosViejos[5]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
-            else:
-                datosViejosStr=None
-            datosNuevos=f"desc: {desc}, ubi: {ubi}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, cant prest: {prest}, grupo: {grupo}, subgrupo: {subgrupo}"
-            dal.insertarHistorial(self.usuario, tipo, 'stock', desc, datosViejosStr, datosNuevos)
 
             bdd.con.commit()
             self.fetchStock()
@@ -779,11 +773,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Obtenemos los datos para guardarlos en el historial.
-            datosViejos=[fila for fila in datos if fila[0] == idd]
-            datosEliminados=f"ubi: {datosViejos[8]}, cant cond: {datosViejos[2]}, cant rep: {datosViejos[3]}, cant baja: {datosViejos[4]}, cant prest: {datosViejos[5]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
+            datosEliminados=[fila for fila in datos if fila[0] == idd][0]
 
             # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+            dal.insertarHistorial(self.usuario, "eliminación", "stock", datosEliminados[1], datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
             self.fetchStock()
@@ -1127,20 +1120,24 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             grupo = tabla.item(row, 0).text()
-            
+            datosNuevos=[grupo]
             try:
                 if not datos:
                     bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo,))
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'grupos', grupo, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
                         """UPDATE grupos SET descripcion = ? WHERE id = ?""",
                         (grupo, idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'grupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 mensaje = """       El grupo que desea ingresar ya está ingresado.
                 Ingrese otro grupo o revise los datos ya ingresados."""
                 return PopUp("Error", mensaje).exec()
+                
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
@@ -1183,6 +1180,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'grupos', datosViejos[1], datosViejos[1:])
             dal.eliminarDatos('grupos', idd)
             self.fetchGrupos()
     
@@ -1394,13 +1393,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
+            datosNuevos=[subgrupo, grupo]
+            
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                         (subgrupo, idGrupo[0])
                     )
-                    tipo='Inserción'
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'subgrupos', subgrupo, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -1410,15 +1411,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (subgrupo, idGrupo[0], idd)
                     )
-                    tipo='Edición'
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'subgrupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """El subgrupo ingresado ya está registrado en el grupo.
                 Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
-            datosViejos=[fila for fila in datos if fila[0] == idd]
-            datosViejosStr=f"grupo: {datosViejos[2]}"
-            datosNuevos=f"grupo: {grupo}"
-            dal.insertarHistorial(self.usuario, tipo, 'subgrupos', subgrupo, datosViejosStr, datosNuevos)
+
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             self.fetchSubgrupos()
@@ -1624,8 +1623,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos=[fila for fila in datos if fila[0] == idd]
-            datosViejosStr=f"grupo: {datosViejos[2]}"
-            dal.insertarHistorial(self.usuario, 'Eliminación', 'subgrupos', datosViejos[1], datosViejosStr)
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'subgrupos', datosViejos[1], datosViejos[1:])
             self.fetchSubgrupos()
 
     def fetchTurnos(self):
