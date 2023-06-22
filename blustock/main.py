@@ -711,7 +711,7 @@ class MainWindow(QtWidgets.QMainWindow):
             
             if idd:
                 datosViejos=[fila for fila in datos if fila[0] == idd]
-                datosViejosStr=f"desc: {datosViejos[0]}, ubi: {datosViejos[8]}, cant cond: {datosViejos[1]}, cant rep: {datosViejos[2]}, cant baja: {datosViejos[3]}, cant prest: {datosViejos[4]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
+                datosViejosStr=f"ubi: {datosViejos[8]}, cant cond: {datosViejos[2]}, cant rep: {datosViejos[3]}, cant baja: {datosViejos[4]}, cant prest: {datosViejos[5]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
             else:
                 datosViejosStr=None
             datosNuevos=f"desc: {desc}, ubi: {ubi}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, cant prest: {prest}, grupo: {grupo}, subgrupo: {subgrupo}"
@@ -780,7 +780,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Obtenemos los datos para guardarlos en el historial.
             datosViejos=[fila for fila in datos if fila[0] == idd]
-            datosEliminados=f"desc: {datosViejos[0]}, ubi: {datosViejos[8]}, cant cond: {datosViejos[1]}, cant rep: {datosViejos[2]}, cant baja: {datosViejos[3]}, cant prest: {datosViejos[4]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
+            datosEliminados=f"ubi: {datosViejos[8]}, cant cond: {datosViejos[2]}, cant rep: {datosViejos[3]}, cant baja: {datosViejos[4]}, cant prest: {datosViejos[5]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
 
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
@@ -1400,6 +1400,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                         (subgrupo, idGrupo[0])
                     )
+                    tipo='Inserción'
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -1409,10 +1410,15 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (subgrupo, idGrupo[0], idd)
                     )
+                    tipo='Edición'
             except sqlite3.IntegrityError:
                 info = """El subgrupo ingresado ya está registrado en el grupo.
                 Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            datosViejosStr=f"grupo: {datosViejos[2]}"
+            datosNuevos=f"grupo: {grupo}"
+            dal.insertarHistorial(self.usuario, tipo, 'subgrupos', subgrupo, datosViejosStr, datosNuevos)
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             self.fetchSubgrupos()
@@ -1617,7 +1623,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            dal.eliminarDatos('subgrupos', idd)
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            datosViejosStr=f"grupo: {datosViejos[2]}"
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'subgrupos', datosViejos[1], datosViejosStr)
             self.fetchSubgrupos()
 
     def fetchTurnos(self):
