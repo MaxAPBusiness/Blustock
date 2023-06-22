@@ -48,38 +48,36 @@ class DAL():
         filtro = []
         
         if filtrosExtra:
-            with open(f"dal{os.sep}queries{os.sep}select{os.sep}conFiltro{os.sep}{tabla}.sql", 'r') as queryText:
-                # Obtenemos y guardamos el código sql como texto
-                query=queryText.read()
-                # Inicializamos la lista con los filtros que se usarán en
-                # la obtención.
-                # Obtenemos la cantidad de filtros extra aportados
-                cantFiltrosExtra=len(filtrosExtra)
-                # Insertamos los filtros extra en la lista de filtros
-                filtro.extend(filtrosExtra)
-                # Cada "?" en el código sql indica que usaremos un dato de
-                # python. Para aplicar la búsqueda en la obtención
-                # correctamente, debemos ver si algún campo de la tabla 
-                # contiene lo buscado. Por eso, por cada campo que queramos
-                # comparar con la búsqeda debe haber un "?". Tenemos que
-                # aportar una lista o tupla que contenga un elemento de
-                # texto por cada "?". Por ejemplo, si queremos consultar
-                # por 6 campos por cada fila, tendremos que pasar una lista
-                # con 6 elementos iguales, todos siendo el texto de
-                # búsqueda. El bucle de abajo mira cuantos "?" tiene la 
-                # consulta y agrega a la lista filtro (que se va a pasar
-                # como filtro en la obtención) la cantidad de textos de 
-                # búsqueda adecuados. NOTA: Como también puede haber
-                # filtros extra, y va a haber un "?" por cada filtro extra,
-                # la cantidad de comparaciones de búsqueda se obtiene
-                # contando los "?" y restando la cantidad de filtros extra.
-                for i in range(query.count('?')-cantFiltrosExtra):
-                    filtro.append(f"%{busqueda}%")
+            cantFiltrosExtra=len(filtrosExtra)
+            # Insertamos los filtros extra en la lista de filtros
+            for filtroExtra in filtrosExtra:
+                if filtroExtra:
+                    filtro.append(filtroExtra)
+                else:
+                    filtro.append('%%')
         else:
-            with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
-                query=queryText.read()
-                for i in range(query.count('?')):
-                    filtro.append(f"%{busqueda}%")
+            cantFiltrosExtra=0
+        with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
+            # Obtenemos y guardamos el código sql como texto
+            query=queryText.read()
+        # Cada "?" en el código sql indica que usaremos un dato de
+        # python. Para aplicar la búsqueda en la obtención
+        # correctamente, debemos ver si algún campo de la tabla 
+        # contiene lo buscado. Por eso, por cada campo que queramos
+        # comparar con la búsqeda debe haber un "?". Tenemos que
+        # aportar una lista o tupla que contenga un elemento de
+        # texto por cada "?". Por ejemplo, si queremos consultar
+        # por 6 campos por cada fila, tendremos que pasar una lista
+        # con 6 elementos iguales, todos siendo el texto de
+        # búsqueda. El bucle de abajo mira cuantos "?" tiene la 
+        # consulta y agrega a la lista filtro (que se va a pasar
+        # como filtro en la obtención) la cantidad de textos de 
+        # búsqueda adecuados. NOTA: Como también puede haber
+        # filtros extra, y va a haber un "?" por cada filtro extra,
+        # la cantidad de comparaciones de búsqueda se obtiene
+        # contando los "?" y restando la cantidad de filtros extra.
+        for i in range(query.count('?')-cantFiltrosExtra):
+            filtro.append(f"%{busqueda}%")
                 # Consulta los datos y los devuelve.
         return bdd.cur.execute(query, filtro).fetchall()
 

@@ -204,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtCore.QDateTime.fromString(
                 (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.listaPanolero.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
 
@@ -922,8 +922,76 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha= self.pantallaMovimientos.desdeFecha
         hastaFecha= self.pantallaMovimientos.hastaFecha
         nTurno = self.pantallaMovimientos.nTurno
+        listaPanolero = self.pantallaMovimientos.listaPanolero
 
-        datos=dal.obtenerDatos("movimientos", barraBusqueda.text())
+        listaElem.disconnect()
+        elemSeleccionado=listaElem.currentText()
+        elems=bdd.cur.execute("""SELECT DISTINCT s.descripcion
+                                FROM movimientos m
+                                JOIN stock s
+                                ON s.id=m.id_elem""").fetchall()
+        
+        listaElem.clear()
+        listaElem.addItem("Todos")
+        for elem in elems:
+            listaElem.addItem(elem[0])
+        listaElem.setCurrentIndex(listaElem.findText(elemSeleccionado))
+
+        listaPersona.disconnect()
+        personaSeleccionada=listaPersona.currentText()
+        personas=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion 
+                                FROM movimientos m
+                                JOIN personal p
+                                ON p.id=m.id_persona
+                                JOIN clases c
+                                ON p.id_clase = c.id""").fetchall()
+        listaPersona.clear()
+        listaPersona.addItem("Todas")
+        for persona in personas:
+            listaPersona.addItem(persona[0])
+        listaPersona.setCurrentIndex(listaPersona.findText(personaSeleccionada))
+
+        listaPanolero.disconnect()
+        panoleroSeleccionado=listaPanolero.currentText()
+        panoleros=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion
+                                FROM movimientos m
+                                JOIN turnos t
+                                ON m.id_turno = t.id
+                                JOIN personal p
+                                ON p.id=t.id_panolero
+                                JOIN clases c
+                                ON p.id_clase = c.id""").fetchall()
+        
+        listaPanolero.clear()
+        listaPanolero.addItem("Todos")
+        for panolero in panoleros:
+            listaPanolero.addItem(panolero[0])
+        listaPanolero.setCurrentIndex(listaPanolero.findText(panoleroSeleccionado))
+
+        filtros=[]
+        for i in (nId, nTurno):
+            if i.value():
+                filtros.append(i)
+            else:
+                filtros.append(None)
+        
+        if elemSeleccionado == "Todos":
+            filtros.append(None)
+        else:
+            filtros.append(elemSeleccionado)
+        
+        if personaSeleccionada == "Todas":
+            filtros.append(None)
+        else:
+            filtros.append(personaSeleccionada)
+
+        if panoleroSeleccionado == "Todos":
+            filtros.append(None)
+        else:
+            filtros.append(panoleroSeleccionado)
+
+        datos=dal.obtenerDatos("movimientos", barraBusqueda.text(), filtros)
+
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
@@ -936,6 +1004,10 @@ class MainWindow(QtWidgets.QMainWindow):
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+
+        listaElem.currentIndexChanged.connect(self.fetchStock)
+        listaPersona.currentIndexChanged.connect(self.fetchStock)
+        listaPanolero.currentIndexChanged.connect(self.fetchStock)
 
 
         self.stackedWidget.setCurrentIndex(4)
@@ -1450,7 +1522,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            # self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
  
@@ -1504,7 +1575,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if nId.value():
             filtro=(nId.value(),)
         else:
-            filtro=None
+            filtro=(None,)
 
         tabla.setRowCount(0)
 
