@@ -19,7 +19,7 @@ from dal.dal import dal
 import types
 import sqlite3
 import sys
-from datetime import date
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 bdd.refrescarBDD()
@@ -192,17 +192,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.listaElem.currentIndexChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.hastaFecha.setDateTime(
             QtCore.QDateTime.fromString(
-                date.today().strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
-                date.today().strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
-                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
 
@@ -971,7 +971,7 @@ class MainWindow(QtWidgets.QMainWindow):
         filtros=[]
         for i in (nId, nTurno):
             if i.value():
-                filtros.append(i)
+                filtros.append(i.value())
             else:
                 filtros.append(None)
         
@@ -990,7 +990,12 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             filtros.append(panoleroSeleccionado)
 
-        datos=dal.obtenerDatos("movimientos", barraBusqueda.text(), filtros)
+        datosCrudos=dal.obtenerDatos("movimientos", barraBusqueda.text(), filtros)
+        datos=[]
+        for rowData in datosCrudos:
+            fecha=QtCore.QDateTime.fromString(rowData[7], 'yyyy/MM/dd HH:mm:ss')
+            if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():    
+                datos.append(rowData)
 
         tabla.setRowCount(0)
 
@@ -1005,9 +1010,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        listaElem.currentIndexChanged.connect(self.fetchStock)
-        listaPersona.currentIndexChanged.connect(self.fetchStock)
-        listaPanolero.currentIndexChanged.connect(self.fetchStock)
+        listaElem.currentIndexChanged.connect(self.fetchMovimientos)
+        listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
+        listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
 
 
         self.stackedWidget.setCurrentIndex(4)

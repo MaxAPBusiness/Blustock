@@ -57,6 +57,7 @@ class DAL():
                     filtro.append('%%')
         else:
             cantFiltrosExtra=0
+            
         with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
             # Obtenemos y guardamos el código sql como texto
             query=queryText.read()
