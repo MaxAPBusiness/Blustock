@@ -20,6 +20,8 @@ import datetime as time
 import types
 import sqlite3
 import sys
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 
 bdd.refrescarBDD()
 
@@ -182,8 +184,81 @@ class MainWindow(QtWidgets.QMainWindow):
                                       self.deleteClases, (0,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
-        
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        self.pantallaStock.listaUbi.currentIndexChanged.connect(self.fetchStock)
+        
+        self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
+        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
+        self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
+
+        self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaElem.currentIndexChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
+
+        self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
+
+        self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
+        self.pantallaReparaciones.hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.desdeFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.hastaFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.desdeFecha.dateChanged.connect(self.fetchReparaciones)
+        self.pantallaReparaciones.hastaFecha.dateChanged.connect(self.fetchReparaciones)
+
+        self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
+        self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.setDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.desdeFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchReparaciones)
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchReparaciones)
+
+        self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
+        self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
+        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.stackedWidget.setCurrentIndex(0)
         self.show()
 
@@ -415,17 +490,31 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
-        try:
-            tabla.disconnect()
-        except:
-            pass
+        tabla.disconnect()
         barraBusqueda = self.pantallaStock.lineEdit
-
+        listaUbi=self.pantallaStock.listaUbi
+        listaUbi.disconnect()
+        ubiSeleccionada=listaUbi.currentText()
+        ubis=bdd.cur.execute("""SELECT DISTINCT u.descripcion
+                                FROM stock s
+                                JOIN ubicaciones u
+                                ON u.id=s.id_ubi""").fetchall()
+        listaUbi.clear()
+        listaUbi.addItem("Todas")
+        for ubi in ubis:
+            listaUbi.addItem(ubi[0])
+        listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
+        
+        if ubiSeleccionada == "Todas":
+            filtroUbi=None
+        else:
+            filtroUbi=(ubiSeleccionada,)
+        
         # Se obtienen los datos de la base de datos pasando como
         # parámetro la tabla de la que queremos obtener los daots y 
         # el texto de la barra de búsqueda mediante el cual queremos
         # filtrarlos.
-        datos=dal.obtenerDatos("stock", barraBusqueda.text())
+        datos=dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
 
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
@@ -510,6 +599,7 @@ class MainWindow(QtWidgets.QMainWindow):
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         tabla.cellChanged.connect(self.actualizarTotal)
+        listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(3)
 
     def saveStock(self, datos: list | None = None):
@@ -871,8 +961,87 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaMovimientos.tableWidget
         barraBusqueda = self.pantallaMovimientos.lineEdit
+        nId = self.pantallaMovimientos.nId
+        listaElem = self.pantallaMovimientos.listaElem
+        listaPersona = self.pantallaMovimientos.listaPersona
+        desdeFecha= self.pantallaMovimientos.desdeFecha
+        hastaFecha= self.pantallaMovimientos.hastaFecha
+        nTurno = self.pantallaMovimientos.nTurno
+        listaPanolero = self.pantallaMovimientos.listaPanolero
 
-        datos=dal.obtenerDatos("movimientos", barraBusqueda.text())
+        listaElem.disconnect()
+        elemSeleccionado=listaElem.currentText()
+        elems=bdd.cur.execute("""SELECT DISTINCT s.descripcion
+                                FROM movimientos m
+                                JOIN stock s
+                                ON s.id=m.id_elem""").fetchall()
+        
+        listaElem.clear()
+        listaElem.addItem("Todos")
+        for elem in elems:
+            listaElem.addItem(elem[0])
+        listaElem.setCurrentIndex(listaElem.findText(elemSeleccionado))
+
+        listaPersona.disconnect()
+        personaSeleccionada=listaPersona.currentText()
+        personas=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion 
+                                FROM movimientos m
+                                JOIN personal p
+                                ON p.id=m.id_persona
+                                JOIN clases c
+                                ON p.id_clase = c.id""").fetchall()
+        listaPersona.clear()
+        listaPersona.addItem("Todas")
+        for persona in personas:
+            listaPersona.addItem(persona[0])
+        listaPersona.setCurrentIndex(listaPersona.findText(personaSeleccionada))
+
+        listaPanolero.disconnect()
+        panoleroSeleccionado=listaPanolero.currentText()
+        panoleros=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion
+                                FROM movimientos m
+                                JOIN turnos t
+                                ON m.id_turno = t.id
+                                JOIN personal p
+                                ON p.id=t.id_panolero
+                                JOIN clases c
+                                ON p.id_clase = c.id""").fetchall()
+        
+        listaPanolero.clear()
+        listaPanolero.addItem("Todos")
+        for panolero in panoleros:
+            listaPanolero.addItem(panolero[0])
+        listaPanolero.setCurrentIndex(listaPanolero.findText(panoleroSeleccionado))
+
+        filtros=[]
+        for i in (nId, nTurno):
+            if i.value():
+                filtros.append(i.value())
+            else:
+                filtros.append(None)
+        
+        if elemSeleccionado == "Todos":
+            filtros.append(None)
+        else:
+            filtros.append(elemSeleccionado)
+        
+        if personaSeleccionada == "Todas":
+            filtros.append(None)
+        else:
+            filtros.append(personaSeleccionada)
+
+        if panoleroSeleccionado == "Todos":
+            filtros.append(None)
+        else:
+            filtros.append(panoleroSeleccionado)
+
+        datosCrudos=dal.obtenerDatos("movimientos", barraBusqueda.text(), filtros)
+        datos=[]
+        for rowData in datosCrudos:
+            fecha=QtCore.QDateTime.fromString(rowData[7], 'yyyy/MM/dd HH:mm:ss')
+            if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():    
+                datos.append(rowData)
+
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
@@ -885,6 +1054,10 @@ class MainWindow(QtWidgets.QMainWindow):
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+
+        listaElem.currentIndexChanged.connect(self.fetchMovimientos)
+        listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
+        listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
 
 
         self.stackedWidget.setCurrentIndex(4)
@@ -1400,7 +1573,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            # self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
  
@@ -1450,10 +1622,23 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
-
-        datos=dal.obtenerDatos("turnos", barraBusqueda.text())
+        nId = self.pantallaTurnos.nId
+        if nId.value():
+            filtro=(nId.value(),)
+        else:
+            filtro=(None,)
 
         tabla.setRowCount(0)
+
+        desdeFecha= self.pantallaReparaciones.desdeFecha
+        hastaFecha= self.pantallaReparaciones.hastaFecha
+
+        datosCrudos=dal.obtenerDatos("turnos", barraBusqueda.text(), filtro)
+        datos=[]
+        for rowData in datosCrudos:
+            fecha=QtCore.QDate.fromString(rowData[2][:10], 'yyyy/MM/dd')
+            if fecha >= desdeFecha.date() and fecha <= hastaFecha.date():    
+                datos.append(rowData)
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
@@ -1744,8 +1929,22 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
         barraBusqueda = self.pantallaReparaciones.lineEdit
+        desdeFecha= self.pantallaReparaciones.desdeFecha
+        hastaFecha= self.pantallaReparaciones.hastaFecha
 
-        datos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
+        datosCrudos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
+        datos=[]
+        for rowData in datosCrudos:
+            fechaEnvio=QtCore.QDate.fromString(rowData[5], 'yyyy/MM/dd')
+            fechaRegreso=QtCore.QDate.fromString(rowData[6], 'yyyy/MM/dd')
+            if (
+                fechaEnvio >= desdeFecha.date()
+                and fechaEnvio <= hastaFecha.date()
+                ) or (
+                fechaRegreso >= desdeFecha.date()
+                and fechaRegreso <= hastaFecha.date()
+                ):
+                datos.append(rowData)
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
