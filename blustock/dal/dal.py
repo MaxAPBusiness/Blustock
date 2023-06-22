@@ -58,7 +58,7 @@ class DAL():
         else:
             cantFiltrosExtra=0
             
-        with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
+        with open(f"dal{os.sep}queries{os.sep}{tabla}.sql", 'r') as queryText:
             # Obtenemos y guardamos el código sql como texto
             query=queryText.read()
         # Cada "?" en el código sql indica que usaremos un dato de
@@ -106,12 +106,12 @@ class DAL():
                 Los datos que se añadieron o reemplazaron otros datos.
                 Default: None
         """
-        with open(f"dal{os.sep}queries{os.sep}insert{os.sep}historial.sql", "r") as queryFile:
-            query=queryFile.read()
-            datos=(usuario, datetime.now(), tipo, tabla, fila,
-                   datosViejos)
-            bdd.cur.execute(query, datos)
-            bdd.con.commit()
+        idTipo=bdd.cur.execute('SELECT id FROM tipos_cambio WHERE descripcion=?', (tipo,)).fetchone()[0]
+        idTabla=bdd.cur.execute('SELECT id FROM tablas WHERE descripcion=?', (tabla,)).fetchone()[0]
+        datos=(usuario, datetime.now(), idTipo, idTabla, fila,
+                datosViejos, datosNuevos,)
+        bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
+        bdd.con.commit()
     
     def verifElimStock(self, idd: int) -> bool:
         """Esta función verifica si la PK de una fila de la tabla stock

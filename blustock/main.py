@@ -605,7 +605,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla stock, que se usarán para obtener
                 el id de la fila en la tabla.
         """
-        
         # Se pregunta al usuario si desea guardar los cambios en la
         # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
@@ -623,12 +622,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
-
+        cond = int(tabla.item(row, 1).text())
+        rep = tabla.item(row, 2).text()
+        baja = tabla.item(row, 3).text()
+        prest = tabla.item(row, 4).text()
         try:
-            cond = int(tabla.item(row, 1).text())
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            prest = tabla.item(row, 4).text()
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
@@ -689,10 +687,12 @@ class MainWindow(QtWidgets.QMainWindow):
             
             try:
                 if not datos:
+                    idd=None
                     bdd.cur.execute(
                         "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0],)
                     )
+                    tipo='Inserción'
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -703,10 +703,20 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0], idd,)
                     )
+                    tipo='Edición'
             except sqlite3.IntegrityError:
                 info = """La herramienta que desea ingresar ya está ingresada.
                 Ingrese otra información o revise la información ya ingresada"""
                 return PopUp("Error", info).exec()
+            
+            if idd:
+                datosViejos=[fila for fila in datos if fila[0] == idd]
+                datosViejosStr=f"desc: {datosViejos[0]}, ubi: {datosViejos[8]}, cant cond: {datosViejos[1]}, cant rep: {datosViejos[2]}, cant baja: {datosViejos[3]}, cant prest: {datosViejos[4]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
+            else:
+                datosViejosStr=None
+            datosNuevos=f"desc: {desc}, ubi: {ubi}, cant cond: {cond}, cant rep: {rep}, cant baja: {baja}, cant prest: {prest}, grupo: {grupo}, subgrupo: {subgrupo}"
+            dal.insertarHistorial(self.usuario, tipo, 'stock', desc, datosViejosStr, datosNuevos)
+
             bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
@@ -769,15 +779,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Obtenemos los datos para guardarlos en el historial.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
-
-            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            datosEliminados=f"desc: {datosViejos[0]}, ubi: {datosViejos[8]}, cant cond: {datosViejos[1]}, cant rep: {datosViejos[2]}, cant baja: {datosViejos[3]}, cant prest: {datosViejos[4]}, grupo: {datosViejos[6]}, subgrupo: {datosViejos[7]}"
 
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
