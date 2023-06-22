@@ -193,6 +193,11 @@
        </column>
        <column>
         <property name="text">
+         <string>Prestadas</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Total</string>
         </property>
        </column>

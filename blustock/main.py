@@ -155,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaStock.tableWidget, 
                                       self.saveStock, self.deleteStock, 
-                                      (0, 1, 5, 6, 7), (4,)))
+                                      (0, 1, 6, 7, 8), (4,5,)))
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
@@ -465,22 +465,17 @@ class MainWindow(QtWidgets.QMainWindow):
     # archivo main se hace muy largo, podemos crear la API del programa
     def actualizarTotal(self, row, col):
         if col in (1, 2, 3):
-            try:
-                tabla=self.pantallaStock.tableWidget
-                cantCond=int(tabla.item(row, 1).text())
-                cantRep=tabla.item(row, 2).text()
-                cantBaja=tabla.item(row, 3).text()
-                if cantRep == "" or cantBaja == "":
-                    total=QtWidgets.QTableWidgetItem(str(cantCond))
-                else:
-                    total=QtWidgets.QTableWidgetItem(str(cantCond + int(cantRep) + int(cantBaja)))
-                total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
-                tabla.setItem(row, 4, total)
-            except Exception as e:
-                mensaje = """       Ha agregado una fila y todavía no ha
-                ingresado los datos de la fila anterior. Ingreselos, guarde
-                los cambios e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
+            tabla=self.pantallaStock.tableWidget
+            cantCond=int(tabla.item(row, 1).text())
+            cantRep=tabla.item(row, 2).text()
+            cantBaja=tabla.item(row, 3).text()
+            cantPrest=tabla.item(row, 4).text()
+            if cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric():
+                total=QtWidgets.QTableWidgetItem(str(cantCond + int(cantRep) + int(cantBaja) + int(cantPrest)))
+            else:
+                total=QtWidgets.QTableWidgetItem(str(cantCond))
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+            tabla.setItem(row, 5, total)
             
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -490,7 +485,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi=self.pantallaStock.listaUbi
         listaUbi.disconnect()
@@ -541,37 +539,32 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-
-            if type(rowData[3]) != type(rowData[2]):
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(str(0)))
-            else:
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            if type(rowData[4]) != type(rowData[2]):
-                tabla.setItem(
-                    rowNum, 3, QtWidgets.QTableWidgetItem(str(0)))
-            else:
-                tabla.setItem(
-                    rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            cantPrest=QtWidgets.QTableWidgetItem(str(rowData[5]))
+            cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            tabla.setItem(
+                rowNum, 4, cantPrest)
 
             # Se calcula el total de stock, sumando las herramientas o
             # insumos en condiciones, reparación y de baja.
-            if rowData[3] != "":
-                total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4]))
+            if rowData[3] not in ("-", ""):
+                total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
             else:
                 total=QtWidgets.QTableWidgetItem(str(rowData[2]))
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
 
 
-            tabla.setItem(rowNum, 4, total)
+            tabla.setItem(rowNum, 5, total)
 
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             tabla.setItem(
                 rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
             tabla.setItem(
                 rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
+            tabla.setItem(
+                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
@@ -620,7 +613,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaStock.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
-        iCampos=(0, 1, 5, 6, 7)
+        iCampos=(0, 1, 6, 7, 8)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
             # Si el campo está vacio...
@@ -633,12 +626,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         try:
             cond = int(tabla.item(row, 1).text())
-
             rep = tabla.item(row, 2).text()
             baja = tabla.item(row, 3).text()
-            if rep != "" or baja != "":
+            prest = tabla.item(row, 4).text()
+            if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
+                try:
+                    prest = int(prest)
+                except:
+                    prest = 0
+            else:
+                rep=None
+                baja=None
+                prest=None
         except:
             mensaje = """       Los datos ingresados no son válidos.
             Por favor, ingrese los datos correctamente."""
@@ -652,9 +653,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Se obtiene el texto de todas las celdas.
             desc = tabla.item(row, 0).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
+            grupo = tabla.item(row, 6).text()
+            subgrupo = tabla.item(row, 7).text()
+            ubi = tabla.item(row, 8).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
@@ -689,8 +690,8 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 if not datos:
                     bdd.cur.execute(
-                        "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?)",
-                        (desc, cond, rep, baja, idSubgrupo[0], idUbi[0],)
+                        "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
+                        (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0],)
                     )
                 else:
                     idd=datos[row][0]
@@ -698,9 +699,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     bdd.cur.execute(
                         """UPDATE stock
                         SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                        cant_baja = ?, id_subgrupo = ?, id_ubi=?
+                        cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
                         WHERE id = ?""",
-                        (desc, cond, rep, baja, idSubgrupo[0], idUbi[0], idd,)
+                        (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0], idd,)
                     )
             except sqlite3.IntegrityError:
                 info = """La herramienta que desea ingresar ya está ingresada.
