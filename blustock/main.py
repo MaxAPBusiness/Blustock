@@ -187,7 +187,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
+
         self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaElem.currentIndexChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(
+                date.today().strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                date.today().strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.listaPanolero.valueChanged.connect(self.fetchMovimientos)
+
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
 
         self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
@@ -898,6 +916,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaMovimientos.tableWidget
         barraBusqueda = self.pantallaMovimientos.lineEdit
+        nId = self.pantallaMovimientos.nId
+        listaElem = self.pantallaMovimientos.listaElem
+        listaPersona = self.pantallaMovimientos.listaPersona
+        desdeFecha= self.pantallaMovimientos.desdeFecha
+        hastaFecha= self.pantallaMovimientos.hastaFecha
+        nTurno = self.pantallaMovimientos.nTurno
 
         datos=dal.obtenerDatos("movimientos", barraBusqueda.text())
         tabla.setRowCount(0)
