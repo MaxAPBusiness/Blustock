@@ -1051,12 +1051,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(4)
 
-    def saveMovimientos(self):
-        pass
-
-    def deleteMovimientos(self):
-        pass
-
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
         inserta en la tabla de la interfaz de usuario.
@@ -1754,7 +1748,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # # Obtenemos los datos para guardarlos en el historial.
             # desc = tabla.item(row, 0).text()
-            # cond = tabla.item(row, 1).text()
+            # cond = tabla.item(row, 1).text()"stock"datos
             # rep = tabla.item(row, 2).text()
             # baja = tabla.item(row, 3).text()
             # grupo = tabla.item(row, 5).text()
@@ -1992,21 +1986,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaClases.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0,)
-        # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
-            # Si el campo está vacio...
             if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
@@ -2015,24 +1999,25 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             clase = tabla.item(row, 0).text()
-
+            datosNuevos=[clase,]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO clases VALUES(NULL, ?)",
                         (clase,)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'clases', clase, None, datosNuevos)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?
                         WHERE id = ?""",
                         (clase, idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'clases', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
@@ -2069,8 +2054,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"des: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "clases", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "clases", row, datosEliminados)
             dal.eliminarDatos('clases', idd)
             tabla.removeRow(row)
 
