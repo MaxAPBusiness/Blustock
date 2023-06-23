@@ -622,11 +622,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
-        cond = int(tabla.item(row, 1).text())
-        rep = tabla.item(row, 2).text()
-        baja = tabla.item(row, 3).text()
-        prest = tabla.item(row, 4).text()
+    
         try:
+            cond = int(tabla.item(row, 1).text())
+            rep = tabla.item(row, 2).text()
+            baja = tabla.item(row, 3).text()
+            prest = tabla.item(row, 4).text()
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
