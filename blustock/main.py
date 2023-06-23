@@ -504,7 +504,7 @@ class MainWindow(QtWidgets.QMainWindow):
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
         
         if ubiSeleccionada == "Todas":
-            filtroUbi=None
+            filtroUbi=(None,)
         else:
             filtroUbi=(ubiSeleccionada,)
         
@@ -622,11 +622,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
-        cond = int(tabla.item(row, 1).text())
-        rep = tabla.item(row, 2).text()
-        baja = tabla.item(row, 3).text()
-        prest = tabla.item(row, 4).text()
+    
         try:
+            cond = int(tabla.item(row, 1).text())
+            rep = tabla.item(row, 2).text()
+            baja = tabla.item(row, 3).text()
+            prest = tabla.item(row, 4).text()
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
@@ -776,7 +777,7 @@ class MainWindow(QtWidgets.QMainWindow):
             datosEliminados=[fila for fila in datos if fila[0] == idd][0]
 
             # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", datosEliminados[1], datosEliminados[1:])
+            dal.insertarHistorial(self.usuario, "Eliminación", "stock", datosEliminados[1], datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
             self.fetchStock()
@@ -867,13 +868,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = """        El curso ingresado no está registrado.
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
-
+            datosNuevos=[nombre, dni, clase]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'personal', None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
@@ -882,6 +884,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (nombre, idClase[0], dni, idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'personal', datosViejos[3], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El dni ingresado ya está registrado.
                 Regístre uno nuevo o revise la información ya ingresada."""
@@ -933,20 +937,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-        #     # Obtenemos los datos para guardarlos en el historial.
-        #     desc = tabla.item(row, 0).text()
-        #     cond = tabla.item(row, 1).text()
-        #     rep = tabla.item(row, 2).text()
-        #     baja = tabla.item(row, 3).text()
-        #     grupo = tabla.item(row, 5).text()
-        #     subgrupo = tabla.item(row, 6).text()
-        #     ubi = tabla.item(row, 7).text()
+            datosEliminados=[fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, "Eliminación", "personal", datosEliminados[1], datosEliminados[1:])
 
-        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-        #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-        #     # Eliminamos los datos
             dal.eliminarDatos('personal', idd)
             self.fetchAlumnos()
 
@@ -1058,12 +1051,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.stackedWidget.setCurrentIndex(4)
-
-    def saveMovimientos(self):
-        pass
-
-    def deleteMovimientos(self):
-        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
@@ -1465,20 +1452,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-        #     # Obtenemos los datos para guardarlos en el historial.
-        #     desc = tabla.item(row, 0).text()
-        #     cond = tabla.item(row, 1).text()
-        #     rep = tabla.item(row, 2).text()
-        #     baja = tabla.item(row, 3).text()
-        #     grupo = tabla.item(row, 5).text()
-        #     subgrupo = tabla.item(row, 6).text()
-        #     ubi = tabla.item(row, 7).text()
-
-        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-        #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-        #     # Eliminamos los datos
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'personal', datosViejos[3], datosViejos[1:])
             dal.eliminarDatos('personal', idd)
             self.fetchOtroPersonal()
 
@@ -1703,7 +1678,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # # Obtenemos los datos para guardarlos en el historial.
             # desc = tabla.item(row, 0).text()
-            # cond = tabla.item(row, 1).text()
+            # cond = tabla.item(row, 1).text()"stock"datos
             # rep = tabla.item(row, 2).text()
             # baja = tabla.item(row, 3).text()
             # grupo = tabla.item(row, 5).text()
@@ -1810,24 +1785,25 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             ubicacion = tabla.item(row, 0).text()
-
+            datosNuevos=[ubicacion,]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO ubicaciones VALUES(NULL, ?)",
                         (ubicacion,)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE ubicaciones
                         SET descripcion=?
                         WHERE id = ?""",
                         (ubicacion, idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
@@ -1864,8 +1840,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"ubi: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "ubicaciones", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "ubicaciones", row, datosEliminados)
             dal.eliminarDatos('ubicaciones', idd)
             self.fetchUbicaciones()
 
@@ -1941,21 +1917,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaClases.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0,)
-        # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
-            # Si el campo está vacio...
             if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
@@ -1964,24 +1930,25 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             clase = tabla.item(row, 0).text()
-
+            datosNuevos=[clase,]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO clases VALUES(NULL, ?)",
                         (clase,)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'clases', clase, None, datosNuevos)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?
                         WHERE id = ?""",
                         (clase, idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'clases', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
@@ -2018,8 +1985,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"des: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "clases", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "clases", row, datosEliminados)
             dal.eliminarDatos('clases', idd)
             tabla.removeRow(row)
 
