@@ -1311,13 +1311,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = """        La clase ingresada no está registrado.
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
-
+            
+            datosNuevos=[nombre, dni, clase]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'personal', nombre, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -1327,6 +1329,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (nombre, dni, idClase[0], idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'personal', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El dni ingresado ya está registrado.
                 Ingrese uno nuevo o revise la información ya ingresada."""
@@ -1453,20 +1457,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-        #     # Obtenemos los datos para guardarlos en el historial.
-        #     desc = tabla.item(row, 0).text()
-        #     cond = tabla.item(row, 1).text()
-        #     rep = tabla.item(row, 2).text()
-        #     baja = tabla.item(row, 3).text()
-        #     grupo = tabla.item(row, 5).text()
-        #     subgrupo = tabla.item(row, 6).text()
-        #     ubi = tabla.item(row, 7).text()
-
-        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-        #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-        #     # Eliminamos los datos
+            datosViejos=[fila for fila in datos if fila[0] == idd]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'personal', datosViejos[3], datosViejos[1:])
             dal.eliminarDatos('personal', idd)
             self.fetchOtroPersonal()
 
