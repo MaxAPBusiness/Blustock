@@ -1855,24 +1855,25 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             ubicacion = tabla.item(row, 0).text()
-
+            datosNuevos=[ubicacion,]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO ubicaciones VALUES(NULL, ?)",
                         (ubicacion,)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE ubicaciones
                         SET descripcion=?
                         WHERE id = ?""",
                         (ubicacion, idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
@@ -1909,8 +1910,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"ubi: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "ubicaciones", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "ubicaciones", row, datosEliminados)
             dal.eliminarDatos('ubicaciones', idd)
             self.fetchUbicaciones()
 
