@@ -504,7 +504,7 @@ class MainWindow(QtWidgets.QMainWindow):
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
         
         if ubiSeleccionada == "Todas":
-            filtroUbi=None
+            filtroUbi=(None,)
         else:
             filtroUbi=(ubiSeleccionada,)
         
