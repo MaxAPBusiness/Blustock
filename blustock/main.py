@@ -181,7 +181,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaClases.tableWidget,
                                       self.saveClases,
-                                      self.deleteClases, (0,)))
+                                      self.deleteClases, (0,1,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
@@ -1697,6 +1697,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1951,13 +1953,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
+        cat=tabla.item(row, 1).text()
+        idCat=('SELECT id FROM cats_clase WHERE descripcion=?',(cat,))
+        if not idCat:
+            mensaje = """       La categoría ingresada no está registrada.
+            Ingresela e intente nuevamente."""
+            return PopUp("Error", mensaje).exec()
 
         info = """        Esta acción no se puede deshacer.
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             clase = tabla.item(row, 0).text()
-            datosNuevos=[clase,]
+            datosNuevos=[clase, cat,]
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1974,7 +1982,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (clase, idd)
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[1:], datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""

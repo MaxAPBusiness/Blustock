@@ -14,8 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">
-</string>
+   <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
@@ -158,6 +157,11 @@
        <column>
         <property name="text">
          <string>Clase</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Categoría</string>
         </property>
        </column>
        <column>
