@@ -21,8 +21,8 @@ class DAL():
             Obtiene datos de la base de datos y los devuelve en forma
             de lista.
     """
-    def obtenerDatos(self, tabla: str, busqueda: str, 
-        filtrosExtra: list | tuple | dict | None = None) -> list:
+    def obtenerDatos(self, tabla: str, busqueda: str | None = None, 
+        filtrosExtra: list | tuple | None = None) -> list:
         """Este método obtiene y devuelve datos de la base de datos
 
         Parámetros
@@ -83,9 +83,9 @@ class DAL():
         datos = bdd.cur.execute(query, filtro).fetchall()
         return [["-" if cellData == None else cellData for cellData in rowData] for rowData in datos]
 
-    def insertarHistorial(self, usuario: int, tipo: str, tabla: str,
-                          fila: int, datosViejos: list | None = None,
-                          datosNuevos: list | None = None):
+    def insertarHistorial(self, usuario: int, tipo: str, gestion: str,
+                          fila: int, listaDatosViejos: list | None = None,
+                          listaDatosNuevos: list | None = None):
         """Este método inserta información sobre cambios realizados a
         la base de datos en la tabla historial.
 
@@ -107,12 +107,23 @@ class DAL():
                 Default: None
         """
         idTipo=bdd.cur.execute('SELECT id FROM tipos_cambio WHERE descripcion=?', (tipo,)).fetchone()[0]
-        idTabla=bdd.cur.execute('SELECT id FROM tablas WHERE descripcion=?', (tabla,)).fetchone()[0]
-        if datosViejos:
-            datosViejos=f'{datosViejos}'
-        if datosNuevos:
-            datosNuevos=f'{datosNuevos}'
-        datos=(usuario, datetime.now(), idTipo, idTabla, fila, datosViejos, datosNuevos,)
+        idGestion=bdd.cur.execute('SELECT id FROM gestiones WHERE descripcion=?', (gestion,)).fetchone()[0]
+        if not idTipo or not idGestion:
+            info="ERROR DE PROGRAMACION: SE PASARON DATOS EQUIVOCADOS EN LA LLAMADA AL HISTORIAL"
+            return PopUp('Error', info).exec()
+        if listaDatosViejos:
+            datosViejos=''
+            for datoViejo in listaDatosViejos:
+                datosViejos += f'{datoViejo};'
+        else:
+            datosViejos=None
+        if listaDatosNuevos:
+            datosNuevos=''
+            for datoNuevo in listaDatosNuevos:
+                datosNuevos += f'{datoNuevo};'
+        else:
+            datosNuevos=None
+        datos=(usuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"), idTipo, idGestion, fila, datosViejos, datosNuevos,)
         bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
         bdd.con.commit()
     

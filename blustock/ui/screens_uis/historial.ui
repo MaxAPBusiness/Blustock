@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
+    <width>1229</width>
     <height>490</height>
    </rect>
   </property>
@@ -178,6 +178,7 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald,sans-serif</family>
+         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -248,23 +249,6 @@ QPushButton:pressed {
          </property>
         </spacer>
        </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <item>
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Usuario:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox"/>
-       </item>
        <item>
         <widget class="QLabel" name="label_4">
          <property name="text">
@@ -276,7 +260,11 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <widget class="QDateEdit" name="dateEdit"/>
+        <widget class="QDateEdit" name="desdeFecha">
+         <property name="displayFormat">
+          <string>yyyy/MM/dd HH:mm:ss</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_5">
@@ -289,25 +277,16 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <widget class="QDateEdit" name="dateEdit_2"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Tipo:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <widget class="QDateEdit" name="hastaFecha">
+         <property name="displayFormat">
+          <string>yyyy/MM/dd HH:mm:ss</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboBox_3"/>
        </item>
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Tabla:</string>
+          <string>Gestión:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -315,7 +294,13 @@ QPushButton:pressed {
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox_2"/>
+        <widget class="QComboBox" name="listaGestion">
+         <item>
+          <property name="text">
+           <string>Todas</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </item>
@@ -368,17 +353,27 @@ QPushButton:pressed {
        </attribute>
        <column>
         <property name="text">
-         <string>Nombre y apellido</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Usuario</string>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Fecha y hora</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Gestión</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Fila</string>
         </property>
        </column>
        <column>
