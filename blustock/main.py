@@ -835,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
                     )
-                    dal.insertarHistorial(self.usuario, 'Inserción', 'Alumnos', None, datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
@@ -846,11 +846,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Alumnos', datosViejos[3], datosViejos[1:], datosNuevos)
-            except sqlite3.IntegrityError:
+            except sqlite3.IntegrityError as e:
+                print(e)
                 info = """        El dni ingresado ya está registrado.
                 Regístre uno nuevo o revise la información ya ingresada."""
-                PopUp("Error", info).exec()
-                self.fetchAlumnos()
+                return PopUp("Error", info).exec()
 
             bdd.con.commit()
             self.fetchAlumnos()
@@ -923,6 +923,8 @@ class MainWindow(QtWidgets.QMainWindow):
             listaElem.disconnect()
             desdeFecha.disconnect()
             hastaFecha.disconnect()
+            listaPersona.disconnect()
+            listaPanolero.disconnect()
         except:
             pass
 
@@ -936,7 +938,6 @@ class MainWindow(QtWidgets.QMainWindow):
             QtCore.QDateTime.fromString(
                 (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
 
-        listaElem.disconnect()
         elemSeleccionado=listaElem.currentText()
         elems=bdd.cur.execute("""SELECT DISTINCT s.descripcion
                                 FROM movimientos m
@@ -949,7 +950,6 @@ class MainWindow(QtWidgets.QMainWindow):
             listaElem.addItem(elem[0])
         listaElem.setCurrentIndex(listaElem.findText(elemSeleccionado))
 
-        listaPersona.disconnect()
         personaSeleccionada=listaPersona.currentText()
         personas=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion 
                                 FROM movimientos m
@@ -963,7 +963,6 @@ class MainWindow(QtWidgets.QMainWindow):
             listaPersona.addItem(persona[0])
         listaPersona.setCurrentIndex(listaPersona.findText(personaSeleccionada))
 
-        listaPanolero.disconnect()
         panoleroSeleccionado=listaPanolero.currentText()
         panoleros=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion
                                 FROM movimientos m
@@ -1430,7 +1429,7 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos=[fila for fila in datos if fila[0] == idd]
+            datosViejos=[fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal', datosViejos[3], datosViejos[1:])
             dal.eliminarDatos('personal', idd)
             self.fetchOtroPersonal()
@@ -1786,7 +1785,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         "INSERT INTO ubicaciones VALUES(NULL, ?)",
                         (ubicacion,)
                     )
-                    dal.insertarHistorial(self.usuario, 'Inserción', 'Ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
@@ -1954,7 +1953,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
         cat=tabla.item(row, 1).text()
-        idCat=('SELECT id FROM cats_clase WHERE descripcion=?',(cat,))
+        idCat=bdd.cur.execute('SELECT id FROM cats_clase WHERE descripcion=?',(cat,)).fetchone()
         if not idCat:
             mensaje = """       La categoría ingresada no está registrada.
             Ingresela e intente nuevamente."""
@@ -1969,26 +1968,28 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 if not datos:
                     bdd.cur.execute(
-                        "INSERT INTO clases VALUES(NULL, ?)",
-                        (clase,)
+                        "INSERT INTO clases VALUES(NULL, ?, ?)",
+                        (clase, idCat[0],)
                     )
                     dal.insertarHistorial(self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
                         """UPDATE clases
-                        SET descripcion=?
+                        SET descripcion=?,
+                        id_cat=?
                         WHERE id = ?""",
-                        (clase, idd)
+                        (clase, idCat[0], idd)
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """        El subgrupo ingresado ya está registrado en ese grupo.
-                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                info = """        La clase ingresada ya está registrada.
+                Ingrese otra o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
+            self.fetchClases()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
