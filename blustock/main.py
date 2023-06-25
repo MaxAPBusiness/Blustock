@@ -399,9 +399,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if tabla.item(ultimaFila, iCampo).text() == "":
                     # Le pide al usuario que termine de llenar los campos
                     # y corta la función.
-                    mensaje = """       Ha agregado una fila y todavía no ha
-                    ingresado los datos de la fila anterior. Ingreselos, guarde
-                    los cambios e intente nuevamente."""
+                    mensaje = "Ha agregado una fila y todavía no ha ingresado los datos de la fila anterior. Ingreselos, guardelos cambios e intente nuevamente."
                     return PopUp("Error", mensaje).exec()
 
         # Se añade la fila al final.
@@ -579,8 +577,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(row, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
     
         try:
@@ -600,12 +597,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 baja=None
                 prest=None
         except:
-            mensaje = """       Los datos ingresados no son válidos.
-            Por favor, ingrese los datos correctamente."""
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             
@@ -624,8 +619,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not idGrupo:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """        El grupo ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
                 return PopUp("Error", info).exec()
 
             # Verificamos que el subgrupo esté registrado y que
@@ -635,9 +629,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 (subgrupo, idGrupo[0],)
             ).fetchone()
             if not idSubgrupo:
-                info = """El subgrupo ingresado no está registrado o no
-                pertenece al grupo ingresado. Regístrelo o asegúrese que esté
-                relacionado al grupo e ingrese nuevamente."""
+                info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
                 return PopUp("Error", info).exec()
             
             idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion = ?",
@@ -668,8 +660,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """La herramienta que desea ingresar ya está ingresada.
-                Ingrese otra información o revise la información ya ingresada"""
+                info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
@@ -718,17 +709,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # Para esta verificación, llamamos a la función del dal.
         hayRelacion = dal.verifElimStock(idd)
         if hayRelacion:
-            mensaje = """        La herramienta/insumo tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            esta herramienta/insumo."""
+            mensaje = "La herramienta/insumo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
             return PopUp('Advertencia', mensaje).exec()
         
         # Si no está relacionado, pregunta al usuario si confirma
         # eliminar la fila y le advierte que la acción no se puede
         # deshacer.
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar la herramienta/insumo?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la herramienta/insumo?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         # Si el usuario presionó el boton sí...
@@ -798,24 +785,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for iCampo in iCampos:
             if tabla.item(row, iCampo).text() == "":
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
         
         try:
             dni = int(tabla.item(row, 2).text())
         except:
-            mensaje = """       Los datos ingresados no son válidos.
-            Por favor, ingreselos correctamente."""
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
         
         if dni > 10**10:
-            mensaje = """       El dni ingresado es muy largo.
-            Por favor, reduzca los dígitos del dni ingresado."""
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
@@ -825,8 +808,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 "SELECT id FROM clases WHERE descripcion = ? AND id_cat=1", (clase,)
             ).fetchone()
             if not idClase:
-                info = """        El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno.
-                Regístrelo o revise los datos ya ingresados."""
+                info = "El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno. Regístrelo o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
             datosNuevos=[nombre, dni, clase]
             try:
@@ -848,8 +830,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(self.usuario, 'Edición', 'Alumnos', datosViejos[3], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError as e:
                 print(e)
-                info = """        El dni ingresado ya está registrado.
-                Regístre uno nuevo o revise la información ya ingresada."""
+                info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
@@ -886,14 +867,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hayRelacion = dal.verifElimAlumnos(idd)
         if hayRelacion:
-            mensaje = """        La alumno/a tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            este alumno/a."""
+            mensaje = "El alumno tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este alumno."
             return PopUp('Advertencia', mensaje).exec()
         
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el alumno/a?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el alumno/a?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1076,12 +1053,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla=self.pantallaGrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         if tabla.item(row, 0).text() == "":
-            mensaje = """       Hay campos en blanco que son obligatorios.
-            Ingreselos e intente nuevamente."""
+            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             grupo = tabla.item(row, 0).text()
@@ -1093,14 +1068,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
-                        """UPDATE grupos SET descripcion = ? WHERE id = ?""",
+                        "UPDATE grupos SET descripcion = ? WHERE id = ?",
                         (grupo, idd,)
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Grupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
-                mensaje = """       El grupo que desea ingresar ya está ingresado.
-                Ingrese otro grupo o revise los datos ya ingresados."""
+                mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
                 return PopUp("Error", mensaje).exec()
                 
             bdd.con.commit()
@@ -1135,14 +1109,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hayRelacion = dal.verifElimGrupos(idd)
         if hayRelacion:
-            mensaje = """        El grupo tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            este grupo."""
+            mensaje = "El grupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este grupo."
             return PopUp('Advertencia', mensaje).exec()
         
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el grupo?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el grupo?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1250,24 +1220,20 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(row, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
         
         try:
             dni = int(tabla.item(row, 2).text())
         except:
-            mensaje = """       Los datos ingresados no son válidos.
-            Por favor, ingreselos correctamente."""
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
         if dni > 10**10:
-            mensaje = """       El dni ingresado es muy largo.
-            Por favor, reduzca los dígitos del dni ingresado."""
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
@@ -1281,8 +1247,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not idClase:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """        La clase ingresada no está registrada o no está vinculada a la categoría "Personal".
-                Regístrela o revise los datos ya ingresados."""
+                info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
                 return PopUp("Error", info).exec()
             datosNuevos=[nombre, dni, clase]
             try:
@@ -1304,8 +1269,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """        El dni ingresado ya está registrado.
-                Ingrese uno nuevo o revise la información ya ingresada."""
+                info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
                 return PopUp("Error", info).exec()
             bdd.con.commit()
             self.fetchOtroPersonal()
@@ -1337,12 +1301,10 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(row, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Se obtiene el texto de todas las celdas.
@@ -1357,8 +1319,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not idGrupo:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """        El grupo ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
                 return PopUp("Error", info).exec()
 
             datosNuevos=[subgrupo, grupo]
@@ -1382,8 +1343,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """El subgrupo ingresado ya está registrado en el grupo.
-                Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."""
+                info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
@@ -1418,14 +1378,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hayRelacion = dal.verifElimOtroPersonal(idd)
         if hayRelacion:
-            mensaje = """        El personal tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            el personal."""
+            mensaje = "El personal tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar el personal."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el personal?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el personal?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1495,14 +1451,10 @@ class MainWindow(QtWidgets.QMainWindow):
             return tabla.removeRow(row)
         hayRelacion = dal.verifElimSubgrupos(idd)
         if hayRelacion:
-            mensaje = """        El subgrupo tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            este subgrupo."""
+            mensaje = "El subgrupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este subgrupo."
             return PopUp('Advertencia', mensaje).exec()
         
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el subgrupo?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el subgrupo?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1655,14 +1607,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hayRelacion = dal.verifElimUsuario(idd)
         if hayRelacion:
-            mensaje = """        El usuario tiene movimientos o un
-            seguimiento de reparación relacionados. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            este usuario."""
+            mensaje = "El usuario tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este usuario."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar el usuario?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el usuario?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1769,12 +1717,10 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(row, iCampo).text() == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             ubicacion = tabla.item(row, 0).text()
@@ -1797,8 +1743,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """        El subgrupo ingresado ya está registrado en ese grupo.
-                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
@@ -1823,12 +1768,9 @@ class MainWindow(QtWidgets.QMainWindow):
         
         hayRelacion = dal.verifElimUbi(idd)
         if hayRelacion:
-            mensaje = """        La ubicacion tiene relaciones. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            esta ubicacion."""
+            mensaje = "La ubicacion está relacionada con registros en otras gestiones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta ubicacion."
             return PopUp('Advertencia', mensaje).exec()
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar la ubicacion?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
@@ -1949,18 +1891,15 @@ class MainWindow(QtWidgets.QMainWindow):
         iCampos=(0,)
         for iCampo in iCampos:
             if tabla.item(row, iCampo).text() == "":
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
         cat=tabla.item(row, 1).text()
         idCat=bdd.cur.execute('SELECT id FROM cats_clase WHERE descripcion=?',(cat,)).fetchone()
         if not idCat:
-            mensaje = """       La categoría ingresada no está registrada.
-            Ingresela e intente nuevamente."""
+            mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             clase = tabla.item(row, 0).text()
@@ -1984,8 +1923,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """        La clase ingresada ya está registrada.
-                Ingrese otra o revise los datos ya ingresados."""
+                info = "La clase ingresada ya está registrada. Ingrese otra o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
@@ -2010,13 +1948,10 @@ class MainWindow(QtWidgets.QMainWindow):
         
         hayRelacion = dal.verifElimClases(idd)
         if hayRelacion:
-            mensaje = """        La clase tiene relaciones. Por motivos de seguridad,
-            debe eliminar primero los registros relacionados antes de eliminar
-            esta clase."""
+            mensaje = "La clase tiene relaciones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta clase."
             return PopUp('Advertencia', mensaje).exec()
         
-        mensaje = """        Esta acción no se puede deshacer.
-        ¿Desea eliminar la clase?"""
+        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la clase?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
