@@ -59,7 +59,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Listado de Seguimientos de Reparación de Herramientas </string>
+        <string>Seguimiento de Reparación de Herramientas </string>
        </property>
       </widget>
      </item>
@@ -126,13 +126,23 @@
        </item>
        <item>
         <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
-          <string>Desde: </string>
+          <string>Desde:</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QDateEdit" name="desdeFecha">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="minimumDate">
           <date>
            <year>1999</year>
@@ -150,13 +160,23 @@
        </item>
        <item>
         <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
-          <string>Hasta: </string>
+          <string>Hasta:</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QDateEdit" name="hastaFecha">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="minimumDate">
           <date>
            <year>2000</year>

@@ -95,7 +95,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="opcionSubgrupos">
    <property name="text">
-    <string>Gestión de subgrupos</string>
+    <string>Gestión de Subgrupos</string>
    </property>
    <property name="font">
     <font>
@@ -105,7 +105,7 @@
   </action>
   <action name="opcionGrupos">
    <property name="text">
-    <string>Gestión de grupos</string>
+    <string>Gestión de Grupos</string>
    </property>
    <property name="font">
     <font>
@@ -115,7 +115,7 @@
   </action>
   <action name="opcionStock">
    <property name="text">
-    <string>Gestión de herramientas e insumos</string>
+    <string>Gestión de Herramientas e Insumos</string>
    </property>
    <property name="font">
     <font>
@@ -135,7 +135,7 @@
   </action>
   <action name="opcionMovimientos">
    <property name="text">
-    <string>Gestión de movimientos</string>
+    <string>Listado de Movimientos</string>
    </property>
    <property name="font">
     <font>
@@ -145,7 +145,7 @@
   </action>
   <action name="opcionAlumnos">
    <property name="text">
-    <string>Gestión de alumnos</string>
+    <string>Gestión de Alumnos</string>
    </property>
    <property name="font">
     <font>
@@ -165,7 +165,7 @@
   </action>
   <action name="opcionOtroPersonal">
    <property name="text">
-    <string>Gestión de otro personal</string>
+    <string>Gestión de Personal</string>
    </property>
    <property name="font">
     <font>
@@ -175,7 +175,7 @@
   </action>
   <action name="opcionTurnos">
    <property name="text">
-    <string>Gestión de turnos del pañol</string>
+    <string>Listado de Turnos de Pañol</string>
    </property>
    <property name="font">
     <font>
@@ -185,7 +185,7 @@
   </action>
   <action name="opcionUsuarios">
    <property name="text">
-    <string>Gestión de usuarios</string>
+    <string>Gestión de Usuarios</string>
    </property>
    <property name="font">
     <font>
@@ -205,7 +205,7 @@
   </action>
   <action name="GestionReparacion">
    <property name="text">
-    <string>Gestión de herramientas en reparacion</string>
+    <string>Seguimiento de Reparaciones</string>
    </property>
    <property name="font">
     <font>
@@ -225,7 +225,7 @@
   </action>
   <action name="GestionClases">
    <property name="text">
-    <string>Gestion de Clases de Personal</string>
+    <string>Gestión de Clases de Personal</string>
    </property>
    <property name="font">
     <font>

@@ -129,6 +129,11 @@
        </item>
        <item>
         <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Ubicación: </string>
          </property>
@@ -136,6 +141,11 @@
        </item>
        <item>
         <widget class="QComboBox" name="listaUbi">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <item>
           <property name="text">
            <string>Todas</string>

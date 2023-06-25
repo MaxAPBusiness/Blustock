@@ -123,6 +123,11 @@
        </item>
        <item>
         <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>ID: </string>
          </property>
@@ -130,6 +135,11 @@
        </item>
        <item>
         <widget class="QSpinBox" name="nId">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="specialValueText">
           <string>Todos</string>
          </property>
@@ -146,6 +156,11 @@
        </item>
        <item>
         <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Desde: </string>
          </property>
@@ -153,6 +168,11 @@
        </item>
        <item>
         <widget class="QDateEdit" name="desdeFecha">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="dateTime">
           <datetime>
            <hour>0</hour>
@@ -177,6 +197,11 @@
        </item>
        <item>
         <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Hasta: </string>
          </property>
@@ -184,6 +209,11 @@
        </item>
        <item>
         <widget class="QDateEdit" name="hastaFecha">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="minimumDate">
           <date>
            <year>1999</year>
