@@ -134,7 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.GestionClases.triggered.connect(self.fetchClases)
         self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
-        self.opcionHistorial.triggered.connect(lambda: self.stackedWidget.setCurrentIndex(9))
+        self.opcionHistorial.triggered.connect(self.fetchHistorial)
 
         with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
@@ -827,16 +827,15 @@ class MainWindow(QtWidgets.QMainWindow):
                         (nombre, idClase[0], dni, idd,)
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(self.usuario, 'Edición', 'Alumnos', datosViejos[3], datosViejos[1:], datosNuevos)
-            except sqlite3.IntegrityError as e:
-                print(e)
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+            except sqlite3.IntegrityError:
                 info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
             self.fetchAlumnos()
             info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
+            return PopUp("Aviso", info).exec()
     
          
 
@@ -875,7 +874,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados=[fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos", datosEliminados[1], datosEliminados[1:])
+            dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos", datosEliminados[1], datosEliminados[2:])
 
             dal.eliminarDatos('personal', idd)
             self.fetchAlumnos()
@@ -1060,19 +1059,19 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             grupo = tabla.item(row, 0).text()
-            datosNuevos=[grupo]
             try:
                 if not datos:
                     bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo,))
-                    dal.insertarHistorial(self.usuario, 'Inserción', 'Grupos', grupo, None, datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Grupos', grupo, None, None)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
                         "UPDATE grupos SET descripcion = ? WHERE id = ?",
                         (grupo, idd,)
                     )
+                    datosNuevos=[grupo]
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(self.usuario, 'Edición', 'Grupos', datosViejos[1], datosViejos[1:], datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Grupos', datosViejos[1], None, datosNuevos)
             except sqlite3.IntegrityError:
                 mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
                 return PopUp("Error", mensaje).exec()
@@ -1116,8 +1115,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos=[fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos', datosViejos[1], datosViejos[1:])
+            grupo=tabla.item(row, 0).text()
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos', grupo, None)
             dal.eliminarDatos('grupos', idd)
             self.fetchGrupos()
     
@@ -1341,7 +1340,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (subgrupo, idGrupo[0], idd)
                     )
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[1:], datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
@@ -1724,7 +1723,6 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             ubicacion = tabla.item(row, 0).text()
-            datosNuevos=[ubicacion,]
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1740,8 +1738,9 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (ubicacion, idd)
                     )
+                    datosNuevos=[ubicacion,]
                     datosViejos=[fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], None, datosNuevos)
             except sqlite3.IntegrityError:
                 info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
@@ -1969,7 +1968,10 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha=self.pantallaHistorial.desdeFecha
         hastaFecha=self.pantallaHistorial.hastaFecha
         listaGestion=self.pantallaHistorial.listaGestion
-        listaGestion.disconnect()
+        try:
+            listaGestion.disconnect()
+        except:
+            pass
         gestionSeleccionada=listaGestion.currentText()
         gestiones=bdd.cur.execute("""SELECT DISTINCT g.descripcion
                                 FROM historial h
@@ -1990,87 +1992,153 @@ class MainWindow(QtWidgets.QMainWindow):
         rawData=dal.obtenerDatos("historial", None, filtroGestion)
         datos=[]
         for rawRow in rawData:
-            fecha=QtCore.QDateTime.fromString(rawRow[1], 'yyyy/MM/dd HH:mm:ss')
-            if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
+            # fecha=QtCore.QDateTime.fromString(rawRow[1], 'yyyy/MM/dd HH:mm:ss')
+            # if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
                 if rawRow[2] == 'Stock':
                     if rawRow[3] == 'Inserción':
                         datosInsertados=rawRow[6].split(';')
                         desc=f"""Se insertó la herramienta {rawRow[4]}, con los siguientes datos:
-                        Ubicación: {datosInsertados[6]} con {datosInsertados[0]}"""
-                datos.append(rowData)
+                        - Cantidad en condiciones: {datosInsertados[0]}
+                        - Cantidad en reparacion: {datosInsertados[1]}
+                        - Cantidad de baja: {datosInsertados[2]}
+                        - Cantidad prestadas: {datosInsertados[3]}
+                        - Grupo: {datosInsertados[4]}
+                        - Subgrupo: {datosInsertados[5]}
+                        - Ubicación: {datosInsertados[6]}"""
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"""Se editó la herramienta {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        - Descripción: {rawRow[4]}, por {datosNuevos[0]}
+                        - Cantidad en condiciones: {datosViejos[0]}, por {datosNuevos[1]}
+                        - Cantidad en reparacion: {datosViejos[1]}, por {datosNuevos[2]}
+                        - Cantidad de baja: {datosViejos[2]}, por {datosNuevos[3]}
+                        - Cantidad prestadas: {datosViejos[3]}, por {datosNuevos[4]}
+                        - Grupo: {datosViejos[4]}, por {datosNuevos[5]}
+                        - Subgrupo: {datosViejos[5]}, por {datosNuevos[6]}
+                        - Ubicación: {datosViejos[6]}, por {datosNuevos[7]}"""
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"""Se eliminó la herramienta {rawRow[4]}, que tenía los siguientes datos:
+                        - Cantidad en condiciones: {datosEliminados[0]}
+                        - Cantidad en reparacion: {datosEliminados[1]}
+                        - Cantidad de baja: {datosEliminados[2]}
+                        - Cantidad prestadas: {datosEliminados[3]}
+                        - Grupo: {datosEliminados[4]}
+                        - Subgrupo: {datosEliminados[5]}
+                        - Ubicación: {datosEliminados[6]}"""
+                elif rawRow[2] == 'Subgrupos':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"Se insertó el subgrupo {rawRow[4]}, perteneciendo al grupo {datosInsertados[0]}."
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"""Se editó el subgrupo {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        - Subgrupo: {rawRow[4]}, por {datosNuevos[0]}
+                        - Grupo: {datosViejos[0]}, por {datosNuevos[1]}"""
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó el subgrupo {rawRow[4]}, que pertenecía al grupo {datosEliminados[0]}."
+                elif rawRow[2] == 'Grupos':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"Se insertó el grupo {rawRow[4]}."
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"Se editó el grupo {rawRow[4]}, y se reemplazó por el grupo {datosNuevos[0]}."
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó el grupo {rawRow[4]}."
+                elif rawRow[2] == 'Alumnos':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"""Se insertó el alumno {rawRow[4]}, con los siguientes datos:
+                        - Curso: {datosInsertados[0]}
+                        - DNI: {datosInsertados[1]}"""
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"""Se editó el alumno {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        - Nombre y apellido: {rawRow[4]}, por {datosNuevos[0]}
+                        - Curso: {datosViejos[0]}, por {datosNuevos[1]}
+                        - DNI: {datosViejos[1]}, por {datosNuevos[2]}"""
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó el alumno {rawRow[4]}, que pertenecía al curso {datosEliminados[0]} y tenía el dni {datosEliminados[1]}."
+                elif rawRow[2] == 'Personal':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"""Se insertó el personal {rawRow[4]}, con los siguientes datos:
+                        - Clase: {datosInsertados[0]}
+                        - DNI: {datosInsertados[1]}"""
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"""Se editó el personal {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        - Nombre y apellido: {rawRow[4]}, por {datosNuevos[0]}
+                        - Clase: {datosViejos[0]}, por {datosNuevos[1]}
+                        - DNI: {datosViejos[1]}, por {datosNuevos[2]}"""
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó el personal {rawRow[4]}, cuya clase era {datosEliminados[0]} y tenía el dni {datosEliminados[1]}."
+                elif rawRow[2] == 'Clases':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"Se insertó la clase {rawRow[4]}, perteneciendo a la categoría {datosInsertados[0]}."
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"""Se editó la clase {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        - Clase: {rawRow[4]}, por {datosNuevos[0]}
+                        - Categoría: {datosViejos[0]}, por {datosNuevos[1]}"""
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó la clase {rawRow[4]}, que pertenecía a la categoría {datosEliminados[0]}."
+                elif rawRow[2] == 'Ubicaciones':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"Se insertó la ubicación {rawRow[4]}."
+                    elif rawRow[3] == 'Edición':
+                        datosViejos=rawRow[5].split(';')
+                        datosNuevos=rawRow[6].split(';')
+                        desc=f"Se editó la ubicación {rawRow[4]}, y se reemplazó por la ubicación {datosNuevos[0]}."
+                    elif rawRow[3] == 'Eliminación':
+                        datosEliminados=rawRow[5].split(';')
+                        desc=f"Se eliminó la ubicación {rawRow[4]}."
+
+                for cellData in rowData:
+                    if barraBusqueda.text() in cellData:
+                        datos.extend(rowData)
+                        datos.append(desc)
 
         for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(rowNum)
 
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            # Método setItem(row, column, item): establece el item de
-            # una celda de una tabla.
-            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
-            # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
             tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            cantPrest=QtWidgets.QTableWidgetItem(str(rowData[5]))
-            cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
-                rowNum, 4, cantPrest)
+                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
 
-            # Se calcula el total de stock, sumando las herramientas o
-            # insumos en condiciones, reparación y de baja.
-            if rowData[3] not in ("-", ""):
-                total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
-            else:
-                total=QtWidgets.QTableWidgetItem(str(rowData[2]))
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
-
-
-            tabla.setItem(rowNum, 5, total)
-
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
-            tabla.setItem(
-                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
-            self.generarBotones(
-                lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
-
-        # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
 
-        # Método setSectionResizeMode(column, ResizeMode): hace que una
-        # columna de una tabla se expanda o no automáticamente conforme
-        # se extiende la tabla.
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        tabla.cellChanged.connect(self.actualizarTotal)
-        listaGestion.currentIndexChanged.connect(self.fetchStock)
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(9)
     
 
 app = QtWidgets.QApplication(sys.argv)
