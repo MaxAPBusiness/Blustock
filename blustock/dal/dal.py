@@ -21,8 +21,8 @@ class DAL():
             Obtiene datos de la base de datos y los devuelve en forma
             de lista.
     """
-    def obtenerDatos(self, tabla: str, busqueda: str, 
-        filtrosExtra: list | tuple | dict | None = None) -> list:
+    def obtenerDatos(self, tabla: str, busqueda: str | None = None, 
+        filtrosExtra: list | tuple | None = None) -> list:
         """Este método obtiene y devuelve datos de la base de datos
 
         Parámetros
@@ -58,7 +58,7 @@ class DAL():
         else:
             cantFiltrosExtra=0
             
-        with open(f"dal{os.sep}queries{os.sep}select{os.sep}{tabla}.sql", 'r') as queryText:
+        with open(f"dal{os.sep}queries{os.sep}{tabla}.sql", 'r') as queryText:
             # Obtenemos y guardamos el código sql como texto
             query=queryText.read()
         # Cada "?" en el código sql indica que usaremos un dato de
@@ -83,9 +83,9 @@ class DAL():
         datos = bdd.cur.execute(query, filtro).fetchall()
         return [["-" if cellData == None else cellData for cellData in rowData] for rowData in datos]
 
-    def insertarHistorial(self, usuario: int, tipo: str, tabla: str,
-                          fila: int, datosViejos: str | None = None,
-                          datosNuevos: str | None = None):
+    def insertarHistorial(self, usuario: int, tipo: str, gestion: str,
+                          fila: int, listaDatosViejos: list | None = None,
+                          listaDatosNuevos: list | None = None):
         """Este método inserta información sobre cambios realizados a
         la base de datos en la tabla historial.
 
@@ -106,12 +106,26 @@ class DAL():
                 Los datos que se añadieron o reemplazaron otros datos.
                 Default: None
         """
-        with open(f"dal{os.sep}queries{os.sep}insert{os.sep}historial.sql", "r") as queryFile:
-            query=queryFile.read()
-            datos=(usuario, datetime.now(), tipo, tabla, fila,
-                   datosViejos)
-            bdd.cur.execute(query, datos)
-            bdd.con.commit()
+        idTipo=bdd.cur.execute('SELECT id FROM tipos_cambio WHERE descripcion=?', (tipo,)).fetchone()[0]
+        idGestion=bdd.cur.execute('SELECT id FROM gestiones WHERE descripcion=?', (gestion,)).fetchone()[0]
+        if not idTipo or not idGestion:
+            info="ERROR DE PROGRAMACION: SE PASARON DATOS EQUIVOCADOS EN LA LLAMADA AL HISTORIAL"
+            return PopUp('Error', info).exec()
+        if listaDatosViejos:
+            datosViejos=''
+            for datoViejo in listaDatosViejos:
+                datosViejos += f'{datoViejo};'
+        else:
+            datosViejos=None
+        if listaDatosNuevos:
+            datosNuevos=''
+            for datoNuevo in listaDatosNuevos:
+                datosNuevos += f'{datoNuevo};'
+        else:
+            datosNuevos=None
+        datos=(usuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"), idTipo, idGestion, fila, datosViejos, datosNuevos,)
+        bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
+        bdd.con.commit()
     
     def verifElimStock(self, idd: int) -> bool:
         """Esta función verifica si la PK de una fila de la tabla stock

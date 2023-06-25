@@ -259,7 +259,7 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>Pase anual</string>
+          <string>Cargar planilla</string>
          </property>
         </widget>
        </item>

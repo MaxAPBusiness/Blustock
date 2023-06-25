@@ -1,1 +1,0 @@
-INSERT INTO historial(id_usuario,fecha_hora,tipo,tabla,id_fila,datos_viejos) VALUES(?,?,?,?,?,?)

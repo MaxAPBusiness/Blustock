@@ -181,11 +181,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaClases.tableWidget,
                                       self.saveClases,
-                                      self.deleteClases, (0,)))
+                                      self.deleteClases, (0,1,)))
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
-        self.pantallaStock.listaUbi.currentIndexChanged.connect(self.fetchStock)
         
         self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
@@ -193,72 +192,33 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.listaElem.currentIndexChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovimientos.desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
 
         self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
-        self.pantallaReparaciones.hastaFecha.setDate(
-            # Esta función también recibe dos parametros asi que estén
-            # atentos, solo que el primero es un string que viene de
-            # la librería dt, esta explicado mas adelante, pero el
-            # segundo string es igual al segundo que usamos en el
-            # primer entry de fecha.
-            QtCore.QDate.fromString(
-                # Clase datetime: construye un objeto datetime de
-                # python, que no es un QDateTime de qt.
-                # Método now: obtiene la fecha y hora actuales.
-                # Método strftime: transforma una fecha de python en un
-                # string. Cada porcentaje y letra simboliza un tipo de
-                # dato. A diferencia del segundo string, este no
-                # necesita una letra por cada dígito sino que entiende
-                # que cada conjunto de digitos es un tipo de dato.
-                # %d son los dos digitos de dia, %m son los dos de mes,
-                # %Y son los cuatro de año, %H son los dos de hora, %M
-                # son los dos de minuto y %S los dos de segundo.
-                # Fijense que, fuera de las letras, las barras y los :
-                # estan en los mismos lugares que en el segundo string.
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaReparaciones.desdeFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaReparaciones.hastaFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaReparaciones.desdeFecha.dateChanged.connect(self.fetchReparaciones)
-        self.pantallaReparaciones.hastaFecha.dateChanged.connect(self.fetchReparaciones)
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
-        self.pantallaTurnos.hastaFecha.setDate(
-            QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaTurnos.desdeFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaTurnos.hastaFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchReparaciones)
-        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchReparaciones)
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
+
+        self.pantallaHistorial.lineEdit.editingFinished.connect(self.fetchHistorial)
+        self.pantallaHistorial.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.desdeFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
+        self.pantallaHistorial.hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
+        self.pantallaHistorial.listaGestion.currentIndexChanged.connect(self.fetchHistorial)
+
         self.stackedWidget.setCurrentIndex(0)
         self.show()
 
@@ -504,7 +464,7 @@ class MainWindow(QtWidgets.QMainWindow):
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
         
         if ubiSeleccionada == "Todas":
-            filtroUbi=None
+            filtroUbi=(None,)
         else:
             filtroUbi=(ubiSeleccionada,)
         
@@ -605,7 +565,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla stock, que se usarán para obtener
                 el id de la fila en la tabla.
         """
-        
         # Se pregunta al usuario si desea guardar los cambios en la
         # tabla. NOTA: Esos tabs en el string son para mantener la
         # misma identación en todas las líneas así dedent funciona,
@@ -623,7 +582,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
-
+    
         try:
             cond = int(tabla.item(row, 1).text())
             rep = tabla.item(row, 2).text()
@@ -687,12 +646,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
                 return PopUp("Error", info).exec()
             
+            datosNuevos=[cond, rep, baja, prest, grupo, subgrupo, ubi]
             try:
                 if not datos:
+                    idd=None
                     bdd.cur.execute(
                         "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Stock', desc, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -703,10 +665,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (desc, cond, rep, baja, prest, idSubgrupo[0], idUbi[0], idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """La herramienta que desea ingresar ya está ingresada.
                 Ingrese otra información o revise la información ya ingresada"""
                 return PopUp("Error", info).exec()
+
             bdd.con.commit()
             self.fetchStock()
             info = "Los datos se han guardado con éxito."
@@ -769,18 +734,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Obtenemos los datos para guardarlos en el historial.
-            desc = tabla.item(row, 0).text()
-            cond = tabla.item(row, 1).text()
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            grupo = tabla.item(row, 5).text()
-            subgrupo = tabla.item(row, 6).text()
-            ubi = tabla.item(row, 7).text()
-
-            datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
+            datosEliminados=[fila for fila in datos if fila[0] == idd][0]
 
             # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
+            dal.insertarHistorial(self.usuario, "Eliminación", "Stock", datosEliminados[1], datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
             self.fetchStock()
@@ -865,19 +822,20 @@ class MainWindow(QtWidgets.QMainWindow):
             clase= tabla.item(row, 1).text()
 
             idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=1", (clase,)
             ).fetchone()
             if not idClase:
-                info = """        El curso ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = """        El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno.
+                Regístrelo o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
-
+            datosNuevos=[nombre, dni, clase]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
@@ -886,11 +844,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (nombre, idClase[0], dni, idd,)
                     )
-            except sqlite3.IntegrityError:
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Alumnos', datosViejos[3], datosViejos[1:], datosNuevos)
+            except sqlite3.IntegrityError as e:
+                print(e)
                 info = """        El dni ingresado ya está registrado.
                 Regístre uno nuevo o revise la información ya ingresada."""
-                PopUp("Error", info).exec()
-                self.fetchAlumnos()
+                return PopUp("Error", info).exec()
 
             bdd.con.commit()
             self.fetchAlumnos()
@@ -937,20 +897,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-        #     # Obtenemos los datos para guardarlos en el historial.
-        #     desc = tabla.item(row, 0).text()
-        #     cond = tabla.item(row, 1).text()
-        #     rep = tabla.item(row, 2).text()
-        #     baja = tabla.item(row, 3).text()
-        #     grupo = tabla.item(row, 5).text()
-        #     subgrupo = tabla.item(row, 6).text()
-        #     ubi = tabla.item(row, 7).text()
+            datosEliminados=[fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos", datosEliminados[1], datosEliminados[1:])
 
-        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-        #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-        #     # Eliminamos los datos
             dal.eliminarDatos('personal', idd)
             self.fetchAlumnos()
 
@@ -970,7 +919,25 @@ class MainWindow(QtWidgets.QMainWindow):
         nTurno = self.pantallaMovimientos.nTurno
         listaPanolero = self.pantallaMovimientos.listaPanolero
 
-        listaElem.disconnect()
+        try:
+            listaElem.disconnect()
+            desdeFecha.disconnect()
+            hastaFecha.disconnect()
+            listaPersona.disconnect()
+            listaPanolero.disconnect()
+        except:
+            pass
+
+        self.pantallaMovimientos.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+
         elemSeleccionado=listaElem.currentText()
         elems=bdd.cur.execute("""SELECT DISTINCT s.descripcion
                                 FROM movimientos m
@@ -983,7 +950,6 @@ class MainWindow(QtWidgets.QMainWindow):
             listaElem.addItem(elem[0])
         listaElem.setCurrentIndex(listaElem.findText(elemSeleccionado))
 
-        listaPersona.disconnect()
         personaSeleccionada=listaPersona.currentText()
         personas=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion 
                                 FROM movimientos m
@@ -997,7 +963,6 @@ class MainWindow(QtWidgets.QMainWindow):
             listaPersona.addItem(persona[0])
         listaPersona.setCurrentIndex(listaPersona.findText(personaSeleccionada))
 
-        listaPanolero.disconnect()
         panoleroSeleccionado=listaPanolero.currentText()
         panoleros=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion
                                 FROM movimientos m
@@ -1059,15 +1024,11 @@ class MainWindow(QtWidgets.QMainWindow):
         listaElem.currentIndexChanged.connect(self.fetchMovimientos)
         listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
         listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
+        desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
 
 
         self.stackedWidget.setCurrentIndex(4)
-
-    def saveMovimientos(self):
-        pass
-
-    def deleteMovimientos(self):
-        pass
 
     def fetchGrupos(self): 
         """Este método obtiene los datos de la tabla grupos y los
@@ -1124,21 +1085,26 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             grupo = tabla.item(row, 0).text()
-            
+            datosNuevos=[grupo]
             try:
                 if not datos:
                     bdd.cur.execute("INSERT INTO grupos VALUES(NULL, ?)",(grupo,))
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Grupos', grupo, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     bdd.cur.execute(
                         """UPDATE grupos SET descripcion = ? WHERE id = ?""",
                         (grupo, idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Grupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 mensaje = """       El grupo que desea ingresar ya está ingresado.
                 Ingrese otro grupo o revise los datos ya ingresados."""
                 return PopUp("Error", mensaje).exec()
+                
             bdd.con.commit()
+            self.fetchGrupos()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
@@ -1180,6 +1146,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            datosViejos=[fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos', datosViejos[1], datosViejos[1:])
             dal.eliminarDatos('grupos', idd)
             self.fetchGrupos()
     
@@ -1302,37 +1270,39 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             nombre = tabla.item(row, 0).text()
             clase= tabla.item(row, 1).text()
 
             # Verificamos que el grupo esté registrado.
             idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (clase,)
             ).fetchone()
             # Si no lo está...
             if not idClase:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """        La clase ingresada no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = """        La clase ingresada no está registrada o no está vinculada a la categoría "Personal".
+                Regístrela o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
-
+            datosNuevos=[nombre, dni, clase]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                         (nombre, dni, idClase[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE personal
-                        SET nombre_apellido=?, id_clase=?, dni=?
+                        SET nombre_apellido=?, dni=?, id_clase=?
                         WHERE id = ?""",
                         (nombre, dni, idClase[0], idd,)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El dni ingresado ya está registrado.
                 Ingrese uno nuevo o revise la información ya ingresada."""
@@ -1391,12 +1361,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 Regístrelo e ingrese nuevamente"""
                 return PopUp("Error", info).exec()
 
+            datosNuevos=[subgrupo, grupo]
+            
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                         (subgrupo, idGrupo[0])
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos)
                 else:
                     idd=datos[row][0]
                     # Guardamos los datos de la fila en
@@ -1406,10 +1379,13 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (subgrupo, idGrupo[0], idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """El subgrupo ingresado ya está registrado en el grupo.
                 Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
+
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             self.fetchSubgrupos()
@@ -1453,20 +1429,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-        #     # Obtenemos los datos para guardarlos en el historial.
-        #     desc = tabla.item(row, 0).text()
-        #     cond = tabla.item(row, 1).text()
-        #     rep = tabla.item(row, 2).text()
-        #     baja = tabla.item(row, 3).text()
-        #     grupo = tabla.item(row, 5).text()
-        #     subgrupo = tabla.item(row, 6).text()
-        #     ubi = tabla.item(row, 7).text()
-
-        #     datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-        #     # Insertamos los datos en el historial para que quede registro.
-        #     dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-        #     # Eliminamos los datos
+            datosViejos=[fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal', datosViejos[3], datosViejos[1:])
             dal.eliminarDatos('personal', idd)
             self.fetchOtroPersonal()
 
@@ -1504,78 +1468,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(6)
         
         lambda: self.stackedWidget.setCurrentIndex(6)
-    def saveSubgrupos(self, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla subgrupos de la base de datos.
-        
-        Parámetros
-        ----------
-            datos: list | None = None
-                Los datos de la tabla subgrupos, que se usarán para
-                obtener el id de la fila en la tabla.
-        """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla=self.pantallaSubgrupos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        iCampos=(0, 1)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = """       Hay campos en blanco que son obligatorios.
-                Ingreselos e intente nuevamente."""
-                return PopUp("Error", mensaje).exec()
-
-        info = """        Esta acción no se puede deshacer.
-        ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
-            subgrupo = tabla.item(row, 0).text()
-            grupo= tabla.item(row, 1).text()
-
-            # Verificamos que el grupo esté registrado.
-            idGrupo=bdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
-            ).fetchone()
-            # Si no lo está...
-            if not idGrupo:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
-                info = """        El grupo ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
-                return PopUp("Error", info).exec()
-
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
-                        (subgrupo, idGrupo[0])
-                    )
-                else:
-                    idd=datos[row][0]
-                    # Guardamos los datos de la fila en
-                    bdd.cur.execute(
-                        """UPDATE subgrupos
-                        SET descripcion=?, id_grupo=?
-                        WHERE id = ?""",
-                        (subgrupo, idGrupo[0], idd)
-                    )
-            except sqlite3.IntegrityError:
-                info = """        El subgrupo ingresado ya está registrado en ese grupo.
-                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
-                return PopUp("Error", info).exec()
-
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
  
     def deleteSubgrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1614,6 +1506,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            datosViejos=[fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos', datosViejos[1], datosViejos[1:])
             dal.eliminarDatos('subgrupos', idd)
             self.fetchSubgrupos()
 
@@ -1624,16 +1518,26 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
         nId = self.pantallaTurnos.nId
+        desdeFecha = self.pantallaReparaciones.desdeFecha
+        hastaFecha = self.pantallaReparaciones.hastaFecha
+        try:
+            desdeFecha.disconnect()
+            hastaFecha.disconnect()
+        except:
+            pass
+        hastaFecha.setDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+
         if nId.value():
             filtro=(nId.value(),)
         else:
             filtro=(None,)
 
         tabla.setRowCount(0)
-
-        desdeFecha= self.pantallaReparaciones.desdeFecha
-        hastaFecha= self.pantallaReparaciones.hastaFecha
-
         datosCrudos=dal.obtenerDatos("turnos", barraBusqueda.text(), filtro)
         datos=[]
         for rowData in datosCrudos:
@@ -1660,6 +1564,9 @@ class MainWindow(QtWidgets.QMainWindow):
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
 
         self.stackedWidget.setCurrentIndex(7)
 
@@ -1761,7 +1668,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # # Obtenemos los datos para guardarlos en el historial.
             # desc = tabla.item(row, 0).text()
-            # cond = tabla.item(row, 1).text()
+            # cond = tabla.item(row, 1).text()"stock"datos
             # rep = tabla.item(row, 2).text()
             # baja = tabla.item(row, 3).text()
             # grupo = tabla.item(row, 5).text()
@@ -1789,6 +1696,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1868,24 +1777,25 @@ class MainWindow(QtWidgets.QMainWindow):
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             ubicacion = tabla.item(row, 0).text()
-
+            datosNuevos=[ubicacion,]
             try:
                 if not datos:
                     bdd.cur.execute(
                         "INSERT INTO ubicaciones VALUES(NULL, ?)",
                         (ubicacion,)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE ubicaciones
                         SET descripcion=?
                         WHERE id = ?""",
                         (ubicacion, idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], datosViejos[1:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = """        El subgrupo ingresado ya está registrado en ese grupo.
                 Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
@@ -1922,8 +1832,8 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"ubi: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "ubicaciones", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "Ubicaciones", row, datosEliminados)
             dal.eliminarDatos('ubicaciones', idd)
             self.fetchUbicaciones()
 
@@ -1932,6 +1842,37 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaReparaciones.lineEdit
         desdeFecha= self.pantallaReparaciones.desdeFecha
         hastaFecha= self.pantallaReparaciones.hastaFecha
+        try:
+            desdeFecha.disconnect()
+            hastaFecha.disconnect()
+        except:
+            pass
+
+        hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         datosCrudos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
         datos=[]
@@ -1984,6 +1925,10 @@ class MainWindow(QtWidgets.QMainWindow):
             4, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        
+        desdeFecha.dateChanged.connect(self.fetchReparaciones)
+        hastaFecha.dateChanged.connect(self.fetchReparaciones)
 
         self.stackedWidget.setCurrentIndex(11)
         tabla.cellClicked.connect(
@@ -1999,53 +1944,52 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaClases.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         iCampos=(0,)
-        # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
-            # Si el campo está vacio...
             if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
                 mensaje = """       Hay campos en blanco que son obligatorios.
                 Ingreselos e intente nuevamente."""
                 return PopUp("Error", mensaje).exec()
+        cat=tabla.item(row, 1).text()
+        idCat=bdd.cur.execute('SELECT id FROM cats_clase WHERE descripcion=?',(cat,)).fetchone()
+        if not idCat:
+            mensaje = """       La categoría ingresada no está registrada.
+            Ingresela e intente nuevamente."""
+            return PopUp("Error", mensaje).exec()
 
         info = """        Esta acción no se puede deshacer.
         ¿Desea guardar los cambios hechos en la fila en la base de datos?"""
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             clase = tabla.item(row, 0).text()
-
+            datosNuevos=[clase, cat,]
             try:
                 if not datos:
                     bdd.cur.execute(
-                        "INSERT INTO clases VALUES(NULL, ?)",
-                        (clase,)
+                        "INSERT INTO clases VALUES(NULL, ?, ?)",
+                        (clase, idCat[0],)
                     )
+                    dal.insertarHistorial(self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
                     idd=datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE clases
-                        SET descripcion=?
+                        SET descripcion=?,
+                        id_cat=?
                         WHERE id = ?""",
-                        (clase, idd)
+                        (clase, idCat[0], idd)
                     )
+                    datosViejos=[fila for fila in datos if fila[0] == idd][0]
+                    dal.insertarHistorial(self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
-                info = """        El subgrupo ingresado ya está registrado en ese grupo.
-                Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."""
+                info = """        La clase ingresada ya está registrada.
+                Ingrese otra o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
+            self.fetchClases()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
 
@@ -2076,10 +2020,123 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = f"des: {des}"
-            dal.insertarHistorial(self.usuario, "eliminación", "clases", row, datosEliminados)
+            datosEliminados = [des,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "Clases", row, datosEliminados)
             dal.eliminarDatos('clases', idd)
             tabla.removeRow(row)
+
+    def fetchHistorial(self):
+        """Este método obtiene los datos de la tabla historial y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+        tabla = self.pantallaHistorial.tableWidget
+        barraBusqueda = self.pantallaHistorial.lineEdit
+        desdeFecha=self.pantallaHistorial.desdeFecha
+        hastaFecha=self.pantallaHistorial.hastaFecha
+        listaGestion=self.pantallaHistorial.listaGestion
+        listaGestion.disconnect()
+        gestionSeleccionada=listaGestion.currentText()
+        gestiones=bdd.cur.execute("""SELECT DISTINCT g.descripcion
+                                FROM historial h
+                                JOIN gestiones g
+                                ON g.id=h.id_gest""").fetchall()
+        listaGestion.clear()
+        listaGestion.addItem("Todas")
+        for gestion in gestiones:
+            listaGestion.addItem(gestion[0])
+        listaGestion.setCurrentIndex(listaGestion.findText(gestionSeleccionada))
+        
+        if gestionSeleccionada == "Todas":
+            filtroGestion=(None,)
+        else:
+            filtroGestion=(gestionSeleccionada,)
+
+        tabla.setRowCount(0)
+        rawData=dal.obtenerDatos("historial", None, filtroGestion)
+        datos=[]
+        for rawRow in rawData:
+            fecha=QtCore.QDateTime.fromString(rawRow[1], 'yyyy/MM/dd HH:mm:ss')
+            if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
+                if rawRow[2] == 'Stock':
+                    if rawRow[3] == 'Inserción':
+                        datosInsertados=rawRow[6].split(';')
+                        desc=f"""Se insertó la herramienta {rawRow[4]}, con los siguientes datos:
+                        Ubicación: {datosInsertados[6]} con {datosInsertados[0]}"""
+                datos.append(rowData)
+
+        for rowNum, rowData in enumerate(datos):
+            # Se añade una fila a la tabla.
+            # Método insertRow(int): inserta una fila en una QTable.
+            tabla.insertRow(rowNum)
+
+            # Inserta el texto en cada celda. Las celdas por defecto no
+            # tienen nada, por lo que hay que añadir primero un item
+            # que contenga el texto. No se puede establecer texto asi
+            # nomás, tira error.
+            # Método setItem(row, column, item): establece el item de
+            # una celda de una tabla.
+            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
+            # texto por defecto.
+            tabla.setItem(
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            cantPrest=QtWidgets.QTableWidgetItem(str(rowData[5]))
+            cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            tabla.setItem(
+                rowNum, 4, cantPrest)
+
+            # Se calcula el total de stock, sumando las herramientas o
+            # insumos en condiciones, reparación y de baja.
+            if rowData[3] not in ("-", ""):
+                total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
+            else:
+                total=QtWidgets.QTableWidgetItem(str(rowData[2]))
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+
+
+            tabla.setItem(rowNum, 5, total)
+
+            tabla.setItem(
+                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
+            tabla.setItem(
+                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
+            tabla.setItem(
+                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
+            for col in range(tabla.columnCount()):
+                item = tabla.item(rowNum, col)
+                if item is not None:
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+            # Se generan e insertan los botones en la fila, pasando
+            # como parámetros las funciones que queremos que los
+            # botones tengan y la tabla y la fila de la tabla en la que
+            # queremos que se inserten.
+            self.generarBotones(
+                lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
+
+        # Método setRowHeight: cambia la altura de una fila.
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        # Método setSectionResizeMode(column, ResizeMode): hace que una
+        # columna de una tabla se expanda o no automáticamente conforme
+        # se extiende la tabla.
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
+        tabla.cellChanged.connect(self.actualizarTotal)
+        listaGestion.currentIndexChanged.connect(self.fetchStock)
+        self.stackedWidget.setCurrentIndex(3)
+    
 
 app = QtWidgets.QApplication(sys.argv)
 
