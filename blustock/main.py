@@ -822,11 +822,11 @@ class MainWindow(QtWidgets.QMainWindow):
             clase= tabla.item(row, 1).text()
 
             idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=1", (clase,)
             ).fetchone()
             if not idClase:
-                info = """        El curso ingresado no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = """        El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno.
+                Regístrelo o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
             datosNuevos=[nombre, dni, clase]
             try:
@@ -1276,14 +1276,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Verificamos que el grupo esté registrado.
             idClase=bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ?", (clase,)
+                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (clase,)
             ).fetchone()
             # Si no lo está...
             if not idClase:
                 # Muestra un mensaje de error al usuario y termina la
                 # función.
-                info = """        La clase ingresada no está registrado.
-                Regístrelo e ingrese nuevamente"""
+                info = """        La clase ingresada no está registrada o no está vinculada a la categoría "Personal".
+                Regístrela o revise los datos ya ingresados."""
                 return PopUp("Error", info).exec()
             datosNuevos=[nombre, dni, clase]
             try:
