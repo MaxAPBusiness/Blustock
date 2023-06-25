@@ -422,6 +422,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Se añade la fila al final.
         tabla.insertRow(indiceFinal)
+        tabla.scrollToItem(tabla.item(indiceFinal-1, 0), QtWidgets.QAbstractItemView.ScrollHint.PositionAtBottom)
         # Se añaden campos de texto en todas las celdas ya que por
         # defecto no vienen.
         for numCol in range(tabla.columnCount() - 2):
@@ -588,6 +589,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaStock.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
         iCampos=(0, 1, 6, 7, 8)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -682,9 +684,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            self.fetchStock()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchStock()
+            barra.setValue(posicion)
 
     def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -701,6 +705,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla=self.pantallaStock.tableWidget
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -745,7 +750,10 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, "Eliminación", "Stock", datosEliminados[1], datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
+            posicion=barra.value()
             self.fetchStock()
+            barra.setValue(posicion)
+
 
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
@@ -799,6 +807,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaAlumnos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra= tabla.verticalScrollBar()
         iCampos=(0, 1, 2)
 
         for iCampo in iCampos:
@@ -851,9 +860,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            self.fetchAlumnos()
             info = "Los datos se han guardado con éxito."
-            return PopUp("Aviso", info).exec()
+            PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchAlumnos()
+            barra.setValue(posicion)
+
     
          
 
@@ -870,6 +882,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaAlumnos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -895,7 +908,10 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos", datosEliminados[1], datosEliminados[2:])
 
             dal.eliminarDatos('personal', idd)
+            posicion=barra.value()
             self.fetchAlumnos()
+            barra.setValue(posicion)
+
 
 
 
@@ -1066,6 +1082,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaGrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
+
         if tabla.item(row, 0).text() == "":
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
@@ -1092,9 +1110,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", mensaje).exec()
                 
             bdd.con.commit()
-            self.fetchGrupos()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchGrupos()
+            barra.setValue(posicion)
+
 
     def deleteGrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1109,6 +1130,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaGrupos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -1133,7 +1155,9 @@ class MainWindow(QtWidgets.QMainWindow):
             grupo=tabla.item(row, 0).text()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos', grupo, None)
             dal.eliminarDatos('grupos', idd)
+            posicion=barra.value()
             self.fetchGrupos()
+            barra.setValue(posicion)
     
 # --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
@@ -1227,6 +1251,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
         iCampos=(0, 1, 2)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -1286,9 +1311,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
                 return PopUp("Error", info).exec()
             bdd.con.commit()
-            self.fetchOtroPersonal()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchOtroPersonal()
+            barra.setValue(posicion)
     
     def saveSubgrupos(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
@@ -1308,6 +1335,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
         iCampos=(0, 1)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -1362,8 +1390,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
-            self.fetchSubgrupos()
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchSubgrupos()
+            barra.setValue(posicion)
 
 
     def deleteOtroPersonal(self, datos: list | None = None) -> None:
@@ -1379,6 +1409,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaOtroPersonal.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
+
         if not datos:
             idd=None
         else:
@@ -1402,7 +1434,9 @@ class MainWindow(QtWidgets.QMainWindow):
             datosViejos=[fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal', datosViejos[3], datosViejos[1:])
             dal.eliminarDatos('personal', idd)
+            posicion=barra.value()
             self.fetchOtroPersonal()
+            barra.setValue(posicion)
 
     def fetchSubgrupos(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -1452,6 +1486,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -1475,7 +1510,9 @@ class MainWindow(QtWidgets.QMainWindow):
             datosViejos=[fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos', datosViejos[1], datosViejos[1:])
             dal.eliminarDatos('subgrupos', idd)
+            posicion=barra.value()
             self.fetchSubgrupos()
+            barra.setValue(posicion)
 
     def fetchTurnos(self):
         """Este método obtiene los datos de la tabla turnos y los
@@ -1724,6 +1761,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla=self.pantallaUbicaciones.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra= tabla.verticalScrollBar()
+
         iCampos=(0,)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -1761,13 +1800,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            self.fetchUbicaciones()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchUbicaciones()
+            barra.setValue(posicion)
 
     def deleteUbicaciones(self, datos: list | None = None) -> None:
         tabla=self.pantallaUbicaciones.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -1791,7 +1833,9 @@ class MainWindow(QtWidgets.QMainWindow):
             datosEliminados = [des,]
             dal.insertarHistorial(self.usuario, "Eliminación", "Ubicaciones", row, datosEliminados)
             dal.eliminarDatos('ubicaciones', idd)
+            posicion=barra.value()
             self.fetchUbicaciones()
+            barra.setValue(posicion)
 
     def fetchReparaciones(self):       
         tabla = self.pantallaReparaciones.tableWidget
@@ -1881,6 +1925,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla=self.pantallaClases.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
+        barra=tabla.verticalScrollBar()
+
         iCampos=(0,)
         for iCampo in iCampos:
             if tabla.item(row, iCampo).text() == "":
@@ -1920,13 +1966,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            self.fetchClases()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
+            posicion=barra.value()
+            self.fetchClases()
+            barra.setValue(posicion)
 
     def deleteClases(self, datos: list | None = None):
         tabla=self.pantallaClases.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra=tabla.verticalScrollBar()
 
         if not datos:
             idd=None
@@ -1952,7 +2001,10 @@ class MainWindow(QtWidgets.QMainWindow):
             datosEliminados = [cat,]
             dal.insertarHistorial(self.usuario, "Eliminación", "Clases", des, datosEliminados)
             dal.eliminarDatos('clases', idd)
-            tabla.removeRow(row)
+            posicion=barra.value()
+            self.fetchClases()
+            barra.setValue(posicion)
+            
 
     def fetchHistorial(self):
         """Este método obtiene los datos de la tabla historial y los
