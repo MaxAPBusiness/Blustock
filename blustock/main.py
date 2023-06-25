@@ -22,6 +22,7 @@ import sqlite3
 import sys
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
+from textwrap import dedent
 
 bdd.refrescarBDD()
 
@@ -193,13 +194,39 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
+        self.pantallaMovimientos.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
 
         self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
+        self.pantallaReparaciones.hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
@@ -209,15 +236,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaHistorial.hastaFecha.setDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.desdeFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
-        self.pantallaHistorial.hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
-        self.pantallaHistorial.listaGestion.currentIndexChanged.connect(self.fetchHistorial)
 
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -904,9 +922,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        self.pantallaMovimientos.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
@@ -1789,27 +1804,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        hastaFecha.setDate(
-            # Esta función también recibe dos parametros asi que estén
-            # atentos, solo que el primero es un string que viene de
-            # la librería dt, esta explicado mas adelante, pero el
-            # segundo string es igual al segundo que usamos en el
-            # primer entry de fecha.
-            QtCore.QDate.fromString(
-                # Clase datetime: construye un objeto datetime de
-                # python, que no es un QDateTime de qt.
-                # Método now: obtiene la fecha y hora actuales.
-                # Método strftime: transforma una fecha de python en un
-                # string. Cada porcentaje y letra simboliza un tipo de
-                # dato. A diferencia del segundo string, este no
-                # necesita una letra por cada dígito sino que entiende
-                # que cada conjunto de digitos es un tipo de dato.
-                # %d son los dos digitos de dia, %m son los dos de mes,
-                # %Y son los cuatro de año, %H son los dos de hora, %M
-                # son los dos de minuto y %S los dos de segundo.
-                # Fijense que, fuera de las letras, las barras y los :
-                # estan en los mismos lugares que en el segundo string.
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         hastaFecha.setMaximumDate(QtCore.QDate.fromString(
@@ -1954,8 +1948,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 0).text()
-            datosEliminados = [des,]
-            dal.insertarHistorial(self.usuario, "Eliminación", "Clases", row, datosEliminados)
+            cat = tabla.item(row, 1).text()
+            datosEliminados = [cat,]
+            dal.insertarHistorial(self.usuario, "Eliminación", "Clases", des, datosEliminados)
             dal.eliminarDatos('clases', idd)
             tabla.removeRow(row)
 
@@ -1970,8 +1965,18 @@ class MainWindow(QtWidgets.QMainWindow):
         listaGestion=self.pantallaHistorial.listaGestion
         try:
             listaGestion.disconnect()
+            desdeFecha.disconnect()
+            hastaFecha.disconnect()
         except:
             pass
+
+        desdeFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
+
         gestionSeleccionada=listaGestion.currentText()
         gestiones=bdd.cur.execute("""SELECT DISTINCT g.descripcion
                                 FROM historial h
@@ -1992,12 +1997,12 @@ class MainWindow(QtWidgets.QMainWindow):
         rawData=dal.obtenerDatos("historial", None, filtroGestion)
         datos=[]
         for rawRow in rawData:
-            # fecha=QtCore.QDateTime.fromString(rawRow[1], 'yyyy/MM/dd HH:mm:ss')
-            # if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
+            fecha=QtCore.QDateTime.fromString(rawRow[1], 'yyyy/MM/dd HH:mm:ss')
+            if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
                 if rawRow[2] == 'Stock':
                     if rawRow[3] == 'Inserción':
                         datosInsertados=rawRow[6].split(';')
-                        desc=f"""Se insertó la herramienta {rawRow[4]}, con los siguientes datos:
+                        desc=f"""                Se insertó la herramienta {rawRow[4]}, con los siguientes datos:
                         - Cantidad en condiciones: {datosInsertados[0]}
                         - Cantidad en reparacion: {datosInsertados[1]}
                         - Cantidad de baja: {datosInsertados[2]}
@@ -2008,7 +2013,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     elif rawRow[3] == 'Edición':
                         datosViejos=rawRow[5].split(';')
                         datosNuevos=rawRow[6].split(';')
-                        desc=f"""Se editó la herramienta {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        desc=f"""                Se editó la herramienta {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Descripción: {rawRow[4]}, por {datosNuevos[0]}
                         - Cantidad en condiciones: {datosViejos[0]}, por {datosNuevos[1]}
                         - Cantidad en reparacion: {datosViejos[1]}, por {datosNuevos[2]}
@@ -2019,7 +2024,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         - Ubicación: {datosViejos[6]}, por {datosNuevos[7]}"""
                     elif rawRow[3] == 'Eliminación':
                         datosEliminados=rawRow[5].split(';')
-                        desc=f"""Se eliminó la herramienta {rawRow[4]}, que tenía los siguientes datos:
+                        desc=f"""                Se eliminó la herramienta {rawRow[4]}, que tenía los siguientes datos:
                         - Cantidad en condiciones: {datosEliminados[0]}
                         - Cantidad en reparacion: {datosEliminados[1]}
                         - Cantidad de baja: {datosEliminados[2]}
@@ -2034,7 +2039,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     elif rawRow[3] == 'Edición':
                         datosViejos=rawRow[5].split(';')
                         datosNuevos=rawRow[6].split(';')
-                        desc=f"""Se editó el subgrupo {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        desc=f"""                Se editó el subgrupo {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Subgrupo: {rawRow[4]}, por {datosNuevos[0]}
                         - Grupo: {datosViejos[0]}, por {datosNuevos[1]}"""
                     elif rawRow[3] == 'Eliminación':
@@ -2054,13 +2059,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif rawRow[2] == 'Alumnos':
                     if rawRow[3] == 'Inserción':
                         datosInsertados=rawRow[6].split(';')
-                        desc=f"""Se insertó el alumno {rawRow[4]}, con los siguientes datos:
+                        desc=f"""                Se insertó el alumno {rawRow[4]}, con los siguientes datos:
                         - Curso: {datosInsertados[0]}
                         - DNI: {datosInsertados[1]}"""
                     elif rawRow[3] == 'Edición':
                         datosViejos=rawRow[5].split(';')
                         datosNuevos=rawRow[6].split(';')
-                        desc=f"""Se editó el alumno {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        desc=f"""                Se editó el alumno {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Nombre y apellido: {rawRow[4]}, por {datosNuevos[0]}
                         - Curso: {datosViejos[0]}, por {datosNuevos[1]}
                         - DNI: {datosViejos[1]}, por {datosNuevos[2]}"""
@@ -2070,13 +2075,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif rawRow[2] == 'Personal':
                     if rawRow[3] == 'Inserción':
                         datosInsertados=rawRow[6].split(';')
-                        desc=f"""Se insertó el personal {rawRow[4]}, con los siguientes datos:
+                        desc=f"""                Se insertó el personal {rawRow[4]}, con los siguientes datos:
                         - Clase: {datosInsertados[0]}
                         - DNI: {datosInsertados[1]}"""
                     elif rawRow[3] == 'Edición':
                         datosViejos=rawRow[5].split(';')
                         datosNuevos=rawRow[6].split(';')
-                        desc=f"""Se editó el personal {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        desc=f"""                Se editó el personal {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Nombre y apellido: {rawRow[4]}, por {datosNuevos[0]}
                         - Clase: {datosViejos[0]}, por {datosNuevos[1]}
                         - DNI: {datosViejos[1]}, por {datosNuevos[2]}"""
@@ -2090,7 +2095,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     elif rawRow[3] == 'Edición':
                         datosViejos=rawRow[5].split(';')
                         datosNuevos=rawRow[6].split(';')
-                        desc=f"""Se editó la clase {rawRow[4]}, y se reemplazaron los siguientes datos:
+                        desc=f"""                Se editó la clase {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Clase: {rawRow[4]}, por {datosNuevos[0]}
                         - Categoría: {datosViejos[0]}, por {datosNuevos[1]}"""
                     elif rawRow[3] == 'Eliminación':
@@ -2108,10 +2113,12 @@ class MainWindow(QtWidgets.QMainWindow):
                         datosEliminados=rawRow[5].split(';')
                         desc=f"Se eliminó la ubicación {rawRow[4]}."
 
-                for cellData in rowData:
+                row=[rawRow[0], rawRow[1], rawRow[2], rawRow[3], rawRow[4], dedent(desc)]
+                for cellData in row:
                     if barraBusqueda.text() in cellData:
-                        datos.extend(rowData)
-                        datos.append(desc)
+                        datos.append(row)
+                        break
+
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
@@ -2137,6 +2144,10 @@ class MainWindow(QtWidgets.QMainWindow):
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        listaGestion.currentIndexChanged.connect(self.fetchHistorial)
+        desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
+        hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
 
         self.stackedWidget.setCurrentIndex(9)
     
