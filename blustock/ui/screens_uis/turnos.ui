@@ -56,7 +56,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Listado de Turnos</string>
+        <string>Listado de Turnos de Pañol</string>
        </property>
       </widget>
      </item>
@@ -178,16 +178,26 @@
            <hour>0</hour>
            <minute>0</minute>
            <second>0</second>
-           <year>1999</year>
-           <month>9</month>
-           <day>1</day>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
+         <property name="minimumDateTime">
+          <datetime>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
           </datetime>
          </property>
          <property name="minimumDate">
           <date>
-           <year>1999</year>
-           <month>9</month>
-           <day>1</day>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
           </date>
          </property>
          <property name="displayFormat">
@@ -214,11 +224,21 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="minimumDateTime">
+          <datetime>
+           <hour>19</hour>
+           <minute>6</minute>
+           <second>30</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
          <property name="minimumDate">
           <date>
-           <year>1999</year>
-           <month>9</month>
-           <day>1</day>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
           </date>
          </property>
          <property name="displayFormat">

@@ -143,11 +143,31 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="dateTime">
+          <datetime>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
+         <property name="minimumDateTime">
+          <datetime>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
          <property name="minimumDate">
           <date>
-           <year>1999</year>
-           <month>9</month>
-           <day>1</day>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
           </date>
          </property>
          <property name="currentSection">

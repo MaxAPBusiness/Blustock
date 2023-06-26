@@ -14,134 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">*{
-    font-family: 'Oswald', sans-serif;
-    font-weight: 400;
-}
-
-QMenuBar{
-    background-color: #293045;
-    padding: 0;    
-    font-size: 14px;
-    color:white;
-}
-
-QMenuBar:item{
-    padding: 17px;
-    border-radius: 10px;
-
-}
-
-QMenuBar:item:selected{
-    background-color: #768AC5;
-    color:black;
-    border-radius: 5px;
-    margin: 10px;
-    
-    
-
-}
-
-QMenu{
-    background-color: #293045;
-
-    color: white;
-}
-
-QMenu:item{
-    padding: 5px;
-    border-radius: 5px;
-}
-
-QMenu:item:selected{
-    background-color: #768AC5;
-    color:white;
-
-}
-Qmenu#icon{
-   icon:size 40px; 
-    
-}
-
-
-QRadioButton:indicator{
-    border-style: solid;
-    border-color:  #293045;
-    border-radius: 6%;
-    border-width:  2px;
-    background-color: #BABFCE;
-}
-QRadioButton::indicator:checked{
-    background-color: #768AC5;
-}
-
-#label{
-    font-size: 35px;
-}
-
-#usuariosLabel{
-    font-size: 14px;
-}
-
-#contraseALabel{
-    font-size: 14px;
-}
-
-#usuariosLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#passwordLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
-
-#labelprofesores{
-    font-size: 26px;
-}
-
-QLineEdit{
-    border-radius: 5px;
-    background-color: #BABFCE;
-    
-}
-
-#title{
-    width: 100px;
-    height: 200px;
-}
-
-
-
-QPushButton{
-    border-color:#293045;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 6px;
-    background-color: #293045;
-    color:#ffffff;
-    padding: 3px 8px;
-
-}
-QPushButton:hover{
-    background-color:#768AC5;
-    color:#293045;
-}
-QPushButton:pressed {
-    background-color: #293045;
-
-}
-
-#pushButton_5{
-    padding: 10px;
-    background-color: #768AC5;
-    border-radius: 15%;
-}
-
-</string>
+   <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
@@ -178,13 +51,12 @@ QPushButton:pressed {
        <property name="font">
         <font>
          <family>Oswald,sans-serif</family>
-         <pointsize>-1</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Historial de cambios</string>
+        <string>Historial de Cambios</string>
        </property>
       </widget>
      </item>
@@ -251,6 +123,14 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string>Desde:</string>
          </property>
@@ -261,6 +141,34 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QDateEdit" name="desdeFecha">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="dateTime">
+          <datetime>
+           <hour>19</hour>
+           <minute>6</minute>
+           <second>30</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
+         <property name="minimumDateTime">
+          <datetime>
+           <hour>19</hour>
+           <minute>6</minute>
+           <second>30</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
          <property name="displayFormat">
           <string>yyyy/MM/dd HH:mm:ss</string>
          </property>
@@ -268,6 +176,14 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string>Hasta:</string>
          </property>
@@ -278,6 +194,24 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QDateEdit" name="hastaFecha">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="minimumDateTime">
+          <datetime>
+           <hour>19</hour>
+           <minute>6</minute>
+           <second>30</second>
+           <year>1963</year>
+           <month>3</month>
+           <day>9</day>
+          </datetime>
+         </property>
          <property name="displayFormat">
           <string>yyyy/MM/dd HH:mm:ss</string>
          </property>
@@ -285,6 +219,14 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QLabel" name="label_8">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string>Gestión:</string>
          </property>
@@ -295,6 +237,14 @@ QPushButton:pressed {
        </item>
        <item>
         <widget class="QComboBox" name="listaGestion">
+         <property name="font">
+          <font>
+           <family>Oswald,sans-serif</family>
+           <pointsize>11</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
          <item>
           <property name="text">
            <string>Todas</string>
