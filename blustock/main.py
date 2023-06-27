@@ -199,48 +199,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovimientos.lineEdit.editingFinished.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nId.valueChanged.connect(self.fetchMovimientos)
         self.pantallaMovimientos.nTurno.valueChanged.connect(self.fetchMovimientos)
-        self.pantallaMovimientos.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(self.fetchOtroPersonal)
 
         self.pantallaReparaciones.lineEdit.editingFinished.connect(self.fetchReparaciones)
-        self.pantallaReparaciones.hastaFecha.setDate(
-            # Esta función también recibe dos parametros asi que estén
-            # atentos, solo que el primero es un string que viene de
-            # la librería dt, esta explicado mas adelante, pero el
-            # segundo string es igual al segundo que usamos en el
-            # primer entry de fecha.
-            QtCore.QDate.fromString(
-                # Clase datetime: construye un objeto datetime de
-                # python, que no es un QDateTime de qt.
-                # Método now: obtiene la fecha y hora actuales.
-                # Método strftime: transforma una fecha de python en un
-                # string. Cada porcentaje y letra simboliza un tipo de
-                # dato. A diferencia del segundo string, este no
-                # necesita una letra por cada dígito sino que entiende
-                # que cada conjunto de digitos es un tipo de dato.
-                # %d son los dos digitos de dia, %m son los dos de mes,
-                # %Y son los cuatro de año, %H son los dos de hora, %M
-                # son los dos de minuto y %S los dos de segundo.
-                # Fijense que, fuera de las letras, las barras y los :
-                # estan en los mismos lugares que en el segundo string.
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
-        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(self.fetchSubgrupos)
         self.pantallaUbicaciones.lineEdit.editingFinished.connect(self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
 
         self.pantallaHistorial.lineEdit.editingFinished.connect(self.fetchHistorial)
-        self.pantallaHistorial.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
@@ -949,10 +920,12 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        self.pantallaMovimientos.desdeFecha.setMaximumDateTime(
+        desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovimientos.hastaFecha.setMaximumDateTime(
+        hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
 
@@ -1861,6 +1834,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaReparaciones.hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         hastaFecha.setMaximumDate(QtCore.QDate.fromString(
                 (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
@@ -2035,6 +2029,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        hastaFecha.setDateTime(QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
