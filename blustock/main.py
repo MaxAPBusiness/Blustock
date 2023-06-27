@@ -102,6 +102,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaNmovimiento = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui'), self.pantallaNmovimiento)
+        self.pantallaDeudas = QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}deudas.ui'), self.pantallaDeudas)
 
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
@@ -111,16 +114,17 @@ class MainWindow(QtWidgets.QMainWindow):
                      self.pantallaSubgrupos, self.pantallaTurnos,
                      self.pantallaUsuarios, self.pantallaHistorial,
                      self.pantallaClases,self.pantallaReparaciones,
-                     self.pantallaUbicaciones,self.pantallaNmovimiento)
+                     self.pantallaUbicaciones,self.pantallaNmovimiento,
+                     self.pantallaDeudas)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
             try:
-                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
                 path = f'ui{os.sep}rsc{os.sep}icons{os.sep}buscar.png'
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
-            except Exception as e:
+                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+            except:
                 pass 
 
         self.opcionStock.triggered.connect(self.fetchStock)
@@ -136,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
         self.opcionHistorial.triggered.connect(self.fetchHistorial)
+        self.opcionDeudas.triggered.connect(self.fetchDeudas)
 
         with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
@@ -236,6 +241,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaHistorial.hastaFecha.setDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        
+        self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
+        self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
+        self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
+        self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
+        self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
 
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -2202,6 +2213,100 @@ class MainWindow(QtWidgets.QMainWindow):
         hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
 
         self.stackedWidget.setCurrentIndex(9)
+
+    def fetchDeudas(self):
+        """Este método obtiene los datos de la tabla deudas y los
+        inserta en la tabla de la interfaz de usuario.
+        """
+        radioHerramienta=self.pantallaDeudas.radioHerramienta
+        listaTablas=self.pantallaDeudas.stackedWidget
+
+        if radioHerramienta.isChecked():
+            listaTablas.setCurrentIndex(0)
+            tabla=listaTablas.findChild(QtWidgets.QTableWidget, "tablaHerramienta")
+        else:
+            listaTablas.setCurrentIndex(1)
+            tabla=listaTablas.findChild(QtWidgets.QTableWidget, "tablaPersona")
+        barraBusqueda = self.pantallaDeudas.lineEdit
+        nMov = self.pantallaDeudas.nMov
+        nTurno = self.pantallaDeudas.nTurno
+        listaPanolero = self.pantallaDeudas.listaPanolero
+
+        try:
+            listaPanolero.disconnect()
+        except:
+            pass
+
+        panoleroSeleccionado=listaPanolero.currentText()
+        panoleros=bdd.cur.execute("""SELECT DISTINCT p.nombre_apellido || ' ' || c.descripcion
+                                FROM movimientos m
+                                JOIN turnos t
+                                ON m.id_turno = t.id
+                                JOIN personal p
+                                ON p.id=t.id_panolero
+                                JOIN clases c
+                                ON p.id_clase = c.id""").fetchall()
+        
+        listaPanolero.clear()
+        listaPanolero.addItem("Todos")
+        for panolero in panoleros:
+            listaPanolero.addItem(panolero[0])
+        listaPanolero.setCurrentIndex(listaPanolero.findText(panoleroSeleccionado))
+
+        filtros=[]
+        for i in (nMov, nTurno):
+            if i.value():
+                filtros.append(i.value())
+            else:
+                filtros.append(None)
+
+        if panoleroSeleccionado == "Todos":
+            filtros.append(None)
+        else:
+            filtros.append(panoleroSeleccionado)
+
+        datos=dal.obtenerDatos("deudas", barraBusqueda.text(), filtros)
+
+        tabla.setRowCount(0)
+        grupo=''
+        contGrupo=1
+        cant=0
+        if radioHerramienta.isChecked():
+            colData=0
+        else:
+            colData=2
+        for rowNum, rowData in enumerate(datos):
+            tabla.insertRow(rowNum)
+
+            if rowData[colData] == grupo:
+                contGrupo+=1
+                cant+=rowData[1]
+            else:
+                # Está bien que printee lo de QTableView, no es un error
+                tabla.setSpan(rowNum+1-contGrupo, 0, contGrupo, 1)
+                tabla.setSpan(rowNum+1-contGrupo, 1, contGrupo, 1)
+                tabla.setItem(rowNum+1-contGrupo, 0, QtWidgets.QTableWidgetItem(rowData[0]))
+                tabla.setItem(rowNum+1-contGrupo, 1, QtWidgets.QTableWidgetItem(str(cant)))
+                contGrupo=0
+                cant=0
+            
+            if not colData:
+                tabla.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(rowData[2]))
+            else:
+                tabla.setItem(rowNum, 2, QtWidgets.QTableWidgetItem(rowData[0]))
+            
+            tabla.setItem(rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            tabla.setItem(rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setItem(rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
+            tabla.setItem(rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[5])))
+            tabla.setItem(rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
+        
+        tabla.setRowHeight(0, 35)
+        tabla.resizeColumnsToContents()
+
+        listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
+
+        self.stackedWidget.setCurrentIndex(14)
     
 
 app = QtWidgets.QApplication(sys.argv)

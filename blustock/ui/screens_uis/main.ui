@@ -59,6 +59,7 @@
     </property>
     <addaction name="realizarMovimientos"/>
     <addaction name="opcionMovimientos"/>
+    <addaction name="opcionDeudas"/>
    </widget>
    <widget class="QMenu" name="menuTurnos">
     <property name="title">
@@ -236,6 +237,16 @@
   <action name="realizarMovimientos">
    <property name="text">
     <string>Realizar movimientos</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="opcionDeudas">
+   <property name="text">
+    <string>Listado de Herramientas Adeudadas</string>
    </property>
    <property name="font">
     <font>
