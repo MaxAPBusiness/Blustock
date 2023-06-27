@@ -109,6 +109,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas = QtWidgets.QWidget()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}deudas.ui'), self.pantallaDeudas)
+        self.pantallaResumen=QtWidgets.QWidget()
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}resumen.ui'), self.pantallaResumen)
 
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
@@ -119,7 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
                      self.pantallaUsuarios, self.pantallaHistorial,
                      self.pantallaClases,self.pantallaReparaciones,
                      self.pantallaUbicaciones,self.pantallaNmovimiento,
-                     self.pantallaDeudas)
+                     self.pantallaDeudas, self.pantallaResumen)
 
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
@@ -145,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
         self.opcionHistorial.triggered.connect(self.fetchHistorial)
         self.opcionDeudas.triggered.connect(self.fetchDeudas)
+        self.opcionResumen.triggered.connect(self.fetchResumen)
 
         with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
             self.setStyleSheet(file.read())
@@ -223,6 +227,34 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
+
+        self.pantallaReparaciones.hastaFecha.setDate(
+            # Esta función también recibe dos parametros asi que estén
+            # atentos, solo que el primero es un string que viene de
+            # la librería dt, esta explicado mas adelante, pero el
+            # segundo string es igual al segundo que usamos en el
+            # primer entry de fecha.
+            QtCore.QDate.fromString(
+                # Clase datetime: construye un objeto datetime de
+                # python, que no es un QDateTime de qt.
+                # Método now: obtiene la fecha y hora actuales.
+                # Método strftime: transforma una fecha de python en un
+                # string. Cada porcentaje y letra simboliza un tipo de
+                # dato. A diferencia del segundo string, este no
+                # necesita una letra por cada dígito sino que entiende
+                # que cada conjunto de digitos es un tipo de dato.
+                # %d son los dos digitos de dia, %m son los dos de mes,
+                # %Y son los cuatro de año, %H son los dos de hora, %M
+                # son los dos de minuto y %S los dos de segundo.
+                # Fijense que, fuera de las letras, las barras y los :
+                # estan en los mismos lugares que en el segundo string.
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+        self.pantallaMovimientos.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
+        self.pantallaResumen.hastaFecha.setDate(QtCore.QDate.fromString(
+                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         self.stackedWidget.setCurrentIndex(0)
         self.show()
@@ -969,8 +1001,6 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        hastaFecha.setDateTime(QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
@@ -1558,8 +1588,7 @@ class MainWindow(QtWidgets.QMainWindow):
             hastaFecha.disconnect()
         except:
             pass
-        hastaFecha.setDate(QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         hastaFecha.setMaximumDate(QtCore.QDate.fromString(
@@ -1880,29 +1909,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
-        self.pantallaReparaciones.hastaFecha.setDate(
-            # Esta función también recibe dos parametros asi que estén
-            # atentos, solo que el primero es un string que viene de
-            # la librería dt, esta explicado mas adelante, pero el
-            # segundo string es igual al segundo que usamos en el
-            # primer entry de fecha.
-            QtCore.QDate.fromString(
-                # Clase datetime: construye un objeto datetime de
-                # python, que no es un QDateTime de qt.
-                # Método now: obtiene la fecha y hora actuales.
-                # Método strftime: transforma una fecha de python en un
-                # string. Cada porcentaje y letra simboliza un tipo de
-                # dato. A diferencia del segundo string, este no
-                # necesita una letra por cada dígito sino que entiende
-                # que cada conjunto de digitos es un tipo de dato.
-                # %d son los dos digitos de dia, %m son los dos de mes,
-                # %Y son los cuatro de año, %H son los dos de hora, %M
-                # son los dos de minuto y %S los dos de segundo.
-                # Fijense que, fuera de las letras, las barras y los :
-                # estan en los mismos lugares que en el segundo string.
-                date.today().strftime("%Y/%m/%d"),"yyyy/MM/dd"))
         hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-                (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+                (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
 
         datosCrudos=dal.obtenerDatos("reparaciones", barraBusqueda.text())
         datos=[]
@@ -2350,6 +2358,74 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(14)
     
+    def fetchResumen(self):
+        """Este método obtiene datos para insertar en la tabla de la
+        interfaz de usuario.
+        """
+        hastaFecha=self.pantallaResumen.hastaFecha
+        tablaDeudas=self.pantallaResumen.tablaDeudas
+        tablaBaja=self.pantallaResumen.tablaBaja
+        labelDeudas=self.pantallaResumen.labelDeudas
+        labelBaja=self.pantallaResumen.labelBaja
+
+        try:
+            hastaFecha.disconnect()
+        except:
+            pass
+
+        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
+                (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),"yyyy/MM/dd"))
+
+        rawData=dal.obtenerDatos("resumen_deudas")
+        datos=[]
+        for rawRow in rawData:
+            fecha=QtCore.QDate.fromString(rawRow[7], 'yyyy/MM/dd')
+            if fecha==hastaFecha.date():
+                datos.append(rawRow)
+        
+        if datos:
+            labelDeudas.setText('Han quedado herramientas adeudadas:')
+            tablaDeudas.setRowCount(0)
+
+            for rowNum, rowData in enumerate(datos):
+                tablaDeudas.insertRow(rowNum)
+                for cellNum, cellData in enumerate(rowData):
+                    item=QtWidgets.QTableWidgetItem(str(cellData))
+                    item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
+                    tablaDeudas.setItem(rowNum, cellNum, QtWidgets.QTableWidgetItem(str(cellData)))
+            
+            tablaDeudas.setRowHeight(0, 35)
+            tablaDeudas.resizeColumnsToContents()
+            tablaDeudas.show()
+        else:
+            labelDeudas.setText('No han quedado herramientas adeudadas.')
+            tablaDeudas.hide()
+        
+        rawData=dal.obtenerDatos("resumen_baja")
+        datos=[]
+        for rawRow in rawData:
+            fecha=QtCore.QDate.fromString(rawRow[8], 'yyyy/MM/dd')
+            if fecha==hastaFecha.date():
+                datos.append(rawRow)
+        
+        if datos:
+            for rowNum, rowData in enumerate(datos):
+                tablaBaja.insertRow(rowNum)
+                for cellNum, cellData in enumerate(rowData):
+                    item=QtWidgets.QTableWidgetItem(str(cellData))
+                    item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
+                    tablaBaja.setItem(rowNum, cellNum, QtWidgets.QTableWidgetItem(str(cellData)))
+            
+            tablaBaja.setRowHeight(0, 35)
+            tablaBaja.resizeColumnsToContents()
+            tablaBaja.show()
+        else:
+            labelBaja.setText('No se han devuelto herramientas en estado de baja.')
+            tablaBaja.hide()
+
+        hastaFecha.dateChanged.connect(self.fetchResumen)
+        self.stackedWidget.setCurrentIndex(15)
+
 
 app = QtWidgets.QApplication(sys.argv)
 
