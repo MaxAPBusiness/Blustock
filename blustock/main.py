@@ -2084,8 +2084,6 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
-        hastaFecha.setDateTime(QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),"yyyy/MM/dd HH:mm:ss"))
         hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"),"yyyy/MM/dd HH:mm:ss"))
@@ -2379,7 +2377,7 @@ class MainWindow(QtWidgets.QMainWindow):
         rawData=dal.obtenerDatos("resumen_deudas")
         datos=[]
         for rawRow in rawData:
-            fecha=QtCore.QDate.fromString(rawRow[7], 'yyyy/MM/dd')
+            fecha=QtCore.QDate.fromString(rawRow[7][:10], 'yyyy/MM/dd')
             if fecha==hastaFecha.date():
                 datos.append(rawRow)
         
