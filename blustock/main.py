@@ -8,23 +8,27 @@ Objetos:
     app: La aplicación principal.
 """
 import os
+
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
+from ui.presets.Toolbotoon import toolboton
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
-from ui.presets.Toolbotoon import toolboton
 from db.bdd import bdd
 from dal.dal import dal
-import datetime as time
-import types
-import sqlite3
-import sys
-from datetime import date, datetime
+
 from dateutil.relativedelta import relativedelta
+from datetime import date, datetime
 from textwrap import dedent
+import datetime as time
+import pandas as pd
+import sqlite3
+import types
+import sys
 
 bdd.refrescarBDD()
+
 
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
@@ -191,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaStock.tableWidget.cellChanged.connect(self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        self.pantallaStock.botonImprimir.clicked.connect(self.printStock)
         
         self.pantallaAlumnos.lineEdit.editingFinished.connect(self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
@@ -735,6 +740,47 @@ class MainWindow(QtWidgets.QMainWindow):
             posicion=barra.value()
             self.fetchStock()
             barra.setValue(posicion)
+    
+    def printStock(self):
+        """Este método genera un spreadsheet a partir de la tabla de la
+        pantalla stock.
+        """
+        info="Los datos que se imprimirán serán los datos guardados en la base de datos. Guarde todos los cambios antes de imprimir."
+        boton= PopUp('Advertencia', info).exec()
+        if boton == QtWidgets.QMessageBox.StandardButton.Ok:
+            dialog = QtWidgets.QFileDialog(self)
+            dialog.setDirectory(os.path.expanduser('~documents'))
+            dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
+            dialog.setOption(QtWidgets.QFileDialog.Option.ShowDirsOnly)
+            dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
+            dialog.setDefaultSuffix('xlsx')
+            dialog.setWindowTitle('Guardar archivo')
+            filename = dialog.getSaveFileName()[0]
+            barraBusqueda = self.pantallaStock.lineEdit
+            listaUbi=self.pantallaStock.listaUbi
+            if listaUbi.currentText() == "Todas":
+                filtroUbi=(None,)
+            else:
+                filtroUbi=(listaUbi.currentText(),)
+            
+            rawData=dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
+            datos=[]
+            for rowNum, rawRow in enumerate(rawData):
+                datos.append([rawRow[1], rawRow[2], rawRow[3], rawRow[4],
+                              rawRow[5], rawRow[6], rawRow[7], rawRow[8]])
+                if rawRow[3] == "-":
+                    datos[rowNum].insert(5, rawRow[2])
+                else:
+                    total=rawRow[2] + rawRow[3] + rawRow[4] + rawRow[5]
+                    datos[rowNum].insert(5, total)
+            columnas=["Elemento", "Cant. en Condiciones",
+                      "Cant. en Reparación", "Cant. de Baja",
+                      "Cant. Prestadas", "Total", "Grupo", "Subgrupo",
+                      "Ubicación"]
+            df = pd.DataFrame(datos, columns=columnas)
+            df.to_excel(filename)
+            info="Los datos se imprimieron exitosamente."
+            PopUp('Aviso', info).exec()
 
 
     def fetchAlumnos(self):
