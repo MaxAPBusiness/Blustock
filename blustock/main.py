@@ -2223,10 +2223,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if radioHerramienta.isChecked():
             listaTablas.setCurrentIndex(0)
-            tabla=listaTablas.findChildren(QtWidgets.QTableWidget)[0]
+            tabla=listaTablas.findChild(QtWidgets.QTableWidget, "tablaHerramienta")
         else:
             listaTablas.setCurrentIndex(1)
-            tabla=listaTablas.findChildren(QtWidgets.QTableWidget)[1]
+            tabla=listaTablas.findChild(QtWidgets.QTableWidget, "tablaPersona")
         barraBusqueda = self.pantallaDeudas.lineEdit
         nMov = self.pantallaDeudas.nMov
         nTurno = self.pantallaDeudas.nTurno
@@ -2282,10 +2282,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 contGrupo+=1
                 cant+=rowData[1]
             else:
-                tabla.setSpan(rowNum-contGrupo, 0, contGrupo, 1)
-                tabla.setSpan(rowNum-contGrupo, 1, contGrupo, 1)
-                tabla.setItem(rowNum-contGrupo, 0, QtWidgets.QTableWidgetItem(rowData[0]))
-                tabla.setItem(rowNum-contGrupo, 1, QtWidgets.QTableWidgetItem(str(cant)))
+                # Está bien que printee lo de QTableView, no es un error
+                tabla.setSpan(rowNum+1-contGrupo, 0, contGrupo, 1)
+                tabla.setSpan(rowNum+1-contGrupo, 1, contGrupo, 1)
+                tabla.setItem(rowNum+1-contGrupo, 0, QtWidgets.QTableWidgetItem(rowData[0]))
+                tabla.setItem(rowNum+1-contGrupo, 1, QtWidgets.QTableWidgetItem(str(cant)))
                 contGrupo=0
                 cant=0
             
@@ -2303,7 +2304,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
+        listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 
         self.stackedWidget.setCurrentIndex(14)
     

@@ -10,7 +10,7 @@ JOIN personal pa ON t.id_panolero=pa.id
 JOIN clases cpa ON pa.id_clase = cpa.id
 WHERE m.id LIKE ?
 AND m.id_turno LIKE ?
-AND pa.nombre_apellido || cpa.descripcion LIKE ?
+AND pa.nombre_apellido || ' ' || cpa.descripcion LIKE ?
 AND (h.descripcion LIKE ?
 OR d.cant LIKE ?
 OR pe.nombre_apellido || ' ' || cpe.descripcion LIKE ?
