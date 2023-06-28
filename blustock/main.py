@@ -2307,15 +2307,15 @@ class MainWindow(QtWidgets.QMainWindow):
             colData=2
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
+            cant+=rowData[1]
 
             if rowData[colData] == grupo:
                 contGrupo+=1
-                cant+=rowData[1]
             else:
                 # Está bien que printee lo de QTableView, no es un error
                 tabla.setSpan(rowNum+1-contGrupo, 0, contGrupo, 1)
                 tabla.setSpan(rowNum+1-contGrupo, 1, contGrupo, 1)
-                tabla.setItem(rowNum+1-contGrupo, 0, QtWidgets.QTableWidgetItem(rowData[0]))
+                tabla.setItem(rowNum+1-contGrupo, 0, QtWidgets.QTableWidgetItem(rowData[colData]))
                 tabla.setItem(rowNum+1-contGrupo, 1, QtWidgets.QTableWidgetItem(str(cant)))
                 contGrupo=0
                 cant=0
