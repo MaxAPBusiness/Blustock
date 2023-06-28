@@ -25,6 +25,9 @@ class ParamEdit(QtWidgets.QLineEdit):
         cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
         cuadroSugerencias.setCaseSensitivity(
             QtCore.Qt.CaseSensitivity.CaseInsensitive)
+        cuadroSugerencias.setCompletionMode(
+            QtWidgets.QCompleter.CompletionMode.PopupCompletion)
+        cuadroSugerencias.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
         # Se introduce el cuadro de sugerencias en el entry.
         self.setCompleter(cuadroSugerencias)
 
