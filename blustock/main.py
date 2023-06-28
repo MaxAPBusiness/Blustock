@@ -9,6 +9,7 @@ Objetos:
 """
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
 import sys
 import types
 import sqlite3
@@ -867,7 +868,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método obtiene los datos de la tabla personal y los
         inserta en la tabla de la interfaz de usuario.
         """
-
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
 
@@ -880,8 +880,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            sql='''SELECT c.descripcion FROM clases c
+            JOIN cats_clase cat ON c.id_cat=cat.id
+            WHERE cat.descripcion='Alumno';'''
+            sugerencias = [sugerencia[0] for sugerencia in
+                           bdd.cur.execute(sql).fetchall()]
+            tabla.setCellWidget(
+                rowNum, 1, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
@@ -918,7 +923,11 @@ class MainWindow(QtWidgets.QMainWindow):
         iCampos = (0, 1, 2)
 
         for iCampo in iCampos:
-            if tabla.item(row, iCampo).text() == "":
+            if iCampo == 1:
+                texto=tabla.cellWidget(row, iCampo).text()
+            else:
+                texto=tabla.item(row, iCampo).text()
+            if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
@@ -936,10 +945,10 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
-            clase = tabla.item(row, 1).text().capitalize()
+            clase = tabla.cellWidget(row, 1).text()
 
             idClase = bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=1", (
+                "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=1", (
                     clase,)
             ).fetchone()
             if not idClase:
@@ -1271,50 +1280,29 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchGrupos()
             barra.setValue(posicion)
 
-# --------------- lo que modifique está abajo --------------------------#
     def fetchOtroPersonal(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # OtroPersonal en variables para que el código se simplifique y se
-        # haga más legible.
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
 
-        # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los datos y
-        # el texto de la barra de búsqueda mediante el cual queremos
-        # filtrarlos.
         datos = dal.obtenerDatos("otro_personal", barraBusqueda.text())
-        # Se refresca la tabla, eliminando todas las filas anteriores.
+
         tabla.setRowCount(0)
 
-        # Bucle: por cada fila de la tabla, se obtiene el número de
-        # fila y los contenidos de ésta.
-        # Método enumerate: devuelve una lista con el número y el
-        # elemento.
         for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
             tabla.insertRow(rowNum)
 
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            # Método setItem(row, column, item): establece el item de
-            # una celda de una tabla.
-            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
-            # texto por defecto.
-
-            # DNI
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            # Nombre y Apellido
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            # Descripción
+            sql='''SELECT c.descripcion FROM clases c
+            JOIN cats_clase cat ON c.id_cat=cat.id
+            WHERE cat.descripcion='Personal';'''
+            sugerencias = [sugerencia[0] for sugerencia in
+                           bdd.cur.execute(sql).fetchall()]
+            tabla.setCellWidget(
+                rowNum, 1, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
@@ -1323,15 +1311,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
-
             self.generarBotones(
                 lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
-        # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
@@ -1354,22 +1336,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla personal, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla = self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
         iCampos = (0, 1, 2)
-        # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
+            if iCampo==1:
+                texto=tabla.cellWidget(row, iCampo).text()
+            else:
+                texto=tabla.item(row, iCampo).text()
+            if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
@@ -1387,19 +1363,16 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
-            clase = tabla.item(row, 1).text().capitalize()
+            clase = tabla.cellWidget(row, 1).text()
 
-            # Verificamos que el grupo esté registrado.
             idClase = bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
                     clase,)
             ).fetchone()
-            # Si no lo está...
             if not idClase:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
                 info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
                 return PopUp("Error", info).exec()
+            
             datosNuevos = [nombre, dni, clase]
             try:
                 if not datos:
@@ -1411,7 +1384,6 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos)
                 else:
                     idd = datos[row][0]
-                    # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE personal
                         SET nombre_apellido=?, dni=?, id_clase=?
@@ -1442,21 +1414,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 obtener el id de la fila en la tabla.
         """
 
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
         tabla = self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
+
         iCampos = (0, 1)
-        # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
+            if iCampo == 1:
+                texto=tabla.cellWidget(row, iCampo).text()
+            else:
+                texto=tabla.item(row, iCampo).text()
+            if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
@@ -1465,11 +1433,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Se obtiene el texto de todas las celdas.
             subgrupo = tabla.item(row, 0).text()
-            grupo = tabla.item(row, 1).text().capitalize()
+            grupo = tabla.cellWidget(row, 1).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo = bdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
+                "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
             ).fetchone()
             # Si no lo está...
             if not idGrupo:
@@ -1566,8 +1534,9 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            sugerencias=[i[0] for i in
+                bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+            tabla.setCellWidget(rowNum, 1, ParamEdit(sugerencias, rowData[2]))
 
             self.generarBotones(
                 lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
