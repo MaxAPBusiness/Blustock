@@ -1431,18 +1431,13 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
             subgrupo = tabla.item(row, 0).text()
             grupo = tabla.cellWidget(row, 1).text()
 
-            # Verificamos que el grupo esté registrado.
             idGrupo = bdd.cur.execute(
                 "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
             ).fetchone()
-            # Si no lo está...
             if not idGrupo:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
                 info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
                 return PopUp("Error", info).exec()
 
