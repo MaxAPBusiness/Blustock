@@ -13,10 +13,11 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 from ui.presets.Toolbotoon import toolboton
+from ui.presets.param_edit import ParamEdit
 from ui.presets.boton import BotonFila
 from ui.presets.popup import PopUp
-from db.bdd import bdd
 from dal.dal import dal
+from db.bdd import bdd
 
 from dateutil.relativedelta import relativedelta
 from datetime import date, datetime
@@ -35,9 +36,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     Hereda: PyQt6.QtWidgets.QMainWindow
 
-    Atributos
-    ---------
-
     Métodos
     -------
         __init__(self):
@@ -45,8 +43,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             Crea la ventana principal con una cabecera, un menú
             izquierdo (inicialmente escondido) y una colección de
-            pantallas."""
-
+            pantallas.
+    """
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
@@ -544,23 +542,30 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 4, cantPrest)
 
-            # Se calcula el total de stock, sumando las herramientas o
-            # insumos en condiciones, reparación y de baja.
             if rowData[3] not in ("-", ""):
                 total=QtWidgets.QTableWidgetItem(str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
             else:
                 total=QtWidgets.QTableWidgetItem(str(rowData[2]))
             total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
 
-
             tabla.setItem(rowNum, 5, total)
 
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[7])))
-            tabla.setItem(
-                rowNum, 8, QtWidgets.QTableWidgetItem(str(rowData[8])))
+            sugerencias=[sugerencia[0] for sugerencia in
+                bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+            paramGrupos=ParamEdit(sugerencias, rowData[6])
+            tabla.setCellWidget(rowNum, 6, paramGrupos)
+            sql='''SELECT s.descripcion FROM subgrupos s
+                   JOIN grupos g ON s.id_grupo = g.id
+                   WHERE g.descripcion = ?'''
+            sugerencias=[sugerencia[0] for sugerencia in
+                         bdd.cur.execute(sql, (rowData[6],)).fetchall()]
+            paramSubgrupos=ParamEdit(sugerencias, rowData[7])
+            tabla.setCellWidget(rowNum, 7, paramSubgrupos)
+            sugerencias=[sugerencia[0] for sugerencia in
+                bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
+            paramUbis=ParamEdit(sugerencias, rowData[8])
+            tabla.setCellWidget(rowNum, 8, paramUbis)
+
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
@@ -613,7 +618,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
             # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
+            if tabla.item(row, iCampo) is not None:
+                texto=tabla.item(row, iCampo).text()
+            else:
+                texto=tabla.cellWidget(row, iCampo).text()
+            if texto == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
@@ -646,13 +655,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Se obtiene el texto de todas las celdas.
             desc = tabla.item(row, 0).text()
-            grupo = tabla.item(row, 6).text().capitalize()
-            subgrupo = tabla.item(row, 7).text().capitalize()
-            ubi = tabla.item(row, 8).text().capitalize()
+            grupo = tabla.cellWidget(row, 6).text()
+            subgrupo = tabla.cellWidget(row, 7).text()
+            ubi = tabla.cellWidget(row, 8).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion = ?", (grupo,)
+                "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
             ).fetchone()
             # Si no lo está...
             if not idGrupo:
@@ -664,14 +673,14 @@ class MainWindow(QtWidgets.QMainWindow):
             # Verificamos que el subgrupo esté registrado y que
             # coincida con el grupo ingresado.
             idSubgrupo=bdd.cur.execute(
-                "SELECT id FROM subgrupos WHERE descripcion = ? AND id_grupo = ?",
+                "SELECT id FROM subgrupos WHERE descripcion LIKE ? AND id_grupo = ?",
                 (subgrupo, idGrupo[0],)
             ).fetchone()
             if not idSubgrupo:
                 info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
                 return PopUp("Error", info).exec()
             
-            idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion = ?",
+            idUbi=bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion LIKE ?",
                                   (ubi,)).fetchone()
             if not idUbi:
                 info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."

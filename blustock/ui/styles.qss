@@ -161,3 +161,7 @@ QPushButton:pressed {
     background-color: #768AC5;
     border-radius: 15%;
 }
+
+#paramEdit{
+    background-color: transparent;
+}
