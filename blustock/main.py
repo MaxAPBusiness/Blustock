@@ -646,9 +646,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Se obtiene el texto de todas las celdas.
             desc = tabla.item(row, 0).text()
-            grupo = tabla.item(row, 6).text()
-            subgrupo = tabla.item(row, 7).text()
-            ubi = tabla.item(row, 8).text()
+            grupo = tabla.item(row, 6).text().capitalize()
+            subgrupo = tabla.item(row, 7).text().capitalize()
+            ubi = tabla.item(row, 8).text().capitalize()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
@@ -889,7 +889,7 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
-            clase= tabla.item(row, 1).text()
+            clase= tabla.item(row, 1).text().capitalize()
 
             idClase=bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion = ? AND id_cat=1", (clase,)
@@ -1081,7 +1081,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
                 item=QtWidgets.QTableWidgetItem(str(cellData))
-                item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
         
@@ -1336,7 +1336,7 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 0).text()
-            clase= tabla.item(row, 1).text()
+            clase= tabla.item(row, 1).text().capitalize()
 
             # Verificamos que el grupo esté registrado.
             idClase=bdd.cur.execute(
@@ -1411,7 +1411,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Se obtiene el texto de todas las celdas.
             subgrupo = tabla.item(row, 0).text()
-            grupo= tabla.item(row, 1).text()
+            grupo= tabla.item(row, 1).text().capitalize()
 
             # Verificamos que el grupo esté registrado.
             idGrupo=bdd.cur.execute(
@@ -1928,28 +1928,12 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
-
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
-            
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            for cellNum, cellData in enumerate(rowData):
+                item=QtWidgets.QTableWidgetItem(str(cellData))
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                tabla.setItem(rowNum, cellNum, item)
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -1969,8 +1953,6 @@ class MainWindow(QtWidgets.QMainWindow):
         hastaFecha.dateChanged.connect(self.fetchReparaciones)
 
         self.stackedWidget.setCurrentIndex(11)
-        tabla.cellClicked.connect(
-            lambda row: self.obtenerFilaEditada(tabla, row))
     
     def saveClases(self, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
@@ -1991,7 +1973,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if tabla.item(row, iCampo).text() == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
-        cat=tabla.item(row, 1).text()
+        cat=tabla.item(row, 1).text().capitalize()
         idCat=bdd.cur.execute('SELECT id FROM cats_clase WHERE descripcion=?',(cat,)).fetchone()
         if not idCat:
             mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
@@ -2351,6 +2333,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        for i in range(tabla.rowCount()):
+            for j in range(tabla.columnCount()):
+                item = QtWidgets.QTableWidgetItem(tabla.item(i, j).text())
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable|QtCore.Qt.ItemFlag.ItemIsEnabled)
+                tabla.setItem(i, j, item)
 
         listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 

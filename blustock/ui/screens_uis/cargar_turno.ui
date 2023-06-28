@@ -53,9 +53,35 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
        <item>
         <property name="text">
          <string>a</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>al</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>alga</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tu vieja</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>juan</string>
         </property>
        </item>
       </widget>

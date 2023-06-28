@@ -145,6 +145,11 @@
          <height>20</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Han quedado herramientas adeudadas:</string>
        </property>
@@ -154,6 +159,9 @@
       <widget class="QTableWidget" name="tablaDeudas">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
        <column>
         <property name="text">
@@ -194,6 +202,11 @@
      </item>
      <item>
       <widget class="QLabel" name="labelBaja">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Se han devuelto herramientas en estado de baja:</string>
        </property>
@@ -201,6 +214,9 @@
      </item>
      <item>
       <widget class="QTableWidget" name="tablaBaja">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <column>
         <property name="text">
          <string>Persona</string>
