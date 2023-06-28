@@ -11,7 +11,9 @@ from textwrap import dedent
 class PopUp(QMessageBox):
     """Esta clase genera un mensaje emergente.
 
-    Atributos
+    Hereda: QMessageBox
+    
+    Parámetros
     ----------
         type : str
             El tipo de ventana: botones, ícono y título.
