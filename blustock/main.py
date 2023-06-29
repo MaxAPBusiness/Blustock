@@ -513,12 +513,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
+        tabla.setSortingEnabled(False)
         try:
             tabla.disconnect()
         except:
             pass
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
+
         listaUbi.disconnect()
         ubiSeleccionada = listaUbi.currentText()
         ubis = bdd.cur.execute("""SELECT DISTINCT u.descripcion
@@ -625,6 +627,7 @@ class MainWindow(QtWidgets.QMainWindow):
             7, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         tabla.cellChanged.connect(self.actualizarTotal)
+        tabla.setSortingEnabled(True)
         listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(3)
 
