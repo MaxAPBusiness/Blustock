@@ -565,26 +565,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            cantPrest = QtWidgets.QTableWidgetItem(str(rowData[5]))
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[2])
+            tabla.setItem(rowNum, 2, item)
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[3])
+            tabla.setItem(rowNum, 3, item)
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[4])
+            tabla.setItem(rowNum, 4, item)
+            cantPrest = QtWidgets.QTableWidgetItem()
+            cantPrest.setData(0, rowData[5])
             cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                QtCore.Qt.ItemFlag.ItemIsEnabled)
             tabla.setItem(
                 rowNum, 5, cantPrest)
-
+            total = QtWidgets.QTableWidgetItem()
             if rowData[3] not in ("-", ""):
-                total = QtWidgets.QTableWidgetItem(
-                    str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
+                total.setData(0, rowData[2] + rowData[3] + rowData[4] + rowData[5])
             else:
-                total = QtWidgets.QTableWidgetItem(str(rowData[2]))
+                total.setData(0, rowData[2])
             total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                            QtCore.Qt.ItemFlag.ItemIsEnabled)
-
             tabla.setItem(rowNum, 6, total)
 
             sugerencias = [sugerencia[0] for sugerencia in
