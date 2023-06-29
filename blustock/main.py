@@ -1746,8 +1746,85 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(8)
 
-    def saveUsuarios(self):
-        print("No implementado")
+    def saveUsuarios(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        tabla = self.pantallaAlumnos.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        barra = tabla.verticalScrollBar()
+        iCampos = (1, 2, 3, 4, 5)
+
+        for iCampo in iCampos:
+            if iCampo == 2:
+                texto=tabla.cellWidget(row, iCampo).text()
+            else:
+                texto=tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            dni = int(tabla.item(row, 3).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**10:
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
+            return PopUp("Error", mensaje).exec()
+
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            nombre = tabla.item(row, 1).text()
+            clase = tabla.cellWidget(row, 2).text()
+            usuario = tabla.cellWidget(row, 4).text()
+            contrasena = tabla.cellWidget(row, 5).text()
+
+            idClase = bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
+                    clase,)
+            ).fetchone()
+            if not idClase:
+                info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
+                return PopUp("Error", info).exec()
+            # datosNuevos = [nombre, dni, clase, usuario]
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
+                        (nombre, dni, idClase[0], usuario, contrasena)
+                    )
+                    # dal.insertarHistorial(
+                        # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                else:
+                    idd = int(tabla.item(row, 0).text())
+                    bdd.cur.execute(
+                        """UPDATE personal
+                        SET nombre_apellido=?, id_clase=?, dni=?
+                        WHERE id = ?""",
+                        (nombre, idClase[0], dni, idd,)
+                    )
+                    # datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                    # dal.insertarHistorial(
+                    #     self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+            except sqlite3.IntegrityError:
+                info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+                return PopUp("Error", info).exec()
+
+            bdd.con.commit()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+            posicion = barra.value()
+            self.fetchUsuarios()
+            barra.setValue(posicion)
 
     def deleteUsuarios(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
