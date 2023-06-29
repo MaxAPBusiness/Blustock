@@ -166,6 +166,11 @@
        </attribute>
        <column>
         <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Subgrupo</string>
         </property>
        </column>
@@ -176,12 +181,12 @@
        </column>
        <column>
         <property name="text">
-         <string>-</string>
+         <string/>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>-</string>
+         <string/>
         </property>
        </column>
       </widget>

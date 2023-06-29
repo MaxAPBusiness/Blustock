@@ -157,6 +157,11 @@
        </attribute>
        <column>
         <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Ubicación</string>
         </property>
        </column>
