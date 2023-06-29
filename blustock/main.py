@@ -1839,17 +1839,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaUsuarios.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = int(tabla.item(row, 0).text())
-
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimUsuario(idd)
         if hayRelacion:
@@ -1874,9 +1869,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # # Insertamos los datos en el historial para que quede registro.
             # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # # Eliminamos los datos
-            # dal.eliminarDatos(idd)
-            print("ME DIJERON QUE NO LO HAGA")
+            dal.eliminarDatos(idd)
+
+        posicion = barra.value()
         self.fetchUsuarios()
+        barra.setValue(posicion)
 
     def fetchClases(self):
         tabla = self.pantallaClases.tableWidget
