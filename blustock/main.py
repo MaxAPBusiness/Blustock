@@ -221,6 +221,17 @@ class MainWindow(QtWidgets.QMainWindow):
                                        (2,), [sugerenciasCat]))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
+        sql='''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Usuario';'''
+        sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
+        self.pantallaUsuarios.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaUsuarios.tableWidget,
+                                       self.saveUsuarios,
+                                       self.deleteUsuarios, (1, 2, 3, 4, 5),
+                                       None, (2,), [sugerenciasClasesU]))
+        self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
+
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
@@ -262,36 +273,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
 
+        self.actualizarHastaFechas()
+        timer=QtCore.QTimer()
+        timer.timeout.connect(self.actualizarHastaFechas)
+        timer.start(300000)
+
+        self.stackedWidget.setCurrentIndex(0)
+        self.show()
+    
+    def actualizarHastaFechas(self):
         self.pantallaReparaciones.hastaFecha.setDate(
-            # Esta función también recibe dos parametros asi que estén
-            # atentos, solo que el primero es un string que viene de
-            # la librería dt, esta explicado mas adelante, pero el
-            # segundo string es igual al segundo que usamos en el
-            # primer entry de fecha.
             QtCore.QDate.fromString(
-                # Clase datetime: construye un objeto datetime de
-                # python, que no es un QDateTime de qt.
-                # Método now: obtiene la fecha y hora actuales.
-                # Método strftime: transforma una fecha de python en un
-                # string. Cada porcentaje y letra simboliza un tipo de
-                # dato. A diferencia del segundo string, este no
-                # necesita una letra por cada dígito sino que entiende
-                # que cada conjunto de digitos es un tipo de dato.
-                # %d son los dos digitos de dia, %m son los dos de mes,
-                # %Y son los cuatro de año, %H son los dos de hora, %M
-                # son los dos de minuto y %S los dos de segundo.
-                # Fijense que, fuera de las letras, las barras y los :
-                # estan en los mismos lugares que en el segundo string.
                 date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
         self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
         self.pantallaMovimientos.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
             datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+            datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaResumen.hastaFecha.setDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-
-        self.stackedWidget.setCurrentIndex(0)
-        self.show()
 
     def login(self):
         bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",
@@ -1691,44 +1692,44 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(7)
 
-    # y que onda con el save
-
     def fetchUsuarios(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # stock en variables para que el código se simplifique y se
-        # haga más legible.
         tabla = self.pantallaUsuarios.tableWidget
         barraBusqueda = self.pantallaUsuarios.lineEdit
+
+        tabla.setSortingEnabled(False)
 
         datos = dal.obtenerDatos("usuarios", barraBusqueda.text())
 
         tabla.setRowCount(0)
-
         for rowNum, rowData in enumerate(datos):
-
             tabla.insertRow(rowNum)
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
+            sql='''SELECT c.descripcion FROM clases c
+            JOIN cats_clase cat ON c.id_cat=cat.id
+            WHERE cat.descripcion='Usuario';'''
+            sugerencias = [sugerencia[0] for sugerencia in
+                           bdd.cur.execute(sql).fetchall()]
+            tabla.setCellWidget(
+                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
                 rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-
+            tabla.setItem(
+                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             self.generarBotones(
-                self.saveUsuarios, self.deleteUsuarios, tabla, rowNum)
+                lambda: self.saveUsuarios(datos),
+                lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
-
-        # Esto lo hacían ustedes creo
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -1739,11 +1740,89 @@ class MainWindow(QtWidgets.QMainWindow):
             3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(8)
 
-    def saveUsuarios(self):
-        print("No implementado")
+    def saveUsuarios(self, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        tabla = self.pantallaUsuarios.tableWidget
+        row = tabla.indexAt(self.sender().pos()).row()
+        barra = tabla.verticalScrollBar()
+        iCampos = (1, 2, 3, 4, 5)
+
+        for iCampo in iCampos:
+            if iCampo == 2:
+                texto=tabla.cellWidget(row, iCampo).text()
+            else:
+                texto=tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            dni = int(tabla.item(row, 3).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**10:
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
+            return PopUp("Error", mensaje).exec()
+
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            nombre = tabla.item(row, 1).text()
+            clase = tabla.cellWidget(row, 2).text()
+            usuario = tabla.item(row, 4).text()
+            contrasena = tabla.item(row, 5).text()
+
+            idClase = bdd.cur.execute(
+                "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
+                    clase,)
+            ).fetchone()
+            if not idClase:
+                info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
+                return PopUp("Error", info).exec()
+            # datosNuevos = [nombre, dni, clase, usuario]
+            try:
+                if not datos:
+                    bdd.cur.execute(
+                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
+                        (nombre, dni, idClase[0], usuario, contrasena)
+                    )
+                    # dal.insertarHistorial(
+                        # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                else:
+                    idd = int(tabla.item(row, 0).text())
+                    bdd.cur.execute(
+                        """UPDATE personal
+                        SET nombre_apellido=?, id_clase=?, dni=?
+                        WHERE id = ?""",
+                        (nombre, idClase[0], dni, idd,)
+                    )
+                    # datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                    # dal.insertarHistorial(
+                    #     self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+            except sqlite3.IntegrityError:
+                info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+                return PopUp("Error", info).exec()
+
+            bdd.con.commit()
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+            posicion = barra.value()
+            self.fetchUsuarios()
+            barra.setValue(posicion)
 
     def deleteUsuarios(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1758,17 +1837,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaUsuarios.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
+        barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = int(tabla.item(row, 0).text())
-
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimUsuario(idd)
         if hayRelacion:
@@ -1793,9 +1867,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # # Insertamos los datos en el historial para que quede registro.
             # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # # Eliminamos los datos
-            # dal.eliminarDatos(idd)
-            print("ME DIJERON QUE NO LO HAGA")
+            dal.eliminarDatos('personal', idd)
+
+        posicion = barra.value()
         self.fetchUsuarios()
+        barra.setValue(posicion)
 
     def fetchClases(self):
         tabla = self.pantallaClases.tableWidget
