@@ -1010,7 +1010,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE personal
                         SET nombre_apellido=?, id_clase=?, dni=?
@@ -1262,7 +1262,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Grupos', grupo, None, None)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         "UPDATE grupos SET descripcion = ? WHERE id = ?",
                         (grupo, idd,)
@@ -1426,7 +1426,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE personal
                         SET nombre_apellido=?, dni=?, id_clase=?
@@ -1495,7 +1495,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE subgrupos
@@ -1765,7 +1765,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if row == len(datos):
                 idd = None
             else:
-                idd = datos[row][0]
+                idd = int(tabla.item(row, 0).text())
 
         if not idd:
             return tabla.removeRow(row)
@@ -1909,7 +1909,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE ubicaciones
                         SET descripcion=?
@@ -2059,7 +2059,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?,
