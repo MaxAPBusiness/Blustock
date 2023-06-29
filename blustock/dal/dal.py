@@ -270,11 +270,11 @@ class DAL():
         turnosPanoleroRel=bdd.cur.execute(
             "SELECT * FROM turnos WHERE id_panolero = ?", (idd,)).fetchone()
         turnosProfIngRel=bdd.cur.execute(
-            "SELECT * FROM turnos WHERE prof_ing = ?", (idd,)).fetchone()
+            "SELECT * FROM turnos WHERE id_prof_ing = ?", (idd,)).fetchone()
         turnosProfEgRel=bdd.cur.execute(
-            "SELECT * FROM turnos WHERE prof_egr = ?", (idd,)).fetchone()
+            "SELECT * FROM turnos WHERE id_prof_egr = ?", (idd,)).fetchone()
         movsRel=bdd.cur.execute(
-            "SELECT * FROM stock WHERE id_persona = ?", (idd,)).fetchone()
+            "SELECT * FROM movimientos WHERE id_persona = ?", (idd,)).fetchone()
         repRel=bdd.cur.execute(
             "SELECT * FROM reparaciones WHERE id_usuario = ?", (idd,)).fetchone()
         if (turnosPanoleroRel or turnosProfIngRel or turnosProfEgRel

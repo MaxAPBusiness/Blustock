@@ -230,7 +230,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                        self.saveUsuarios,
                                        self.deleteUsuarios, (1, 2, 3, 4, 5),
                                        None, (2,), [sugerenciasClasesU]))
-        self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
+        self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
@@ -1724,8 +1724,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[6])))
             self.generarBotones(
                 lambda: self.saveUsuarios(datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
@@ -1756,7 +1754,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla alumnos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaAlumnos.tableWidget
+        tabla = self.pantallaUsuarios.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
         iCampos = (1, 2, 3, 4, 5)
@@ -1785,8 +1783,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             nombre = tabla.item(row, 1).text()
             clase = tabla.cellWidget(row, 2).text()
-            usuario = tabla.cellWidget(row, 4).text()
-            contrasena = tabla.cellWidget(row, 5).text()
+            usuario = tabla.item(row, 4).text()
+            contrasena = tabla.item(row, 5).text()
 
             idClase = bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
@@ -1869,7 +1867,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # # Insertamos los datos en el historial para que quede registro.
             # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # # Eliminamos los datos
-            dal.eliminarDatos(idd)
+            dal.eliminarDatos('personal', idd)
 
         posicion = barra.value()
         self.fetchUsuarios()
