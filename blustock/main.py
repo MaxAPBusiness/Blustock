@@ -187,7 +187,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaGrupos.tableWidget,
                                        self.saveGrupos,
-                                       self.deleteGrupos, (0,)))
+                                       self.deleteGrupos, (1,)))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
         sql='''SELECT c.descripcion FROM clases c
                JOIN cats_clase cat ON c.id_cat=cat.id
@@ -1196,15 +1196,18 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
 
+        tabla.setSortingEnabled(False)
+
         datos = dal.obtenerDatos("grupos", barraBusqueda.text())
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
-
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             self.generarBotones(
                 lambda: self.saveGrupos(datos), lambda: self.deleteGrupos(datos), tabla, rowNum)
@@ -1215,9 +1218,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
-
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(2)
 
@@ -1235,14 +1238,14 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        if tabla.item(row, 0).text() == "":
+        if tabla.item(row, 1).text() == "":
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            grupo = tabla.item(row, 0).text()
+            grupo = tabla.item(row, 1).text()
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1285,16 +1288,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimGrupos(idd)
         if hayRelacion:
@@ -1305,9 +1302,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            grupo = tabla.item(row, 0).text()
+            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Grupos', grupo, None)
+                self.usuario, 'Eliminación', 'Grupos', datosEliminados[0], None)
             dal.eliminarDatos('grupos', idd)
             posicion = barra.value()
             self.fetchGrupos()
