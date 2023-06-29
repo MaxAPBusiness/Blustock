@@ -2120,7 +2120,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if not idCat:
             mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
             return PopUp("Error", mensaje).exec()
-
+        
+        idd = int(tabla.item(row, 0).text())
+        datosViejos = [fila for fila in datos if fila[0] == idd][0]
+        if cat != datosViejos[2] and dal.verifElimClases(idd):
+            mensaje = "La clase que desea cambiar de categoría tiene personal relacionado. Por motivos de seguridad, debe eliminar primero el personal relacionado antes de modificar la categoría de la clase."
+            return PopUp("Advertencia", mensaje).exec()
+        
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -2135,7 +2141,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
-                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?,
@@ -2143,7 +2148,6 @@ class MainWindow(QtWidgets.QMainWindow):
                         WHERE id = ?""",
                         (clase, idCat[0], idd)
                     )
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(
                         self.usuario, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
