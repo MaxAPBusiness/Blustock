@@ -221,6 +221,17 @@ class MainWindow(QtWidgets.QMainWindow):
                                        (2,), [sugerenciasCat]))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
+        sql='''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Usuario';'''
+        sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
+        self.pantallaUsuarios.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaUsuarios.tableWidget,
+                                       self.saveUsuarios,
+                                       self.deleteUsuarios, (1, 2, 3, 4, 5),
+                                       None, (2,), [sugerenciasClasesU]))
+        self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
+
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
