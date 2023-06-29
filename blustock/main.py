@@ -163,37 +163,63 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.pantallaLogin.showPass, self.pantallaLogin.passwordLineEdit
             )
         )
+        sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+        sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
 
         self.pantallaStock.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaStock.tableWidget,
-                                       self.saveStock, self.deleteStock,
-                                       (0, 1, 6, 7, 8), (4, 5,)))
+            lambda: self.insertarFilas(
+                self.pantallaStock.tableWidget, self.saveStock,
+                self.deleteStock, (1, 2, 7, 8, 9), (5, 6,), (7, 8, 9),
+                (sugerenciasGrupos, [], sugerenciasUbis,),7))
+        self.pantallaStock.tableWidget.setColumnHidden(0, True)
+
+        sql='''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Personal';'''
+        sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                self.deleteOtroPersonal, (0, 1, 2)
+                self.deleteOtroPersonal, (1, 2, 3), None, (2,), [sugerenciasClasesP]
             )
         )
+        self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
+        sugerenciasGruposS=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
                                        self.saveSubgrupos,
-                                       self.deleteSubgrupos, (0, 1)))
+                                       self.deleteSubgrupos, (0, 1), None,
+                                       (2,), [sugerenciasGruposS]))
+        self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
+
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaGrupos.tableWidget,
                                        self.saveGrupos,
-                                       self.deleteGrupos, (0,)))
+                                       self.deleteGrupos, (1,)))
+        self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
+
+        sql='''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Alumno';'''
+        sugerenciasClasesA=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaAlumnos.tableWidget,
                                        self.saveAlumnos,
-                                       self.deleteAlumnos, (0, 1, 2)))
+                                       self.deleteAlumnos, (1, 2, 3), None, 
+                                       (2,), [sugerenciasClasesA]))
+        self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaUbicaciones.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
                                        self.saveUbicaciones,
                                        self.deleteUbicaciones, (0,)))
+        self.pantallaUbicaciones.tableWidget.setColumnHidden(0, True)
+        sugerenciasCat=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaClases.tableWidget,
                                        self.saveClases,
-                                       self.deleteClases, (0, 1,)))
+                                       self.deleteClases, (1, 2,), None,
+                                       (2,), [sugerenciasCat]))
+        self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
@@ -400,7 +426,10 @@ class MainWindow(QtWidgets.QMainWindow):
                       funcGuardar: types.FunctionType,
                       funcEliminar: types.FunctionType,
                       camposObligatorios: tuple | None = None,
-                      camposNoEditables: tuple | None = None):
+                      camposNoEditables: tuple | None = None,
+                      camposSugeridos: tuple | None = None,
+                      sugerencias: tuple | list | None= None,
+                      campoEspecial: int | None = None):
         """Este método inserta una nueva fila en la tabla stock.
 
         Si la fila anterior fue recientemente ingresada y los datos no
@@ -466,39 +495,58 @@ class MainWindow(QtWidgets.QMainWindow):
         for numCol in range(tabla.columnCount() - 2):
             if camposNoEditables:
                 if numCol not in camposNoEditables:
-                    tabla.setItem(indiceFinal, numCol,
-                                  QtWidgets.QTableWidgetItem(""))
+                    if camposSugeridos and numCol in camposSugeridos:
+                        indice=camposSugeridos.index(numCol)
+                        campoSugerido = ParamEdit(sugerencias[indice], "")
+                        #Este arreglo no es el mejor del mundo, pero por ahora funca
+                        if campoEspecial and campoEspecial==numCol:
+                            campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
+                        tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
+                    else:
+                        tabla.setItem(indiceFinal, numCol,
+                                    QtWidgets.QTableWidgetItem(""))
                 else:
                     campoNoEditable = QtWidgets.QTableWidgetItem("")
-                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                                             QtCore.Qt.ItemFlag.ItemIsEnabled)
                     tabla.setItem(indiceFinal, numCol, campoNoEditable)
+            # No me encanta este arreglo porque se podría ahorrar
+            # código, pero ahí está
             else:
-                tabla.setItem(indiceFinal, numCol,
-                              QtWidgets.QTableWidgetItem(""))
+                if camposSugeridos and numCol in camposSugeridos:
+                    indice=camposSugeridos.index(numCol)
+                    campoSugerido = ParamEdit(sugerencias[indice], "")
+                    #Este arreglo no es el mejor del mundo, pero por ahora funca
+                    if campoEspecial and campoEspecial==numCol:
+                        campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
+                    tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
+                else:
+                    tabla.setItem(indiceFinal, numCol,
+                                QtWidgets.QTableWidgetItem(""))
+            
         self.generarBotones(
             funcGuardar, funcEliminar, tabla, indiceFinal)
 
     def actualizarTotal(self, row, col):
-        tabla = self.pantallaStock.tableWidget
-        if col in (1, 2, 3):
+        if col in (2, 3, 4):
             tabla = self.pantallaStock.tableWidget
-            cantCond = int(tabla.item(row, 1).text())
-            cantRep = tabla.item(row, 2).text()
-            cantBaja = tabla.item(row, 3).text()
-            cantPrest = tabla.item(row, 4).text()
+            cantCond = int(tabla.item(row, 2).text())
+            cantRep = tabla.item(row, 3).text()
+            cantBaja = tabla.item(row, 4).text()
+            cantPrest = tabla.item(row, 5).text()
             if cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric():
                 total = QtWidgets.QTableWidgetItem(
                     str(cantCond + int(cantRep) + int(cantBaja) + int(cantPrest)))
             else:
                 total = QtWidgets.QTableWidgetItem(str(cantCond))
             total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(row, 5, total)
+            tabla.setItem(row, 6, total)
 
     def actualizarSugerenciasSubgrupos(self):
         tabla=self.pantallaStock.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
-        grupo=tabla.cellWidget(row, 6).text()
-        completer=tabla.cellWidget(row, 7).completer()
+        grupo=tabla.cellWidget(row, 7).text()
+        completer=tabla.cellWidget(row, 8).completer()
         sugerencias=[i[0] for i in 
                      bdd.cur.execute('''SELECT s.descripcion FROM subgrupos s
                      JOIN grupos g ON s.id_grupo = g.id
@@ -513,12 +561,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # stock en variables para que el código se simplifique y se
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
+        tabla.setSortingEnabled(False)
         try:
             tabla.disconnect()
         except:
             pass
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
+
         listaUbi.disconnect()
         ubiSeleccionada = listaUbi.currentText()
         ubis = bdd.cur.execute("""SELECT DISTINCT u.descripcion
@@ -559,48 +609,48 @@ class MainWindow(QtWidgets.QMainWindow):
             # tienen nada, por lo que hay que añadir primero un item
             # que contenga el texto. No se puede establecer texto asi
             # nomás, tira error.
-            # Método setItem(row, column, item): establece el item de
-            # una celda de una tabla.
-            # QTableWidgetItem: un item de pantalla.tableWidget. Se puede crear con
-            # texto por defecto.
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            cantPrest = QtWidgets.QTableWidgetItem(str(rowData[5]))
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[2])
+            tabla.setItem(rowNum, 2, item)
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[3])
+            tabla.setItem(rowNum, 3, item)
+            item=QtWidgets.QTableWidgetItem()
+            item.setData(0, rowData[4])
+            tabla.setItem(rowNum, 4, item)
+            cantPrest = QtWidgets.QTableWidgetItem()
+            cantPrest.setData(0, rowData[5])
             cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                QtCore.Qt.ItemFlag.ItemIsEnabled)
             tabla.setItem(
-                rowNum, 4, cantPrest)
-
+                rowNum, 5, cantPrest)
+            total = QtWidgets.QTableWidgetItem()
             if rowData[3] not in ("-", ""):
-                total = QtWidgets.QTableWidgetItem(
-                    str(rowData[2] + rowData[3] + rowData[4] + rowData[5]))
+                total.setData(0, rowData[2] + rowData[3] + rowData[4] + rowData[5])
             else:
-                total = QtWidgets.QTableWidgetItem(str(rowData[2]))
+                total.setData(0, rowData[2])
             total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                            QtCore.Qt.ItemFlag.ItemIsEnabled)
-
-            tabla.setItem(rowNum, 5, total)
+            tabla.setItem(rowNum, 6, total)
 
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
             paramGrupos=ParamEdit(sugerencias, rowData[6])
             paramGrupos.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
-            tabla.setCellWidget(rowNum, 6, paramGrupos)
+            tabla.setCellWidget(rowNum, 7, paramGrupos)
             sql = '''SELECT s.descripcion FROM subgrupos s
                    JOIN grupos g ON s.id_grupo = g.id
                    WHERE g.descripcion LIKE ?'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql, (rowData[6],)).fetchall()]
-            tabla.setCellWidget(rowNum, 7, ParamEdit(sugerencias, rowData[7]))
+            tabla.setCellWidget(rowNum, 8, ParamEdit(sugerencias, rowData[7]))
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
-            tabla.setCellWidget(rowNum, 8, ParamEdit(sugerencias, rowData[8]))
+            tabla.setCellWidget(rowNum, 9, ParamEdit(sugerencias, rowData[8]))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -614,21 +664,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
-        # Método setRowHeight: cambia la altura de una fila.
+        # Cambiamos la altura de la fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Método setSectionResizeMode(column, ResizeMode): hace que una
-        # columna de una tabla se expanda o no automáticamente conforme
-        # se extiende la tabla.
+        # Hacemos que las columnas se expandan al ampliar la pantalla.
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         tabla.cellChanged.connect(self.actualizarTotal)
+        tabla.setSortingEnabled(True)
         listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(3)
 
@@ -650,7 +699,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaStock.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        iCampos = (0, 1, 6, 7, 8)
+        iCampos = (1, 2, 7, 8, 9)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
             # Si el campo está vacio...
@@ -665,10 +714,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", mensaje).exec()
 
         try:
-            cond = int(tabla.item(row, 1).text())
-            rep = tabla.item(row, 2).text()
-            baja = tabla.item(row, 3).text()
-            prest = tabla.item(row, 4).text()
+            cond = int(tabla.item(row, 2).text())
+            rep = tabla.item(row, 3).text()
+            baja = tabla.item(row, 4).text()
+            prest = tabla.item(row, 5).text()
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
@@ -687,12 +736,11 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-
             # Se obtiene el texto de todas las celdas.
-            desc = tabla.item(row, 0).text()
-            grupo = tabla.cellWidget(row, 6).text()
-            subgrupo = tabla.cellWidget(row, 7).text()
-            ubi = tabla.cellWidget(row, 8).text()
+            desc = tabla.item(row, 1).text()
+            grupo = tabla.cellWidget(row, 7).text()
+            subgrupo = tabla.cellWidget(row, 8).text()
+            ubi = tabla.cellWidget(row, 9).text()
 
             # Verificamos que el grupo esté registrado.
             idGrupo = bdd.cur.execute(
@@ -723,8 +771,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             datosNuevos = [cond, rep, baja, prest, grupo, subgrupo, ubi]
             try:
-                if not datos:
-                    idd = None
+                idd = tabla.item(row, 0).text()
+                if not idd:
                     bdd.cur.execute(
                         "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
                         (desc, cond, rep, baja, prest,
@@ -733,7 +781,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Stock', desc, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd=int(idd)
                     # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE stock
@@ -773,14 +821,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
-
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
+        idd=tabla.item(row, 0).text()
         # Si no se pasó el argumento idd, significa que la fila no está
         # relacionada con la base de datos. Eso significa que la fila
         # se insertó en la tabla de la UI, pero aún no se guardaron los
@@ -788,6 +829,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not idd:
             # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
+        idd=int(idd)
         # Si está relacionada con la base de datos, antes de eliminar,
         # tenemos que verificar que la PK de la fila no
         # tenga relaciones foráneas con otras tablas. Si llegase a
@@ -871,6 +913,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
 
+        tabla.setSortingEnabled(False)
+
         datos = dal.obtenerDatos("alumnos", barraBusqueda.text())
 
         tabla.setRowCount(0)
@@ -879,31 +923,33 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sql='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Alumno';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             tabla.setCellWidget(
-                rowNum, 1, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             self.generarBotones(
                 lambda: self.saveAlumnos(datos), lambda: self.deleteAlumnos(datos), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
-        # Método setRowHeight: cambia la altura de una fila.
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Esto lo hacían ustedes creo
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(1)
 
@@ -920,10 +966,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaAlumnos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        iCampos = (0, 1, 2)
+        iCampos = (1, 2, 3)
 
         for iCampo in iCampos:
-            if iCampo == 1:
+            if iCampo == 2:
                 texto=tabla.cellWidget(row, iCampo).text()
             else:
                 texto=tabla.item(row, iCampo).text()
@@ -932,7 +978,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", mensaje).exec()
 
         try:
-            dni = int(tabla.item(row, 2).text())
+            dni = int(tabla.item(row, 3).text())
         except:
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
@@ -944,8 +990,8 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 0).text()
-            clase = tabla.cellWidget(row, 1).text()
+            nombre = tabla.item(row, 1).text()
+            clase = tabla.cellWidget(row, 2).text()
 
             idClase = bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=1", (
@@ -964,7 +1010,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE personal
                         SET nombre_apellido=?, id_clase=?, dni=?
@@ -999,17 +1045,13 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaAlumnos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
-
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
+        
+        idd=tabla.item(row, 0).text()
 
         if not idd:
             return tabla.removeRow(row)
+        
+        idd=int(idd)
 
         hayRelacion = dal.verifElimAlumnos(idd)
         if hayRelacion:
@@ -1163,15 +1205,18 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
 
+        tabla.setSortingEnabled(False)
+
         datos = dal.obtenerDatos("grupos", barraBusqueda.text())
         tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
-
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             self.generarBotones(
                 lambda: self.saveGrupos(datos), lambda: self.deleteGrupos(datos), tabla, rowNum)
@@ -1182,9 +1227,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
-
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(2)
 
@@ -1202,14 +1247,14 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        if tabla.item(row, 0).text() == "":
+        if tabla.item(row, 1).text() == "":
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            grupo = tabla.item(row, 0).text()
+            grupo = tabla.item(row, 1).text()
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1217,7 +1262,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Grupos', grupo, None, None)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         "UPDATE grupos SET descripcion = ? WHERE id = ?",
                         (grupo, idd,)
@@ -1252,16 +1297,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimGrupos(idd)
         if hayRelacion:
@@ -1272,9 +1311,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            grupo = tabla.item(row, 0).text()
+            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Grupos', grupo, None)
+                self.usuario, 'Eliminación', 'Grupos', datosEliminados[0], None)
             dal.eliminarDatos('grupos', idd)
             posicion = barra.value()
             self.fetchGrupos()
@@ -1287,24 +1326,27 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
 
+        tabla.setSortingEnabled(False)
+
         datos = dal.obtenerDatos("otro_personal", barraBusqueda.text())
 
         tabla.setRowCount(0)
-
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sql='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Personal';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             tabla.setCellWidget(
-                rowNum, 1, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1318,11 +1360,12 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.resizeColumnsToContents()
 
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(5)
 
@@ -1339,9 +1382,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        iCampos = (0, 1, 2)
+        iCampos = (1, 2, 3)
         for iCampo in iCampos:
-            if iCampo==1:
+            if iCampo==2:
                 texto=tabla.cellWidget(row, iCampo).text()
             else:
                 texto=tabla.item(row, iCampo).text()
@@ -1350,7 +1393,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", mensaje).exec()
 
         try:
-            dni = int(tabla.item(row, 2).text())
+            dni = int(tabla.item(row, 3).text())
         except:
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
@@ -1362,8 +1405,8 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 0).text()
-            clase = tabla.cellWidget(row, 1).text()
+            nombre = tabla.item(row, 1).text()
+            clase = tabla.cellWidget(row, 2).text()
 
             idClase = bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
@@ -1383,7 +1426,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE personal
                         SET nombre_apellido=?, dni=?, id_clase=?
@@ -1418,9 +1461,9 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        iCampos = (0, 1)
+        iCampos = (1, 2)
         for iCampo in iCampos:
-            if iCampo == 1:
+            if iCampo == 2:
                 texto=tabla.cellWidget(row, iCampo).text()
             else:
                 texto=tabla.item(row, iCampo).text()
@@ -1431,8 +1474,8 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            subgrupo = tabla.item(row, 0).text()
-            grupo = tabla.cellWidget(row, 1).text()
+            subgrupo = tabla.item(row, 1).text()
+            grupo = tabla.cellWidget(row, 2).text()
 
             idGrupo = bdd.cur.execute(
                 "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
@@ -1452,7 +1495,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     # Guardamos los datos de la fila en
                     bdd.cur.execute(
                         """UPDATE subgrupos
@@ -1489,16 +1532,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimOtroPersonal(idd)
         if hayRelacion:
@@ -1523,15 +1560,19 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
+
+        tabla.setSortingEnabled(False)
         datos = dal.obtenerDatos("subgrupos", barraBusqueda.text())
         tabla.setRowCount(0)
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-            tabla.setCellWidget(rowNum, 1, ParamEdit(sugerencias, rowData[2]))
+            tabla.setCellWidget(rowNum, 2, ParamEdit(sugerencias, rowData[2]))
 
             self.generarBotones(
                 lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
@@ -1548,6 +1589,8 @@ class MainWindow(QtWidgets.QMainWindow):
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(6)
 
@@ -1568,16 +1611,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
         hayRelacion = dal.verifElimSubgrupos(idd)
         if hayRelacion:
             mensaje = "El subgrupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este subgrupo."
@@ -1728,7 +1765,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if row == len(datos):
                 idd = None
             else:
-                idd = datos[row][0]
+                idd = int(tabla.item(row, 0).text())
 
         if not idd:
             return tabla.removeRow(row)
@@ -1764,17 +1801,21 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
 
-        datos = dal.obtenerDatos("clases", barraBusqueda.text())
-        tabla.setRowCount(0)
+        tabla.setSortingEnabled(False)
 
+        datos = dal.obtenerDatos("clases", barraBusqueda.text())
+
+        tabla.setRowCount(0)
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
-            tabla.setCellWidget(rowNum, 1, ParamEdit(sugerencias, rowData[2]))
+            tabla.setCellWidget(rowNum, 2, ParamEdit(sugerencias, rowData[2]))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1787,13 +1828,15 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(10)
 
     def fetchUbicaciones(self):
         tabla = self.pantallaUbicaciones.tableWidget
         barraBusqueda = self.pantallaUbicaciones.lineEdit
+        tabla.setSortingEnabled(False)
 
         datos = dal.obtenerDatos("ubicaciones", barraBusqueda.text())
 
@@ -1803,7 +1846,9 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1816,7 +1861,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(12)
 
@@ -1840,7 +1886,7 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        iCampos = (0,)
+        iCampos = (1,)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
             # Si el campo está vacio...
@@ -1853,7 +1899,7 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            ubicacion = tabla.item(row, 0).text()
+            ubicacion = tabla.item(row, 1).text()
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1863,7 +1909,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE ubicaciones
                         SET descripcion=?
@@ -1890,16 +1936,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimUbi(idd)
         if hayRelacion:
@@ -1989,7 +2029,7 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        iCampos = (0,1,)
+        iCampos = (1, 2,)
         for iCampo in iCampos:
             if tabla.item(row, iCampo) is not None:
                 texto=tabla.item(row, iCampo).text()
@@ -1998,7 +2038,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
-        cat = tabla.cellWidget(row, 1).text()
+        cat = tabla.cellWidget(row, 2).text()
         idCat = bdd.cur.execute(
             'SELECT id FROM cats_clase WHERE descripcion LIKE ?', (cat,)).fetchone()
         if not idCat:
@@ -2008,7 +2048,7 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            clase = tabla.item(row, 0).text()
+            clase = tabla.item(row, 1).text()
             datosNuevos = [clase, cat,]
             try:
                 if not datos:
@@ -2019,7 +2059,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
-                    idd = datos[row][0]
+                    idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?,
@@ -2046,16 +2086,11 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
+        idd=tabla.item(row, 0).text()
 
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimClases(idd)
         if hayRelacion:
@@ -2065,11 +2100,9 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la clase?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            des = tabla.item(row, 0).text()
-            cat = tabla.item(row, 1).text()
-            datosEliminados = [cat,]
+            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, "Eliminación", "Clases", des, datosEliminados)
+                self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados)
             dal.eliminarDatos('clases', idd)
             posicion = barra.value()
             self.fetchClases()
