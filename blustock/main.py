@@ -167,15 +167,20 @@ class MainWindow(QtWidgets.QMainWindow):
         sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
 
         self.pantallaStock.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaStock.tableWidget,
-                                       self.saveStock, self.deleteStock,
-                                       (1, 2, 7, 8, 9), (5, 6,), (7, 8, 9),
-                                       (sugerenciasGrupos, [], sugerenciasUbis,),7))
+            lambda: self.insertarFilas(
+                self.pantallaStock.tableWidget, self.saveStock,
+                self.deleteStock, (1, 2, 7, 8, 9), (5, 6,), (7, 8, 9),
+                (sugerenciasGrupos, [], sugerenciasUbis,),7))
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
+
+        sql='''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Personal';'''
+        sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                self.deleteOtroPersonal, (0, 1, 2)
+                self.deleteOtroPersonal, (1, 2, 3), None, (2,), [sugerenciasClasesP]
             )
         )
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
@@ -189,15 +194,16 @@ class MainWindow(QtWidgets.QMainWindow):
                                        self.saveGrupos,
                                        self.deleteGrupos, (1,)))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
+
         sql='''SELECT c.descripcion FROM clases c
                JOIN cats_clase cat ON c.id_cat=cat.id
                WHERE cat.descripcion='Alumno';'''
-        sugerenciasClases=[i[0] for i in bdd.cur.execute(sql).fetchall()]
+        sugerenciasClasesA=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaAlumnos.tableWidget,
                                        self.saveAlumnos,
                                        self.deleteAlumnos, (1, 2, 3), None, 
-                                       (2,), [sugerenciasClases]))
+                                       (2,), [sugerenciasClasesA]))
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaUbicaciones.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
@@ -1317,24 +1323,27 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
 
+        tabla.setSortingEnabled(False)
+
         datos = dal.obtenerDatos("otro_personal", barraBusqueda.text())
 
         tabla.setRowCount(0)
-
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[1])))
+                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            tabla.setItem(
+                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sql='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Personal';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             tabla.setCellWidget(
-                rowNum, 1, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
             tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[3])))
+                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1348,11 +1357,12 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.resizeColumnsToContents()
 
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.setSortingEnabled(True)
 
         self.stackedWidget.setCurrentIndex(5)
 
@@ -1369,9 +1379,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaOtroPersonal.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        iCampos = (0, 1, 2)
+        iCampos = (1, 2, 3)
         for iCampo in iCampos:
-            if iCampo==1:
+            if iCampo==2:
                 texto=tabla.cellWidget(row, iCampo).text()
             else:
                 texto=tabla.item(row, iCampo).text()
@@ -1380,7 +1390,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", mensaje).exec()
 
         try:
-            dni = int(tabla.item(row, 2).text())
+            dni = int(tabla.item(row, 3).text())
         except:
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
@@ -1392,8 +1402,8 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 0).text()
-            clase = tabla.cellWidget(row, 1).text()
+            nombre = tabla.item(row, 1).text()
+            clase = tabla.cellWidget(row, 2).text()
 
             idClase = bdd.cur.execute(
                 "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
@@ -1519,16 +1529,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        if not datos:
-            idd = None
-        else:
-            if row == len(datos):
-                idd = None
-            else:
-                idd = datos[row][0]
-
+        idd=tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
+        idd=int(idd)
 
         hayRelacion = dal.verifElimOtroPersonal(idd)
         if hayRelacion:
