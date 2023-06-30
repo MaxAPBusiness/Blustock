@@ -880,6 +880,8 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog.setDefaultSuffix('xlsx')
             dialog.setWindowTitle('Guardar archivo')
             filename = dialog.getSaveFileName()[0]
+            if not filename:
+                return
             barraBusqueda = self.pantallaStock.lineEdit
             listaUbi = self.pantallaStock.listaUbi
             if listaUbi.currentText() == "Todas":
@@ -907,6 +909,12 @@ class MainWindow(QtWidgets.QMainWindow):
             info = "Los datos se imprimieron exitosamente."
             PopUp('Aviso', info).exec()
 
+    def cargarPlanilla(self):
+        info = '¿La planilla está en el formato de tutorvip? En caso de no estarlo, asegúrese que las columnas se llamen "curso", "dni", y "nombre", o se llamen parecido.'
+        boton = PopUp('Advertencia', info).exec()
+        #if boton == QtWidgets.QMessageBox.StandardButton.Yes:
+
+    
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
         inserta en la tabla de la interfaz de usuario.
