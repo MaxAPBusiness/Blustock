@@ -910,9 +910,29 @@ class MainWindow(QtWidgets.QMainWindow):
             PopUp('Aviso', info).exec()
 
     def cargarPlanilla(self):
-        info = '¿La planilla está en el formato de tutorvip? En caso de no estarlo, asegúrese que las columnas se llamen "curso", "dni", y "nombre", o se llamen parecido.'
-        boton = PopUp('Advertencia', info).exec()
-        #if boton == QtWidgets.QMessageBox.StandardButton.Yes:
+        info = '¿La planilla está en el formato de tutorvip? En caso de no estarlo, asegúrese que los datos estén estructurados como: nombre, curso, dni (las columnas no tienen que llamarse así, pero tienen que estar en ese orden).'
+        formato = (PopUp('Pregunta', info).exec() == 
+                   QtWidgets.QMessageBox.StandardButton.Yes)
+        if formato:
+            info = 'Los cursos de la nueva planilla pueden ser diferentes a los cursos ingresados en el sistema. ¿Desea actualizar los cursos ingresados con los cursos del tutorvip?'
+            actualizarCursos= (PopUp('Pregunta', info).exec() == 
+                               QtWidgets.QMessageBox.StandardButton.Yes)
+            dialog = QtWidgets.QFileDialog(self)
+            dialog.setDirectory(os.path.expanduser('~documents'))
+            dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
+            dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
+            dialog.setWindowTitle('Abrir archivo')
+            filename = dialog.getOpenFileName()
+            if not filename:
+                return
+            df=pd.read_excel(filename)
+            cols = list(df.columns.values)
+            df=df[[cols[2], cols[0]], cols[1]]
+            datos=df.values.tolist()
+
+
+
+
 
     
     def fetchAlumnos(self):

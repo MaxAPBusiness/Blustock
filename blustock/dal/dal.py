@@ -316,6 +316,11 @@ class DAL():
         """
         bdd.cur.execute(f"DELETE FROM {tabla} WHERE id = ?", (idd,))
         bdd.con.commit()
+    
+    def cargarPlanilla(self, datos: list, tipo:str):
+        bdd.cur.execute('CREATE TABLE #alumnos_nuevos(curso VARCHAR(50), dni INTEGER, nombre VARCHAR(100));')
+        for fila in datos:
+            bdd.cur.execute('INSERT INTO #alumnos_nuevos VALUES()')
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
