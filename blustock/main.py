@@ -207,6 +207,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                        self.saveAlumnos,
                                        self.deleteAlumnos, (1, 2, 3), None, 
                                        (2,), [sugerenciasClasesA]))
+        self.pantallaAlumnos.botonCargarPlanilla.clicked.connect(
+            self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaUbicaciones.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
