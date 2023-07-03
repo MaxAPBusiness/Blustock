@@ -924,25 +924,42 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 return
         elif formato == QtWidgets.QMessageBox.StandardButton.No:
-            info = 'La planilla se actualizará en base al dni y se actualizarán los nombres y los cursos. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. También, asegúrese que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
+            info = 'Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
             if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
                 return
-            actualizarCursos=False
+            actualizarCursos=True
         else:
             return
+        formato = formato == QtWidgets.QMessageBox.StandardButton.Yes
 
         dialog = QtWidgets.QFileDialog(self)
         dialog.setDirectory(os.path.expanduser('~documents'))
         dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
+        dialog.setNameFilter("Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
         dialog.setWindowTitle('Abrir archivo')
-        filename = dialog.getOpenFileName()[0]
-        if not filename:
+        if dialog.exec():
+            filename = dialog.selectedFiles()[0]
+        else:
             return
-        df=pd.read_excel(filename)
+        try:
+            df=pd.read_excel(filename)
+        except:
+            info='El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
+            return PopUp('Error', info).exec()
         cols = list(df.columns.values)
         if formato:
             df=df[cols[2], cols[0], cols[1]]
+            cols = [cols[2], cols[0], cols[1]]
+        
+        if len(cols) > 3:
+            info='La plantilla proporcionada tiene más columnas que las requeridas. Proporcione la cantidad justa de columnas.'
+            return PopUp('Error', info).exec() 
+        if ("dni" in cols[0].lower() or "curso" in cols[0].lower()
+            or "dni" in cols[1].lower() or "curso" in cols[2].lower()
+            or "nombre" in cols[2].lower()):
+            info='Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
+            return PopUp('Error', info).exec()
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
 
     def fetchAlumnos(self):

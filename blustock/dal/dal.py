@@ -9,6 +9,7 @@ import os
 from db.bdd import bdd
 from ui.presets.popup import PopUp
 from datetime import datetime
+import sqlite3
 
 class DAL():
     """Esta clase contiene métodos que gestionan el envío de datos
@@ -317,52 +318,77 @@ class DAL():
         bdd.cur.execute(f"DELETE FROM {tabla} WHERE id = ?", (idd,))
         bdd.con.commit()
     
-    def cargarPlanilla(self, datos: list, actualizarCursos: bool):       
+    def cargarPlanilla(self, datos: list, actualizarCursos: bool):
+        for fila in datos:
+            try:
+                if not fila[2].isnumeric():
+                    dni = ''.join(fila[2].split("."))
+                    if not dni.isnumeric():
+                        info = 'Un dni proporcionado en la planilla no es válido. Revise los dni de la plantilla e intente nuevamente.'
+                        return PopUp('Error', info).exec()
+            except AttributeError:
+                pass
+
         if actualizarCursos:
-            cursos=bdd.cur.execute('SELECT DISTINCT curso FROM #alumnos_nuevos').fetchall()
+            cursos=bdd.cur.execute('SELECT DISTINCT curso FROM alumnos_nuevos').fetchall()
             for curso in cursos:
-                bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso[0]))
+                try:
+                    bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso[0]))
+                except sqlite3.IntegrityError:
+                    pass
         
-        bdd.cur.execute('''CREATE TABLE #alumnos_nuevos(
-                           nombre_apellido VARCHAR(100)),
+        bdd.cur.execute('''CREATE TABLE alumnos_nuevos(
+                           nombre_apellido VARCHAR(100),
                            id_curso INTEGER,
                            dni INTEGER);''')
         for fila in datos:
-            bdd.cur.execute('INSERT INTO #alumnos_nuevos VALUES(?, ?, ?)', fila)
+            bdd.cur.execute('INSERT INTO alumnos_nuevos VALUES(?, ?, ?)', fila)
                 
         egr=bdd.cur.execute("SELECT id FROM clases WHERE descripcion LIKE 'Egresado'").fetchone()
         if not egr:
             bdd.cur.execute("INSERT INTO clases VALUES(NULL, 'Egresado', 1)")
         mergeSelect = bdd.cur.execute('''
-                        SELECT a.nombre_apellido, a.id_clase, a.dni,
+                        SELECT a.nombre_apellido, a.dni,
                         an.nombre_apellido, cn.descripcion
                         FROM personal a
                         JOIN clases c ON a.id_clase = c.id
-                        FULL JOIN #alumnos_nuevos an
+                        LEFT JOIN alumnos_nuevos an
                         ON a.dni = an.dni
                         LEFT JOIN clases cn ON an.id_curso = cn.descripcion
+                        WHERE c.descripcion IS NULL
+                        OR c.id_cat LIKE 'Alumno'
+                        UNION ALL
+                        SELECT a.nombre_apellido, a.dni,
+                        an.nombre_apellido, cn.descripcion
+                        FROM alumnos_nuevos an
+                        JOIN clases cn ON an.id_curso = cn.descripcion
+                        LEFT JOIN personal a
+                        ON a.dni = an.dni
+                        LEFT JOIN clases c ON a.id_clase = c.id
                         WHERE c.descripcion IS NULL
                         OR c.id_cat LIKE 'Alumno';''').fetchall()
         for mergeRow in mergeSelect:
             if actualizarCursos:
-                curso=mergeRow[4]
+                curso=mergeRow[3]
             else:
-                curso=mergeRow[4][0] + mergeRow[4][-1]
+                curso=mergeRow[3][0] + mergeRow[3][-1]
             if mergeRow[0] is None:
                 bdd.cur.execute('''
-                    INSERT INTO personal VALUES (?, (
+                    INSERT INTO personal VALUES (NULL, ?, (
                         SELECT id FROM clases WHERE descripcion = ?
-                    ), ?)''', (mergeRow[3], curso, mergeRow[2],))
-            elif mergeRow[3] is None:
+                    ), ?, NULL, NULL)''', (mergeRow[2], curso, mergeRow[1],))
+            elif mergeRow[2] is None:
                 bdd.cur.execute('''
                     UPDATE personal SET id_clase = (
                         SELECT id FROM clases
                         WHERE descripcion LIKE 'Egresado'
-                    ) WEHERE dni = ?''', (mergeRow[2]))
+                    ) WHERE dni = ?''', (mergeRow[1]))
             else:
                 bdd.cur.execute('''
                     UPDATE personal SET nombre_apellido = ?, id_clase = ?
-                    WHERE dni = ?''', (mergeRow[3], curso, mergeRow[2],))
+                    WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
+        bdd.cur.execute('DROP TABLE alumnos_nuevos')
+        bdd.con.commit()
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
