@@ -207,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                        self.saveAlumnos,
                                        self.deleteAlumnos, (1, 2, 3), None, 
                                        (2,), [sugerenciasClasesA]))
-        self.pantallaAlumnos.botonCargarPlanilla.clicked.connect(
+        self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaUbicaciones.pushButton_2.clicked.connect(
@@ -920,7 +920,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if actualizarCursos in (QtWidgets.QMessageBox.StandardButton.Yes,
                                     QtWidgets.QMessageBox.StandardButton.No):
                 actualizarCursos = (QtWidgets.QMessageBox.StandardButton.Yes
-                                    == actualizarCursos)[0]
+                                    == actualizarCursos)
             else:
                 return
         elif formato == QtWidgets.QMessageBox.StandardButton.No:
@@ -936,7 +936,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
         dialog.setWindowTitle('Abrir archivo')
-        filename = dialog.getOpenFileName()
+        filename = dialog.getOpenFileName()[0]
         if not filename:
             return
         df=pd.read_excel(filename)
@@ -945,12 +945,6 @@ class MainWindow(QtWidgets.QMainWindow):
             df=df[cols[2], cols[0], cols[1]]
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
 
-
-
-
-
-
-    
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
         inserta en la tabla de la interfaz de usuario.

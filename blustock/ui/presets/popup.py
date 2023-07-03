@@ -30,17 +30,17 @@ class PopUp(QMessageBox):
 
             # Método setStandardButtons: elije los botones del mensaje.
             # Ok significa que va a tener un boton que dice ok.
-            self.setStandardButtons(QMessageBox.StandardButton.Ok)
+            self.setStandardButtons(QMessageBox.StandardButton.Cancel |QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
         elif type == "Advertencia":
             self.setIcon(QMessageBox.Icon.Warning)
-            self.setStandardButtons(QMessageBox.StandardButton.Ok)
+            self.setStandardButtons(QMessageBox.StandardButton.Cancel |QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
         elif type == "Aviso":
             self.setIcon(QMessageBox.Icon.Information)
-            self.setStandardButtons(QMessageBox.StandardButton.Ok)
+            self.setStandardButtons(QMessageBox.StandardButton.Cancel |QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
         elif type[:8] == 'Pregunta':
@@ -48,17 +48,25 @@ class PopUp(QMessageBox):
                 self.setIcon(QMessageBox.Icon.Warning)
                 self.setWindowTitle("Advertencia")
                 self.setText("Advertencia")
+                self.setStandardButtons(
+                    QMessageBox.StandardButton.Cancel |
+                    QMessageBox.StandardButton.No |
+                    QMessageBox.StandardButton.Yes)
             elif type == "Pregunta-Info":
                 self.setIcon(QMessageBox.Icon.Information)
                 self.setWindowTitle("Pregunta")
                 self.setText("Pregunta")
+                self.setStandardButtons(
+                    QMessageBox.StandardButton.Cancel |
+                    QMessageBox.StandardButton.No |
+                    QMessageBox.StandardButton.Yes)
             # Va a tener dos botones, uno de no y uno de sí.
-            self.setStandardButtons(
-                QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes)
+
             # Obtenemos el boton sí para cambiarle el texto, asi dice
             # sí en vez de yes.
             self.button(QMessageBox.StandardButton.Yes).setText("Sí")
-
+        
+        self.button(QMessageBox.StandardButton.Cancel).hide()
         # Método setInformativeText: establece el texto informativo.
         # Tiene un dedent para quitar la identación del código y que se
         # muestre bien, sino tiene márgen de más.
