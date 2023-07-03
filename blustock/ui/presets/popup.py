@@ -6,7 +6,6 @@ Clases
         Genera un mensaje emergente.
 """
 from PyQt6.QtWidgets import QMessageBox
-from textwrap import dedent
 
 class PopUp(QMessageBox):
     """Esta clase genera un mensaje emergente.
@@ -34,29 +33,33 @@ class PopUp(QMessageBox):
             self.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
-        elif type == "Advertencia" or type == "Warning":
+        elif type == "Advertencia":
             self.setIcon(QMessageBox.Icon.Warning)
             self.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
-        elif type == "Aviso" or type == "Information":
+        elif type == "Aviso":
             self.setIcon(QMessageBox.Icon.Information)
             self.setStandardButtons(QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
-        elif type == "Pregunta" or type == "Question":
-            self.setIcon(QMessageBox.Icon.Warning)
+        elif type[:8] == 'Pregunta':
+            if type == "Pregunta":
+                self.setIcon(QMessageBox.Icon.Warning)
+                self.setWindowTitle("Advertencia")
+                self.setText("Advertencia")
+            elif type == "Pregunta-Info":
+                self.setIcon(QMessageBox.Icon.Information)
+                self.setWindowTitle("Pregunta")
+                self.setText("Pregunta")
             # Va a tener dos botones, uno de no y uno de sí.
             self.setStandardButtons(
                 QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes)
             # Obtenemos el boton sí para cambiarle el texto, asi dice
             # sí en vez de yes.
-            si = self.button(QMessageBox.StandardButton.Yes)
-            si.setText("Sí")
-            self.setWindowTitle("Advertencia")
-            self.setText(type)
+            self.button(QMessageBox.StandardButton.Yes).setText("Sí")
 
         # Método setInformativeText: establece el texto informativo.
         # Tiene un dedent para quitar la identación del código y que se
         # muestre bien, sino tiene márgen de más.
-        self.setInformativeText(dedent(info))
+        self.setInformativeText(info)

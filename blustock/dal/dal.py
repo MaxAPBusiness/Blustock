@@ -317,10 +317,52 @@ class DAL():
         bdd.cur.execute(f"DELETE FROM {tabla} WHERE id = ?", (idd,))
         bdd.con.commit()
     
-    def cargarPlanilla(self, datos: list, tipo:str):
-        bdd.cur.execute('CREATE TABLE #alumnos_nuevos(curso VARCHAR(50), dni INTEGER, nombre VARCHAR(100));')
+    def cargarPlanilla(self, datos: list, actualizarCursos: bool):       
+        if actualizarCursos:
+            cursos=bdd.cur.execute('SELECT DISTINCT curso FROM #alumnos_nuevos').fetchall()
+            for curso in cursos:
+                bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso[0]))
+        
+        bdd.cur.execute('''CREATE TABLE #alumnos_nuevos(
+                           nombre_apellido VARCHAR(100)),
+                           id_curso INTEGER,
+                           dni INTEGER);''')
         for fila in datos:
             bdd.cur.execute('INSERT INTO #alumnos_nuevos VALUES(?, ?, ?)', fila)
+                
+        egr=bdd.cur.execute("SELECT id FROM clases WHERE descripcion LIKE 'Egresado'").fetchone()
+        if not egr:
+            bdd.cur.execute("INSERT INTO clases VALUES(NULL, 'Egresado', 1)")
+        mergeSelect = bdd.cur.execute('''
+                        SELECT a.nombre_apellido, a.id_clase, a.dni,
+                        an.nombre_apellido, cn.descripcion
+                        FROM personal a
+                        JOIN clases c ON a.id_clase = c.id
+                        FULL JOIN #alumnos_nuevos an
+                        ON a.dni = an.dni
+                        LEFT JOIN clases cn ON an.id_curso = cn.descripcion
+                        WHERE c.descripcion IS NULL
+                        OR c.id_cat LIKE 'Alumno';''').fetchall()
+        for mergeRow in mergeSelect:
+            if actualizarCursos:
+                curso=mergeRow[4]
+            else:
+                curso=mergeRow[4][0] + mergeRow[4][-1]
+            if mergeRow[0] is None:
+                bdd.cur.execute('''
+                    INSERT INTO personal VALUES (?, (
+                        SELECT id FROM clases WHERE descripcion = ?
+                    ), ?)''', (mergeRow[3], curso, mergeRow[2],))
+            elif mergeRow[3] is None:
+                bdd.cur.execute('''
+                    UPDATE personal SET id_clase = (
+                        SELECT id FROM clases
+                        WHERE descripcion LIKE 'Egresado'
+                    ) WEHERE dni = ?''', (mergeRow[2]))
+            else:
+                bdd.cur.execute('''
+                    UPDATE personal SET nombre_apellido = ?, id_clase = ?
+                    WHERE dni = ?''', (mergeRow[3], curso, mergeRow[2],))
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
