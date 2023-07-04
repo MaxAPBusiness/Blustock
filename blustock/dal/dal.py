@@ -330,10 +330,10 @@ class DAL():
                 pass
 
         if actualizarCursos:
-            cursos=bdd.cur.execute('SELECT DISTINCT curso FROM alumnos_nuevos').fetchall()
+            cursos=set([fila[1] for fila in datos])
             for curso in cursos:
                 try:
-                    bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso[0]))
+                    bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso,))
                 except sqlite3.IntegrityError:
                     pass
         
@@ -358,7 +358,7 @@ class DAL():
                         WHERE c.descripcion IS NULL
                         OR c.id_cat LIKE 'Alumno'
                         UNION ALL
-                        SELECT a.nombre_apellido, a.dni,
+                        SELECT a.nombre_apellido, an.dni,
                         an.nombre_apellido, cn.descripcion
                         FROM alumnos_nuevos an
                         JOIN clases cn ON an.id_curso = cn.descripcion
@@ -371,12 +371,12 @@ class DAL():
             if actualizarCursos:
                 curso=mergeRow[3]
             else:
-                curso=mergeRow[3][0] + mergeRow[3][-1]
+                curso=f'{mergeRow[3][0]}{mergeRow[3][-1]}'
             if mergeRow[0] is None:
                 bdd.cur.execute('''
-                    INSERT INTO personal VALUES (NULL, ?, (
+                    INSERT INTO personal VALUES (NULL, ?, ?, (
                         SELECT id FROM clases WHERE descripcion = ?
-                    ), ?, NULL, NULL)''', (mergeRow[2], curso, mergeRow[1],))
+                    ), NULL, NULL)''', (mergeRow[2], mergeRow[1], curso,))
             elif mergeRow[2] is None:
                 bdd.cur.execute('''
                     UPDATE personal SET id_clase = (
@@ -389,6 +389,7 @@ class DAL():
                     WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
+        return PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
