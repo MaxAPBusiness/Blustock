@@ -355,8 +355,8 @@ class DAL():
                         LEFT JOIN alumnos_nuevos an
                         ON a.dni = an.dni
                         LEFT JOIN clases cn ON an.id_curso = cn.descripcion
-                        WHERE c.descripcion IS NULL
-                        OR c.id_cat LIKE 'Alumno'
+                        JOIN cats_clase cat ON c.id_cat = cat.id
+                        WHERE cat.descripcion LIKE 'Alumno'
                         UNION ALL
                         SELECT a.nombre_apellido, an.dni,
                         an.nombre_apellido, cn.descripcion
@@ -365,8 +365,9 @@ class DAL():
                         LEFT JOIN personal a
                         ON a.dni = an.dni
                         LEFT JOIN clases c ON a.id_clase = c.id
-                        WHERE c.descripcion IS NULL
-                        OR c.id_cat LIKE 'Alumno';''').fetchall()
+                        LEFT JOIN cats_clase cat ON c.id_cat = cat.id
+                        WHERE cat.descripcion LIKE 'Alumno'
+                        ;''').fetchall()
         for mergeRow in mergeSelect:
             if actualizarCursos:
                 curso=mergeRow[3]
@@ -382,11 +383,12 @@ class DAL():
                     UPDATE personal SET id_clase = (
                         SELECT id FROM clases
                         WHERE descripcion LIKE 'Egresado'
-                    ) WHERE dni = ?''', (mergeRow[1]))
+                    ) WHERE dni = ?''', (mergeRow[1],))
             else:
                 bdd.cur.execute('''
-                    UPDATE personal SET nombre_apellido = ?, id_clase = ?
-                    WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
+                    UPDATE personal SET nombre_apellido = ?, id_clase = (
+                        SELECT id FROM clases WHERE descripcion = ?
+                    ) WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
         return PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()

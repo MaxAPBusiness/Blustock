@@ -961,6 +961,8 @@ class MainWindow(QtWidgets.QMainWindow):
             info='Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
             return PopUp('Error', info).exec()
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
+        self.fetchAlumnos()
+        
 
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
