@@ -949,8 +949,8 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp('Error', info).exec()
         cols = list(df.columns.values)
         if formato:
-            df=df[cols[2], cols[0], cols[1]]
-            cols = [cols[2], cols[0], cols[1]]
+            df=df[[cols[2], cols[0], cols[1]]]
+            cols = list(df.columns.values)
         
         if len(cols) > 3:
             info='La plantilla proporcionada tiene más columnas que las requeridas. Proporcione la cantidad justa de columnas.'

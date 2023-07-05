@@ -375,7 +375,8 @@ class DAL():
                 curso=f'{mergeRow[3][0]}{mergeRow[3][-1]}'
             if mergeRow[0] is None:
                 bdd.cur.execute('''
-                    INSERT INTO personal VALUES (NULL, ?, ?, (
+                    INSERT INTO per
+                    sonal VALUES (NULL, ?, ?, (
                         SELECT id FROM clases WHERE descripcion = ?
                     ), NULL, NULL)''', (mergeRow[2], mergeRow[1], curso,))
             elif mergeRow[2] is None:
