@@ -165,3 +165,8 @@ QPushButton:pressed {
 #paramEdit{
     background-color: transparent;
 }
+
+#guardar:disabled{
+    background-color:gray;
+    border-color: dark;
+}

@@ -129,7 +129,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
-            except:
+                pantalla.tableWidget.cellChanged.connect(self.habilitarSaves)
+            except BaseException:
                 pass
 
         self.opcionStock.triggered.connect(self.fetchStock)
@@ -364,6 +365,7 @@ class MainWindow(QtWidgets.QMainWindow):
         guardar = BotonFila("guardar")
         # Conectamos el botón a su función guardar correspondiente.
         guardar.clicked.connect(funcGuardar)
+        guardar.setEnabled(False)
         borrar = BotonFila("eliminar")
         borrar.clicked.connect(funcEliminar)
 
@@ -529,8 +531,13 @@ class MainWindow(QtWidgets.QMainWindow):
             
         self.generarBotones(
             funcGuardar, funcEliminar, tabla, indiceFinal)
+    
+    def habilitarSaves(self, row):
+        tabla=self.sender()
+        tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row, col):
+        self.habilitarSaves(row)
         if col in (2, 3, 4):
             tabla = self.pantallaStock.tableWidget
             cantCond = int(tabla.item(row, 2).text())
@@ -565,10 +572,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
         tabla.setSortingEnabled(False)
-        try:
-            tabla.disconnect()
-        except:
-            pass
+        tabla.disconnect()
+
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
 
@@ -970,6 +975,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
+        tabla.disconnect()
 
         tabla.setSortingEnabled(False)
 
@@ -1008,6 +1014,7 @@ class MainWindow(QtWidgets.QMainWindow):
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(1)
 
@@ -1144,6 +1151,11 @@ class MainWindow(QtWidgets.QMainWindow):
         listaPanolero = self.pantallaMovimientos.listaPanolero
 
         try:
+            tabla.disconnect()
+        except:
+            pass
+
+        try:
             listaElem.disconnect()
             desdeFecha.disconnect()
             hastaFecha.disconnect()
@@ -1262,6 +1274,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
+        tabla.disconnect()
 
         tabla.setSortingEnabled(False)
 
@@ -1288,6 +1301,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(2)
 
@@ -1383,6 +1397,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
+        tabla.disconnect()
 
         tabla.setSortingEnabled(False)
 
@@ -1424,6 +1439,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(5)
 
@@ -1618,6 +1634,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
+        tabla.disconnect()
 
         tabla.setSortingEnabled(False)
         datos = dal.obtenerDatos("subgrupos", barraBusqueda.text())
@@ -1649,10 +1666,10 @@ class MainWindow(QtWidgets.QMainWindow):
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(6)
 
-        lambda: self.stackedWidget.setCurrentIndex(6)
 
     def deleteSubgrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1699,6 +1716,11 @@ class MainWindow(QtWidgets.QMainWindow):
         nId = self.pantallaTurnos.nId
         desdeFecha = self.pantallaReparaciones.desdeFecha
         hastaFecha = self.pantallaReparaciones.hastaFecha
+
+        try:
+            tabla.disconnect()
+        except:
+            pass
         try:
             desdeFecha.disconnect()
             hastaFecha.disconnect()
@@ -1757,6 +1779,7 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaUsuarios.lineEdit
 
         tabla.setSortingEnabled(False)
+        tabla.disconnect()
 
         datos = dal.obtenerDatos("usuarios", barraBusqueda.text())
 
@@ -1798,6 +1821,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             4, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(8)
 
@@ -1933,6 +1957,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchClases(self):
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
+        tabla.disconnect()
 
         tabla.setSortingEnabled(False)
 
@@ -1963,6 +1988,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(10)
 
@@ -1970,6 +1996,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaUbicaciones.tableWidget
         barraBusqueda = self.pantallaUbicaciones.lineEdit
         tabla.setSortingEnabled(False)
+        tabla.disconnect()
 
         datos = dal.obtenerDatos("ubicaciones", barraBusqueda.text())
 
@@ -1996,6 +2023,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
+        tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(12)
 
@@ -2095,6 +2123,10 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaReparaciones.lineEdit
         desdeFecha = self.pantallaReparaciones.desdeFecha
         hastaFecha = self.pantallaReparaciones.hastaFecha
+        try:
+            tabla.disconnect()
+        except:
+            pass
         try:
             desdeFecha.disconnect()
             hastaFecha.disconnect()
