@@ -207,6 +207,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                        self.saveAlumnos,
                                        self.deleteAlumnos, (1, 2, 3), None, 
                                        (2,), [sugerenciasClasesA]))
+        self.pantallaAlumnos.botonCargar.clicked.connect(
+            self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaUbicaciones.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
@@ -910,11 +912,58 @@ class MainWindow(QtWidgets.QMainWindow):
             PopUp('Aviso', info).exec()
 
     def cargarPlanilla(self):
-        info = '¿La planilla está en el formato de tutorvip? En caso de no estarlo, asegúrese que las columnas se llamen "curso", "dni", y "nombre", o se llamen parecido.'
-        boton = PopUp('Advertencia', info).exec()
-        #if boton == QtWidgets.QMessageBox.StandardButton.Yes:
+        info = '¿La planilla está en el formato de tutorvip?'
+        formato = PopUp('Pregunta-Info', info).exec()
+        if formato == QtWidgets.QMessageBox.StandardButton.Yes:
+            info = '¿Desea reemplazar el formato de cursos del sistema por el de tutorvip?'
+            actualizarCursos = PopUp('Pregunta', info).exec()
+            if actualizarCursos in (QtWidgets.QMessageBox.StandardButton.Yes,
+                                    QtWidgets.QMessageBox.StandardButton.No):
+                actualizarCursos = (QtWidgets.QMessageBox.StandardButton.Yes
+                                    == actualizarCursos)
+            else:
+                return
+        elif formato == QtWidgets.QMessageBox.StandardButton.No:
+            info = 'Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
+            if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
+                return
+            actualizarCursos=True
+        else:
+            return
+        formato = formato == QtWidgets.QMessageBox.StandardButton.Yes
 
-    
+        dialog = QtWidgets.QFileDialog(self)
+        dialog.setDirectory(os.path.expanduser('~documents'))
+        dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
+        dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
+        dialog.setNameFilter("Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
+        dialog.setWindowTitle('Abrir archivo')
+        if dialog.exec():
+            filename = dialog.selectedFiles()[0]
+        else:
+            return
+        try:
+            df=pd.read_excel(filename)
+        except:
+            info='El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
+            return PopUp('Error', info).exec()
+        cols = list(df.columns.values)
+        if formato:
+            df=df[[cols[2], cols[0], cols[1]]]
+            cols = list(df.columns.values)
+        
+        if len(cols) > 3:
+            info='La plantilla proporcionada tiene más columnas que las requeridas. Proporcione la cantidad justa de columnas.'
+            return PopUp('Error', info).exec() 
+        if ("dni" in cols[0].lower() or "curso" in cols[0].lower()
+            or "dni" in cols[1].lower() or "curso" in cols[2].lower()
+            or "nombre" in cols[2].lower()):
+            info='Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
+            return PopUp('Error', info).exec()
+        dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
+        self.fetchAlumnos()
+        PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
+
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
         inserta en la tabla de la interfaz de usuario.
@@ -992,7 +1041,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
@@ -1407,7 +1456,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
@@ -1782,7 +1831,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
