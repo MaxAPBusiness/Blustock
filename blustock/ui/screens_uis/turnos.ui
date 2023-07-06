@@ -125,7 +125,7 @@
         <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>14</pointsize>
           </font>
          </property>
          <property name="text">
@@ -158,7 +158,7 @@
         <widget class="QLabel" name="label_4">
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>14</pointsize>
           </font>
          </property>
          <property name="text">
@@ -209,7 +209,7 @@
         <widget class="QLabel" name="label_5">
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>14</pointsize>
           </font>
          </property>
          <property name="text">
@@ -226,9 +226,9 @@
          </property>
          <property name="minimumDateTime">
           <datetime>
-           <hour>19</hour>
-           <minute>6</minute>
-           <second>30</second>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
            <year>1963</year>
            <month>3</month>
            <day>9</day>

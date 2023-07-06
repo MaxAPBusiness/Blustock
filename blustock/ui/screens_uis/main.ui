@@ -37,6 +37,11 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuHerramientas">
+    <property name="font">
+     <font>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>HERRAMIENTAS</string>
     </property>
@@ -101,7 +106,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -111,7 +116,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -121,7 +126,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -141,7 +146,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -151,7 +156,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -171,7 +176,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -181,7 +186,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -191,7 +196,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -201,7 +206,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -211,7 +216,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -221,7 +226,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -231,7 +236,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -241,7 +246,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -251,7 +256,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>
@@ -261,7 +266,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>13</pointsize>
     </font>
    </property>
   </action>

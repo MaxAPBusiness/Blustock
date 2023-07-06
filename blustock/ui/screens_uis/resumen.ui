@@ -147,7 +147,7 @@
        </property>
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>13</pointsize>
         </font>
        </property>
        <property name="text">
@@ -163,39 +163,77 @@
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
          <string>Persona</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Herramienta</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Cantidad</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Movimiento</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Pañolero</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Ubicación</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Turno</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
       </widget>
@@ -204,7 +242,7 @@
       <widget class="QLabel" name="labelBaja">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>13</pointsize>
         </font>
        </property>
        <property name="text">
@@ -217,44 +255,87 @@
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <column>
         <property name="text">
          <string>Persona</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Herramienta</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Cantidad</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Motivo</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Movimiento</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Pañolero</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Ubicación</string>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>Turno</string>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+         </font>
         </property>
        </column>
       </widget>

@@ -163,19 +163,6 @@
         <number>20</number>
        </property>
        <item>
-        <spacer name="horizontalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QLabel" name="label_8">
          <property name="font">
           <font>
@@ -209,7 +196,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
@@ -240,6 +227,19 @@
           <string>#</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QLabel" name="label_7">
@@ -312,40 +312,80 @@
             <property name="text">
              <string>Herramienta</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Cantidad</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Persona</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Cantidad</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Desde</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Movimiento</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Turno</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Pañolero</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
           </widget>
@@ -383,44 +423,87 @@
            <attribute name="horizontalHeaderHighlightSections">
             <bool>true</bool>
            </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
            <column>
             <property name="text">
              <string>Persona</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Cantidad</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Herramienta</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Cantidad</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Desde</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Movimiento</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
            <column>
             <property name="text">
              <string>Turno</string>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Pañolero</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+             </font>
             </property>
            </column>
           </widget>

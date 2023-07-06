@@ -50,7 +50,7 @@ QMenuBar:item{
 }
 
 QTableWidget{ 
-    font-size:11pt;
+    font-size:13pt;
     font-weight: 400;
 }
 
@@ -95,7 +95,7 @@ QRadioButton::indicator:checked{
 }
 
 #label{
-    font-size: 35px;
+    font-size: 45px;
 }
 
 
@@ -169,4 +169,9 @@ QPushButton:pressed {
 #guardar:disabled{
     background-color:gray;
     border-color: dark;
+}
+
+#lineEdit, #desdeFecha, #hastaFecha, QComboBox, QSpinBox, #label_3, #label_4,
+#label_5, #label_6, #label_7, #label_8, QRadioButton, QMenu:QAction{
+    font-size:13pt;
 }

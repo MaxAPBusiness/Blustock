@@ -128,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 path = f'ui{os.sep}rsc{os.sep}icons{os.sep}buscar.png'
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
-                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 11))
+                pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 13))
                 pantalla.tableWidget.cellChanged.connect(self.habilitarSaves)
             except BaseException:
                 pass
@@ -282,7 +282,7 @@ class MainWindow(QtWidgets.QMainWindow):
         timer.start(300000)
 
         self.stackedWidget.setCurrentIndex(0)
-        self.show()
+        self.showMaximized()
     
     def actualizarHastaFechas(self):
         self.pantallaReparaciones.hastaFecha.setDate(
@@ -533,7 +533,7 @@ class MainWindow(QtWidgets.QMainWindow):
             funcGuardar, funcEliminar, tabla, indiceFinal)
         tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
     
-    def habilitarSaves(self, row, tabla: QtWidgets.QTableWidget | None = None):
+    def habilitarSaves(self, row, col, tabla: QtWidgets.QTableWidget | None = None):
         if not tabla:
             tabla=self.sender()
         if not row:
@@ -664,12 +664,12 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql, (rowData[6],)).fetchall()]
             subgrupos=ParamEdit(sugerencias, rowData[7])
-            subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
             ubicaciones=ParamEdit(sugerencias, rowData[8])
-            ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 9, ubicaciones)
 
             for col in range(tabla.columnCount()):
@@ -692,9 +692,11 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
             7, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            9, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         tabla.cellChanged.connect(self.actualizarTotal)
         tabla.setSortingEnabled(True)
@@ -1012,7 +1014,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             cursos = ParamEdit(sugerencias, rowData[2])
-            cursos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            cursos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, cursos)
             tabla.setItem(
@@ -1028,8 +1030,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
@@ -1276,6 +1276,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaElem.currentIndexChanged.connect(self.fetchMovimientos)
         listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
@@ -1443,7 +1445,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             clases = ParamEdit(sugerencias, rowData[2])
-            clases.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            clases.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
             tabla.setItem(
@@ -1464,8 +1466,6 @@ class MainWindow(QtWidgets.QMainWindow):
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1680,7 +1680,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
             grupos=ParamEdit(sugerencias, rowData[2])
-            grupos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            grupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 2, grupos)
 
             self.generarBotones(
@@ -1695,9 +1695,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.resizeColumnsToContents()
 
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
@@ -1792,13 +1792,16 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        # Esto lo hacían ustedes creo
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
@@ -1835,7 +1838,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             clases = ParamEdit(sugerencias, rowData[2])
-            clases.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            clases.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
             tabla.setItem(
@@ -1851,15 +1854,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -2006,7 +2001,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
             cats = ParamEdit(sugerencias, rowData[2])
-            cats.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            cats.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 2, cats)
 
             for col in range(tabla.columnCount()):
@@ -2202,15 +2197,11 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         desdeFecha.dateChanged.connect(self.fetchReparaciones)
         hastaFecha.dateChanged.connect(self.fetchReparaciones)
@@ -2610,6 +2601,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         for i in range(tabla.rowCount()):
             for j in range(tabla.columnCount()):
                 item = QtWidgets.QTableWidgetItem(tabla.item(i, j).text())
@@ -2661,6 +2654,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tablaDeudas.setRowHeight(0, 35)
             tablaDeudas.resizeColumnsToContents()
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                5, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.show()
         else:
             labelDeudas.setText('No han quedado herramientas adeudadas.')
@@ -2685,6 +2686,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tablaBaja.setRowHeight(0, 35)
             tablaBaja.resizeColumnsToContents()
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader().setSectionResizeMode(
+                6, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.show()
         else:
             labelBaja.setText(
