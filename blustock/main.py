@@ -781,7 +781,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
                 return PopUp("Error", info).exec()
 
-            datosNuevos = [cond, rep, baja, prest, grupo, subgrupo, ubi]
+            datosNuevos = ["" if cell in ("-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
             try:
                 idd = tabla.item(row, 0).text()
                 if not idd:
@@ -803,7 +803,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (desc, cond, rep, baja, prest,
                          idSubgrupo[0], idUbi[0], idd,)
                     )
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                    datosViejos = [["" if cellData in ("-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(
                         self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
@@ -2317,6 +2317,10 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha = self.pantallaHistorial.desdeFecha
         hastaFecha = self.pantallaHistorial.hastaFecha
         listaGestion = self.pantallaHistorial.listaGestion
+        try:
+            tabla.disconnect()
+        except:
+            pass
         try:
             listaGestion.disconnect()
             desdeFecha.disconnect()

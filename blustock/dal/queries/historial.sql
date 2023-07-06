@@ -5,3 +5,4 @@ JOIN personal u ON h.id_usuario=u.id
 JOIN tipos_cambio t ON h.id_tipo=t.id
 JOIN gestiones g ON h.id_gest=g.id
 WHERE g.descripcion LIKE ?
+ORDER BY h.fecha_hora DESC;
