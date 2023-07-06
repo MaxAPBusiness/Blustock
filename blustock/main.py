@@ -534,16 +534,16 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
     
     def habilitarSaves(self, row, col, tabla: QtWidgets.QTableWidget | None = None):
-        if not tabla:
+        if tabla is None:
             tabla=self.sender()
-        if not row:
+        if row is None:
             row=tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row, col):
-        self.habilitarSaves(row)
+        tabla = self.pantallaStock.tableWidget
+        self.habilitarSaves(row, col, tabla)
         if col in (2, 3, 4):
-            tabla = self.pantallaStock.tableWidget
             cantCond = int(tabla.item(row, 2).text())
             cantRep = tabla.item(row, 3).text()
             cantBaja = tabla.item(row, 4).text()
