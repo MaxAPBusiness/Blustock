@@ -124,7 +124,9 @@ class DAL():
                 datosNuevos += f'{datoNuevo};'
         else:
             datosNuevos=None
-        datos=(usuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"), idTipo, idGestion, fila, datosViejos, datosNuevos,)
+        
+        idUsuario=bdd.cur.execute('SELECT id FROM personal WHERE dni = ?', (usuario,)).fetchone()[0]
+        datos=(idUsuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"), idTipo, idGestion, fila, datosViejos, datosNuevos,)
         bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
         bdd.con.commit()
     

@@ -531,6 +531,7 @@ class MainWindow(QtWidgets.QMainWindow):
             
         self.generarBotones(
             funcGuardar, funcEliminar, tabla, indiceFinal)
+        tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
     
     def habilitarSaves(self, row):
         tabla=self.sender()
@@ -572,7 +573,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # haga más legible.
         tabla = self.pantallaStock.tableWidget
         tabla.setSortingEnabled(False)
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
 
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
@@ -975,7 +979,11 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         tabla.setSortingEnabled(False)
 
@@ -1274,7 +1282,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         tabla.setSortingEnabled(False)
 
@@ -1397,7 +1409,11 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         tabla.setSortingEnabled(False)
 
@@ -1634,7 +1650,11 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         tabla.setSortingEnabled(False)
         datos = dal.obtenerDatos("subgrupos", barraBusqueda.text())
@@ -1779,7 +1799,11 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaUsuarios.lineEdit
 
         tabla.setSortingEnabled(False)
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         datos = dal.obtenerDatos("usuarios", barraBusqueda.text())
 
@@ -1957,7 +1981,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchClases(self):
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         tabla.setSortingEnabled(False)
 
@@ -1996,7 +2024,11 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaUbicaciones.tableWidget
         barraBusqueda = self.pantallaUbicaciones.lineEdit
         tabla.setSortingEnabled(False)
-        tabla.disconnect()
+        try:
+            tabla.disconnect()
+        except:
+            pass
+
 
         datos = dal.obtenerDatos("ubicaciones", barraBusqueda.text())
 
@@ -2210,12 +2242,6 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
             return PopUp("Error", mensaje).exec()
         
-        idd = int(tabla.item(row, 0).text())
-        datosViejos = [fila for fila in datos if fila[0] == idd][0]
-        if cat != datosViejos[2] and dal.verifElimClases(idd):
-            mensaje = "La clase que desea cambiar de categoría tiene personal relacionado. Por motivos de seguridad, debe eliminar primero el personal relacionado antes de modificar la categoría de la clase."
-            return PopUp("Advertencia", mensaje).exec()
-        
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -2230,6 +2256,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
                 else:
+                    idd = int(tabla.item(row, 0).text())
+                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                    if cat != datosViejos[2] and dal.verifElimClases(idd):
+                        mensaje = "La clase que desea cambiar de categoría tiene personal relacionado. Por motivos de seguridad, debe eliminar primero el personal relacionado antes de modificar la categoría de la clase."
+                        return PopUp("Advertencia", mensaje).exec()
                     bdd.cur.execute(
                         """UPDATE clases
                         SET descripcion=?,
