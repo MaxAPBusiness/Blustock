@@ -962,7 +962,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp('Error', info).exec()
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
         self.fetchAlumnos()
-        
+        PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
     def fetchAlumnos(self):
         """Este método obtiene los datos de la tabla personal y los
@@ -1041,7 +1041,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
@@ -1456,7 +1456,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
@@ -1831,7 +1831,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        if dni > 10**10:
+        if dni > 10**8:
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 

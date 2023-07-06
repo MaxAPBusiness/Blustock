@@ -319,80 +319,70 @@ class DAL():
         bdd.con.commit()
     
     def cargarPlanilla(self, datos: list, actualizarCursos: bool):
-        for fila in datos:
-            try:
-                if not fila[2].isnumeric():
-                    dni = ''.join(fila[2].split("."))
-                    if not dni.isnumeric():
-                        info = 'Un dni proporcionado en la planilla no es válido. Revise los dni de la plantilla e intente nuevamente.'
+        for n, fila in enumerate(datos):
+            if isinstance(fila[2], int):
+                if fila[2] > 10**8:
+                    info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
+                    return PopUp('Error', info).exec()
+                continue
+            elif isinstance(fila[2], str):
+                dni = ''.join(fila[2].split("."))
+                if dni.isnumeric():
+                    dni = int(dni)
+                    if dni > 10**8:
+                        info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
                         return PopUp('Error', info).exec()
-            except AttributeError:
-                pass
-
-        if actualizarCursos:
-            cursos=set([fila[1] for fila in datos])
-            for curso in cursos:
-                try:
-                    bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso,))
-                except sqlite3.IntegrityError:
-                    pass
-        
-        bdd.cur.execute('''CREATE TABLE alumnos_nuevos(
-                           nombre_apellido VARCHAR(100),
-                           id_curso INTEGER,
-                           dni INTEGER);''')
-        for fila in datos:
-            bdd.cur.execute('INSERT INTO alumnos_nuevos VALUES(?, ?, ?)', fila)
+                    datos[n][2] = dni
+                    continue
+            info = 'Un dni proporcionado en la planilla no es válido. Revise los dni de la plantilla e intente nuevamente.'
+            return PopUp('Error', info).exec()
                 
-        egr=bdd.cur.execute("SELECT id FROM clases WHERE descripcion LIKE 'Egresado'").fetchone()
-        if not egr:
-            bdd.cur.execute("INSERT INTO clases VALUES(NULL, 'Egresado', 1)")
-        mergeSelect = bdd.cur.execute('''
-                        SELECT a.nombre_apellido, a.dni,
-                        an.nombre_apellido, cn.descripcion
-                        FROM personal a
-                        JOIN clases c ON a.id_clase = c.id
-                        LEFT JOIN alumnos_nuevos an
-                        ON a.dni = an.dni
-                        LEFT JOIN clases cn ON an.id_curso = cn.descripcion
-                        JOIN cats_clase cat ON c.id_cat = cat.id
-                        WHERE cat.descripcion LIKE 'Alumno'
-                        UNION ALL
-                        SELECT a.nombre_apellido, an.dni,
-                        an.nombre_apellido, cn.descripcion
-                        FROM alumnos_nuevos an
-                        JOIN clases cn ON an.id_curso = cn.descripcion
-                        LEFT JOIN personal a
-                        ON a.dni = an.dni
-                        LEFT JOIN clases c ON a.id_clase = c.id
-                        LEFT JOIN cats_clase cat ON c.id_cat = cat.id
-                        WHERE cat.descripcion LIKE 'Alumno'
-                        ;''').fetchall()
-        for mergeRow in mergeSelect:
+        cursos=set([fila[1] for fila in datos])
+        for curso in cursos:
             if actualizarCursos:
                 curso=mergeRow[3]
             else:
                 curso=f'{mergeRow[3][0]}{mergeRow[3][-1]}'
-            if mergeRow[0] is None:
-                bdd.cur.execute('''
-                    INSERT INTO per
-                    sonal VALUES (NULL, ?, ?, (
-                        SELECT id FROM clases WHERE descripcion = ?
-                    ), NULL, NULL)''', (mergeRow[2], mergeRow[1], curso,))
-            elif mergeRow[2] is None:
+            try:
+                bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso,))
+            except sqlite3.IntegrityError:
+                pass
+        
+        bdd.cur.execute('''CREATE TABLE alumnos_nuevos(
+                           nombre_apellido VARCHAR(100) NOT NULL,
+                           id_curso INTEGER NOT NULL,
+                           dni INTEGER UNIQUE NOT NULL);''')
+        for fila in datos:
+            idCurso=bdd.cur.execute('SELECT id FROM clases WHERE descripcion LIKE ?', (fila[1],)).fetchone()[0]
+            try:
+                bdd.cur.execute('INSERT INTO alumnos_nuevos VALUES(?, ?, ?)',
+                                (fila[0], idCurso, fila[2],))
+            except sqlite3.IntegrityError:
+                pass
+                
+        with open(f"dal{os.sep}queries{os.sep}merge_alumnos.sql", 'r') as queryText:
+            sql=queryText.read()
+        mergeSelect = bdd.cur.execute(sql).fetchall()
+        for mergeRow in mergeSelect:
+            if mergeRow[2] is None:
                 bdd.cur.execute('''
                     UPDATE personal SET id_clase = (
                         SELECT id FROM clases
                         WHERE descripcion LIKE 'Egresado'
                     ) WHERE dni = ?''', (mergeRow[1],))
             else:
-                bdd.cur.execute('''
-                    UPDATE personal SET nombre_apellido = ?, id_clase = (
-                        SELECT id FROM clases WHERE descripcion = ?
-                    ) WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
+                if mergeRow[0] is None:
+                    bdd.cur.execute('''
+                        INSERT INTO personal VALUES (NULL, ?, ?, (
+                            SELECT id FROM clases WHERE descripcion = ?
+                        ), NULL, NULL)''', (mergeRow[2], mergeRow[1], curso,))
+                else:
+                    bdd.cur.execute('''
+                        UPDATE personal SET nombre_apellido = ?, id_clase = (
+                            SELECT id FROM clases WHERE descripcion = ?
+                        ) WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
-        return PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
