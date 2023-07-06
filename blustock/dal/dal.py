@@ -321,7 +321,8 @@ class DAL():
     def cargarPlanilla(self, datos: list, actualizarCursos: bool):
         for n, fila in enumerate(datos):
             if not actualizarCursos:
-                curso=f'{fila[1]][0]}{mergeRow[3][-1]}'
+                datos[n][1]=f'{fila[1][0]}{fila[1][-1]}'
+                
             if isinstance(fila[2], int):
                 if fila[2] > 10**8:
                     info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
@@ -373,12 +374,12 @@ class DAL():
                     bdd.cur.execute('''
                         INSERT INTO personal VALUES (NULL, ?, ?, (
                             SELECT id FROM clases WHERE descripcion = ?
-                        ), NULL, NULL)''', (mergeRow[2], mergeRow[1], curso,))
+                        ), NULL, NULL)''', (mergeRow[2], mergeRow[1], mergeRow[3],))
                 else:
                     bdd.cur.execute('''
                         UPDATE personal SET nombre_apellido = ?, id_clase = (
                             SELECT id FROM clases WHERE descripcion = ?
-                        ) WHERE dni = ?''', (mergeRow[2], curso, mergeRow[1],))
+                        ) WHERE dni = ?''', (mergeRow[2], mergeRow[3], mergeRow[1],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
 
