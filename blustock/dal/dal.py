@@ -320,6 +320,8 @@ class DAL():
     
     def cargarPlanilla(self, datos: list, actualizarCursos: bool):
         for n, fila in enumerate(datos):
+            if not actualizarCursos:
+                curso=f'{fila[1]][0]}{mergeRow[3][-1]}'
             if isinstance(fila[2], int):
                 if fila[2] > 10**8:
                     info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
@@ -339,10 +341,6 @@ class DAL():
                 
         cursos=set([fila[1] for fila in datos])
         for curso in cursos:
-            if actualizarCursos:
-                curso=mergeRow[3]
-            else:
-                curso=f'{mergeRow[3][0]}{mergeRow[3][-1]}'
             try:
                 bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso,))
             except sqlite3.IntegrityError:
