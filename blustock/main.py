@@ -2144,7 +2144,7 @@ class MainWindow(QtWidgets.QMainWindow):
             des = tabla.item(row, 1).text()
             datosEliminados = [des,]
             dal.insertarHistorial(
-                self.usuario, "Eliminación", "Ubicaciones", row, datosEliminados)
+                self.usuario, "Eliminación", "Ubicaciones", des, None)
             dal.eliminarDatos('ubicaciones', idd)
             posicion = barra.value()
             self.fetchUbicaciones()
