@@ -1073,7 +1073,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not idClase:
                 info = "El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno. Regístrelo o revise los datos ya ingresados."
                 return PopUp("Error", info).exec()
-            datosNuevos = [nombre, dni, clase]
+            datosNuevos = [nombre, clase, dni]
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1081,7 +1081,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (nombre, dni, idClase[0],)
                     )
                     dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                        self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
                 else:
                     idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
@@ -2142,7 +2142,6 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             des = tabla.item(row, 1).text()
-            datosEliminados = [des,]
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Ubicaciones", des, None)
             dal.eliminarDatos('ubicaciones', idd)
@@ -2254,7 +2253,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (clase, idCat[0],)
                     )
                     dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos)
+                        self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos[1:])
                 else:
                     idd = int(tabla.item(row, 0).text())
                     datosViejos = [fila for fila in datos if fila[0] == idd][0]
@@ -2302,7 +2301,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados)
+                self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('clases', idd)
             posicion = barra.value()
             self.fetchClases()
