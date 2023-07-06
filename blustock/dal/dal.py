@@ -380,6 +380,11 @@ class DAL():
                         UPDATE personal SET nombre_apellido = ?, id_clase = (
                             SELECT id FROM clases WHERE descripcion = ?
                         ) WHERE dni = ?''', (mergeRow[2], mergeRow[3], mergeRow[1],))
+        egresados=bdd.cur.execute('''SELECT * FROM personal WHERE id_clase IN (
+                SELECT id FROM clases WHERE descripcion='Egresado');''').fetchall()
+        for egresado in egresados:
+            if not self.verifElimAlumnos(egresado[0]):
+                bdd.cur.execute('DELETE FROM personal WHERE id=?', (egresado[0],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
 

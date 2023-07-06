@@ -915,7 +915,7 @@ class MainWindow(QtWidgets.QMainWindow):
         info = '¿La planilla está en el formato de tutorvip?'
         formato = PopUp('Pregunta-Info', info).exec()
         if formato == QtWidgets.QMessageBox.StandardButton.Yes:
-            info = '¿Desea reemplazar el formato de cursos del sistema por el de tutorvip?'
+            info = '¿Desea usar el formato de cursos del tutorvip o el formato de cursos simplificado?'
             actualizarCursos = PopUp('Pregunta', info).exec()
             if actualizarCursos in (QtWidgets.QMessageBox.StandardButton.Yes,
                                     QtWidgets.QMessageBox.StandardButton.No):
@@ -924,7 +924,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 return
         elif formato == QtWidgets.QMessageBox.StandardButton.No:
-            info = 'Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
+            info = 'Esta acción no se puede deshacer. Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
             if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
                 return
             actualizarCursos=True
