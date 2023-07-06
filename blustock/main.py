@@ -2487,19 +2487,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
+            for cellNum, cellData in enumerate(rowData):
+                item = QtWidgets.QTableWidgetItem(str(cellData))
+                item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                              QtCore.Qt.ItemFlag.ItemIsEnabled)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                tabla.setItem(rowNum, cellNum, item)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
