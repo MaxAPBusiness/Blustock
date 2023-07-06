@@ -2141,7 +2141,7 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            des = tabla.item(row, 0).text()
+            des = tabla.item(row, 1).text()
             datosEliminados = [des,]
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Ubicaciones", row, datosEliminados)
