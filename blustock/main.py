@@ -968,13 +968,15 @@ class MainWindow(QtWidgets.QMainWindow):
             info='El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
             return PopUp('Error', info).exec()
         cols = list(df.columns.values)
+                
+        if len(cols) != 3:
+            info='La plantilla proporcionada tiene una cantidad de columnas distinta al formato requerido. Proporcione la cantidad justa de columnas.'
+            return PopUp('Error', info).exec()
+        
         if formato:
             df=df[[cols[2], cols[0], cols[1]]]
             cols = list(df.columns.values)
-        
-        if len(cols) > 3:
-            info='La plantilla proporcionada tiene más columnas que las requeridas. Proporcione la cantidad justa de columnas.'
-            return PopUp('Error', info).exec() 
+ 
         if ("dni" in cols[0].lower() or "curso" in cols[0].lower()
             or "dni" in cols[1].lower() or "curso" in cols[2].lower()
             or "nombre" in cols[2].lower()):
