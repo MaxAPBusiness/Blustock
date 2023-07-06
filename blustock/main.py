@@ -533,8 +533,11 @@ class MainWindow(QtWidgets.QMainWindow):
             funcGuardar, funcEliminar, tabla, indiceFinal)
         tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
     
-    def habilitarSaves(self, row):
-        tabla=self.sender()
+    def habilitarSaves(self, row, tabla: QtWidgets.QTableWidget | None = None):
+        if not tabla:
+            tabla=self.sender()
+        if not row:
+            row=tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row, col):
@@ -563,6 +566,7 @@ class MainWindow(QtWidgets.QMainWindow):
                      JOIN grupos g ON s.id_grupo = g.id
                      WHERE g.descripcion LIKE ?''', (grupo,)).fetchall()]
         completer.setModel(QtCore.QStringListModel(sugerencias))
+        tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
     
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
@@ -659,10 +663,14 @@ class MainWindow(QtWidgets.QMainWindow):
                    WHERE g.descripcion LIKE ?'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql, (rowData[6],)).fetchall()]
-            tabla.setCellWidget(rowNum, 8, ParamEdit(sugerencias, rowData[7]))
+            subgrupos=ParamEdit(sugerencias, rowData[7])
+            subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
-            tabla.setCellWidget(rowNum, 9, ParamEdit(sugerencias, rowData[8]))
+            ubicaciones=ParamEdit(sugerencias, rowData[8])
+            ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            tabla.setCellWidget(rowNum, 9, ubicaciones)
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1003,8 +1011,10 @@ class MainWindow(QtWidgets.QMainWindow):
             WHERE cat.descripcion='Alumno';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
+            cursos = ParamEdit(sugerencias, rowData[2])
+            cursos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
             tabla.setCellWidget(
-                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, cursos)
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
@@ -1397,7 +1407,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Grupos', datosEliminados[0], None)
+                self.usuario, 'Eliminación', 'Grupos', datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
             posicion = barra.value()
             self.fetchGrupos()
@@ -1432,8 +1442,10 @@ class MainWindow(QtWidgets.QMainWindow):
             WHERE cat.descripcion='Personal';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
+            clases = ParamEdit(sugerencias, rowData[2])
+            clases.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
             tabla.setCellWidget(
-                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, clases)
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
@@ -1506,7 +1518,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
                 return PopUp("Error", info).exec()
             
-            datosNuevos = [nombre, dni, clase]
+            datosNuevos = [nombre, clase, dni,]
             try:
                 if not datos:
                     bdd.cur.execute(
@@ -1514,7 +1526,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (nombre, dni, idClase[0],)
                     )
                     dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos)
+                        self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
                 else:
                     idd = int(tabla.item(row, 0).text())
                     bdd.cur.execute(
@@ -1525,7 +1537,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     )
                     datosViejos = [fila for fila in datos if fila[0] == idd][0]
                     dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[1:], datosNuevos)
+                        self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
                 return PopUp("Error", info).exec()
@@ -1583,7 +1595,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         (subgrupo, idGrupo[0])
                     )
                     dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos)
+                        self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
                 else:
                     idd = int(tabla.item(row, 0).text())
                     # Guardamos los datos de la fila en
@@ -1638,7 +1650,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Personal', datosViejos[3], datosViejos[1:])
+                self.usuario, 'Eliminación', 'Personal', datosViejos[1], datosViejos[2:])
             dal.eliminarDatos('personal', idd)
             posicion = barra.value()
             self.fetchOtroPersonal()
@@ -1667,7 +1679,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-            tabla.setCellWidget(rowNum, 2, ParamEdit(sugerencias, rowData[2]))
+            grupos=ParamEdit(sugerencias, rowData[2])
+            grupos.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            tabla.setCellWidget(rowNum, 2, grupos)
 
             self.generarBotones(
                 lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
@@ -1721,7 +1735,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos = [fila for fila in datos if fila[0] == idd][0]
             dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Subgrupos', datosViejos[1], datosViejos[1:])
+                self.usuario, 'Eliminación', 'Subgrupos', datosViejos[1], datosViejos[2:])
             dal.eliminarDatos('subgrupos', idd)
             posicion = barra.value()
             self.fetchSubgrupos()
@@ -1820,8 +1834,10 @@ class MainWindow(QtWidgets.QMainWindow):
             WHERE cat.descripcion='Usuario';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
+            clases = ParamEdit(sugerencias, rowData[2])
+            clases.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
             tabla.setCellWidget(
-                rowNum, 2, ParamEdit(sugerencias, rowData[2]))
+                rowNum, 2, clases)
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
             tabla.setItem(
@@ -1958,18 +1974,6 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # # Obtenemos los datos para guardarlos en el historial.
-            # desc = tabla.item(row, 0).text()
-            # cond = tabla.item(row, 1).text()"stock"datos
-            # rep = tabla.item(row, 2).text()
-            # baja = tabla.item(row, 3).text()
-            # grupo = tabla.item(row, 5).text()
-            # subgrupo = tabla.item(row, 6).text()
-            # ubi = tabla.item(row, 7).text()
-
-            # datosEliminados = f"desc: {desc}, ubi: {ubi},\n cant cond: {cond}, cant rep: {rep}, cant baja: {baja},\n grupo: {grupo}, subgrupo: {subgrupo}"
-
-            # # Insertamos los datos en el historial para que quede registro.
             # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
             # # Eliminamos los datos
             dal.eliminarDatos('personal', idd)
@@ -2001,7 +2005,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
-            tabla.setCellWidget(rowNum, 2, ParamEdit(sugerencias, rowData[2]))
+            cats = ParamEdit(sugerencias, rowData[2])
+            cats.textChanged.connect(lambda: self.habilitarSaves(None, tabla))
+            tabla.setCellWidget(rowNum, 2, cats)
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
