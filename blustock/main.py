@@ -282,6 +282,7 @@ class MainWindow(QtWidgets.QMainWindow):
         timer.start(300000)
 
         self.stackedWidget.setCurrentIndex(0)
+        self.setWindowTitle('Blustock')
         self.showMaximized()
     
     def actualizarHastaFechas(self):
