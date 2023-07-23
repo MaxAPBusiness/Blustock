@@ -9,7 +9,6 @@ Objetos:
 """
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
-
 import sys
 import types
 import sqlite3
@@ -49,9 +48,6 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
-        boton = toolboton("usuario", self)
-        boton.setIconSize(QtCore.QSize(60, 40))
-        self.menubar.setCornerWidget(boton)
         self.menubar.hide()
 
         self.pantallaAlumnos = QtWidgets.QWidget()
@@ -148,12 +144,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionHistorial.triggered.connect(self.fetchHistorial)
         self.opcionDeudas.triggered.connect(self.fetchDeudas)
         self.opcionResumen.triggered.connect(self.fetchResumen)
-
-        with open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r') as file:
-            self.setStyleSheet(file.read())
-
-        self.pantallaLogin.passwordState.hide()
-        self.pantallaLogin.usuarioState.hide()
 
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
         pixmap = QtGui.QPixmap(path)
@@ -275,6 +265,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
+        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
 
         self.actualizarHastaFechas()
         timer=QtCore.QTimer()
@@ -310,14 +302,38 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
+                if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
+                    self.menubar.actions()[4].setVisible(False)
+
+                boton = toolboton("usuario", self)
+                boton.setIconSize(QtCore.QSize(60, 40))
+                self.label = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
+                if self.label != None: 
+                    self.label = QtWidgets.QLabel(str("El pañolero en turno es: " + self.label[0]))
+                    self.label.setObjectName("sopas")
+                    self.menubar.setCornerWidget(self.label,QtCore.Qt.Corner.TopRightCorner)
+                    boton.menu().actions()[0].setVisible(False)
+                    for i in range(7):
+                        if i != 3:
+                            self.menubar.actions()[i].setVisible(False)
+                else:
+                    self.label = QtWidgets.QLabel(str("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0]))
+                    self.label.setObjectName("sopas")
+                    self.menubar.setCornerWidget(self.label,QtCore.Qt.Corner.TopRightCorner)
+
+                self.menubar.setCornerWidget(boton,QtCore.Qt.Corner.TopLeftCorner)
                 self.menubar.show()
+                self.pantallaLogin.usuarioState.setText("")
+                self.pantallaLogin.passwordState.setText("")
 
             else:
-                self.pantallaLogin.passwordState.show()
-                self.pantallaLogin.usuarioState.hide()
+                self.pantallaLogin.passwordState.setText("contraseña incorrecta")
+                self.pantallaLogin.usuarioState.setText("")
+
         else:
-            self.pantallaLogin.usuarioState.show()
-            self.pantallaLogin.passwordState.hide()
+            self.pantallaLogin.usuarioState.setText("usuario incorrecto")
+            self.pantallaLogin.passwordState.setText("")
+
 
     def mostrarContrasena(self, boton, entry: QtWidgets.QLineEdit):
         """Este método muestra o esconde lo ingresado en el campo de
@@ -380,7 +396,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def sopas(self):
         self.pantallaNmovimiento.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaNmovimiento.cursoComboBox.currentText(),):
-            print(i)
             self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
@@ -395,6 +410,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for i in dal.obtenerDatos("clases", ""):
             self.pantallaNmovimiento.cursoComboBox.addItem(i[1])
+        
+        for i in dal.obtenerDatos("ubicaciones", ""):
+            self.pantallaNmovimiento.ubicacionComboBox.addItem(i[1])
 
         self.pantallaNmovimiento.cursoComboBox.currentTextChanged.connect(
             self.sopas)
@@ -402,19 +420,44 @@ class MainWindow(QtWidgets.QMainWindow):
             self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
+    def restar(self,cant,herramienta,estado):
+        estado = estado[0][1]
+        estado = estado[estado.index(" "):]
+        estado = estado[1:]
+        estado = "cant_" + estado.lower()
+        bdd.cur.execute("""UPDATE stock set ? = ? + ? where id = ?""",(estado,estado,cant,herramienta[0]))
+
+    def sumar(self,cant,herramienta,estado):
+        estado = estado[0][1]
+        estado = estado[estado.index(" "):]
+        estado = estado[1:]
+        estado = "cant_" + estado.lower()
+        bdd.cur.execute("""UPDATE stock set ? = ? - ? where id = ?""",(estado,estado,cant,herramienta[0]))
 
     def saveMovimiento(self):
         turno = bdd.cur.execute(
             "select id from turnos where fecha_egr IS NULL").fetchall()
         tipo = dal.obtenerDatos(
             "tipos_mov", self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText())
-        herramienta = dal.obtenerDatos(
-            "stock", self.pantallaNmovimiento.herramientaComboBox.currentText())
+        
         cant = self.pantallaNmovimiento.cantidadSpinBox.value()
         estado = dal.obtenerDatos(
             "estados", self.pantallaNmovimiento.estadoComboBox.currentText())
-        persona = dal.obtenerDatos(
-            "personas", self.pantallaNmovimiento.alumnoComboBox.currentText())
+        persona = bdd.cur.execute('''SELECT p.id 
+            FROM personal p
+            JOIN clases c ON c.id = p.id_clase
+            WHERE p.nombre_apellido LIKE ?
+            and c.descripcion LIKE ?;''', (self.pantallaNmovimiento.alumnoComboBox.currentText(), self.pantallaNmovimiento.cursoComboBox.currentText())).fetchone()
+
+        ubicacion = dal.obtenerDatos(
+            "ubicaciones", self.pantallaNmovimiento.ubicacionComboBox.currentText())
+        herramienta = bdd.cur.execute(
+            """SELECT s.id FROM STOCK s
+            JOIN subgrupos sub ON s.id_subgrupo = sub.id
+            JOIN grupos g ON sub.id_grupo=g.id
+            JOIN ubicaciones u ON s.id_ubi=u.id
+            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaNmovimiento.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
+
         descripcion = self.pantallaNmovimiento.descripcionLineEdit.text()
         fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if cant == 0:
@@ -423,7 +466,19 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp("Error", mensaje).exec()
         else:
             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                            (turno[0][0], herramienta[0][0], estado[0][0], cant, persona[0][0], fecha, tipo[0][0], descripcion))
+                            (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+            
+            if tipo[0][1] == ("1"):
+                self.sumar(cant,herramienta[0],estado[0][1])
+            if tipo[0][0] == ("2"):
+                self.sumar(cant,herramienta[0],estado[0][1])
+            if tipo[0][0] == ("3"):
+                self.restar(cant,herramienta[0],estado[0][1])
+            if tipo[0][0] == ("4"):
+                self.sumar(cant,herramienta[0],estado[0][1])
+            if tipo[0][0] == ("5"):
+                self.restar(cant,herramienta[0],estado[0][1])
+
             bdd.con.commit()
             mensaje = """       Movimiento cargado con exito."""
             return PopUp("Aviso", mensaje).exec()
@@ -698,7 +753,7 @@ class MainWindow(QtWidgets.QMainWindow):
             8, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             9, QtWidgets.QHeaderView.ResizeMode.Stretch)
-
+        
         tabla.cellChanged.connect(self.actualizarTotal)
         tabla.setSortingEnabled(True)
         listaUbi.currentIndexChanged.connect(self.fetchStock)
@@ -1806,9 +1861,6 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-
         self.stackedWidget.setCurrentIndex(7)
 
     def fetchUsuarios(self):
@@ -2710,7 +2762,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 app = QtWidgets.QApplication(sys.argv)
-
+app.setStyleSheet(open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r').read())
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
