@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "blustock"
+version = "0.1.1"
+description = ""
+authors = ["Maximo Alejandro Pellegrino <mapellegrinobusiness@gmail.com>"]
+readme = "README.md"
+packages = [{include = "blustock"},]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <4.0"
+pandas = "^2.0.3"
+python-dateutil = "^2.8.2"
+pyqt6 = "^6.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
