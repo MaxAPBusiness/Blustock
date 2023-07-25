@@ -7,8 +7,12 @@ Clases:
 Objetos:
     app: La aplicación principal.
 """
+# Antes de arrancar, establecemos el path con el que la app trabajará 
+# para evitar problemas de importar módulos
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
+# Ahora sí, hacemos todos los imports
 import sys
 import types
 import sqlite3
@@ -39,85 +43,126 @@ class MainWindow(QtWidgets.QMainWindow):
         __init__(self):
             El constructor de la clase MainWindow.
 
-            Crea la ventana principal con una cabecera, un menú
-            izquierdo (inicialmente escondido) y una colección de
-            pantallas.
+            Crea la ventana principal con un menú inicialmente
+            escondido y una colección de pantallas.
     """
-
     def __init__(self):
+        """El constructor, crea la ventana principal con un menú
+        inicialmente escondido y una colección de pantallas."""
+        # Inicializamos la clase heredada
         super().__init__()
+
+        # Inicializamos el menú principal
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        
+        # Escondemos el menú para que no se pueda acceder apenas
+        # se inicia la aplicación.
         self.menubar.hide()
 
+        # Empezamos a crear todas las pantallas:
+        # # Creamos un widget vacío
         self.pantallaAlumnos = QtWidgets.QWidget()
-        uic.loadUi(
-            os.path.join(
-                os.path.abspath(os.getcwd()),
-                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
-            ), self.pantallaAlumnos)
-
+        # # Guardamos el path al archivo ui
+        pathAlumnos=os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}alumnos.ui')
+        # # Cargamos el ui al widget vacío
+        uic.loadUi(pathAlumnos, self.pantallaAlumnos)
+        
         self.pantallaGrupos = QtWidgets.QWidget()
-
         pathGrupos = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
-
         uic.loadUi(pathGrupos, self.pantallaGrupos)
 
         self.pantallaStock = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
+        pathStock = os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}stock.ui')
+        uic.loadUi(pathStock, self.pantallaStock)
+
         self.pantallaHistorial = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
-        self.pantallaMovimientos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
+        pathHistorial = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}historial.ui')
+        uic.loadUi(pathHistorial, self.pantallaHistorial)
+
+        self.pantallaMovs = QtWidgets.QWidget()
+        pathMovs = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}movimientos.ui')
+        uic.loadUi(pathMovs, self.pantallaMovs)
+
         self.pantallaOtroPersonal = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
+        pathOtroPersonal = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}otro_personal.ui')
+        uic.loadUi(pathOtroPersonal, self.pantallaOtroPersonal)
+
         self.pantallaSubgrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
+        pathSubgrupos = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}subgrupos.ui')
+        uic.loadUi(pathSubgrupos, self.pantallaSubgrupos)
+
         self.pantallaTurnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
+        pathTurnos = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}turnos.ui')
+        uic.loadUi(pathTurnos, self.pantallaTurnos)
+
         self.pantallaUsuarios = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(
-            os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
+        pathUsuarios = os.path.join(
+                                os.path.abspath(os.getcwd()),
+                                f'ui{os.sep}screens_uis{os.sep}usuarios.ui')
+        uic.loadUi(pathUsuarios, self.pantallaUsuarios)
+
         self.pantallaLogin = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
+        pathLogin = os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}login.ui')
+        uic.loadUi(pathLogin, self.pantallaLogin)
+
         self.pantallaClases = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
-        self.pantallaReparaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}reparaciones.ui'), self.pantallaReparaciones)
-        self.pantallaUbicaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
-        self.pantallaNmovimiento = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui'), self.pantallaNmovimiento)
+        pathClases = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}clases.ui')
+        uic.loadUi(pathClases, self.pantallaClases)
+
+        self.pantallaReps = QtWidgets.QWidget()
+        pathReps = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}reparaciones.ui')
+        uic.loadUi(pathReps, self.pantallaReps)
+
+        self.pantallaUbis = QtWidgets.QWidget()
+        pathUbis = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui')
+        uic.loadUi(pathUbis, self.pantallaUbis)
+
+        self.pantallaRealizarMov = QtWidgets.QWidget()
+        pathRealizarMov = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui')
+        uic.loadUi(pathRealizarMov, self.pantallaRealizarMov)
+
         self.pantallaDeudas = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}deudas.ui'), self.pantallaDeudas)
+        pathDeudas = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}deudas.ui')
+        uic.loadUi(pathDeudas, self.pantallaDeudas)
+
         self.pantallaResumen = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}resumen.ui'), self.pantallaResumen)
+        pathResumen = os.path.join(os.path.abspath(os.getcwd()),
+                                   f'ui{os.sep}screens_uis{os.sep}resumen.ui')
+        uic.loadUi(pathResumen, self.pantallaResumen)
 
-        self.pantallaLogin.Ingresar.clicked.connect(self.login)
-
+        # Queremos aplicar cambios a todas las pantallas
+        # # Primero, hacemos un set que contenga todas las tablas
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
-                     self.pantallaMovimientos, self.pantallaOtroPersonal,
+                     self.pantallaMovs, self.pantallaOtroPersonal,
                      self.pantallaSubgrupos, self.pantallaTurnos,
                      self.pantallaUsuarios, self.pantallaHistorial,
-                     self.pantallaClases, self.pantallaReparaciones,
-                     self.pantallaUbicaciones, self.pantallaNmovimiento,
+                     self.pantallaClases, self.pantallaReps,
+                     self.pantallaUbis, self.pantallaRealizarMov,
                      self.pantallaDeudas, self.pantallaResumen)
-
+        # Después, insertamos
         for pantalla in pantallas:
             self.stackedWidget.addWidget(pantalla)
             try:
@@ -154,6 +199,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.pantallaLogin.showPass, self.pantallaLogin.passwordLineEdit
             )
         )
+        self.pantallaLogin.Ingresar.clicked.connect(self.login)
+
         sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
         sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
 
@@ -201,11 +248,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
-        self.pantallaUbicaciones.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
+        self.pantallaUbis.pushButton_2.clicked.connect(
+            lambda: self.insertarFilas(self.pantallaUbis.tableWidget,
                                        self.saveUbicaciones,
                                        self.deleteUbicaciones, (0,)))
-        self.pantallaUbicaciones.tableWidget.setColumnHidden(0, True)
+        self.pantallaUbis.tableWidget.setColumnHidden(0, True)
         sugerenciasCat=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaClases.tableWidget,
@@ -235,17 +282,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
 
-        self.pantallaMovimientos.lineEdit.editingFinished.connect(
+        self.pantallaMovs.lineEdit.editingFinished.connect(
             self.fetchMovimientos)
-        self.pantallaMovimientos.nId.valueChanged.connect(
+        self.pantallaMovs.nId.valueChanged.connect(
             self.fetchMovimientos)
-        self.pantallaMovimientos.nTurno.valueChanged.connect(
+        self.pantallaMovs.nTurno.valueChanged.connect(
             self.fetchMovimientos)
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
 
-        self.pantallaReparaciones.lineEdit.editingFinished.connect(
+        self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
@@ -253,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
-        self.pantallaUbicaciones.lineEdit.editingFinished.connect(
+        self.pantallaUbis.lineEdit.editingFinished.connect(
             self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
 
@@ -287,12 +334,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.showMaximized()
     
     def actualizarHastaFechas(self):
-        self.pantallaReparaciones.hastaFecha.setDate(
+        self.pantallaReps.hastaFecha.setDate(
             QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
         self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        self.pantallaMovimientos.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
             datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
             datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
@@ -415,35 +462,35 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
     def sopas(self):
-        self.pantallaNmovimiento.alumnoComboBox.clear()
-        for i in dal.obtenerDatos("alumnos", self.pantallaNmovimiento.cursoComboBox.currentText(),):
-            self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
+        self.pantallaRealizarMov.alumnoComboBox.clear()
+        for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
+            self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
-        self.pantallaNmovimiento.tipoDeMovimientoComboBox.clear()
-        self.pantallaNmovimiento.herramientaComboBox.clear()
-        self.pantallaNmovimiento.estadoComboBox.clear()
-        self.pantallaNmovimiento.cursoComboBox.clear()
-        self.pantallaNmovimiento.ubicacionComboBox.clear()
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
+        self.pantallaRealizarMov.herramientaComboBox.clear()
+        self.pantallaRealizarMov.estadoComboBox.clear()
+        self.pantallaRealizarMov.cursoComboBox.clear()
+        self.pantallaRealizarMov.ubicacionComboBox.clear()
         
         for i in dal.obtenerDatos("tipos_mov", ""):
-            self.pantallaNmovimiento.tipoDeMovimientoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("stock", ""):
-            self.pantallaNmovimiento.herramientaComboBox.addItem(i[1])
+            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("estados", ""):
-            self.pantallaNmovimiento.estadoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("clases", ""):
-            self.pantallaNmovimiento.cursoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.cursoComboBox.addItem(i[1])
         
         for i in dal.obtenerDatos("ubicaciones", ""):
-            self.pantallaNmovimiento.ubicacionComboBox.addItem(i[1])
+            self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
-        self.pantallaNmovimiento.cursoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
             self.sopas)
-        self.pantallaNmovimiento.pushButton.clicked.connect(
+        self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
@@ -465,27 +512,27 @@ class MainWindow(QtWidgets.QMainWindow):
         turno = bdd.cur.execute(
             "select id from turnos where fecha_egr IS NULL").fetchall()
         tipo = dal.obtenerDatos(
-            "tipos_mov", self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText())
+            "tipos_mov", self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText())
         
-        cant = self.pantallaNmovimiento.cantidadSpinBox.value()
+        cant = self.pantallaRealizarMov.cantidadSpinBox.value()
         estado = dal.obtenerDatos(
-            "estados", self.pantallaNmovimiento.estadoComboBox.currentText())
+            "estados", self.pantallaRealizarMov.estadoComboBox.currentText())
         persona = bdd.cur.execute('''SELECT p.id 
             FROM personal p
             JOIN clases c ON c.id = p.id_clase
             WHERE p.nombre_apellido LIKE ?
-            and c.descripcion LIKE ?;''', (self.pantallaNmovimiento.alumnoComboBox.currentText(), self.pantallaNmovimiento.cursoComboBox.currentText())).fetchone()
+            and c.descripcion LIKE ?;''', (self.pantallaRealizarMov.alumnoComboBox.currentText(), self.pantallaRealizarMov.cursoComboBox.currentText())).fetchone()
 
         ubicacion = dal.obtenerDatos(
-            "ubicaciones", self.pantallaNmovimiento.ubicacionComboBox.currentText())
+            "ubicaciones", self.pantallaRealizarMov.ubicacionComboBox.currentText())
         herramienta = bdd.cur.execute(
             """SELECT s.id FROM STOCK s
             JOIN subgrupos sub ON s.id_subgrupo = sub.id
             JOIN grupos g ON sub.id_grupo=g.id
             JOIN ubicaciones u ON s.id_ubi=u.id
-            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaNmovimiento.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
+            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
-        descripcion = self.pantallaNmovimiento.descripcionLineEdit.text()
+        descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
         fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if cant == 0:
             mensaje = """       Por favor ingrese un valor 
@@ -1243,15 +1290,15 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método obtiene los datos de la tabla movimientos y los
         inserta en la tabla de la interfaz de usuario.
         """
-        tabla = self.pantallaMovimientos.tableWidget
-        barraBusqueda = self.pantallaMovimientos.lineEdit
-        nId = self.pantallaMovimientos.nId
-        listaElem = self.pantallaMovimientos.listaElem
-        listaPersona = self.pantallaMovimientos.listaPersona
-        desdeFecha = self.pantallaMovimientos.desdeFecha
-        hastaFecha = self.pantallaMovimientos.hastaFecha
-        nTurno = self.pantallaMovimientos.nTurno
-        listaPanolero = self.pantallaMovimientos.listaPanolero
+        tabla = self.pantallaMovs.tableWidget
+        barraBusqueda = self.pantallaMovs.lineEdit
+        nId = self.pantallaMovs.nId
+        listaElem = self.pantallaMovs.listaElem
+        listaPersona = self.pantallaMovs.listaPersona
+        desdeFecha = self.pantallaMovs.desdeFecha
+        hastaFecha = self.pantallaMovs.hastaFecha
+        nTurno = self.pantallaMovs.nTurno
+        listaPanolero = self.pantallaMovs.listaPanolero
 
         try:
             tabla.disconnect()
@@ -1833,8 +1880,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
         nId = self.pantallaTurnos.nId
-        desdeFecha = self.pantallaReparaciones.desdeFecha
-        hastaFecha = self.pantallaReparaciones.hastaFecha
+        desdeFecha = self.pantallaReps.desdeFecha
+        hastaFecha = self.pantallaReps.hastaFecha
 
         try:
             tabla.disconnect()
@@ -2104,8 +2151,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(10)
 
     def fetchUbicaciones(self):
-        tabla = self.pantallaUbicaciones.tableWidget
-        barraBusqueda = self.pantallaUbicaciones.lineEdit
+        tabla = self.pantallaUbis.tableWidget
+        barraBusqueda = self.pantallaUbis.lineEdit
         tabla.setSortingEnabled(False)
         try:
             tabla.disconnect()
@@ -2158,7 +2205,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla = self.pantallaUbicaciones.tableWidget
+        tabla = self.pantallaUbis.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
@@ -2208,7 +2255,7 @@ class MainWindow(QtWidgets.QMainWindow):
             barra.setValue(posicion)
 
     def deleteUbicaciones(self, datos: list | None = None) -> None:
-        tabla = self.pantallaUbicaciones.tableWidget
+        tabla = self.pantallaUbis.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
@@ -2233,10 +2280,10 @@ class MainWindow(QtWidgets.QMainWindow):
             barra.setValue(posicion)
 
     def fetchReparaciones(self):
-        tabla = self.pantallaReparaciones.tableWidget
-        barraBusqueda = self.pantallaReparaciones.lineEdit
-        desdeFecha = self.pantallaReparaciones.desdeFecha
-        hastaFecha = self.pantallaReparaciones.hastaFecha
+        tabla = self.pantallaReps.tableWidget
+        barraBusqueda = self.pantallaReps.lineEdit
+        desdeFecha = self.pantallaReps.desdeFecha
+        hastaFecha = self.pantallaReps.hastaFecha
         try:
             tabla.disconnect()
         except:

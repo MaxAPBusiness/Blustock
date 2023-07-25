@@ -315,7 +315,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Taller</string>
+         <string>Ubicación</string>
         </property>
        </column>
       </widget>
