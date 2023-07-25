@@ -43,6 +43,17 @@ class PopUp(QMessageBox):
             self.setStandardButtons(QMessageBox.StandardButton.Cancel |QMessageBox.StandardButton.Ok)
             self.setWindowTitle(type)
             self.setText(type)
+        elif type == "Turno":
+            self.setIcon(QMessageBox.Icon.Question)
+            self.setWindowTitle("Turno no finalizado")
+            self.setText("Pregunta")
+            self.setStandardButtons(
+            QMessageBox.StandardButton.Cancel |
+            QMessageBox.StandardButton.No |
+            QMessageBox.StandardButton.Yes)
+            self.button(QMessageBox.StandardButton.Yes).setText("Continuar turno")
+            self.button(QMessageBox.StandardButton.No).setText("Finalizar turno")
+
         elif type[:8] == 'Pregunta':
             if type == "Pregunta":
                 self.setIcon(QMessageBox.Icon.Warning)

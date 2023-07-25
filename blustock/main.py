@@ -267,6 +267,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
+        self.boton = toolboton("usuario", self)
+        self.boton.setIconSize(QtCore.QSize(60, 40))
+        self.label = QtWidgets.QLabel(str("El pañolero en turno es: "))
+        self.label.setObjectName("sopas")
+        widget_with_layout = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(widget_with_layout)
+        layout.addWidget(self.label)
+        layout.addWidget(self.boton)
+        self.menubar.setCornerWidget(widget_with_layout,QtCore.Qt.Corner.TopRightCorner)
 
         self.actualizarHastaFechas()
         timer=QtCore.QTimer()
@@ -291,6 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
     def login(self):
+        self.boton.show()
         bdd.cur.execute("SELECT count(*) FROM personal WHERE usuario = ?",
                         (self.pantallaLogin.usuariosLineEdit.text(),))
         check = bdd.cur.fetchone()
@@ -304,24 +314,26 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchStock()
                 if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
                     self.menubar.actions()[4].setVisible(False)
+                pañolero = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
+                if pañolero != None:
+                    mensaje = "hay un turno sin finalizar desea continuarlo o finalizarlo?"
+                    popup = PopUp("Turno",mensaje).exec()
+                    if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+                        self.label.setText("El pañolero en turno es: " + pañolero[0])
+                        self.label.setObjectName("sopas")
+                        self.boton.menu().actions()[0].setVisible(False)
+                        for i in range(7):
+                            if i != 3:
+                                self.menubar.actions()[i].setVisible(False)
+                    if popup == QtWidgets.QMessageBox.StandardButton.No:
+                        profe = dal.obtenerDatos("usuarios", self.usuario,)
+                        hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                        bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
+                        bdd.con.commit()
 
-                boton = toolboton("usuario", self)
-                boton.setIconSize(QtCore.QSize(60, 40))
-                self.label = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
-                if self.label != None: 
-                    self.label = QtWidgets.QLabel(str("El pañolero en turno es: " + self.label[0]))
-                    self.label.setObjectName("sopas")
-                    self.menubar.setCornerWidget(self.label,QtCore.Qt.Corner.TopRightCorner)
-                    boton.menu().actions()[0].setVisible(False)
-                    for i in range(7):
-                        if i != 3:
-                            self.menubar.actions()[i].setVisible(False)
                 else:
-                    self.label = QtWidgets.QLabel(str("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0]))
-                    self.label.setObjectName("sopas")
-                    self.menubar.setCornerWidget(self.label,QtCore.Qt.Corner.TopRightCorner)
+                    self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
 
-                self.menubar.setCornerWidget(boton,QtCore.Qt.Corner.TopLeftCorner)
                 self.menubar.show()
                 self.pantallaLogin.usuarioState.setText("")
                 self.pantallaLogin.passwordState.setText("")
@@ -399,6 +411,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
+        self.pantallaNmovimiento.tipoDeMovimientoComboBox.clear()
+        self.pantallaNmovimiento.herramientaComboBox.clear()
+        self.pantallaNmovimiento.estadoComboBox.clear()
+        self.pantallaNmovimiento.cursoComboBox.clear()
+        self.pantallaNmovimiento.ubicacionComboBox.clear()
+        
         for i in dal.obtenerDatos("tipos_mov", ""):
             self.pantallaNmovimiento.tipoDeMovimientoComboBox.addItem(i[1])
 

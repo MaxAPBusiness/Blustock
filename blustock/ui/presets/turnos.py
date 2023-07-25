@@ -15,6 +15,7 @@ from ui.presets.popup import PopUp
 
 class NuevoTurno(QDialog):
     def __init__(self,usuario):
+        self.turnFinalized = None
         self.usuario = usuario
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'cargar_turno.ui'), self)
@@ -42,7 +43,7 @@ class NuevoTurno(QDialog):
 
     def turno(self):
         if bdd.cur.execute("select count(*) from turnos WHERE fecha_egr is null").fetchall()[0][0] == 0:
-            if self.alumnoComboBox.currentText() == None:
+            if self.alumnoComboBox.currentText() != "":
                 profe = dal.obtenerDatos("usuarios",self.usuario,)
                 alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
                 panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
@@ -50,21 +51,22 @@ class NuevoTurno(QDialog):
                 bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha_ing, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
                 bdd.con.commit()
                 mensaje = """El turno se cargo con exito."""
+                self.turnFinalized = True
                 PopUp("Aviso", mensaje).exec()
-                return(12)
+
             else:
                 mensaje = """Por favor ingrese un alumno."""
                 PopUp("Error", mensaje).exec()
-                return(True)
 
 
         else:
             mensaje = """Ya hay un turno activo en este momento."""
             PopUp("Error", mensaje).exec()
-            return(True)
+            
 
 class TerminarTurno(QDialog):
     def __init__(self,usuario):
+        self.turnFinalized = None
         self.usuario = usuario
         super().__init__()
         uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'finalizar_turno.ui'), self)
@@ -94,26 +96,20 @@ class TerminarTurno(QDialog):
 
     def cerrar(self):
         if bdd.cur.execute("select count(*) from turnos WHERE fecha_egr is null").fetchall()[0][0] != 0:
-            if self.contrasenaLineEdit.text()== dal.obtenerDatos("usuarios",self.usuario,)[0][5]:
-                profe = dal.obtenerDatos("usuarios",self.usuario,)
+            if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
+                self.turnFinalized = True
+                profe = dal.obtenerDatos("usuarios", self.usuario,)
                 hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr= ? WHERE fecha_egr is null""",(hora,profe[0][0],))
+                bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                 bdd.con.commit()
                 mensaje = """El turno se ha finalizado correctamente"""
                 PopUp("Aviso", mensaje).exec()
-                return(8)
             else:
-                mensaje = """       Contraseña incorrecta.
-            El turno no se ha finalizado"""
-            PopUp("Error", mensaje).exec()
-            return(True)
-
-
+                mensaje = """Contraseña incorrecta. El turno no se ha finalizado"""
+                PopUp("Error", mensaje).exec()
         else:
-            mensaje = """       No hay ningun turno activo
-            en este momento."""
+            mensaje = """No hay ningún turno activo en este momento."""
             PopUp("Error", mensaje).exec()
-            return(True)
 
 
 

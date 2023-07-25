@@ -46,19 +46,24 @@ QMenu{
 }
 
 QMenu:item{
-    padding: 5px;
-    border-radius: 5px;
+    padding:5px;
+    border-radius:5px;
 }
-
+Qmenu:item:icon{
+    icon-size:40px;
+}
 QMenu:item:selected{
     background-color: #768AC5;
     color:white;
-
+    border-radius:5px;
+}
+QToolBar{
+    icon-size:50px
 }
 Qmenu#icon{
-   icon:size 40px; 
-    
+   icon:size 40px;   
 }
+
 QPushButton{
     border-color:#293045;
     border-style: solid;
@@ -95,10 +100,10 @@ QLineEdit{
 
 #sopas{
     border:none;
-    padding-right: 17px;
-    padding-top: 17px;
-    padding-bottom: 17px;
+    padding:6px;
     font-size: 20px;
+    border-radius:5px;
+    background-color: #595e6e;
     color:white;
 }
 #label{
@@ -111,14 +116,12 @@ QLineEdit{
 #usuario{
     border:none;
     background-color: #293045;
-    padding-right:0px;
-    margin:5px
+    margin-right:15px;
 }
 #usuario::menu-indicator{
     image:none;
 }
 #usuario:hover,pressed{
-    padding-right:0px;
     background-color: #768AC5;
     color:black;
     border-radius: 5px;
