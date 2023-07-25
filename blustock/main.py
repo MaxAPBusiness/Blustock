@@ -330,6 +330,15 @@ class MainWindow(QtWidgets.QMainWindow):
                         hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                         bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                         bdd.con.commit()
+                        self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
+                        for i in range(7):
+                            if i != 3:
+                                self.menubar.actions()[i].setVisible(True)
+                                
+                        if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
+                            self.menubar.actions()[4].setVisible(False)
+                        self.boton.menu().actions()[0].setVisible(True)
+
 
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
