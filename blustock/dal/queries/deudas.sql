@@ -5,9 +5,9 @@ JOIN movimientos m ON d.id_mov=m.id
 JOIN stock h ON m.id_elem = h.id
 JOIN personal pe ON m.id_persona=pe.id
 JOIN clases cpe ON pe.id_clase=cpe.id
-JOIN turnos t ON m.id_turno = t.id
-JOIN personal pa ON t.id_panolero=pa.id
-JOIN clases cpa ON pa.id_clase = cpa.id
+LEFT JOIN turnos t ON m.id_turno = t.id
+LEFT JOIN personal pa ON t.id_panolero=pa.id
+LEFT JOIN clases cpa ON pa.id_clase = cpa.id
 WHERE m.id LIKE ?
 AND m.id_turno LIKE ?
 AND pa.nombre_apellido || ' ' || cpa.descripcion LIKE ?

@@ -46,12 +46,11 @@
      </font>
     </property>
     <property name="title">
-     <string>HERRAMIENTAS</string>
+     <string>STOCK</string>
     </property>
     <addaction name="opcionStock"/>
     <addaction name="opcionSubgrupos"/>
     <addaction name="opcionGrupos"/>
-    <addaction name="GestionReparacion"/>
    </widget>
    <widget class="QMenu" name="menuPersonal">
     <property name="title">
@@ -69,6 +68,7 @@
     <addaction name="opcionMovimientos"/>
     <addaction name="opcionDeudas"/>
     <addaction name="opcionResumen"/>
+    <addaction name="GestionReparacion"/>
    </widget>
    <widget class="QMenu" name="menuTurnos">
     <property name="title">
@@ -98,9 +98,9 @@
     <addaction name="GestionUbicaciones"/>
    </widget>
    <addaction name="menuHerramientas"/>
+   <addaction name="menuMovimientos"/>
    <addaction name="menuPersonal"/>
    <addaction name="menuTurnos"/>
-   <addaction name="menuMovimientos"/>
    <addaction name="menuUsuarios"/>
    <addaction name="menuTalleres"/>
    <addaction name="menuHISTORIAL"/>
@@ -128,7 +128,7 @@
   </action>
   <action name="opcionStock">
    <property name="text">
-    <string>Gestión de Herramientas e Insumos</string>
+    <string>Gestión de Stock</string>
    </property>
    <property name="font">
     <font>
