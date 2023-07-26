@@ -18,6 +18,7 @@ import types
 import sqlite3
 import pandas as pd
 import datetime as time
+from misc import mostrarContrasena
 from textwrap import dedent
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -153,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(pathResumen, self.pantallaResumen)
 
         # Queremos aplicar cambios a todas las pantallas
-        # # Primero, hacemos un set que contenga todas las tablas
+        # # Primero, hacemos una tupla que contenga todas las tablas.
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
                      self.pantallaMovs, self.pantallaOtroPersonal,
@@ -162,18 +163,26 @@ class MainWindow(QtWidgets.QMainWindow):
                      self.pantallaClases, self.pantallaReps,
                      self.pantallaUbis, self.pantallaRealizarMov,
                      self.pantallaDeudas, self.pantallaResumen)
-        # Después, insertamos
+        # # Por cada pantalla ...
         for pantalla in pantallas:
+            # # ... la añadimos al stackedwidget de la ventana
+            # # principal
             self.stackedWidget.addWidget(pantalla)
+            # #, intentamos...
             try:
+                # # insertarle el logo de la barra de búsqueda
                 path = f'ui{os.sep}rsc{os.sep}icons{os.sep}buscar.png'
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
+                # # aplicar estilos y funcionalidad a todas las tablas
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 13))
                 pantalla.tableWidget.cellChanged.connect(self.habilitarSaves)
+            # # Si ocurre algún error, es porque la pantalla no tenía
+            # # una tabla. En ese caso, ignoramos la excepción.
             except BaseException:
                 pass
 
+        # Conectamos las opciones del menú a sus respectivas pantallas
         self.opcionStock.triggered.connect(self.fetchStock)
         self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
         self.opcionGrupos.triggered.connect(self.fetchGrupos)
@@ -190,17 +199,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionDeudas.triggered.connect(self.fetchDeudas)
         self.opcionResumen.triggered.connect(self.fetchResumen)
 
+        # Añadimos un botón de mostrar contraseña para la pantalla de
+        # inicio de sesión.
+        # Primero aplicamos el ícono.
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
         pixmap = QtGui.QPixmap(path)
         self.pantallaLogin.showPass.setIcon(QtGui.QIcon(QtGui.QIcon(pixmap)))
         self.pantallaLogin.showPass.setIconSize(QtCore.QSize(25, 25))
+        # Le damos funcionalidad.
         self.pantallaLogin.showPass.clicked.connect(
-            lambda: self.mostrarContrasena(
-                self.pantallaLogin.showPass, self.pantallaLogin.passwordLineEdit
-            )
-        )
+            lambda: mostrarContrasena(
+                self.pantallaLogin.showPass,
+                self.pantallaLogin.passwordLineEdit))
+                
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
+        #
         sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
         sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
 
@@ -401,32 +415,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.pantallaLogin.usuarioState.setText("usuario incorrecto")
             self.pantallaLogin.passwordState.setText("")
-
-
-    def mostrarContrasena(self, boton, entry: QtWidgets.QLineEdit):
-        """Este método muestra o esconde lo ingresado en el campo de
-        contraseña vinculado dependiendo del estado de activación del 
-        botón.
-
-        Parámetros
-        ----------
-            entry : QtWidgets.QLineEdit
-                El entry de contraseña vinculado al botón.
-        """
-        # Si el botón está presionado
-        if boton.isChecked():
-            # Muestra lo ingresado en el campo.
-            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
-            # Cambia el ícono.
-            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}esconder.png'
-            pixmap = QtGui.QPixmap(path)
-        else:
-            # Cifra lo ingresado en el campo.
-            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
-            pixmap = QtGui.QPixmap(path)
-        boton.setIcon(QtGui.QIcon(pixmap))
-        boton.setIconSize(QtCore.QSize(25, 25))
 
     def generarBotones(self, funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
                        tabla: QtWidgets.QTableWidget, numFila: int):
