@@ -214,7 +214,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
-        #
+        # Empezamos a conectar los botones de agregar de todas las
+        # gestiones.
+
         sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
         sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
 
@@ -240,7 +242,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
                                        self.saveSubgrupos,
-                                       self.deleteSubgrupos, (0, 1), None,
+                                       self.deleteSubgrupos, (1, 2), None,
                                        (2,), [sugerenciasGruposS]))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
 
@@ -544,112 +546,6 @@ class MainWindow(QtWidgets.QMainWindow):
             bdd.con.commit()
             mensaje = """       Movimiento cargado con exito."""
             return PopUp("Aviso", mensaje).exec()
-
-    def insertarFilas(self, tabla: QtWidgets.QTableWidget,
-                      funcGuardar: types.FunctionType,
-                      funcEliminar: types.FunctionType,
-                      camposObligatorios: tuple | None = None,
-                      camposNoEditables: tuple | None = None,
-                      camposSugeridos: tuple | None = None,
-                      sugerencias: tuple | list | None= None,
-                      campoEspecial: int | None = None):
-        """Este método inserta una nueva fila en la tabla stock.
-
-        Si la fila anterior fue recientemente ingresada y los datos no
-        fueron modificados, en vez de añadir una nueva fila se le
-        muestra un mensaje al usuario pidiéndole que ingrese los datos
-        primero.
-
-        Parámetros
-        ----------
-            tabla: QtWidgets.QTableWidget
-                La tabla a la que se le van a insertar los elementos.
-            camposObligatorios: tuple
-                Los campos de la fil anterior que se van a verificar
-                para que no estén en blanco, evitando así que se puedan
-                insertar múltiples filas en blanco.
-            funcGuardar: types.FunctionType
-                La función guardar que el botón guardar de la fila
-                ejecutará.
-            funcEliminar: types.FunctionType
-                La función eliminar que el botón eliminar de la fila
-                ejecutará.
-        """
-        try:
-            tabla.disconnect()
-        except:
-            pass
-        # Las filas en la tabla se ingresan escribiendo el índice en
-        # el que queremos que se ingresen. Para ingresar la fila al
-        # final, tenemos que saber el índice del final. Para obtenerlo,
-        # contamos la cantidad de filas: por ejemplo, si queremos
-        # agregar una fila al final y la tabla tiene 5 filas, si las
-        # contamos vamos a obtener el número 5; si usamos ese número
-        # como índice para agregar la fila, la fila se va a agregar al
-        # final.
-        indiceFinal = tabla.rowCount()
-
-        # Antes de agregar la fila, queremos comprobar que la última
-        # fila de la tabla no tenga campos vacíos. Esto lo hacemos
-        # para que el usuario no pueda ingresar múltiples filas vacías
-        # haciendo que el sistema detecte si la fila anterior está
-        # vacía.
-        ultimaFila = indiceFinal-1
-        if ultimaFila >= 0:
-            # Por cada campo que no debe ser nulo...
-            for iCampo in camposObligatorios:
-                # Si el campo está vacio...
-                if tabla.item(ultimaFila, iCampo) is not None:
-                    texto=tabla.item(ultimaFila, iCampo).text()
-                else:
-                    texto=tabla.cellWidget(ultimaFila, iCampo).text()
-                if texto == "":
-                    # Le pide al usuario que termine de llenar los campos
-                    # y corta la función.
-                    mensaje = "Ha agregado una fila y todavía no ha ingresado los datos de la fila anterior. Ingreselos, guardelos cambios e intente nuevamente."
-                    return PopUp("Error", mensaje).exec()
-
-        # Se añade la fila al final.
-        tabla.insertRow(indiceFinal)
-        tabla.scrollToItem(tabla.item(indiceFinal-1, 0),
-                           QtWidgets.QAbstractItemView.ScrollHint.PositionAtBottom)
-        # Se añaden campos de texto en todas las celdas ya que por
-        # defecto no vienen.
-        for numCol in range(tabla.columnCount() - 2):
-            if camposNoEditables:
-                if numCol not in camposNoEditables:
-                    if camposSugeridos and numCol in camposSugeridos:
-                        indice=camposSugeridos.index(numCol)
-                        campoSugerido = ParamEdit(sugerencias[indice], "")
-                        #Este arreglo no es el mejor del mundo, pero por ahora funca
-                        if campoEspecial and campoEspecial==numCol:
-                            campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
-                        tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
-                    else:
-                        tabla.setItem(indiceFinal, numCol,
-                                    QtWidgets.QTableWidgetItem(""))
-                else:
-                    campoNoEditable = QtWidgets.QTableWidgetItem("")
-                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                                             QtCore.Qt.ItemFlag.ItemIsEnabled)
-                    tabla.setItem(indiceFinal, numCol, campoNoEditable)
-            # No me encanta este arreglo porque se podría ahorrar
-            # código, pero ahí está
-            else:
-                if camposSugeridos and numCol in camposSugeridos:
-                    indice=camposSugeridos.index(numCol)
-                    campoSugerido = ParamEdit(sugerencias[indice], "")
-                    #Este arreglo no es el mejor del mundo, pero por ahora funca
-                    if campoEspecial and campoEspecial==numCol:
-                        campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
-                    tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
-                else:
-                    tabla.setItem(indiceFinal, numCol,
-                                QtWidgets.QTableWidgetItem(""))
-            
-        self.generarBotones(
-            funcGuardar, funcEliminar, tabla, indiceFinal)
-        tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
     
     def habilitarSaves(self, row, col, tabla: QtWidgets.QTableWidget | None = None):
         if tabla is None:
