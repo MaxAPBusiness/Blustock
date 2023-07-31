@@ -18,6 +18,7 @@ class ParamEdit(QtWidgets.QLineEdit):
     """
     def __init__(self, sugerencias: list | tuple, texto: str):
         super().__init__()
+        texto=str(texto)
         self.setObjectName('paramEdit')
         self.setText(texto)
         self.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
