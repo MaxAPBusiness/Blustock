@@ -14,7 +14,6 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 # Ahora sí, hacemos todos los imports
 import sys
-import types
 import sqlite3
 import pandas as pd
 import datetime as time
@@ -25,7 +24,6 @@ from dateutil.relativedelta import relativedelta
 from db.bdd import bdd
 from dal.dal import dal
 from ui.presets.popup import PopUp
-from ui.presets.boton import BotonFila
 from ui.presets.param_edit import ParamEdit
 from ui.presets.Toolbotoon import toolboton
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
@@ -216,18 +214,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Empezamos a conectar los botones de agregar de todas las
         # gestiones.
-
+        # Primero obtenemos sugerencias para los campos con cuadro de 
+        # sugerencia de las tablas.
         sugerenciasGrupos=[i[0] for i in bdd.cur.execute(
             'SELECT descripcion FROM grupos').fetchall()]
         sugerenciasUbis=[i[0] for i in bdd.cur.execute(
             'SELECT descripcion FROM ubicaciones').fetchall()]
-
+        # Conectamos el botón.
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaStock.tableWidget, self.saveStock,
-                self.deleteStock, core.camposStock,
+                self.deleteStock, self.actualizarTotal, core.camposStock[0],
                 (sugerenciasGrupos, [], sugerenciasUbis,),
                 self.actualizarSugerenciasSubgrupos))
+        # Además, escondemos la primera columna. Esto es porque es la
+        # columna id es necesaria para tener el número de fila pero no
+        # queremos que la vean los usuarios porque no es info necesaria
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -237,8 +239,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                self.deleteOtroPersonal, core.camposOtroPersonal,
-                [sugerenciasClasesP]))
+                self.deleteOtroPersonal, self.habilitarSaves,
+                core.camposOtroPersonal[0], [sugerenciasClasesP]))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
 
         sugerenciasGruposS=[i[0] for i in bdd.cur.execute(
@@ -246,14 +248,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
-                self.deleteSubgrupos, core.camposSubgrupos,
-                [sugerenciasGruposS]))
+                self.deleteSubgrupos, self.habilitarSaves,
+                core.camposSubgrupos[0], [sugerenciasGruposS]))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
 
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget, self.saveGrupos,
-                self.deleteGrupos, core.camposGrupos))
+                self.deleteGrupos, self.habilitarSaves, core.camposGrupos[0]))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -263,8 +265,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
-                self.saveAlumnos, self.deleteAlumnos, core.camposAlumnos, 
-                [sugerenciasClasesA]))
+                self.saveAlumnos, self.deleteAlumnos,  self.habilitarSaves,
+                core.camposAlumnos[0], [sugerenciasClasesA]))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
@@ -272,7 +274,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, self.saveUbicaciones,
-                self.deleteUbicaciones, core.camposUbis))
+                self.deleteUbicaciones, self.habilitarSaves,
+                core.camposUbis[0]))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
 
         sugerenciasCat=[i[0] for i in bdd.cur.execute(
@@ -280,7 +283,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
             self.pantallaClases.tableWidget, self.saveClases,
-            self.deleteClases, core.camposClases, [sugerenciasCat]))
+            self.deleteClases, self.habilitarSaves, core.camposClases[0],
+            [sugerenciasCat]))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -290,7 +294,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, self.saveUsuarios,
-                self.deleteUsuarios, core.camposUsuarios, [sugerenciasClasesU]))
+                self.deleteUsuarios, self.habilitarSaves,
+                core.camposUsuarios[0], [sugerenciasClasesU]))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
         self.pantallaStock.tableWidget.cellChanged.connect(
@@ -517,7 +522,27 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = """       Movimiento cargado con exito."""
             return PopUp("Aviso", mensaje).exec()
     
-    def habilitarSaves(self, row, col, tabla: QtWidgets.QTableWidget | None = None):
+    def habilitarSaves(self, row: int | None = None, col: int | None = None,
+                       tabla: QtWidgets.QTableWidget | None = None):
+        """Este método habilita el botón de guardar de una fila de una
+        tabla de una gestión.
+        
+        Parámetros
+        ----------
+            row: int | None = None
+                La fila en la que está el boton.
+                Default: None.
+            col: int | None = None
+                La columna de la que se ejecutó la función, no se usa
+                pero es necesario declararla porque, si se ejecuta
+                de una forma especial, esa ejecución pasa por defecto
+                un parámetor de columna que, si no guardaramos en ese
+                parámetro, estaría sobreescribiendo el parámetro tabla.
+                Default: None.
+            tabla: QtWidgets.QTableWidget | None = None
+                La tabla en la que está el botón.
+                Default:None
+        """
         if tabla is None:
             tabla=self.sender()
         if row is None:

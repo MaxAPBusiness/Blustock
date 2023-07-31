@@ -5,6 +5,18 @@ Funciones
     mostrarContrasena(boton, entry: QtWidgets.QLineEdit):
         Muestra o esconde lo ingresado en el campo de contraseña
         vinculado dependiendo del estado de activación del botón.
+    insertarFilas(tabla: QtWidgets.QTableWidget,
+                  funcGuardar: types.FunctionType,
+                  funcEliminar: types.FunctionType,
+                  campos: tuple,
+                  sugerencias: tuple | list | None = None,
+                  funcEspecial: types.FunctionType | None = None):
+        Inserta una nueva fila en una tabla de una gestión.
+    generarBotones(funcGuardar: types.FunctionType,
+                   funcEliminar: types.FunctionType,
+                   tabla: QtWidgets.QTableWidget, numFila: int):
+        Genera botones para guardar cambios y eliminar filas y los
+        inserta en una fila de una tabla de la UI.
 """
 import os
 import types
@@ -40,23 +52,27 @@ def mostrarContrasena(boton: QtWidgets.QCheckBox, entry: QtWidgets.QLineEdit):
     boton.setIcon(QtGui.QIcon(pixmap))
     boton.setIconSize(QtCore.QSize(25, 25))
 
-camposStock=(2, 1, 1, 0, 0, 2, 2, 4, 3, 3)
-camposAlumnos=(2, 1, 3, 1)
-camposClases=(2, 1, 3)
-camposDeudas=(2, 2, 2, 2, 2, 2, 2, 2)
-camposGrupos=(2, 1)
-camposHistorial=(2, 2, 2, 2, 2, 2)
-camposMovs=(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
-camposOtroPersonal=(2, 1, 3, 1)
-camposSubgrupos=(2, 1, 3)
-camposTurnos=(2, 2, 2, 2, 2, 2, 2)
-camposUbis=(2, 1)
-camposUsuarios=(2, 1, 3, 1, 1, 1)
+# Creamos matrices que llevan la información del tipo de campo y el
+# tipo de valor del campo, respectivamente.
+camposStock=((2, 1, 1, 0, 0, 2, 2, 4, 3, 3), (0, 1, 0, 0, 0, 0, 0, 2, 2, 2))
+camposAlumnos=((2, 1, 3, 1), (0, 1, 2, 0))
+camposClases=((2, 1, 3), (0, 1, 2))
+camposDeudas=((2, 2, 2, 2, 2, 2, 2, 2), (1, 0, 1, 0, 1, 0, 0, 1))
+camposGrupos=((2, 1), (0, 1))
+camposHistorial=((2, 2, 2, 2, 2, 2), (1, 1, 1, 1, 1, 1))
+camposMovs=((2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+            (0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1))
+camposOtroPersonal=((2, 1, 3, 1), (0, 1, 2, 0))
+camposSubgrupos=((2, 1, 3), (0, 1, 2))
+camposTurnos=((2, 2, 2, 2, 2, 2, 2), (0, 1, 1, 1, 1, 1, 1))
+camposUbis=((2, 1), (0, 1))
+camposUsuarios=((2, 1, 3, 1, 1, 1), (0, 1, 2, 1, 1, 1))
 
 def insertarFilas(tabla: QtWidgets.QTableWidget,
                   funcGuardar: types.FunctionType,
                   funcEliminar: types.FunctionType,
-                  campos: tuple, sugerencias: tuple | list | None = None,
+                  funcTabla: types.FunctionType, campos: tuple,
+                  sugerencias: tuple | list | None = None,
                   funcEspecial: types.FunctionType | None = None):
     """Este método inserta una nueva fila en una tabla de una gestión.
 
@@ -64,16 +80,30 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     ----------
         tabla: QtWidgets.QTableWidget
             La tabla a la que se le van a insertar los elementos.
-        camposObligatorios: tuple
-            Los campos de la fil anterior que se van a verificar
-            para que no estén en blanco, evitando así que se puedan
-            insertar múltiples filas en blanco.
         funcGuardar: types.FunctionType
             La función guardar que el botón guardar de la fila
             ejecutará.
         funcEliminar: types.FunctionType
             La función eliminar que el botón eliminar de la fila
             ejecutará.
+        campos: tuple
+            Una tupla que contenga cada campo de la tabla y su tipo.
+            Para ver una lista de qué significa cada tipo de campo, ver
+            el readme.
+        sugerencias: tuple | list | None = None
+            Una lista que debe contener una lista de sugerencia, que
+            contenga todas las sugerencias, por cada campo que lleve un
+            cuadro de sugerencia. Si se pasa None, se entenderá que la
+            tabla no tiene cuadros de sugerencia.
+            Default: None.
+        funcEspecial: types.FunctionType | None = None
+            Una función que se ejecutará al finalizar la edición de un
+            campo determinado. Si se pasa None, se entenderá que la
+            tabla no tiene campos de este tipo.
+            Default: None.
+        funcTabla: types.FunctionType | None = None
+            La función que se conectará con la tabla, que se desconecta
+            para evitar bugs.
     """
     # Desconectamos la tabla para que no genere problemas
     try:
@@ -115,29 +145,65 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     tabla.scrollToItem(
         tabla.item(indiceFinal-1, 0),
         QtWidgets.QAbstractItemView.ScrollHint.PositionAtBottom)
-    # Añadimos campos de texto en todas las celdas.
+    # Por cada número de campo y tipo de campo de la tabla...
     for nCampo, tipoCampo in enumerate(campos):
+        # Si el tipo de campo no es con sugerencia...
         if tipoCampo in {0, 1, 2}:
+            # Se crea el campo como un TableWidgetItem
             item=QtWidgets.QTableWidgetItem("")
+            # Si el tipo de campo es no editable...
             if tipoCampo == 2:
+                # Hacemos que el campo sea solo seleccionable.
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
+            # Agregamos el item a la celda específica.
             tabla.setItem(indiceFinal, nCampo, item)
+        # Si no...
         else:
+            # Significa que el campo es de sugerencia.
+            # Creamos un contador para recorrer la lista de listas de
+            # sugerencias.
             indice=0
+            # Recorremos la lista de sugerencias fijándonos cuantos
+            # campos de sugerencias hay en la tabla, ya que la cantidad
+            # de listas de sugerencias es igual a la cantidad de campos
+            # de sugerencia, y cada lista corresponde a cada campo de
+            # antes a despues.
             for i, j in enumerate(campos):
+                # ... recorremos cada tipo de campo de la tabla y
+                # verificamos que sea con sugerencia...
                 if j in {3, 4}:
-                    if i >= nCampo:
-                        break
-                    else:
+                    #... si el campo que se quiere ingresar no está
+                    # en ese índice...
+                    if i < nCampo:
+                        # Entendemos que su lista de sugerencia está
+                        # después en la lista de listas, entonces
+                        # sumamos 1 al índice en el que puede estar.
+                        # Haciendo esto, obtenemos el índice de la
+                        # lista de sugerencias relacionada con el campo
                         indice += 1
+                    #...si está en ese índice, ya encontramos el campo
+                    else:
+                        #...y cortamos el bucle.
+                        break
+            # Creamos el lineedit con sugerencias usando el índice
+            # obtenido en el bucle anterior.
             campoSugerido = ParamEdit(sugerencias[indice], "")
+            # Si el tipo de campo es de una función especial...
             if tipoCampo == 4:
-                campoSugerido.editingFinished.connect(funcEspecial)
+                # Conectamos el cuadro de sugerencias con la función
+                # especial cuando se termine de editar.
+                campoSugerido.textChanged.connect(funcEspecial)
+            else:
+                campoSugerido.textChanged.connect(
+                    lambda: funcTabla(None, tabla))
+            # Añadimos el campo a la celda.
             tabla.setCellWidget(indiceFinal, nCampo, campoSugerido)
         
+    # Añadimos botones a la fila
     generarBotones(funcGuardar, funcEliminar, tabla, indiceFinal)
-    tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
+    # Conectamos a la tabla a su función anterior
+    tabla.cellChanged.connect(funcTabla)
 
 def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
                    tabla: QtWidgets.QTableWidget, numFila: int):
