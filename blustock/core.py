@@ -195,8 +195,7 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
                 # especial cuando se termine de editar.
                 campoSugerido.textChanged.connect(funcEspecial)
             else:
-                campoSugerido.textChanged.connect(
-                    lambda: funcTabla(None, tabla))
+                campoSugerido.textChanged.connect(lambda: funcTabla(None, None, tabla))
             # Añadimos el campo a la celda.
             tabla.setCellWidget(indiceFinal, nCampo, campoSugerido)
         
