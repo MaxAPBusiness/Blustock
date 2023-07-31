@@ -50,10 +50,10 @@ camposMovs=(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
 camposOtroPersonal=(2, 1, 3, 1)
 camposSubgrupos=(2, 1, 3)
 camposTurnos=(2, 2, 2, 2, 2, 2, 2)
-camposUbicaciones=(2, 1)
+camposUbis=(2, 1)
 camposUsuarios=(2, 1, 3, 1, 1, 1)
 
-def insertarFilas(self, tabla: QtWidgets.QTableWidget,
+def insertarFilas(tabla: QtWidgets.QTableWidget,
                   funcGuardar: types.FunctionType,
                   funcEliminar: types.FunctionType,
                   campos: tuple, sugerencias: tuple | list | None = None,
@@ -127,7 +127,7 @@ def insertarFilas(self, tabla: QtWidgets.QTableWidget,
             indice=0
             for i, j in enumerate(campos):
                 if j in {3, 4}:
-                    if i > nCampo:
+                    if i >= nCampo:
                         break
                     else:
                         indice += 1

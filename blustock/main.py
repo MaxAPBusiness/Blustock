@@ -18,7 +18,7 @@ import types
 import sqlite3
 import pandas as pd
 import datetime as time
-from core import mostrarContrasena, insertarFilas, generarBotones
+import core
 from textwrap import dedent
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -208,7 +208,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaLogin.showPass.setIconSize(QtCore.QSize(25, 25))
         # Le damos funcionalidad.
         self.pantallaLogin.showPass.clicked.connect(
-            lambda: mostrarContrasena(
+            lambda: core.mostrarContrasena(
                 self.pantallaLogin.showPass,
                 self.pantallaLogin.passwordLineEdit))
                 
@@ -217,14 +217,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # Empezamos a conectar los botones de agregar de todas las
         # gestiones.
 
-        sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-        sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
+        sugerenciasGrupos=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
+        sugerenciasUbis=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM ubicaciones').fetchall()]
 
         self.pantallaStock.pushButton_2.clicked.connect(
-            lambda: insertarFilas(
+            lambda: core.insertarFilas(
                 self.pantallaStock.tableWidget, self.saveStock,
-                self.deleteStock, (1, 2, 7, 8, 9), (5, 6,), (7, 8, 9),
-                (sugerenciasGrupos, [], sugerenciasUbis,),7))
+                self.deleteStock, core.camposStock,
+                (sugerenciasGrupos, [], sugerenciasUbis,),
+                self.actualizarSugerenciasSubgrupos))
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -232,24 +235,25 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Personal';'''
         sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
-            lambda: insertarFilas(
+            lambda: core.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                self.deleteOtroPersonal, (1, 2, 3), None, (2,), [sugerenciasClasesP]
-            )
-        )
+                self.deleteOtroPersonal, core.camposOtroPersonal,
+                [sugerenciasClasesP]))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
-        sugerenciasGruposS=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+
+        sugerenciasGruposS=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaSubgrupos.tableWidget,
-                                       self.saveSubgrupos,
-                                       self.deleteSubgrupos, (1, 2), None,
-                                       (2,), [sugerenciasGruposS]))
+            lambda: core.insertarFilas(
+                self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
+                self.deleteSubgrupos, core.camposSubgrupos,
+                [sugerenciasGruposS]))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
 
         self.pantallaGrupos.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaGrupos.tableWidget,
-                                       self.saveGrupos,
-                                       self.deleteGrupos, (1,)))
+            lambda: core.insertarFilas(
+                self.pantallaGrupos.tableWidget, self.saveGrupos,
+                self.deleteGrupos, core.camposGrupos))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -257,24 +261,26 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Alumno';'''
         sugerenciasClasesA=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaAlumnos.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaAlumnos.tableWidget,
-                                       self.saveAlumnos,
-                                       self.deleteAlumnos, (1, 2, 3), None, 
-                                       (2,), [sugerenciasClasesA]))
+            lambda: core.insertarFilas(
+                self.pantallaAlumnos.tableWidget,
+                self.saveAlumnos, self.deleteAlumnos, core.camposAlumnos, 
+                [sugerenciasClasesA]))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
+
         self.pantallaUbis.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaUbis.tableWidget,
-                                       self.saveUbicaciones,
-                                       self.deleteUbicaciones, (0,)))
+            lambda: core.insertarFilas(
+                self.pantallaUbis.tableWidget, self.saveUbicaciones,
+                self.deleteUbicaciones, core.camposUbis))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
-        sugerenciasCat=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
+
+        sugerenciasCat=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaClases.tableWidget,
-                                       self.saveClases,
-                                       self.deleteClases, (1, 2,), None,
-                                       (2,), [sugerenciasCat]))
+            lambda: core.insertarFilas(
+            self.pantallaClases.tableWidget, self.saveClases,
+            self.deleteClases, core.camposClases, [sugerenciasCat]))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -282,10 +288,9 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Usuario';'''
         sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaUsuarios.pushButton_2.clicked.connect(
-            lambda: insertarFilas(self.pantallaUsuarios.tableWidget,
-                                       self.saveUsuarios,
-                                       self.deleteUsuarios, (1, 2, 3, 4, 5),
-                                       None, (2,), [sugerenciasClasesU]))
+            lambda: core.insertarFilas(
+                self.pantallaUsuarios.tableWidget, self.saveUsuarios,
+                self.deleteUsuarios, core.camposUsuarios, [sugerenciasClasesU]))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
         self.pantallaStock.tableWidget.cellChanged.connect(
@@ -307,7 +312,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
-
         self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
 
@@ -319,7 +323,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUbis.lineEdit.editingFinished.connect(
             self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
-
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
 
@@ -658,11 +661,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Cambiamos la altura de la fila.
@@ -1002,7 +1001,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveAlumnos(datos), lambda: self.deleteAlumnos(datos), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
@@ -1295,7 +1294,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveGrupos(datos), lambda: self.deleteGrupos(datos), tabla, rowNum)
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1438,7 +1437,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -1665,7 +1664,7 @@ class MainWindow(QtWidgets.QMainWindow):
             grupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 2, grupos)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
             for col in range(tabla.columnCount()):
@@ -1826,7 +1825,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveUsuarios(datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
@@ -1988,7 +1987,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveClases(datos), lambda: self.deleteClases(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -2027,7 +2026,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveUbicaciones(datos), lambda: self.deleteUbicaciones(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
