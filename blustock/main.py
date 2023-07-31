@@ -298,6 +298,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 core.camposUsuarios[0], [sugerenciasClasesU]))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
+        # Conectamos los parámetros de las gestiones y listados para
+        # que se refresquen las tablas cada vez que el usuario cambie
+        # un parámetro.
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
@@ -348,12 +351,17 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.boton)
         self.menubar.setCornerWidget(widget_with_layout,QtCore.Qt.Corner.TopRightCorner)
 
+        # Actualizamos las fechas a los valores actuales.
         self.actualizarHastaFechas()
+
+        # Hacemos un timer que actualice las fechas máximas cada 5 minutos
         timer=QtCore.QTimer()
         timer.timeout.connect(self.actualizarHastaFechas)
         timer.start(300000)
 
+        # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
+        # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.setWindowTitle('Blustock')
         self.showMaximized()
     
