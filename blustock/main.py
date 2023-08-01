@@ -259,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-
+        self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentTextChanged.connect(self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
@@ -316,7 +316,21 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.menubar.actions()[4].setVisible(False)
                 pañolero = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
                 if pañolero != None:
-                    mensaje = "hay un turno sin finalizar desea continuarlo o finalizarlo?"
+                    mensaje = "Hay un turno sin finalizar, desea continuarlo o finalizarlo?"
+                    popup = PopUp("Turno",mensaje)
+                    
+                    class sopas(QtCore.QObject):
+                        def eventFilter(self, obj, event):
+                            # Ignore all key events
+                            if event.type() in [QtCore.QEvent.Type.KeyPress, QtCore.QEvent.Type.KeyRelease]:
+                                return True  # Return True to indicate the event has been handled and should be ignored
+                            return super().eventFilter(obj, event)
+                        
+                    filtro = sopas(popup)
+                    popup.installEventFilter(filtro)
+                    popup.setWindowFlags(QtCore.Qt.WindowType.CustomizeWindowHint)
+                    popup.setWindowFlag(QtCore.Qt.WindowType.WindowTitleHint)
+                    popup.button(QtWidgets.QMessageBox.StandardButton.Cancel).hide()
                     popup = PopUp("Turno",mensaje).exec()
                     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
                         self.label.setText("El pañolero en turno es: " + pañolero[0])
@@ -325,6 +339,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         for i in range(7):
                             if i != 3:
                                 self.menubar.actions()[i].setVisible(False)
+
                     if popup == QtWidgets.QMessageBox.StandardButton.No:
                         profe = dal.obtenerDatos("usuarios", self.usuario,)
                         hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -338,8 +353,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
                             self.menubar.actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(True)
-
-
+                            
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
 
@@ -418,6 +432,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaNmovimiento.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaNmovimiento.cursoComboBox.currentText(),):
             self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
+    def check(self):
+        if self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
+            self.pantallaNmovimiento.estadoComboBox.removeItem(1)
+        else:
+            for i in dal.obtenerDatos("estados", ""):
+                print(type(self.pantallaNmovimiento.estadoComboBox.count()))
+                if 2 == self.pantallaNmovimiento.estadoComboBox.count():
+                    self.pantallaNmovimiento.estadoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
         self.pantallaNmovimiento.tipoDeMovimientoComboBox.clear()
@@ -447,14 +469,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
-    def restar(self,cant,herramienta,estado):
+    
+    def sumar(self,cant,herramienta,estado):
         estado = estado[0][1]
         estado = estado[estado.index(" "):]
         estado = estado[1:]
         estado = "cant_" + estado.lower()
         bdd.cur.execute("""UPDATE stock set ? = ? + ? where id = ?""",(estado,estado,cant,herramienta[0]))
 
-    def sumar(self,cant,herramienta,estado):
+    def restar(self,cant,herramienta,estado):
         estado = estado[0][1]
         estado = estado[estado.index(" "):]
         estado = estado[1:]
@@ -466,7 +489,6 @@ class MainWindow(QtWidgets.QMainWindow):
             "select id from turnos where fecha_egr IS NULL").fetchall()
         tipo = dal.obtenerDatos(
             "tipos_mov", self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText())
-        
         cant = self.pantallaNmovimiento.cantidadSpinBox.value()
         estado = dal.obtenerDatos(
             "estados", self.pantallaNmovimiento.estadoComboBox.currentText())
@@ -492,23 +514,30 @@ class MainWindow(QtWidgets.QMainWindow):
             mayor a 0."""
             return PopUp("Error", mensaje).exec()
         else:
-            bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                            (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
-            
-            if tipo[0][1] == ("1"):
-                self.sumar(cant,herramienta[0],estado[0][1])
-            if tipo[0][0] == ("2"):
-                self.sumar(cant,herramienta[0],estado[0][1])
-            if tipo[0][0] == ("3"):
-                self.restar(cant,herramienta[0],estado[0][1])
-            if tipo[0][0] == ("4"):
-                self.sumar(cant,herramienta[0],estado[0][1])
-            if tipo[0][0] == ("5"):
-                self.restar(cant,herramienta[0],estado[0][1])
-
-            bdd.con.commit()
-            mensaje = """       Movimiento cargado con exito."""
-            return PopUp("Aviso", mensaje).exec()
+            if persona != "" and persona != None:
+                if turno == " " or turno == None or turno == []:
+                    turno = bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()
+                bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
+                                (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+                if tipo[0][1] == ("1"):
+                    self.sumar(cant,herramienta[0],estado[0][1])
+                if tipo[0][0] == ("2"):
+                    self.restar(cant,herramienta[0],estado[0][1])
+                    self.sumar(cant,herramienta[0],"En Reparación")
+                if tipo[0][0] == ("3"):
+                    self.restar(cant,herramienta[0],estado[0][1])
+                if tipo[0][0] == ("4"):
+                    self.sumar(cant,herramienta[0],estado[0][1])
+                if tipo[0][0] == ("5"):
+                    self.restar(cant,herramienta[0],estado[0][1])
+                    self.sumar(cant,herramienta[0],"De Baja")
+                
+                bdd.con.commit()
+                mensaje = """       Movimiento cargado con exito."""
+                return PopUp("Aviso", mensaje).exec()
+            else:            
+                mensaje = """       Por favor ingrese el nombre del alumno solicitante."""
+                return PopUp("Error", mensaje).exec()
 
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
                       funcGuardar: types.FunctionType,
