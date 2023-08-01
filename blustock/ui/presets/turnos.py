@@ -18,7 +18,7 @@ class NuevoTurno(QDialog):
         self.turnFinalized = None
         self.usuario = usuario
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'cargar_turno.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.pardir),os.getcwd(),"ui", 'screens_uis', 'cargar_turno.ui'), self)
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.setWindowTitle("Cargar turno")
 
