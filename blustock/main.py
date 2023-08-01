@@ -387,6 +387,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
+        print(QtGui.QGuiApplication.primaryScreen().availableSize())
+        self.setBaseSize(QtGui.QGuiApplication.primaryScreen().availableSize())
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,QtWidgets.QSizePolicy.Policy.Expanding)
         self.setWindowTitle('Blustock')
         self.showMaximized()
     
