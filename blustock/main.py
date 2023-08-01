@@ -20,6 +20,7 @@ import pandas as pd
 import datetime as time
 import core
 import types
+from unidecode import unidecode
 from textwrap import dedent
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -517,18 +518,43 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(13)
     
     def sumar(self,cant,herramienta,estado):
-        estado = estado[0][1]
-        estado = estado[estado.index(" "):]
-        estado = estado[1:]
-        estado = "cant_" + estado.lower()
-        bdd.cur.execute("""UPDATE stock set ? = ? + ? where id = ?""",(estado,estado,cant,herramienta[0]))
+            try:
+                estado = estado[estado.index(" "):]
+                estado = estado[1:]
+            except:
+                pass
+            estado = unidecode(estado)
+            estado = "cant_" + estado.lower()
+            query = f"select {estado} from stock WHERE id = ?"
+            params = (herramienta,)
+            if bdd.cur.execute(query,params)==None:
+                query = f"UPDATE stock SET {estado} = 0 + ? WHERE id = ?"
+            else:
+                query = f"UPDATE stock SET {estado} = {estado} + ? WHERE id = ?"
+                params = (cant, herramienta)
+            self.sopas=True
+            bdd.cur.execute(query,params)
 
     def restar(self,cant,herramienta,estado):
-        estado = estado[0][1]
-        estado = estado[estado.index(" "):]
-        estado = estado[1:]
-        estado = "cant_" + estado.lower()
-        bdd.cur.execute("""UPDATE stock set ? = ? - ? where id = ?""",(estado,estado,cant,herramienta[0]))
+        if bdd.cur.execute("select cant_condiciones from stock").fetchall()[0][0]-cant>=0:
+            try:
+                estado = estado[estado.index(" "):]
+                estado = estado[1:]
+            except:
+                pass
+            estado = unidecode(estado)
+            estado = "cant_" + estado.lower()
+            query = f"select {estado} from stock WHERE id = ?"
+            params = (herramienta,)
+            if bdd.cur.execute(query,params)==None:
+                query = f"UPDATE stock SET {estado} = 0 - ? WHERE id = ?"
+            else:
+                query = f"UPDATE stock SET {estado} = {estado} - ? WHERE id = ?"
+                params = (cant, herramienta)
+            bdd.cur.execute(query, params)
+            self.sopas=True
+        else:
+            self.sopas=False
 
     def saveMovimiento(self):
         turno = bdd.cur.execute(
@@ -556,8 +582,7 @@ class MainWindow(QtWidgets.QMainWindow):
         descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
         fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if cant == 0:
-            mensaje = """       Por favor ingrese un valor 
-            mayor a 0."""
+            mensaje = """Por favor ingrese un valor mayor a 0."""
             return PopUp("Error", mensaje).exec()
         else:
             if persona != "" and persona != None:
@@ -565,24 +590,31 @@ class MainWindow(QtWidgets.QMainWindow):
                     turno = bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()
                 bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
                                 (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
-                if tipo[0][1] == ("1"):
+                if tipo[0][0] == 1:
                     self.sumar(cant,herramienta[0],estado[0][1])
-                if tipo[0][0] == ("2"):
+                if tipo[0][0] == 2:
                     self.restar(cant,herramienta[0],estado[0][1])
-                    self.sumar(cant,herramienta[0],"En Reparación")
-                if tipo[0][0] == ("3"):
+                    self.sumar(cant,herramienta[0],"En reparacion")
+                if tipo[0][0] == 3:
                     self.restar(cant,herramienta[0],estado[0][1])
-                if tipo[0][0] == ("4"):
+                    self.sumar(cant,herramienta[0],"prest")
+                if tipo[0][0] == 4:
                     self.sumar(cant,herramienta[0],estado[0][1])
-                if tipo[0][0] == ("5"):
+                    self.restar(cant,herramienta[0],"prest")
+                if tipo[0][0] == 5:
                     self.restar(cant,herramienta[0],estado[0][1])
-                    self.sumar(cant,herramienta[0],"De Baja")
+                    self.sumar(cant,herramienta[0],"De baja")
                 
                 bdd.con.commit()
-                mensaje = """       Movimiento cargado con exito."""
-                return PopUp("Aviso", mensaje).exec()
+                if self.sopas == True:
+                    mensaje = """Movimiento cargado con exito."""
+                    return PopUp("Aviso", mensaje).exec()
+                else:
+                    mensaje = """Movimiento cancelado no hay suficientes herramientas para realizar el movimiento."""
+                    return PopUp("Error", mensaje).exec()
+
             else:            
-                mensaje = """       Por favor ingrese el nombre del alumno solicitante."""
+                mensaje = """Por favor ingrese el nombre del alumno solicitante."""
                 return PopUp("Error", mensaje).exec()
 
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
