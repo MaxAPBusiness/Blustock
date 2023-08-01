@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1611</width>
-    <height>534</height>
+    <width>1285</width>
+    <height>1080</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,22 +64,6 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>lupa.png</pixmap>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QLineEdit" name="lineEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -110,7 +94,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_2">
+        <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -125,14 +109,17 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
        <property name="topMargin">
         <number>20</number>
        </property>
        <property name="bottomMargin">
         <number>20</number>
        </property>
-       <item>
+       <item row="0" column="0">
         <widget class="QLabel" name="label_8">
          <property name="font">
           <font>
@@ -144,7 +131,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="1">
         <widget class="QSpinBox" name="nId">
          <property name="minimumSize">
           <size>
@@ -165,59 +152,7 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_6">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Elemento: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="listaElem">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <item>
-          <property name="text">
-           <string>Todos</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_6">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
+       <item row="0" column="4">
         <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
@@ -229,7 +164,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="5">
         <widget class="QComboBox" name="listaPersona">
          <property name="minimumSize">
           <size>
@@ -249,8 +184,52 @@
          </item>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_7">
+       <item row="0" column="13">
+        <widget class="QComboBox" name="listaPanolero">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <item>
+          <property name="text">
+           <string>Todos</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="12">
+        <widget class="QLabel" name="label_7">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Pañolero: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="14">
+        <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -262,7 +241,7 @@
          </property>
         </spacer>
        </item>
-       <item>
+       <item row="1" column="4">
         <widget class="QLabel" name="label_4">
          <property name="minimumSize">
           <size>
@@ -286,7 +265,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="1" column="5">
         <widget class="QDateTimeEdit" name="desdeFecha">
          <property name="minimumSize">
           <size>
@@ -324,20 +303,7 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_8">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
+       <item row="1" column="6">
         <widget class="QLabel" name="label_5">
          <property name="minimumSize">
           <size>
@@ -361,7 +327,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item row="1" column="10">
         <widget class="QDateTimeEdit" name="hastaFecha">
          <property name="minimumSize">
           <size>
@@ -389,32 +355,7 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_9">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_9">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Turno: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
+       <item row="0" column="10">
         <widget class="QSpinBox" name="nTurno">
          <property name="minimumSize">
           <size>
@@ -435,39 +376,20 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_7">
+       <item row="0" column="6">
+        <widget class="QLabel" name="label_9">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>Pañolero: </string>
+          <string>Turno: </string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QComboBox" name="listaPanolero">
-         <property name="minimumSize">
-          <size>
-           <width>200</width>
-           <height>0</height>
-          </size>
-         </property>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="listaElem">
          <property name="font">
           <font>
            <pointsize>11</pointsize>
@@ -480,95 +402,120 @@
          </item>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Elemento: </string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
-      <widget class="QTableWidget" name="tableWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-       <attribute name="horizontalHeaderDefaultSectionSize">
-        <number>110</number>
-       </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>ID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Tipo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Elemento</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Estado</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Cantidad</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Motivo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Persona</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Fecha y Hora</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Turno</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Ubicación</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Pañorelo</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Profesor a cargo del turno</string>
-        </property>
-       </column>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidget">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>1200</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>110</number>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Tipo</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Elemento</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Estado</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Cantidad</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Motivo</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Persona</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Fecha y Hora</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Turno</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Ubicación</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Pañorelo</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Profesor a cargo del turno</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
