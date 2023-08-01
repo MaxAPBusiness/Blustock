@@ -5,22 +5,27 @@ Clases:
     MainWindow(qtw.QMainWindow): crea la ventana principal.
 
 Objetos:
-    app: La aplicación principal.
+    mainWindow: la ventana principal.
+    app: la aplicación principal.
 """
+# Antes de arrancar, establecemos el path con el que la app trabajará 
+# para evitar problemas de importar módulos
 import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
+
+# Ahora sí, hacemos todos los imports
 import sys
-import types
 import sqlite3
 import pandas as pd
 import datetime as time
+import core
+import types
 from textwrap import dedent
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from db.bdd import bdd
 from dal.dal import dal
 from ui.presets.popup import PopUp
-from ui.presets.boton import BotonFila
 from ui.presets.param_edit import ParamEdit
 from ui.presets.Toolbotoon import toolboton
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
@@ -39,96 +44,166 @@ class MainWindow(QtWidgets.QMainWindow):
         __init__(self):
             El constructor de la clase MainWindow.
 
-            Crea la ventana principal con una cabecera, un menú
-            izquierdo (inicialmente escondido) y una colección de
-            pantallas.
-    """
+            Crea la ventana principal con un menú inicialmente
+            escondido y una colección de pantallas.
 
+        actualizarHastaFechas(self):
+            Actualiza los filtros de fecha y hora con la fecha y hora
+            actuales.
+        
+        habilitarSaves(self, row: int | None = None,
+                       col: int | None = None,
+                       tabla: QtWidgets.QTableWidget | None = None):
+            Habilita el botón de guardar de una fila de una tabla de
+            una gestión.
+        
+        actualizarTotal(self, row: int, col: int,
+                        tabla: QtWidgets.QTableWidget | None = None):
+            Actualiza el campo total de la tabla stock cuando se
+            modifican las cantidades.
+        
+        fetchStock(self):
+            Actualiza las sugerencias de los campos de subgrupos al
+            editar lo ingresado en un campo de grupos relacionado, ya
+            que las sugerencias de subgrupos deben estar relacionadas
+            al grupo ingresado.
+    """
     def __init__(self):
+        """El constructor, crea la ventana principal con un menú
+        inicialmente escondido y una colección de pantallas."""
+        # Inicializamos la clase heredada
         super().__init__()
+
+        # Inicializamos el menú principal
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
+        
+        # Escondemos el menú para que no se pueda acceder apenas
+        # se inicia la aplicación.
         self.menubar.hide()
 
+        # Empezamos a crear todas las pantallas:
+        # # Creamos un widget vacío
         self.pantallaAlumnos = QtWidgets.QWidget()
-        uic.loadUi(
-            os.path.join(
-                os.path.abspath(os.getcwd()),
-                f'ui{os.sep}screens_uis{os.sep}alumnos.ui'
-            ), self.pantallaAlumnos)
-
+        # # Guardamos el path al archivo ui
+        pathAlumnos=os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}alumnos.ui')
+        # # Cargamos el ui al widget vacío
+        uic.loadUi(pathAlumnos, self.pantallaAlumnos)
+        
         self.pantallaGrupos = QtWidgets.QWidget()
-
         pathGrupos = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
-
         uic.loadUi(pathGrupos, self.pantallaGrupos)
 
         self.pantallaStock = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}stock.ui'), self.pantallaStock)
+        pathStock = os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}stock.ui')
+        uic.loadUi(pathStock, self.pantallaStock)
+
         self.pantallaHistorial = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}historial.ui'), self.pantallaHistorial)
-        self.pantallaMovimientos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}movimientos.ui'), self.pantallaMovimientos)
+        pathHistorial = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}historial.ui')
+        uic.loadUi(pathHistorial, self.pantallaHistorial)
+
+        self.pantallaMovs = QtWidgets.QWidget()
+        pathMovs = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}movimientos.ui')
+        uic.loadUi(pathMovs, self.pantallaMovs)
+
         self.pantallaOtroPersonal = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}otro_personal.ui'), self.pantallaOtroPersonal)
+        pathOtroPersonal = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}otro_personal.ui')
+        uic.loadUi(pathOtroPersonal, self.pantallaOtroPersonal)
+
         self.pantallaSubgrupos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd(
-        )), f'ui{os.sep}screens_uis{os.sep}subgrupos.ui'), self.pantallaSubgrupos)
+        pathSubgrupos = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}subgrupos.ui')
+        uic.loadUi(pathSubgrupos, self.pantallaSubgrupos)
+
         self.pantallaTurnos = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}turnos.ui'), self.pantallaTurnos)
+        pathTurnos = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}turnos.ui')
+        uic.loadUi(pathTurnos, self.pantallaTurnos)
+
         self.pantallaUsuarios = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(
-            os.getcwd()), f'ui{os.sep}screens_uis{os.sep}usuarios.ui'), self.pantallaUsuarios)
+        pathUsuarios = os.path.join(
+                                os.path.abspath(os.getcwd()),
+                                f'ui{os.sep}screens_uis{os.sep}usuarios.ui')
+        uic.loadUi(pathUsuarios, self.pantallaUsuarios)
+
         self.pantallaLogin = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}login.ui'), self.pantallaLogin)
+        pathLogin = os.path.join(os.path.abspath(os.getcwd()),
+                                 f'ui{os.sep}screens_uis{os.sep}login.ui')
+        uic.loadUi(pathLogin, self.pantallaLogin)
+
         self.pantallaClases = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}clases.ui'), self.pantallaClases)
-        self.pantallaReparaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}reparaciones.ui'), self.pantallaReparaciones)
-        self.pantallaUbicaciones = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui'), self.pantallaUbicaciones)
-        self.pantallaNmovimiento = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui'), self.pantallaNmovimiento)
+        pathClases = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}clases.ui')
+        uic.loadUi(pathClases, self.pantallaClases)
+
+        self.pantallaReps = QtWidgets.QWidget()
+        pathReps = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}reparaciones.ui')
+        uic.loadUi(pathReps, self.pantallaReps)
+
+        self.pantallaUbis = QtWidgets.QWidget()
+        pathUbis = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui')
+        uic.loadUi(pathUbis, self.pantallaUbis)
+
+        self.pantallaRealizarMov = QtWidgets.QWidget()
+        pathRealizarMov = os.path.join(
+                            os.path.abspath(os.getcwd()),
+                            f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui')
+        uic.loadUi(pathRealizarMov, self.pantallaRealizarMov)
+
         self.pantallaDeudas = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}deudas.ui'), self.pantallaDeudas)
+        pathDeudas = os.path.join(os.path.abspath(os.getcwd()),
+                                  f'ui{os.sep}screens_uis{os.sep}deudas.ui')
+        uic.loadUi(pathDeudas, self.pantallaDeudas)
+
         self.pantallaResumen = QtWidgets.QWidget()
-        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
-                   f'ui{os.sep}screens_uis{os.sep}resumen.ui'), self.pantallaResumen)
+        pathResumen = os.path.join(os.path.abspath(os.getcwd()),
+                                   f'ui{os.sep}screens_uis{os.sep}resumen.ui')
+        uic.loadUi(pathResumen, self.pantallaResumen)
 
-        self.pantallaLogin.Ingresar.clicked.connect(self.login)
-
+        # Queremos aplicar cambios a todas las pantallas
+        # # Primero, hacemos una tupla que contenga todas las tablas.
         pantallas = (self.pantallaLogin, self.pantallaAlumnos,
                      self.pantallaGrupos, self.pantallaStock,
-                     self.pantallaMovimientos, self.pantallaOtroPersonal,
+                     self.pantallaMovs, self.pantallaOtroPersonal,
                      self.pantallaSubgrupos, self.pantallaTurnos,
                      self.pantallaUsuarios, self.pantallaHistorial,
-                     self.pantallaClases, self.pantallaReparaciones,
-                     self.pantallaUbicaciones, self.pantallaNmovimiento,
+                     self.pantallaClases, self.pantallaReps,
+                     self.pantallaUbis, self.pantallaRealizarMov,
                      self.pantallaDeudas, self.pantallaResumen)
-
+        # # Por cada pantalla ...
         for pantalla in pantallas:
+            # # ... la añadimos al stackedwidget de la ventana
+            # # principal
             self.stackedWidget.addWidget(pantalla)
+            # #, intentamos...
             try:
+                # # insertarle el logo de la barra de búsqueda
                 path = f'ui{os.sep}rsc{os.sep}icons{os.sep}buscar.png'
                 pixmap = QtGui.QPixmap(path)
                 pantalla.label_2.setPixmap(pixmap)
+                # # aplicar estilos y funcionalidad a todas las tablas
                 pantalla.tableWidget.horizontalHeader().setFont(QtGui.QFont("Oswald", 13))
                 pantalla.tableWidget.cellChanged.connect(self.habilitarSaves)
+            # # Si ocurre algún error, es porque la pantalla no tenía
+            # # una tabla. En ese caso, ignoramos la excepción.
             except BaseException:
                 pass
 
+        # Conectamos las opciones del menú a sus respectivas pantallas
         self.opcionStock.triggered.connect(self.fetchStock)
         self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
         self.opcionGrupos.triggered.connect(self.fetchGrupos)
@@ -145,23 +220,39 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionDeudas.triggered.connect(self.fetchDeudas)
         self.opcionResumen.triggered.connect(self.fetchResumen)
 
+        # Añadimos un botón de mostrar contraseña para la pantalla de
+        # inicio de sesión.
+        # Primero aplicamos el ícono.
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
         pixmap = QtGui.QPixmap(path)
         self.pantallaLogin.showPass.setIcon(QtGui.QIcon(QtGui.QIcon(pixmap)))
         self.pantallaLogin.showPass.setIconSize(QtCore.QSize(25, 25))
+        # Le damos funcionalidad.
         self.pantallaLogin.showPass.clicked.connect(
-            lambda: self.mostrarContrasena(
-                self.pantallaLogin.showPass, self.pantallaLogin.passwordLineEdit
-            )
-        )
-        sugerenciasGrupos=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-        sugerenciasUbis=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
+            lambda: core.mostrarContrasena(
+                self.pantallaLogin.showPass,
+                self.pantallaLogin.passwordLineEdit))
+                
+        self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
+        # Empezamos a conectar los botones de agregar de todas las
+        # gestiones.
+        # Primero obtenemos sugerencias para los campos con cuadro de 
+        # sugerencia de las tablas.
+        sugerenciasGrupos=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
+        sugerenciasUbis=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM ubicaciones').fetchall()]
+        # Conectamos el botón.
         self.pantallaStock.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(
+            lambda: core.insertarFilas(
                 self.pantallaStock.tableWidget, self.saveStock,
-                self.deleteStock, (1, 2, 7, 8, 9), (5, 6,), (7, 8, 9),
-                (sugerenciasGrupos, [], sugerenciasUbis,),7))
+                self.deleteStock, self.actualizarTotal, core.camposStock[0],
+                (sugerenciasGrupos, [], sugerenciasUbis,),
+                self.actualizarSugerenciasSubgrupos))
+        # Además, escondemos la primera columna. Esto es porque es la
+        # columna id es necesaria para tener el número de fila pero no
+        # queremos que la vean los usuarios porque no es info necesaria
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -169,24 +260,25 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Personal';'''
         sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(
+            lambda: core.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                self.deleteOtroPersonal, (1, 2, 3), None, (2,), [sugerenciasClasesP]
-            )
-        )
+                self.deleteOtroPersonal, self.habilitarSaves,
+                core.camposOtroPersonal[0], [sugerenciasClasesP]))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
-        sugerenciasGruposS=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+
+        sugerenciasGruposS=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaSubgrupos.tableWidget,
-                                       self.saveSubgrupos,
-                                       self.deleteSubgrupos, (0, 1), None,
-                                       (2,), [sugerenciasGruposS]))
+            lambda: core.insertarFilas(
+                self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
+                self.deleteSubgrupos, self.habilitarSaves,
+                core.camposSubgrupos[0], [sugerenciasGruposS]))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
 
         self.pantallaGrupos.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaGrupos.tableWidget,
-                                       self.saveGrupos,
-                                       self.deleteGrupos, (1,)))
+            lambda: core.insertarFilas(
+                self.pantallaGrupos.tableWidget, self.saveGrupos,
+                self.deleteGrupos, self.habilitarSaves, core.camposGrupos[0]))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -194,24 +286,28 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Alumno';'''
         sugerenciasClasesA=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaAlumnos.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaAlumnos.tableWidget,
-                                       self.saveAlumnos,
-                                       self.deleteAlumnos, (1, 2, 3), None, 
-                                       (2,), [sugerenciasClasesA]))
+            lambda: core.insertarFilas(
+                self.pantallaAlumnos.tableWidget,
+                self.saveAlumnos, self.deleteAlumnos,  self.habilitarSaves,
+                core.camposAlumnos[0], [sugerenciasClasesA]))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
-        self.pantallaUbicaciones.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaUbicaciones.tableWidget,
-                                       self.saveUbicaciones,
-                                       self.deleteUbicaciones, (0,)))
-        self.pantallaUbicaciones.tableWidget.setColumnHidden(0, True)
-        sugerenciasCat=[i[0] for i in bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
+
+        self.pantallaUbis.pushButton_2.clicked.connect(
+            lambda: core.insertarFilas(
+                self.pantallaUbis.tableWidget, self.saveUbicaciones,
+                self.deleteUbicaciones, self.habilitarSaves,
+                core.camposUbis[0]))
+        self.pantallaUbis.tableWidget.setColumnHidden(0, True)
+
+        sugerenciasCat=[i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaClases.tableWidget,
-                                       self.saveClases,
-                                       self.deleteClases, (1, 2,), None,
-                                       (2,), [sugerenciasCat]))
+            lambda: core.insertarFilas(
+            self.pantallaClases.tableWidget, self.saveClases,
+            self.deleteClases, self.habilitarSaves, core.camposClases[0],
+            [sugerenciasCat]))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -219,12 +315,15 @@ class MainWindow(QtWidgets.QMainWindow):
                WHERE cat.descripcion='Usuario';'''
         sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaUsuarios.pushButton_2.clicked.connect(
-            lambda: self.insertarFilas(self.pantallaUsuarios.tableWidget,
-                                       self.saveUsuarios,
-                                       self.deleteUsuarios, (1, 2, 3, 4, 5),
-                                       None, (2,), [sugerenciasClasesU]))
+            lambda: core.insertarFilas(
+                self.pantallaUsuarios.tableWidget, self.saveUsuarios,
+                self.deleteUsuarios, self.habilitarSaves,
+                core.camposUsuarios[0], [sugerenciasClasesU]))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
+        # Conectamos los parámetros de las gestiones y listados para
+        # que se refresquen las tablas cada vez que el usuario cambie
+        # un parámetro.
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
@@ -235,17 +334,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
 
-        self.pantallaMovimientos.lineEdit.editingFinished.connect(
+        self.pantallaMovs.lineEdit.editingFinished.connect(
             self.fetchMovimientos)
-        self.pantallaMovimientos.nId.valueChanged.connect(
+        self.pantallaMovs.nId.valueChanged.connect(
             self.fetchMovimientos)
-        self.pantallaMovimientos.nTurno.valueChanged.connect(
+        self.pantallaMovs.nTurno.valueChanged.connect(
             self.fetchMovimientos)
 
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
-
-        self.pantallaReparaciones.lineEdit.editingFinished.connect(
+        self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
 
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
@@ -253,13 +351,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
-        self.pantallaUbicaciones.lineEdit.editingFinished.connect(
+        self.pantallaUbis.lineEdit.editingFinished.connect(
             self.fetchUbicaciones)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
-
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-        self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentTextChanged.connect(self.check)
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
@@ -277,22 +374,30 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.boton)
         self.menubar.setCornerWidget(widget_with_layout,QtCore.Qt.Corner.TopRightCorner)
 
+        # Actualizamos las fechas a los valores actuales.
         self.actualizarHastaFechas()
+
+        # Hacemos un timer que actualice las fechas máximas cada 5 minutos
         timer=QtCore.QTimer()
         timer.timeout.connect(self.actualizarHastaFechas)
         timer.start(300000)
 
+        # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
+        # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.setWindowTitle('Blustock')
         self.showMaximized()
     
     def actualizarHastaFechas(self):
-        self.pantallaReparaciones.hastaFecha.setDate(
+        """Este método actualiza los filtros de fecha y hora con la
+        fecha y hora actuales.
+        """
+        self.pantallaReps.hastaFecha.setDate(
             QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
         self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        self.pantallaMovimientos.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
             datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
             datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
@@ -369,103 +474,44 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaLogin.usuarioState.setText("usuario incorrecto")
             self.pantallaLogin.passwordState.setText("")
 
-
-    def mostrarContrasena(self, boton, entry: QtWidgets.QLineEdit):
-        """Este método muestra o esconde lo ingresado en el campo de
-        contraseña vinculado dependiendo del estado de activación del 
-        botón.
-
-        Parámetros
-        ----------
-            entry : QtWidgets.QLineEdit
-                El entry de contraseña vinculado al botón.
-        """
-        # Si el botón está presionado
-        if boton.isChecked():
-            # Muestra lo ingresado en el campo.
-            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
-            # Cambia el ícono.
-            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}esconder.png'
-            pixmap = QtGui.QPixmap(path)
-        else:
-            # Cifra lo ingresado en el campo.
-            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
-            pixmap = QtGui.QPixmap(path)
-        boton.setIcon(QtGui.QIcon(pixmap))
-        boton.setIconSize(QtCore.QSize(25, 25))
-
-    def generarBotones(self, funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
-                       tabla: QtWidgets.QTableWidget, numFila: int):
-        """Este método genera botones para guardar cambios y eliminar
-        filas y los inserta en una fila de una tabla de la UI
-
-        Parámetros
-        ----------
-            funcGuardar: types.FunctionType
-                La función que estará vinculada al botón guardar.
-            funcEliminar: types.FunctionType
-                La función que estará vinculada al botón eliminar.
-            tabla: QtWidgets.QTableWidget
-                La tabla a la que se le añadirán los botones.
-            numFila: int
-                La fila en la que se insertarán los botones.
-        """
-        # Se crean dos botones: uno de editar y uno de eliminar
-        # Para saber que hacen BotonFila, vayan al código de la
-        # clase.
-        guardar = BotonFila("guardar")
-        # Conectamos el botón a su función guardar correspondiente.
-        guardar.clicked.connect(funcGuardar)
-        guardar.setEnabled(False)
-        borrar = BotonFila("eliminar")
-        borrar.clicked.connect(funcEliminar)
-
-        # Se añaden los botones a cada fila.
-        # Método setCellWidget(row, column, widget): añade un
-        # widget a la celda de una tabla.
-
-        tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
-        tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
-
     def sopas(self):
-        self.pantallaNmovimiento.alumnoComboBox.clear()
-        for i in dal.obtenerDatos("alumnos", self.pantallaNmovimiento.cursoComboBox.currentText(),):
-            self.pantallaNmovimiento.alumnoComboBox.addItem(i[1])
+        self.pantallaRealizarMov.alumnoComboBox.clear()
+        for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
+            self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
     def check(self):
-        if self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
-            self.pantallaNmovimiento.estadoComboBox.removeItem(1)
+        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
+            self.pantallaRealizarMov.estadoComboBox.itemText
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
         else:
             for i in dal.obtenerDatos("estados", ""):
-                print(type(self.pantallaNmovimiento.estadoComboBox.count()))
-                if 2 == self.pantallaNmovimiento.estadoComboBox.count():
-                    self.pantallaNmovimiento.estadoComboBox.addItem(i[1])
+                if 2 == self.pantallaRealizarMov.estadoComboBox.count():
+                    self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
-        self.pantallaNmovimiento.tipoDeMovimientoComboBox.clear()
-        self.pantallaNmovimiento.herramientaComboBox.clear()
-        self.pantallaNmovimiento.estadoComboBox.clear()
-        self.pantallaNmovimiento.cursoComboBox.clear()
-        self.pantallaNmovimiento.ubicacionComboBox.clear()
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
+        self.pantallaRealizarMov.herramientaComboBox.clear()
+        self.pantallaRealizarMov.estadoComboBox.clear()
+        self.pantallaRealizarMov.cursoComboBox.clear()
+        self.pantallaRealizarMov.ubicacionComboBox.clear()
         
         for i in dal.obtenerDatos("tipos_mov", ""):
-            self.pantallaNmovimiento.tipoDeMovimientoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("stock", ""):
-            self.pantallaNmovimiento.herramientaComboBox.addItem(i[1])
+            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("estados", ""):
-            self.pantallaNmovimiento.estadoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("clases", ""):
-            self.pantallaNmovimiento.cursoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.cursoComboBox.addItem(i[1])
         
         for i in dal.obtenerDatos("ubicaciones", ""):
-            self.pantallaNmovimiento.ubicacionComboBox.addItem(i[1])
+            self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
-        self.pantallaNmovimiento.cursoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
             self.sopas)
-        self.pantallaNmovimiento.pushButton.clicked.connect(
+        self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
@@ -488,26 +534,26 @@ class MainWindow(QtWidgets.QMainWindow):
         turno = bdd.cur.execute(
             "select id from turnos where fecha_egr IS NULL").fetchall()
         tipo = dal.obtenerDatos(
-            "tipos_mov", self.pantallaNmovimiento.tipoDeMovimientoComboBox.currentText())
-        cant = self.pantallaNmovimiento.cantidadSpinBox.value()
+            "tipos_mov", self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText())
+        cant = self.pantallaRealizarMov.cantidadSpinBox.value()
         estado = dal.obtenerDatos(
-            "estados", self.pantallaNmovimiento.estadoComboBox.currentText())
+            "estados", self.pantallaRealizarMov.estadoComboBox.currentText())
         persona = bdd.cur.execute('''SELECT p.id 
             FROM personal p
             JOIN clases c ON c.id = p.id_clase
             WHERE p.nombre_apellido LIKE ?
-            and c.descripcion LIKE ?;''', (self.pantallaNmovimiento.alumnoComboBox.currentText(), self.pantallaNmovimiento.cursoComboBox.currentText())).fetchone()
+            and c.descripcion LIKE ?;''', (self.pantallaRealizarMov.alumnoComboBox.currentText(), self.pantallaRealizarMov.cursoComboBox.currentText())).fetchone()
 
         ubicacion = dal.obtenerDatos(
-            "ubicaciones", self.pantallaNmovimiento.ubicacionComboBox.currentText())
+            "ubicaciones", self.pantallaRealizarMov.ubicacionComboBox.currentText())
         herramienta = bdd.cur.execute(
             """SELECT s.id FROM STOCK s
             JOIN subgrupos sub ON s.id_subgrupo = sub.id
             JOIN grupos g ON sub.id_grupo=g.id
             JOIN ubicaciones u ON s.id_ubi=u.id
-            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaNmovimiento.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
+            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
-        descripcion = self.pantallaNmovimiento.descripcionLineEdit.text()
+        descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
         fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if cant == 0:
             mensaje = """       Por favor ingrese un valor 
@@ -556,157 +602,157 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Parámetros
         ----------
-            tabla: QtWidgets.QTableWidget
-                La tabla a la que se le van a insertar los elementos.
-            camposObligatorios: tuple
-                Los campos de la fil anterior que se van a verificar
-                para que no estén en blanco, evitando así que se puedan
-                insertar múltiples filas en blanco.
-            funcGuardar: types.FunctionType
-                La función guardar que el botón guardar de la fila
-                ejecutará.
-            funcEliminar: types.FunctionType
-                La función eliminar que el botón eliminar de la fila
-                ejecutará.
+            row: int | None = None
+                La fila en la que está el boton.
+                Default: None.
+            col: int | None = None
+                La columna de la que se ejecutó la función, no se usa
+                pero es necesario declararla porque, si se ejecuta
+                de una forma especial, esa ejecución pasa por defecto
+                un parámetor de columna que, si no guardaramos en ese
+                parámetro, estaría sobreescribiendo el parámetro tabla.
+                Default: None.
+            tabla: QtWidgets.QTableWidget | None = None
+                La tabla en la que está el botón.
+                Default:None
         """
-        try:
-            tabla.disconnect()
-        except:
-            pass
-        # Las filas en la tabla se ingresan escribiendo el índice en
-        # el que queremos que se ingresen. Para ingresar la fila al
-        # final, tenemos que saber el índice del final. Para obtenerlo,
-        # contamos la cantidad de filas: por ejemplo, si queremos
-        # agregar una fila al final y la tabla tiene 5 filas, si las
-        # contamos vamos a obtener el número 5; si usamos ese número
-        # como índice para agregar la fila, la fila se va a agregar al
-        # final.
-        indiceFinal = tabla.rowCount()
-
-        # Antes de agregar la fila, queremos comprobar que la última
-        # fila de la tabla no tenga campos vacíos. Esto lo hacemos
-        # para que el usuario no pueda ingresar múltiples filas vacías
-        # haciendo que el sistema detecte si la fila anterior está
-        # vacía.
-        ultimaFila = indiceFinal-1
-        if ultimaFila >= 0:
-            # Por cada campo que no debe ser nulo...
-            for iCampo in camposObligatorios:
-                # Si el campo está vacio...
-                if tabla.item(ultimaFila, iCampo) is not None:
-                    texto=tabla.item(ultimaFila, iCampo).text()
-                else:
-                    texto=tabla.cellWidget(ultimaFila, iCampo).text()
-                if texto == "":
-                    # Le pide al usuario que termine de llenar los campos
-                    # y corta la función.
-                    mensaje = "Ha agregado una fila y todavía no ha ingresado los datos de la fila anterior. Ingreselos, guardelos cambios e intente nuevamente."
-                    return PopUp("Error", mensaje).exec()
-
-        # Se añade la fila al final.
-        tabla.insertRow(indiceFinal)
-        tabla.scrollToItem(tabla.item(indiceFinal-1, 0),
-                           QtWidgets.QAbstractItemView.ScrollHint.PositionAtBottom)
-        # Se añaden campos de texto en todas las celdas ya que por
-        # defecto no vienen.
-        for numCol in range(tabla.columnCount() - 2):
-            if camposNoEditables:
-                if numCol not in camposNoEditables:
-                    if camposSugeridos and numCol in camposSugeridos:
-                        indice=camposSugeridos.index(numCol)
-                        campoSugerido = ParamEdit(sugerencias[indice], "")
-                        #Este arreglo no es el mejor del mundo, pero por ahora funca
-                        if campoEspecial and campoEspecial==numCol:
-                            campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
-                        tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
-                    else:
-                        tabla.setItem(indiceFinal, numCol,
-                                    QtWidgets.QTableWidgetItem(""))
-                else:
-                    campoNoEditable = QtWidgets.QTableWidgetItem("")
-                    campoNoEditable.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                                             QtCore.Qt.ItemFlag.ItemIsEnabled)
-                    tabla.setItem(indiceFinal, numCol, campoNoEditable)
-            # No me encanta este arreglo porque se podría ahorrar
-            # código, pero ahí está
-            else:
-                if camposSugeridos and numCol in camposSugeridos:
-                    indice=camposSugeridos.index(numCol)
-                    campoSugerido = ParamEdit(sugerencias[indice], "")
-                    #Este arreglo no es el mejor del mundo, pero por ahora funca
-                    if campoEspecial and campoEspecial==numCol:
-                        campoSugerido.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
-                    tabla.setCellWidget(indiceFinal, numCol, campoSugerido)
-                else:
-                    tabla.setItem(indiceFinal, numCol,
-                                QtWidgets.QTableWidgetItem(""))
-            
-        self.generarBotones(
-            funcGuardar, funcEliminar, tabla, indiceFinal)
-        tabla.cellWidget(indiceFinal, tabla.columnCount()-2).setEnabled(True)
-    
-    def habilitarSaves(self, row, col, tabla: QtWidgets.QTableWidget | None = None):
+        # Si no se pasa la tabla por parámetro, se asume que la tabla
+        # modificada es quien llamó a este método. Esto es porque
+        # cuando se llama a este método desde una tabla modificada, hay
+        # ocasiones en las que la tabla
         if tabla is None:
             tabla=self.sender()
+        
+        # Si la fila no se pasa, se asume que fue un widget quien llamó
+        # a este método.
         if row is None:
+            # Se obtiene la posicion de la fila a través del widget.
             row=tabla.indexAt(self.sender().pos()).row()
+        # Habilitamos el botón de saves para que el usuario pueda hacer
+        # cambios.
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
-    def actualizarTotal(self, row, col):
-        tabla = self.pantallaStock.tableWidget
+    def actualizarTotal(self, row: int, col: int,
+                        tabla: QtWidgets.QTableWidget | None = None):
+        """Este método actualiza el campo total de la tabla stock
+        cuando se modifican las cantidades, y habilita el botón de 
+        guardar de la fila modificada.
+        
+        Parámetros
+        ----------
+            row: int
+                La fila del campo modificado.
+            col: int
+                La columna del campo modificado.
+            tabla: QtWidgets.QTableWidget
+                La tabla a la que se le actualizará el total.
+                Default: None
+        """
+        # Si no se pasó una tabla por parámetro...
+        if tabla is None:
+            #... se usa la tabla de la pantalla stock.
+            tabla = self.pantallaStock.tableWidget
+        # Si esta función se ejecuta, significa que el usuario
+        # modificó una fila de la tabla. Por eso, habilitamos los saves
+        # de la fila para que el usuario pueda guardar los cambios.
         self.habilitarSaves(row, col, tabla)
+        # Esta función se ejecuta siempre que el usuario modifique una
+        # celda, sin distinguir la columna, por eso hay que checkear si
+        # la columna modificada fue una de una cantidad antes de
+        # ejecutar el código.
+        # Si la columna modificada es de cantidad en condiciones,
+        # cantidad en reparación o cantidad de baja...
         if col in (2, 3, 4):
+            # ...obtenemos los valores de las cantidades
             cantCond = int(tabla.item(row, 2).text())
             cantRep = tabla.item(row, 3).text()
             cantBaja = tabla.item(row, 4).text()
             cantPrest = tabla.item(row, 5).text()
-            if cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric():
+            # Las cantidades en reparación y de baja pueden no ser
+            # numéricas ("-", significa dato nulo), por lo que hay que
+            # checkear si el usuario las ingresó como numéricas o no
+            # antes de hacer cuentas.
+            # Si las cantidades en reparación y de baja son numéricas..
+            if (cantRep.isnumeric() and cantBaja.isnumeric()):
+                #... se calcula el total sumando todas las cantidades
                 total = QtWidgets.QTableWidgetItem(
-                    str(cantCond + int(cantRep) + int(cantBaja) + int(cantPrest)))
+                            str(cantCond + int(cantRep)
+                            + int(cantBaja) + int(cantPrest)))
+            # Si no...
             else:
-                total = QtWidgets.QTableWidgetItem(str(cantCond))
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+                #... se calcula el total sumando solamente las
+                # cantidades en condiciones y adeudadas.
+                total = QtWidgets.QTableWidgetItem(
+                            str(cantCond) + int(cantRep))
+            # El campo se hace no editable y se guarda en la tabla
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                           QtCore.Qt.ItemFlag.ItemIsEnabled)
             tabla.setItem(row, 6, total)
 
     def actualizarSugerenciasSubgrupos(self):
+        """Este método actualiza las sugerencias de los campos de
+        subgrupos al editar lo ingresado en un campo de grupos
+        relacionado, ya que las sugerencias de subgrupos deben estar
+        relacionadas al grupo ingresado.
+        """
+        # Usamos la tabla de stock.
         tabla=self.pantallaStock.tableWidget
+        # Obtenemos la fila del campo de grupos modificado.
         row = tabla.indexAt(self.sender().pos()).row()
+        # Obtenemos los nuevos datos.
         grupo=tabla.cellWidget(row, 7).text()
+        # Obtenemos el cuadro de sugerencias del campo subgrupos.
         completer=tabla.cellWidget(row, 8).completer()
+        # Obtenemos sugerencias actualizadas.
         sugerencias=[i[0] for i in 
                      bdd.cur.execute('''SELECT s.descripcion FROM subgrupos s
                      JOIN grupos g ON s.id_grupo = g.id
                      WHERE g.descripcion LIKE ?''', (grupo,)).fetchall()]
+        # Añadimos las sugerencias actualizadas al campo de subgrupos.
         completer.setModel(QtCore.QStringListModel(sugerencias))
+        # Habilitamos el boton de guardar para que el usuario pueda
+        # guardar los cambios.
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
     
     def fetchStock(self):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # stock en variables para que el código se simplifique y se
-        # haga más legible.
+        # La mayoría de métodos de stock son parecidos a este, por lo
+        # que solo voy a documentar esta función.
+        # Obtenemos la tabla.
         tabla = self.pantallaStock.tableWidget
+        # Desactivamos el sorting por defecto porque si alguien
+        # refresca con el sorting activado se bugea.
         tabla.setSortingEnabled(False)
+        # Desconectamos la tabla para que no ejecute funciones mientras
+        # la refrescamos.
         try:
             tabla.disconnect()
         except:
             pass
-
+        
+        # Guardamos los filtros.
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
 
+        # Desconectamos el filtro por la misma razón que la tabla.
         listaUbi.disconnect()
+        # Obtenemos el texto seleccionado.
         ubiSeleccionada = listaUbi.currentText()
+        # Volvemos a buscar sugerencias.
         ubis = bdd.cur.execute("""SELECT DISTINCT u.descripcion
                                 FROM stock s
                                 JOIN ubicaciones u
                                 ON u.id=s.id_ubi""").fetchall()
+        # Limpiamos las sugerencias viejas.
         listaUbi.clear()
+        # Añadimos el cuadro de sugerencias actualizado.
         listaUbi.addItem("Todas")
         for ubi in ubis:
             listaUbi.addItem(ubi[0])
+        # Volvemos a seleccionar la opción que estaba seleccionada
+        # desde antes de refrescar.
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
 
         if ubiSeleccionada == "Todas":
@@ -714,90 +760,82 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             filtroUbi = (ubiSeleccionada,)
 
-        # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los daots y
-        # el texto de la barra de búsqueda mediante el cual queremos
-        # filtrarlos.
+        # Se obtienen los datos de la base de datos.
         datos = dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
 
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
 
-        # Bucle: por cada fila de los datos obtenidos de la tabla de la
-        # base de datos, se obtiene el número de fila y los contenidos
-        # de ésta.
-        # Método enumerate: devuelve una lista con el número y el
-        # elemento.
+        # Por cada número de fila y los contenidos de ésta en los datos
+        # obtenidos...
         for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
+            # ...se añade una fila a la tabla.
             tabla.insertRow(rowNum)
 
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[2])
-            tabla.setItem(rowNum, 2, item)
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[3])
-            tabla.setItem(rowNum, 3, item)
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[4])
-            tabla.setItem(rowNum, 4, item)
-            cantPrest = QtWidgets.QTableWidgetItem()
-            cantPrest.setData(0, rowData[5])
-            cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                               QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(
-                rowNum, 5, cantPrest)
-            total = QtWidgets.QTableWidgetItem()
-            if rowData[3] not in ("-", ""):
-                total.setData(0, rowData[2] + rowData[3] + rowData[4] + rowData[5])
-            else:
-                total.setData(0, rowData[2])
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+            # Empezamos a añadir los items.
+            item0=QtWidgets.QTableWidgetItem(str(rowData[0]))
+            # Los centramos.
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1=QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
+            item2=QtWidgets.QTableWidgetItem()
+            item2.setData(0, rowData[2])
+            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 2, item2)
+            item3=QtWidgets.QTableWidgetItem()
+            item3.setData(0, rowData[3])
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 3, item3)
+            item4=QtWidgets.QTableWidgetItem()
+            item4.setData(0, rowData[4])
+            item4.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 4, item4)
+            item5 = QtWidgets.QTableWidgetItem()
+            item5.setData(0, rowData[5])
+            item5.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item5.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                            QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(rowNum, 6, total)
+            tabla.setItem(rowNum, 5, item5)
+            item6 = QtWidgets.QTableWidgetItem()
+            item6.setData(0, rowData[6])
+            item6.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item6.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                           QtCore.Qt.ItemFlag.ItemIsEnabled)
+            tabla.setItem(rowNum, 6, item6)
 
+            # Creamos el campo de sugerencias del campo grupos.
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-            paramGrupos=ParamEdit(sugerencias, rowData[6])
+            # Creamos el campo con sugerencia.
+            paramGrupos=ParamEdit(sugerencias, rowData[7])
+            # Cuando termina de editarse, hacemos que actualice el
+            # cuadro de sugerencias del campo grupos.
             paramGrupos.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
             tabla.setCellWidget(rowNum, 7, paramGrupos)
             sql = '''SELECT s.descripcion FROM subgrupos s
                    JOIN grupos g ON s.id_grupo = g.id
                    WHERE g.descripcion LIKE ?'''
             sugerencias = [sugerencia[0] for sugerencia in
-                           bdd.cur.execute(sql, (rowData[6],)).fetchall()]
-            subgrupos=ParamEdit(sugerencias, rowData[7])
+                           bdd.cur.execute(sql, (rowData[7],)).fetchall()]
+            subgrupos=ParamEdit(sugerencias, rowData[8])
             subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
-            ubicaciones=ParamEdit(sugerencias, rowData[8])
+            ubicaciones=ParamEdit(sugerencias, rowData[9])
             ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 9, ubicaciones)
 
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-            # Se generan e insertan los botones en la fila, pasando
-            # como parámetros las funciones que queremos que los
-            # botones tengan y la tabla y la fila de la tabla en la que
-            # queremos que se inserten.
-            self.generarBotones(
+            # Generamos los botones para la fila de la tabla
+            core.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Cambiamos la altura de la fila.
         tabla.setRowHeight(0, 35)
+        # Hacemos que las columnas no puedan ser menos anchas que sus
+        # contenidos.
         tabla.resizeColumnsToContents()
 
         # Hacemos que las columnas se expandan al ampliar la pantalla.
@@ -810,6 +848,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             9, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
+        # Hacemos que cada vez que se edite una celda de una tabla, se
+        # ejecuta la función.
         tabla.cellChanged.connect(self.actualizarTotal)
         tabla.setSortingEnabled(True)
         listaUbi.currentIndexChanged.connect(self.fetchStock)
@@ -851,18 +891,14 @@ class MainWindow(QtWidgets.QMainWindow):
             cond = int(tabla.item(row, 2).text())
             rep = tabla.item(row, 3).text()
             baja = tabla.item(row, 4).text()
-            prest = tabla.item(row, 5).text()
+            prest = int(tabla.item(row, 5).text())
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
-                try:
-                    prest = int(prest)
-                except:
-                    prest = 0
+
             else:
                 rep = None
                 baja = None
-                prest = None
         except:
             mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
             return PopUp("Error", mensaje).exec()
@@ -1134,7 +1170,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveAlumnos(datos), lambda: self.deleteAlumnos(datos), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
@@ -1272,15 +1308,15 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método obtiene los datos de la tabla movimientos y los
         inserta en la tabla de la interfaz de usuario.
         """
-        tabla = self.pantallaMovimientos.tableWidget
-        barraBusqueda = self.pantallaMovimientos.lineEdit
-        nId = self.pantallaMovimientos.nId
-        listaElem = self.pantallaMovimientos.listaElem
-        listaPersona = self.pantallaMovimientos.listaPersona
-        desdeFecha = self.pantallaMovimientos.desdeFecha
-        hastaFecha = self.pantallaMovimientos.hastaFecha
-        nTurno = self.pantallaMovimientos.nTurno
-        listaPanolero = self.pantallaMovimientos.listaPanolero
+        tabla = self.pantallaMovs.tableWidget
+        barraBusqueda = self.pantallaMovs.lineEdit
+        nId = self.pantallaMovs.nId
+        listaElem = self.pantallaMovs.listaElem
+        listaPersona = self.pantallaMovs.listaPersona
+        desdeFecha = self.pantallaMovs.desdeFecha
+        hastaFecha = self.pantallaMovs.hastaFecha
+        nTurno = self.pantallaMovs.nTurno
+        listaPanolero = self.pantallaMovs.listaPanolero
 
         try:
             tabla.disconnect()
@@ -1427,7 +1463,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveGrupos(datos), lambda: self.deleteGrupos(datos), tabla, rowNum)
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -1570,7 +1606,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -1797,7 +1833,7 @@ class MainWindow(QtWidgets.QMainWindow):
             grupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 2, grupos)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
             for col in range(tabla.columnCount()):
@@ -1862,8 +1898,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
         nId = self.pantallaTurnos.nId
-        desdeFecha = self.pantallaReparaciones.desdeFecha
-        hastaFecha = self.pantallaReparaciones.hastaFecha
+        desdeFecha = self.pantallaReps.desdeFecha
+        hastaFecha = self.pantallaReps.hastaFecha
 
         try:
             tabla.disconnect()
@@ -1958,7 +1994,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveUsuarios(datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
@@ -2120,7 +2156,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveClases(datos), lambda: self.deleteClases(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -2133,8 +2169,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(10)
 
     def fetchUbicaciones(self):
-        tabla = self.pantallaUbicaciones.tableWidget
-        barraBusqueda = self.pantallaUbicaciones.lineEdit
+        tabla = self.pantallaUbis.tableWidget
+        barraBusqueda = self.pantallaUbis.lineEdit
         tabla.setSortingEnabled(False)
         try:
             tabla.disconnect()
@@ -2159,7 +2195,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if item is not None:
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-            self.generarBotones(
+            core.generarBotones(
                 lambda: self.saveUbicaciones(datos), lambda: self.deleteUbicaciones(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -2187,7 +2223,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla = self.pantallaUbicaciones.tableWidget
+        tabla = self.pantallaUbis.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
@@ -2237,7 +2273,7 @@ class MainWindow(QtWidgets.QMainWindow):
             barra.setValue(posicion)
 
     def deleteUbicaciones(self, datos: list | None = None) -> None:
-        tabla = self.pantallaUbicaciones.tableWidget
+        tabla = self.pantallaUbis.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
@@ -2262,10 +2298,10 @@ class MainWindow(QtWidgets.QMainWindow):
             barra.setValue(posicion)
 
     def fetchReparaciones(self):
-        tabla = self.pantallaReparaciones.tableWidget
-        barraBusqueda = self.pantallaReparaciones.lineEdit
-        desdeFecha = self.pantallaReparaciones.desdeFecha
-        hastaFecha = self.pantallaReparaciones.hastaFecha
+        tabla = self.pantallaReps.tableWidget
+        barraBusqueda = self.pantallaReps.lineEdit
+        desdeFecha = self.pantallaReps.desdeFecha
+        hastaFecha = self.pantallaReps.hastaFecha
         try:
             tabla.disconnect()
         except:

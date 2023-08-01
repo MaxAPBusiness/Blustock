@@ -59,7 +59,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Seguimiento de Reparación de Herramientas </string>
+        <string>Seguimiento de Envíos de Herramientas a Reparación </string>
        </property>
       </widget>
      </item>
