@@ -5,7 +5,8 @@ Clases:
     MainWindow(qtw.QMainWindow): crea la ventana principal.
 
 Objetos:
-    app: La aplicación principal.
+    mainWindow: la ventana principal.
+    app: la aplicación principal.
 """
 # Antes de arrancar, establecemos el path con el que la app trabajará 
 # para evitar problemas de importar módulos
@@ -850,14 +851,11 @@ class MainWindow(QtWidgets.QMainWindow):
             cond = int(tabla.item(row, 2).text())
             rep = tabla.item(row, 3).text()
             baja = tabla.item(row, 4).text()
-            prest = tabla.item(row, 5).text()
+            prest = int(tabla.item(row, 5).text())
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
-                try:
-                    prest = int(prest)
-                except:
-                    prest = 0
+
             else:
                 rep = None
                 baja = None
