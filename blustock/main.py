@@ -54,6 +54,17 @@ class MainWindow(QtWidgets.QMainWindow):
                        tabla: QtWidgets.QTableWidget | None = None):
             Habilita el botón de guardar de una fila de una tabla de
             una gestión.
+        
+        actualizarTotal(self, row: int, col: int,
+                        tabla: QtWidgets.QTableWidget | None = None):
+            Actualiza el campo total de la tabla stock cuando se
+            modifican las cantidades.
+        
+        fetchStock(self):
+            Actualiza las sugerencias de los campos de subgrupos al
+            editar lo ingresado en un campo de grupos relacionado, ya
+            que las sugerencias de subgrupos deben estar relacionadas
+            al grupo ingresado.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -571,15 +582,20 @@ class MainWindow(QtWidgets.QMainWindow):
         if tabla is None:
             tabla=self.sender()
         
-        # Si 
+        # Si la fila no se pasa, se asume que fue un widget quien llamó
+        # a este método.
         if row is None:
+            # Se obtiene la posicion de la fila a través del widget.
             row=tabla.indexAt(self.sender().pos()).row()
+        # Habilitamos el botón de saves para que el usuario pueda hacer
+        # cambios.
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row: int, col: int,
                         tabla: QtWidgets.QTableWidget | None = None):
         """Este método actualiza el campo total de la tabla stock
-        cuando se modifican las cantidades.
+        cuando se modifican las cantidades, y habilita el botón de 
+        guardar de la fila modificada.
         
         Parámetros
         ----------
@@ -661,29 +677,41 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método obtiene los datos de la tabla stock y los
         inserta en la tabla de la interfaz de usuario.
         """
-        # Se guardan la tabla y la barra de búsqueda de la pantalla
-        # stock en variables para que el código se simplifique y se
-        # haga más legible.
+        # La mayoría de métodos de stock son parecidos a este, por lo
+        # que solo voy a documentar esta función.
+        # Obtenemos la tabla.
         tabla = self.pantallaStock.tableWidget
+        # Desactivamos el sorting por defecto porque si alguien
+        # refresca con el sorting activado se bugea.
         tabla.setSortingEnabled(False)
+        # Desconectamos la tabla para que no ejecute funciones mientras
+        # la refrescamos.
         try:
             tabla.disconnect()
         except:
             pass
-
+        
+        # Guardamos los filtros.
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
 
+        # Desconectamos el filtro por la misma razón que la tabla.
         listaUbi.disconnect()
+        # Obtenemos el texto seleccionado.
         ubiSeleccionada = listaUbi.currentText()
+        # Volvemos a buscar sugerencias.
         ubis = bdd.cur.execute("""SELECT DISTINCT u.descripcion
                                 FROM stock s
                                 JOIN ubicaciones u
                                 ON u.id=s.id_ubi""").fetchall()
+        # Limpiamos las sugerencias viejas.
         listaUbi.clear()
+        # Añadimos el cuadro de sugerencias actualizado.
         listaUbi.addItem("Todas")
         for ubi in ubis:
             listaUbi.addItem(ubi[0])
+        # Volvemos a seleccionar la opción que estaba seleccionada
+        # desde antes de refrescar.
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
 
         if ubiSeleccionada == "Todas":
@@ -691,86 +719,82 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             filtroUbi = (ubiSeleccionada,)
 
-        # Se obtienen los datos de la base de datos pasando como
-        # parámetro la tabla de la que queremos obtener los daots y
-        # el texto de la barra de búsqueda mediante el cual queremos
-        # filtrarlos.
+        # Se obtienen los datos de la base de datos.
         datos = dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
 
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
 
-        # Bucle: por cada fila de los datos obtenidos de la tabla de la
-        # base de datos, se obtiene el número de fila y los contenidos
-        # de ésta.
-        # Método enumerate: devuelve una lista con el número y el
-        # elemento.
+        # Por cada número de fila y los contenidos de ésta en los datos
+        # obtenidos...
         for rowNum, rowData in enumerate(datos):
-            # Se añade una fila a la tabla.
-            # Método insertRow(int): inserta una fila en una QTable.
+            # ...se añade una fila a la tabla.
             tabla.insertRow(rowNum)
 
-            # Inserta el texto en cada celda. Las celdas por defecto no
-            # tienen nada, por lo que hay que añadir primero un item
-            # que contenga el texto. No se puede establecer texto asi
-            # nomás, tira error.
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[2])
-            tabla.setItem(rowNum, 2, item)
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[3])
-            tabla.setItem(rowNum, 3, item)
-            item=QtWidgets.QTableWidgetItem()
-            item.setData(0, rowData[4])
-            tabla.setItem(rowNum, 4, item)
-            cantPrest = QtWidgets.QTableWidgetItem()
-            cantPrest.setData(0, rowData[5])
-            cantPrest.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                               QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(
-                rowNum, 5, cantPrest)
-            total = QtWidgets.QTableWidgetItem()
-            if rowData[3] not in ("-", ""):
-                total.setData(0, rowData[2] + rowData[3] + rowData[4] + rowData[5])
-            else:
-                total.setData(0, rowData[2])
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+            # Empezamos a añadir los items.
+            item0=QtWidgets.QTableWidgetItem(str(rowData[0]))
+            # Los centramos.
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1=QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
+            item2=QtWidgets.QTableWidgetItem()
+            item2.setData(0, rowData[2])
+            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 2, item2)
+            item3=QtWidgets.QTableWidgetItem()
+            item3.setData(0, rowData[3])
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 3, item3)
+            item4=QtWidgets.QTableWidgetItem()
+            item4.setData(0, rowData[4])
+            item4.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 4, item4)
+            item5 = QtWidgets.QTableWidgetItem()
+            item5.setData(0, rowData[5])
+            item5.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item5.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                            QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(rowNum, 6, total)
+            tabla.setItem(rowNum, 5, item5)
+            item6 = QtWidgets.QTableWidgetItem()
+            item6.setData(0, rowData[6])
+            item6.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item6.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                           QtCore.Qt.ItemFlag.ItemIsEnabled)
+            tabla.setItem(rowNum, 6, item6)
 
+            # Creamos el campo de sugerencias del campo grupos.
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-            paramGrupos=ParamEdit(sugerencias, rowData[6])
+            # Creamos el campo con sugerencia.
+            paramGrupos=ParamEdit(sugerencias, rowData[7])
+            # Cuando termina de editarse, hacemos que actualice el
+            # cuadro de sugerencias del campo grupos.
             paramGrupos.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
             tabla.setCellWidget(rowNum, 7, paramGrupos)
             sql = '''SELECT s.descripcion FROM subgrupos s
                    JOIN grupos g ON s.id_grupo = g.id
                    WHERE g.descripcion LIKE ?'''
             sugerencias = [sugerencia[0] for sugerencia in
-                           bdd.cur.execute(sql, (rowData[6],)).fetchall()]
-            subgrupos=ParamEdit(sugerencias, rowData[7])
+                           bdd.cur.execute(sql, (rowData[7],)).fetchall()]
+            subgrupos=ParamEdit(sugerencias, rowData[8])
             subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
-            ubicaciones=ParamEdit(sugerencias, rowData[8])
+            ubicaciones=ParamEdit(sugerencias, rowData[9])
             ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 9, ubicaciones)
 
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
+            # Generamos los botones para la fila de la tabla
             core.generarBotones(
                 lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Cambiamos la altura de la fila.
         tabla.setRowHeight(0, 35)
+        # Hacemos que las columnas no puedan ser menos anchas que sus
+        # contenidos.
         tabla.resizeColumnsToContents()
 
         # Hacemos que las columnas se expandan al ampliar la pantalla.
@@ -783,6 +807,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             9, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
+        # Hacemos que cada vez que se edite una celda de una tabla, se
+        # ejecuta la función.
         tabla.cellChanged.connect(self.actualizarTotal)
         tabla.setSortingEnabled(True)
         listaUbi.currentIndexChanged.connect(self.fetchStock)
