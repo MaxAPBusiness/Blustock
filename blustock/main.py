@@ -584,35 +584,77 @@ class MainWindow(QtWidgets.QMainWindow):
         Parámetros
         ----------
             row: int
-                La fila del campo modificado
-            
+                La fila del campo modificado.
+            col: int
+                La columna del campo modificado.
+            tabla: QtWidgets.QTableWidget
+                La tabla a la que se le actualizará el total.
+                Default: None
         """
+        # Si no se pasó una tabla por parámetro...
         if tabla is None:
+            #... se usa la tabla de la pantalla stock.
             tabla = self.pantallaStock.tableWidget
+        # Si esta función se ejecuta, significa que el usuario
+        # modificó una fila de la tabla. Por eso, habilitamos los saves
+        # de la fila para que el usuario pueda guardar los cambios.
         self.habilitarSaves(row, col, tabla)
+        # Esta función se ejecuta siempre que el usuario modifique una
+        # celda, sin distinguir la columna, por eso hay que checkear si
+        # la columna modificada fue una de una cantidad antes de
+        # ejecutar el código.
+        # Si la columna modificada es de cantidad en condiciones,
+        # cantidad en reparación o cantidad de baja...
         if col in (2, 3, 4):
+            # ...obtenemos los valores de las cantidades
             cantCond = int(tabla.item(row, 2).text())
             cantRep = tabla.item(row, 3).text()
             cantBaja = tabla.item(row, 4).text()
             cantPrest = tabla.item(row, 5).text()
-            if cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric():
+            # Las cantidades en reparación y de baja pueden no ser
+            # numéricas ("-", significa dato nulo), por lo que hay que
+            # checkear si el usuario las ingresó como numéricas o no
+            # antes de hacer cuentas.
+            # Si las cantidades en reparación y de baja son numéricas..
+            if (cantRep.isnumeric() and cantBaja.isnumeric()):
+                #... se calcula el total sumando todas las cantidades
                 total = QtWidgets.QTableWidgetItem(
-                    str(cantCond + int(cantRep) + int(cantBaja) + int(cantPrest)))
+                            str(cantCond + int(cantRep)
+                            + int(cantBaja) + int(cantPrest)))
+            # Si no...
             else:
-                total = QtWidgets.QTableWidgetItem(str(cantCond))
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+                #... se calcula el total sumando solamente las
+                # cantidades en condiciones y adeudadas.
+                total = QtWidgets.QTableWidgetItem(
+                            str(cantCond) + int(cantRep))
+            # El campo se hace no editable y se guarda en la tabla
+            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                           QtCore.Qt.ItemFlag.ItemIsEnabled)
             tabla.setItem(row, 6, total)
 
     def actualizarSugerenciasSubgrupos(self):
+        """Este método actualiza las sugerencias de los campos de
+        subgrupos al editar lo ingresado en un campo de grupos
+        relacionado, ya que las sugerencias de subgrupos deben estar
+        relacionadas al grupo ingresado.
+        """
+        # Usamos la tabla de stock.
         tabla=self.pantallaStock.tableWidget
+        # Obtenemos la fila del campo de grupos modificado.
         row = tabla.indexAt(self.sender().pos()).row()
+        # Obtenemos los nuevos datos.
         grupo=tabla.cellWidget(row, 7).text()
+        # Obtenemos el cuadro de sugerencias del campo subgrupos.
         completer=tabla.cellWidget(row, 8).completer()
+        # Obtenemos sugerencias actualizadas.
         sugerencias=[i[0] for i in 
                      bdd.cur.execute('''SELECT s.descripcion FROM subgrupos s
                      JOIN grupos g ON s.id_grupo = g.id
                      WHERE g.descripcion LIKE ?''', (grupo,)).fetchall()]
+        # Añadimos las sugerencias actualizadas al campo de subgrupos.
         completer.setModel(QtCore.QStringListModel(sugerencias))
+        # Habilitamos el boton de guardar para que el usuario pueda
+        # guardar los cambios.
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
     
     def fetchStock(self):
