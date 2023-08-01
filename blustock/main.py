@@ -44,6 +44,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
             Crea la ventana principal con un menú inicialmente
             escondido y una colección de pantallas.
+
+        actualizarHastaFechas(self):
+            Actualiza los filtros de fecha y hora con la fecha y hora
+            actuales.
+        
+        habilitarSaves(self, row: int | None = None,
+                       col: int | None = None,
+                       tabla: QtWidgets.QTableWidget | None = None):
+            Habilita el botón de guardar de una fila de una tabla de
+            una gestión.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -366,6 +376,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.showMaximized()
     
     def actualizarHastaFechas(self):
+        """Este método actualiza los filtros de fecha y hora con la
+        fecha y hora actuales.
+        """
         self.pantallaReps.hastaFecha.setDate(
             QtCore.QDate.fromString(
                 date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
@@ -551,14 +564,31 @@ class MainWindow(QtWidgets.QMainWindow):
                 La tabla en la que está el botón.
                 Default:None
         """
+        # Si no se pasa la tabla por parámetro, se asume que la tabla
+        # modificada es quien llamó a este método. Esto es porque
+        # cuando se llama a este método desde una tabla modificada, hay
+        # ocasiones en las que la tabla
         if tabla is None:
             tabla=self.sender()
+        
+        # Si 
         if row is None:
             row=tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
-    def actualizarTotal(self, row, col):
-        tabla = self.pantallaStock.tableWidget
+    def actualizarTotal(self, row: int, col: int,
+                        tabla: QtWidgets.QTableWidget | None = None):
+        """Este método actualiza el campo total de la tabla stock
+        cuando se modifican las cantidades.
+        
+        Parámetros
+        ----------
+            row: int
+                La fila del campo modificado
+            
+        """
+        if tabla is None:
+            tabla = self.pantallaStock.tableWidget
         self.habilitarSaves(row, col, tabla)
         if col in (2, 3, 4):
             cantCond = int(tabla.item(row, 2).text())
