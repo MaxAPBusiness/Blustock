@@ -113,3 +113,42 @@ class TerminarTurno(QDialog):
 
 
 
+class cerrarSesion(QDialog):
+    def __init__(self,usuario):
+        self.turnFinalized = None
+        self.usuario = usuario
+        super().__init__()
+        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'finalizar_turno.ui'), self)
+        self.setWindowTitle("Cerrar la aplicacion")
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+        self.Contrasena.setText("Para cerrar la aplicacion, por favor ingrese su contraseña")
+        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
+        pixmap = QtGui.QPixmap(path)
+        self.showPass.setIcon(QtGui.QIcon(QtGui.QIcon(pixmap)))
+        self.showPass.setIconSize(QtCore.QSize(25, 25))
+        self.showPass.clicked.connect(lambda: self.mostrarContrasena(self.showPass, self.contrasenaLineEdit))
+        self.buttonBox.accepted.connect(self.cerrar)
+
+        self.show()
+
+    def mostrarContrasena(self, boton,entry: QtWidgets.QLineEdit):
+        if boton.isChecked():
+            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Normal)
+            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}esconder.png'
+            pixmap = QtGui.QPixmap(path)
+        else:
+            entry.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+            path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
+            pixmap = QtGui.QPixmap(path)
+        boton.setIcon(QtGui.QIcon(pixmap))
+        boton.setIconSize(QtCore.QSize(25, 25))
+
+    def cerrar(self):
+        if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
+            mensaje = """Esta seguro que desea cerrar la sesion?"""
+            popup = PopUp("Pregunta", mensaje).exec()
+            if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+                self.turnFinalized = True
+        else:
+            mensaje = """Contraseña incorrecta. No es posible cerrar la aplicacion"""
+            PopUp("Error", mensaje).exec()

@@ -11,7 +11,7 @@ Clases
 """
 from PyQt6 import QtWidgets, QtCore, QtGui
 import os
-from ui.presets.turnos import NuevoTurno,TerminarTurno
+from ui.presets.turnos import NuevoTurno,TerminarTurno,cerrarSesion
 from db.bdd import bdd
 from ui.presets.popup import PopUp
 
@@ -65,14 +65,19 @@ class toolboton(QtWidgets.QToolButton):
         b=QtGui.QAction("Cerrar sesion",a)
         c=QtGui.QAction("Terminar turno",a)
         d=QtGui.QAction("Iniciar turno",a)
+        f=QtGui.QAction("Salir de la aplicacion",a)
+
         b.triggered.connect(self.inicio)
         c.triggered.connect(self.cerrar)
         d.triggered.connect(self.nuevo)
+        f.triggered.connect(self.salir)
         a.addAction(d)
         a.addSeparator()
         a.addAction(c)
         a.addSeparator()
         a.addAction(b)
+        a.addSeparator()
+        a.addAction(f)
         self.setMenu(a)
         
 
@@ -96,14 +101,20 @@ class toolboton(QtWidgets.QToolButton):
                 self.menu().actions()[0].setVisible(False)
 
     def cerrar(self):
-            self.popup=TerminarTurno(self.nw.usuario)
-            self.popup.exec()
-            if self.popup.turnFinalized == True:
-                self.nw.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.nw.usuario,)).fetchone()[0])
-                for i in range(7):
-                    if i != 3:
-                        self.nw.menubar.actions()[i].setVisible(True)
+        self.popup=TerminarTurno(self.nw.usuario)
+        self.popup.exec()
+        if self.popup.turnFinalized == True:
+            self.nw.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.nw.usuario,)).fetchone()[0])
+            for i in range(7):
+                if i != 3:
+                    self.nw.menubar.actions()[i].setVisible(True)
 
-                if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.nw.usuario,)).fetchone()[0] != "Director de Taller":
-                    self.nw.menubar.actions()[4].setVisible(False)
-                self.menu().actions()[0].setVisible(True)
+            if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.nw.usuario,)).fetchone()[0] != "Director de Taller":
+                self.nw.menubar.actions()[4].setVisible(False)
+            self.menu().actions()[0].setVisible(True)
+
+    def salir(self):
+        self.popup=cerrarSesion(self.nw.usuario)
+        self.popup.exec()
+        if self.popup.turnFinalized == True:
+            self.nw.close()

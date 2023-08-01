@@ -23,7 +23,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Para finalizar el turno por favor ingrese su contraseña</string>
+      <string>Para finalizar el turno, por favor ingrese su contraseña</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

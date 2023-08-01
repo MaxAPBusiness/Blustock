@@ -382,7 +382,8 @@ class MainWindow(QtWidgets.QMainWindow):
         timer=QtCore.QTimer()
         timer.timeout.connect(self.actualizarHastaFechas)
         timer.start(300000)
-
+        self.setWindowFlags(QtCore.Qt.WindowType.CustomizeWindowHint)
+        self.setWindowFlag(QtCore.Qt.WindowType.WindowTitleHint)
         # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
@@ -475,10 +476,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaLogin.usuarioState.setText("usuario incorrecto")
             self.pantallaLogin.passwordState.setText("")
 
-    def sopas(self):
+    def alumnos(self):
         self.pantallaRealizarMov.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
             self.pantallaRealizarMov.estadoComboBox.itemText
@@ -511,7 +513,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
         self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
-            self.sopas)
+            self.alumnos)
         self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
 
@@ -607,11 +609,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 
                 bdd.con.commit()
                 if self.sopas == True:
+                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
+                    self.pantallaRealizarMov.herramientaComboBox.clear()
+                    self.pantallaRealizarMov.estadoComboBox.clear()
+                    self.pantallaRealizarMov.cursoComboBox.clear()
+                    self.pantallaRealizarMov.ubicacionComboBox.clear()
                     mensaje = """Movimiento cargado con exito."""
                     return PopUp("Aviso", mensaje).exec()
                 else:
                     mensaje = """Movimiento cancelado no hay suficientes herramientas para realizar el movimiento."""
                     return PopUp("Error", mensaje).exec()
+
 
             else:            
                 mensaje = """Por favor ingrese el nombre del alumno solicitante."""
