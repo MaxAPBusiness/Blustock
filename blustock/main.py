@@ -390,9 +390,11 @@ class MainWindow(QtWidgets.QMainWindow):
         print(QtGui.QGuiApplication.primaryScreen().availableSize())
         self.setBaseSize(QtGui.QGuiApplication.primaryScreen().availableSize())
         self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,QtWidgets.QSizePolicy.Policy.Expanding)
+        print(self.size())
         self.setWindowTitle('Blustock')
-        self.showMaximized()
-    
+        self.show()  
+        print(self.size())
+  
     def actualizarHastaFechas(self):
         """Este método actualiza los filtros de fecha y hora con la
         fecha y hora actuales.
@@ -628,6 +630,32 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = """Por favor ingrese el nombre del alumno solicitante."""
                 return PopUp("Error", mensaje).exec()
 
+    def habilitarSaves(self, row: int | None = None, col: int | None = None,
+                       tabla: QtWidgets.QTableWidget | None = None):
+        """Este método habilita el botón de guardar de una fila de una
+        tabla de una gestión.
+        
+        Parámetros
+        ----------
+            row: int | None = None
+                La fila en la que está el boton.
+                Default: None.
+            col: int | None = None
+                La columna de la que se ejecutó la función, no se usa
+                pero es necesario declararla porque, si se ejecuta
+                de una forma especial, esa ejecución pasa por defecto
+                un parámetor de columna que, si no guardaramos en ese
+                parámetro, estaría sobreescribiendo el parámetro tabla.
+                Default: None.
+            tabla: QtWidgets.QTableWidget | None = None
+                La tabla en la que está el botón.
+                Default:None
+        """
+        if tabla is None:
+            tabla=self.sender()
+        if row is None:
+            row=tabla.indexAt(self.sender().pos()).row()
+        tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
     def insertarFilas(self, tabla: QtWidgets.QTableWidget,
                       funcGuardar: types.FunctionType,
                       funcEliminar: types.FunctionType,
