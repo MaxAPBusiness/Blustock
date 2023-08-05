@@ -17,7 +17,6 @@ os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 import sys
 import sqlite3
 import pandas as pd
-import datetime as time
 import core
 import types
 from unidecode import unidecode
@@ -31,9 +30,7 @@ from ui.presets.param_edit import ParamEdit
 from ui.presets.Toolbotoon import toolboton
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
 
-
 bdd.refrescarBDD()
-
 
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
@@ -382,19 +379,20 @@ class MainWindow(QtWidgets.QMainWindow):
         timer=QtCore.QTimer()
         timer.timeout.connect(self.actualizarHastaFechas)
         timer.start(300000)
-        self.setWindowFlags(QtCore.Qt.WindowType.CustomizeWindowHint)
-        self.setWindowFlag(QtCore.Qt.WindowType.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
-        print(QtGui.QGuiApplication.primaryScreen().availableSize())
-        self.setBaseSize(QtGui.QGuiApplication.primaryScreen().availableSize())
-        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,QtWidgets.QSizePolicy.Policy.Expanding)
-        print(self.size())
-        self.setWindowTitle('Blustock')
+        self.move(0,0)
+        self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
         self.show()  
-        print(self.size())
-  
+      
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        if self.sender() != None:
+            event.accept()
+        else:
+            event.ignore()
+
     def actualizarHastaFechas(self):
         """Este método actualiza los filtros de fecha y hora con la
         fecha y hora actuales.
@@ -430,7 +428,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 if pañolero != None:
                     mensaje = "Hay un turno sin finalizar, desea continuarlo o finalizarlo?"
                     popup = PopUp("Turno",mensaje)
-                    
+
                     class sopas(QtCore.QObject):
                         def eventFilter(self, obj, event):
                             # Ignore all key events
@@ -454,7 +452,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     if popup == QtWidgets.QMessageBox.StandardButton.No:
                         profe = dal.obtenerDatos("usuarios", self.usuario,)
-                        hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                        hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                         bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                         bdd.con.commit()
                         self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
@@ -587,7 +585,7 @@ class MainWindow(QtWidgets.QMainWindow):
             where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
         descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
-        fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         if cant == 0:
             mensaje = """Por favor ingrese un valor mayor a 0."""
             return PopUp("Error", mensaje).exec()
@@ -2922,7 +2920,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         hastaFecha.dateChanged.connect(self.fetchResumen)
         self.stackedWidget.setCurrentIndex(15)
-
 
 app = QtWidgets.QApplication(sys.argv)
 app.setStyleSheet(open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r').read())

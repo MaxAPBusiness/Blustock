@@ -71,13 +71,10 @@ class toolboton(QtWidgets.QToolButton):
         c.triggered.connect(self.cerrar)
         d.triggered.connect(self.nuevo)
         f.triggered.connect(self.salir)
-        a.addAction(d)
-        a.addSeparator()
-        a.addAction(c)
-        a.addSeparator()
-        a.addAction(b)
-        a.addSeparator()
-        a.addAction(f)
+        
+        for i in (b,c,d,f):
+            a.addAction(i)
+            a.addSeparator()
         self.setMenu(a)
         
 

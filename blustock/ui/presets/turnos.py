@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import QDialog
 from PyQt6 import uic,QtGui,QtCore,QtWidgets
 from dal.dal import dal
 from db.bdd import bdd
-import datetime as time
+from datetime import datetime
 from ui.presets.popup import PopUp
 
 class NuevoTurno(QDialog):
@@ -47,7 +47,7 @@ class NuevoTurno(QDialog):
                 profe = dal.obtenerDatos("usuarios",self.usuario,)
                 alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
                 panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
-                fecha = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                 bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha_ing, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
                 bdd.con.commit()
                 mensaje = """El turno se cargo con exito."""
@@ -99,7 +99,7 @@ class TerminarTurno(QDialog):
             if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
                 self.turnFinalized = True
                 profe = dal.obtenerDatos("usuarios", self.usuario,)
-                hora = time.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                 bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                 bdd.con.commit()
                 mensaje = """El turno se ha finalizado correctamente"""
