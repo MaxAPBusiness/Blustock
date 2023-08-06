@@ -385,6 +385,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.move(0,0)
         self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
+        boton = QtWidgets.QPushButton()
+        boton.setObjectName("prueba")
+        boton.setText("X")
+        boton.setFixedSize(40, 40)
+        boton.setVisible(True)
+        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'
+        pixmap = QtGui.QPixmap(path)
+        boton.clicked.connect(lambda:self.close())
+        self.pantallaLogin.gridLayout.addWidget(boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
         self.show()  
       
     def closeEvent(self, event: QtGui.QCloseEvent):
@@ -447,7 +456,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.label.setObjectName("sopas")
                         self.boton.menu().actions()[0].setVisible(False)
                         for i in range(7):
-                            if i != 3:
+                            if i != 1:
                                 self.menubar.actions()[i].setVisible(False)
 
                     if popup == QtWidgets.QMessageBox.StandardButton.No:
@@ -457,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         bdd.con.commit()
                         self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
                         for i in range(7):
-                            if i != 3:
+                            if i != 1:
                                 self.menubar.actions()[i].setVisible(True)
                                 
                         if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":

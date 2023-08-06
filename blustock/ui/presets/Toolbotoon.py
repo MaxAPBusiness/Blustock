@@ -72,7 +72,7 @@ class toolboton(QtWidgets.QToolButton):
         d.triggered.connect(self.nuevo)
         f.triggered.connect(self.salir)
         
-        for i in (b,c,d,f):
+        for i in (d,c,b,f):
             a.addAction(i)
             a.addSeparator()
         self.setMenu(a)
@@ -93,7 +93,7 @@ class toolboton(QtWidgets.QToolButton):
                 if usuario != None: 
                     self.nw.label.setText("El pañolero en turno es: " + usuario[0])
                     for i in range(7):
-                        if i != 3:
+                        if i != 1:
                             self.nw.menubar.actions()[i].setVisible(False)
                 self.menu().actions()[0].setVisible(False)
 
@@ -103,7 +103,7 @@ class toolboton(QtWidgets.QToolButton):
         if self.popup.turnFinalized == True:
             self.nw.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.nw.usuario,)).fetchone()[0])
             for i in range(7):
-                if i != 3:
+                if i != 1:
                     self.nw.menubar.actions()[i].setVisible(True)
 
             if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.nw.usuario,)).fetchone()[0] != "Director de Taller":

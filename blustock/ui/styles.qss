@@ -3,6 +3,20 @@
     font-weight: 400;
     font-size: 20px;
 }
+
+#prueba{
+    background-color: #293045;
+    font-weight: 1000;
+    font-size: 30px;
+    text-align: center;
+    font-family: math;
+}
+
+#prueba:hover{
+    background-color: #768AC5;
+    color:white;
+}
+
 QComboBox{
     border-radius: 5px;
     background-color: #BABFCE;
@@ -80,7 +94,6 @@ QPushButton:hover{
 }
 QPushButton:pressed {
     background-color: #293045;
-
 }
 
 QRadioButton:indicator{
