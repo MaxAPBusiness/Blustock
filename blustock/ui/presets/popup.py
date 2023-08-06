@@ -6,6 +6,7 @@ Clases
         Genera un mensaje emergente.
 """
 from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import Qt
 
 class PopUp(QMessageBox):
     """Esta clase genera un mensaje emergente.
@@ -21,13 +22,13 @@ class PopUp(QMessageBox):
     """
     def __init__(self, type, info):
         super().__init__()
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
 
         # Dependiendo del título, cambia el tipo de ventana y su ícono.
         # Los iconos son: critical (La cruz), warning (El triangulo 
         # amarillo con el !) y Information (una i en un dialogo azul)
         if type == "Error":
             self.setIcon(QMessageBox.Icon.Critical)
-
             # Método setStandardButtons: elije los botones del mensaje.
             # Ok significa que va a tener un boton que dice ok.
             self.setStandardButtons(QMessageBox.StandardButton.Cancel |QMessageBox.StandardButton.Ok)
@@ -53,7 +54,6 @@ class PopUp(QMessageBox):
             QMessageBox.StandardButton.Yes)
             self.button(QMessageBox.StandardButton.Yes).setText("Continuar turno")
             self.button(QMessageBox.StandardButton.No).setText("Finalizar turno")
-
         elif type[:8] == 'Pregunta':
             if type == "Pregunta":
                 self.setIcon(QMessageBox.Icon.Warning)
@@ -72,7 +72,6 @@ class PopUp(QMessageBox):
                     QMessageBox.StandardButton.No |
                     QMessageBox.StandardButton.Yes)
             # Va a tener dos botones, uno de no y uno de sí.
-
             # Obtenemos el boton sí para cambiarle el texto, asi dice
             # sí en vez de yes.
             self.button(QMessageBox.StandardButton.Yes).setText("Sí")

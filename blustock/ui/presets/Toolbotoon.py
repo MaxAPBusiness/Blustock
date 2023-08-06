@@ -13,7 +13,6 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 import os
 from ui.presets.turnos import NuevoTurno,TerminarTurno,cerrarSesion
 from db.bdd import bdd
-from ui.presets.popup import PopUp
 
 class toolboton(QtWidgets.QToolButton):
     """Esta clase genera un botón que se ubicará en las filas de las
@@ -87,6 +86,7 @@ class toolboton(QtWidgets.QToolButton):
     
     def nuevo(self):
             self.popup = NuevoTurno(self.nw.usuario)
+            self.popup.setWindowFlags(self.popup.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
             self.popup.exec()
             if self.popup.turnFinalized == True:
                 usuario = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
@@ -96,9 +96,11 @@ class toolboton(QtWidgets.QToolButton):
                         if i != 1:
                             self.nw.menubar.actions()[i].setVisible(False)
                 self.menu().actions()[0].setVisible(False)
+                self.menu().actions()[4].setVisible(False)
 
     def cerrar(self):
         self.popup=TerminarTurno(self.nw.usuario)
+        self.popup.setWindowFlags(self.popup.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         self.popup.exec()
         if self.popup.turnFinalized == True:
             self.nw.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.nw.usuario,)).fetchone()[0])
@@ -109,9 +111,11 @@ class toolboton(QtWidgets.QToolButton):
             if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.nw.usuario,)).fetchone()[0] != "Director de Taller":
                 self.nw.menubar.actions()[4].setVisible(False)
             self.menu().actions()[0].setVisible(True)
+            self.menu().actions()[4].setVisible(True)
 
     def salir(self):
         self.popup=cerrarSesion(self.nw.usuario)
+        self.popup.setWindowFlags(self.popup.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         self.popup.exec()
         if self.popup.turnFinalized == True:
             self.nw.close()
