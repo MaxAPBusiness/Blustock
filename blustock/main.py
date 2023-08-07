@@ -244,7 +244,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Conectamos el botón.
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaStock.tableWidget, self.saveStock,
+                self.pantallaStock.tableWidget, 
+                lambda: self.saveOne(self.pantallaStock.tableWidget,
+                                     self.saveStock, self.fetchStock),
                 self.deleteStock, self.actualizarTotal, core.camposStock[0],
                 (sugerenciasGrupos, [], sugerenciasUbis,),
                 self.actualizarSugerenciasSubgrupos))
@@ -899,7 +901,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Generamos los botones para la fila de la tabla
             core.generarBotones(
-                lambda: self.saveStock(datos), lambda: self.deleteStock(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveStock, self.fetchStock, datos),
+                lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Cambiamos la altura de la fila.
         tabla.setRowHeight(0, 35)
@@ -924,7 +928,7 @@ class MainWindow(QtWidgets.QMainWindow):
         listaUbi.currentIndexChanged.connect(self.fetchStock)
         self.stackedWidget.setCurrentIndex(3)
 
-    def saveStock(self, datos: list | None = None):
+    def saveOne(self, tabla, funcSave, funcFetch, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla stock de la base de datos.
 
@@ -939,9 +943,17 @@ class MainWindow(QtWidgets.QMainWindow):
         # misma identación en todas las líneas así dedent funciona,
         # sino le da ansiedad.
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla = self.pantallaStock.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
+        exito=funcSave(tabla, row, datos)
+        if exito == True:    
+            info = "Los datos se han guardado con éxito."
+            PopUp("Aviso", info).exec()
+        posicion = barra.value()
+        funcFetch()
+        barra.setValue(posicion)
+    
+    def saveStock(self, tabla, row, datos):
         iCampos = (1, 2, 7, 8, 9)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -1038,11 +1050,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchStock()
-            barra.setValue(posicion)
+            return True
 
     def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
