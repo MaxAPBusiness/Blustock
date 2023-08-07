@@ -256,8 +256,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.botonGuardar.clicked.connect(
             lambda: core.saveAll(
                 self.pantallaStock.tableWidget, self.saveStock,
-                dal.obtenerDatos("stock", self.pantallaStock.lineEdit.text()))
-                )
+                dal.obtenerDatos("stock", self.pantallaStock.lineEdit.text()),
+                self.fetchStock))
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -275,9 +275,20 @@ class MainWindow(QtWidgets.QMainWindow):
             'SELECT descripcion FROM grupos').fetchall()]
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
+                self.pantallaSubgrupos.tableWidget,
+                lambda: self.saveOne(self.pantallaSubgrupos.tableWidget,
+                        self.saveSubgrupos, self.fetchSubgrupos),                
                 self.deleteSubgrupos, self.habilitarSaves,
                 core.camposSubgrupos[0], [sugerenciasGruposS]))
+        # Además, escondemos la primera columna. Esto es porque es la
+        # columna id es necesaria para tener el número de fila pero no
+        # queremos que la vean los usuarios porque no es info necesaria
+        self.pantallaSubgrupos.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
+                dal.obtenerDatos(
+                    "subgrupos", self.pantallaSubgrupos.lineEdit.text()),
+                self.fetchSubgrupos))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
 
         self.pantallaGrupos.pushButton_2.clicked.connect(
@@ -1795,7 +1806,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchOtroPersonal()
             barra.setValue(posicion)
 
-    def saveSubgrupos(self, datos: list | None = None):
+    def saveSubgrupos(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla subgrupos de la base de datos.
 
@@ -1805,11 +1816,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-
-        tabla = self.pantallaSubgrupos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
-
         iCampos = (1, 2)
         for iCampo in iCampos:
             if iCampo == 2:
@@ -1820,51 +1826,44 @@ class MainWindow(QtWidgets.QMainWindow):
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            subgrupo = tabla.item(row, 1).text()
-            grupo = tabla.cellWidget(row, 2).text()
+        subgrupo = tabla.item(row, 1).text()
+        grupo = tabla.cellWidget(row, 2).text()
 
-            idGrupo = bdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
-            ).fetchone()
-            if not idGrupo:
-                info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
-                return PopUp("Error", info).exec()
+        idGrupo = bdd.cur.execute(
+            "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
+        ).fetchone()
+        if not idGrupo:
+            info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
+            return PopUp("Error", info).exec()
 
-            datosNuevos = [subgrupo, grupo]
+        datosNuevos = [subgrupo, grupo]
 
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
-                        (subgrupo, idGrupo[0])
-                    )
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    # Guardamos los datos de la fila en
-                    bdd.cur.execute(
-                        """UPDATE subgrupos
-                        SET descripcion=?, id_grupo=?
-                        WHERE id = ?""",
-                        (subgrupo, idGrupo[0], idd)
-                    )
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[2:], datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
-                return PopUp("Error", info).exec()
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
+                    (subgrupo, idGrupo[0])
+                )
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
+            else:
+                idd = int(tabla.item(row, 0).text())
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE subgrupos
+                    SET descripcion=?, id_grupo=?
+                    WHERE id = ?""",
+                    (subgrupo, idGrupo[0], idd)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
 
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchSubgrupos()
-            barra.setValue(posicion)
+        bdd.con.commit()
+        return True
 
     def deleteOtroPersonal(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1931,7 +1930,9 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setCellWidget(rowNum, 2, grupos)
 
             core.generarBotones(
-                lambda: self.saveSubgrupos(datos), lambda: self.deleteSubgrupos(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveSubgrupos, self.fetchSubgrupos, datos),
+                lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
