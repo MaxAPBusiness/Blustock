@@ -253,6 +253,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # Además, escondemos la primera columna. Esto es porque es la
         # columna id es necesaria para tener el número de fila pero no
         # queremos que la vean los usuarios porque no es info necesaria
+        self.pantallaStock.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaStock.tableWidget, self.saveStock,
+                dal.obtenerDatos("stock", self.pantallaStock.lineEdit.text()))
+                )
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -399,7 +404,7 @@ class MainWindow(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap(path)
         boton.clicked.connect(lambda:self.close())
         self.pantallaLogin.gridLayout.addWidget(boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
-        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         self.show()  
       
     def closeEvent(self, event: QtGui.QCloseEvent):
@@ -531,6 +536,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
+
+        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
+            self.alumnos)
+        self.pantallaRealizarMov.pushButton.clicked.connect(
+            self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
     
@@ -955,13 +965,16 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        exito=funcSave(tabla, row, datos)
-        if exito == True:    
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-        posicion = barra.value()
-        funcFetch()
-        barra.setValue(posicion)
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            exito=funcSave(tabla, row, datos)
+            if exito == True:    
+                info = "Los datos se han guardado con éxito."
+                PopUp("Aviso", info).exec()
+            posicion = barra.value()
+            funcFetch()
+            barra.setValue(posicion)
     
     def saveStock(self, tabla, row, datos):
         iCampos = (1, 2, 7, 8, 9)
@@ -994,73 +1007,70 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
             return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # Se obtiene el texto de todas las celdas.
-            desc = tabla.item(row, 1).text()
-            grupo = tabla.cellWidget(row, 7).text()
-            subgrupo = tabla.cellWidget(row, 8).text()
-            ubi = tabla.cellWidget(row, 9).text()
+        # Se obtiene el texto de todas las celdas.
+        desc = tabla.item(row, 1).text()
+        grupo = tabla.cellWidget(row, 7).text()
+        subgrupo = tabla.cellWidget(row, 8).text()
+        ubi = tabla.cellWidget(row, 9).text()
 
-            # Verificamos que el grupo esté registrado.
-            idGrupo = bdd.cur.execute(
-                "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
-            ).fetchone()
-            # Si no lo está...
-            if not idGrupo:
-                # Muestra un mensaje de error al usuario y termina la
-                # función.
-                info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
-                return PopUp("Error", info).exec()
+        # Verificamos que el grupo esté registrado.
+        idGrupo = bdd.cur.execute(
+            "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
+        ).fetchone()
+        # Si no lo está...
+        if not idGrupo:
+            # Muestra un mensaje de error al usuario y termina la
+            # función.
+            info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
+            return PopUp("Error", info).exec()
 
-            # Verificamos que el subgrupo esté registrado y que
-            # coincida con el grupo ingresado.
-            idSubgrupo = bdd.cur.execute(
-                "SELECT id FROM subgrupos WHERE descripcion LIKE ? AND id_grupo = ?",
-                (subgrupo, idGrupo[0],)
-            ).fetchone()
-            if not idSubgrupo:
-                info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
-                return PopUp("Error", info).exec()
+        # Verificamos que el subgrupo esté registrado y que
+        # coincida con el grupo ingresado.
+        idSubgrupo = bdd.cur.execute(
+            "SELECT id FROM subgrupos WHERE descripcion LIKE ? AND id_grupo = ?",
+            (subgrupo, idGrupo[0],)
+        ).fetchone()
+        if not idSubgrupo:
+            info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
+            return PopUp("Error", info).exec()
 
-            idUbi = bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion LIKE ?",
-                                    (ubi,)).fetchone()
-            if not idUbi:
-                info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
-                return PopUp("Error", info).exec()
+        idUbi = bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion LIKE ?",
+                                (ubi,)).fetchone()
+        if not idUbi:
+            info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
+            return PopUp("Error", info).exec()
 
-            datosNuevos = ["" if cell in ("-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
-            try:
-                idd = tabla.item(row, 0).text()
-                if not idd:
-                    bdd.cur.execute(
-                        "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
-                        (desc, cond, rep, baja, prest,
-                         idSubgrupo[0], idUbi[0],)
-                    )
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Stock', desc, None, datosNuevos)
-                else:
-                    idd=int(idd)
-                    # Guardamos los datos de la fila en
-                    bdd.cur.execute(
-                        """UPDATE stock
-                        SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                        cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
-                        WHERE id = ?""",
-                        (desc, cond, rep, baja, prest,
-                         idSubgrupo[0], idUbi[0], idd,)
-                    )
-                    datosViejos = [["" if cellData in ("-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
-                return PopUp("Error", info).exec()
+        datosNuevos = ["" if cell in ("-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd:
+                bdd.cur.execute(
+                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
+                    (desc, cond, rep, baja, prest,
+                        idSubgrupo[0], idUbi[0],)
+                )
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Stock', desc, None, datosNuevos)
+            else:
+                idd=int(idd)
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE stock
+                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+                    cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
+                    WHERE id = ?""",
+                    (desc, cond, rep, baja, prest,
+                        idSubgrupo[0], idUbi[0], idd,)
+                )
+                datosViejos = [["" if cellData in ("-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
+            return PopUp("Error", info).exec()
 
-            bdd.con.commit()
-            return True
+        bdd.con.commit()
+        return True
 
     def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
