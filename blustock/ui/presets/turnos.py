@@ -145,7 +145,7 @@ class cerrarSesion(QDialog):
 
     def cerrar(self):
         if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
-            mensaje = """Esta seguro que desea cerrar la sesion?"""
+            mensaje = """Esta seguro que desea cerrar la aplicacion?"""
             popup = PopUp("Pregunta", mensaje).exec()
             if popup == QtWidgets.QMessageBox.StandardButton.Yes:
                 self.turnFinalized = True

@@ -364,6 +364,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
+        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(self.alumnos)
+        self.pantallaRealizarMov.pushButton.clicked.connect(self.saveMovimiento)
+
         self.boton = toolboton("usuario", self)
         self.boton.setIconSize(QtCore.QSize(60, 40))
         self.label = QtWidgets.QLabel(str("El pañolero en turno es: "))
@@ -387,6 +390,16 @@ class MainWindow(QtWidgets.QMainWindow):
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.move(0,0)
         self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
+        boton = QtWidgets.QPushButton()
+        boton.setObjectName("prueba")
+        boton.setText("X")
+        boton.setFixedSize(40, 40)
+        boton.setVisible(True)
+        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'
+        pixmap = QtGui.QPixmap(path)
+        boton.clicked.connect(lambda:self.close())
+        self.pantallaLogin.gridLayout.addWidget(boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         self.show()  
       
     def closeEvent(self, event: QtGui.QCloseEvent):
@@ -447,11 +460,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
                         self.label.setText("El pañolero en turno es: " + pañolero[0])
                         self.label.setObjectName("sopas")
+                        self.boton.menu().actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(False)
                         for i in range(7):
-                            if i != 3:
+                            if i != 1:
                                 self.menubar.actions()[i].setVisible(False)
-
+                                
                     if popup == QtWidgets.QMessageBox.StandardButton.No:
                         profe = dal.obtenerDatos("usuarios", self.usuario,)
                         hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -459,13 +473,14 @@ class MainWindow(QtWidgets.QMainWindow):
                         bdd.con.commit()
                         self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
                         for i in range(7):
-                            if i != 3:
+                            if i != 1:
                                 self.menubar.actions()[i].setVisible(True)
                                 
                         if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
                             self.menubar.actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(True)
-                            
+                        self.boton.menu().actions()[4].setVisible(True)
+
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
 
@@ -516,11 +531,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
-
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
-            self.alumnos)
-        self.pantallaRealizarMov.pushButton.clicked.connect(
-            self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
     
