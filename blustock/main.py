@@ -803,7 +803,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # ejecutar el código.
         # Si la columna modificada es de cantidad en condiciones,
         # cantidad en reparación o cantidad de baja...
-        if col in (2, 3, 4):
+        if col in (2, 3, 4, 5):
             # ...obtenemos los valores de las cantidades
             try:
                 cantCond = int(tabla.item(row, 2).text())
@@ -1050,15 +1050,13 @@ class MainWindow(QtWidgets.QMainWindow):
             rep = tabla.item(row, 3).text()
             baja = tabla.item(row, 4).text()
             prest = tabla.item(row, 5).text()
-            if prest in ("-", ""):
-                prest = 0
-            if rep not in ("-", "") and baja not in ("-", ""):
+            if rep.isnumeric() and baja.isnumeric():
                 rep = int(rep)
                 baja = int(baja)
-
             else:
                 rep = None
                 baja = None
+                prest = 0
         except:
             mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
             return PopUp("Error", mensaje).exec()
