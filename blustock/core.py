@@ -250,4 +250,4 @@ def saveAll(tabla, funcSave, datos, funcFetch):
         if exito==True:
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec() 
-    funcFetch()
+            funcFetch()
