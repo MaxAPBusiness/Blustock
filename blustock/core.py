@@ -54,7 +54,7 @@ def mostrarContrasena(boton: QtWidgets.QCheckBox, entry: QtWidgets.QLineEdit):
 
 # Creamos matrices que llevan la información del tipo de campo y el
 # tipo de valor del campo, respectivamente.
-camposStock=((2, 1, 1, 0, 0, 2, 2, 4, 3, 3), (0, 1, 0, 0, 0, 0, 0, 2, 2, 2))
+camposStock=((2, 1, 1, 0, 0, 1, 2, 4, 3, 3), (0, 1, 0, 0, 0, 0, 0, 2, 2, 2))
 camposAlumnos=((2, 1, 3, 1), (0, 1, 2, 0))
 camposClases=((2, 1, 3), (0, 1, 2))
 camposDeudas=((2, 2, 2, 2, 2, 2, 2, 2), (1, 0, 1, 0, 1, 0, 0, 1))

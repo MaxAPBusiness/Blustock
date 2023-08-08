@@ -193,17 +193,17 @@
        </column>
        <column>
         <property name="text">
-         <string>Condiciones</string>
+         <string>En Condiciones</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Reparación</string>
+         <string>En Reparación</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Baja</string>
+         <string>De Baja</string>
         </property>
        </column>
        <column>

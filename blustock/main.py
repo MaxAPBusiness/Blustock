@@ -325,7 +325,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.pantallaAlumnos.tableWidget, self.saveAlumnos,
                 dal.obtenerDatos(
                     "alumnos", self.pantallaAlumnos.lineEdit.text()),
-                self.fetchGrupos))
+                self.fetchAlumnos))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
@@ -805,30 +805,34 @@ class MainWindow(QtWidgets.QMainWindow):
         # cantidad en reparación o cantidad de baja...
         if col in (2, 3, 4):
             # ...obtenemos los valores de las cantidades
-            cantCond = int(tabla.item(row, 2).text())
-            cantRep = tabla.item(row, 3).text()
-            cantBaja = tabla.item(row, 4).text()
-            cantPrest = tabla.item(row, 5).text()
-            # Las cantidades en reparación y de baja pueden no ser
-            # numéricas ("-", significa dato nulo), por lo que hay que
-            # checkear si el usuario las ingresó como numéricas o no
-            # antes de hacer cuentas.
-            # Si las cantidades en reparación y de baja son numéricas..
-            if (cantRep.isnumeric() and cantBaja.isnumeric()):
-                #... se calcula el total sumando todas las cantidades
-                total = QtWidgets.QTableWidgetItem(
-                            str(cantCond + int(cantRep)
-                            + int(cantBaja) + int(cantPrest)))
-            # Si no...
-            else:
-                #... se calcula el total sumando solamente las
-                # cantidades en condiciones y adeudadas.
-                total = QtWidgets.QTableWidgetItem(
-                            str(cantCond) + int(cantRep))
-            # El campo se hace no editable y se guarda en la tabla
-            total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                           QtCore.Qt.ItemFlag.ItemIsEnabled)
-            tabla.setItem(row, 6, total)
+            try:
+                cantCond = int(tabla.item(row, 2).text())
+                cantRep = tabla.item(row, 3).text()
+                cantBaja = tabla.item(row, 4).text()
+                cantPrest = tabla.item(row, 5).text()
+                # Las cantidades en reparación y de baja pueden no ser
+                # numéricas ("-", significa dato nulo), por lo que hay que
+                # checkear si el usuario las ingresó como numéricas o no
+                # antes de hacer cuentas.
+                # Si las cantidades en reparación y de baja son numéricas..
+                if (cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric()):
+                    #... se calcula el total sumando todas las cantidades
+                    total = QtWidgets.QTableWidgetItem(
+                                str(cantCond + int(cantRep)
+                                + int(cantBaja) + int(cantPrest)))
+                # Si no...
+                else:
+                    #... se calcula el total sumando solamente las
+                    # cantidades en condiciones y adeudadas.
+                    total = QtWidgets.QTableWidgetItem(str(cantCond))
+                # El campo se hace no editable y se guarda en la tabla
+                total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                            QtCore.Qt.ItemFlag.ItemIsEnabled)
+                tabla.setItem(row, 6, total)
+            except:
+                print('Sos un boludo')
+                return
+
 
     def actualizarSugerenciasSubgrupos(self):
         """Este método actualiza las sugerencias de los campos de
@@ -1022,9 +1026,9 @@ class MainWindow(QtWidgets.QMainWindow):
             if exito == True:    
                 info = "Los datos se han guardado con éxito."
                 PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            funcFetch()
-            barra.setValue(posicion)
+                posicion = barra.value()
+                funcFetch()
+                barra.setValue(posicion)
     
     def saveStock(self, tabla, row, datos):
         iCampos = (1, 2, 7, 8, 9)
@@ -1045,7 +1049,9 @@ class MainWindow(QtWidgets.QMainWindow):
             cond = int(tabla.item(row, 2).text())
             rep = tabla.item(row, 3).text()
             baja = tabla.item(row, 4).text()
-            prest = int(tabla.item(row, 5).text())
+            prest = tabla.item(row, 5).text()
+            if prest in ("-", None):
+                prest = 0
             if rep not in ("-", "") or baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
@@ -1856,7 +1862,8 @@ class MainWindow(QtWidgets.QMainWindow):
         datosNuevos = [subgrupo, grupo]
 
         try:
-            if not datos:
+            idd = tabla.item(row, 0).text()
+            if not datos or not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                     (subgrupo, idGrupo[0])
@@ -1864,7 +1871,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.insertarHistorial(
                     self.usuario, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 # Guardamos los datos de la fila en
                 bdd.cur.execute(
                     """UPDATE subgrupos
