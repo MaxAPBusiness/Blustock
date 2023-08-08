@@ -1385,7 +1385,8 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp("Error", info).exec()
         datosNuevos = [nombre, clase, dni]
         try:
-            if not datos:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                     (nombre, dni, idClase[0],)
@@ -1393,7 +1394,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.insertarHistorial(
                     self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 bdd.cur.execute(
                     """UPDATE personal
                     SET nombre_apellido=?, id_clase=?, dni=?
@@ -1643,13 +1644,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         grupo = tabla.item(row, 1).text()
         try:
-            if not datos:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
                 dal.insertarHistorial(
                     self.usuario, 'Inserción', 'Grupos', grupo, None, None)
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 bdd.cur.execute(
                     "UPDATE grupos SET descripcion = ? WHERE id = ?",
                     (grupo, idd,)
@@ -1804,6 +1806,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         datosNuevos = [nombre, clase, dni,]
         try:
+            idd = tabla.item(row, 0).text()
             if not datos:
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
@@ -1812,7 +1815,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.insertarHistorial(
                     self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 bdd.cur.execute(
                     """UPDATE personal
                     SET nombre_apellido=?, dni=?, id_clase=?
@@ -2175,7 +2178,8 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp("Error", info).exec()
         # datosNuevos = [nombre, dni, clase, usuario]
         try:
-            if not datos:
+            idd=tabla.item(row, 0).text()
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
                     (nombre, dni, idClase[0], usuario, contrasena)
@@ -2183,7 +2187,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 # dal.insertarHistorial(
                     # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 bdd.cur.execute(
                     """UPDATE personal
                     SET nombre_apellido=?, id_clase=?, dni=?
@@ -2340,7 +2344,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ubicacion = tabla.item(row, 1).text()
         try:
-            if not datos:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO ubicaciones VALUES(NULL, ?)",
                     (ubicacion,)
@@ -2348,7 +2353,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.insertarHistorial(
                     self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
             else:
-                idd = int(tabla.item(row, 0).text())
+                idd = int(idd)
                 bdd.cur.execute(
                     """UPDATE ubicaciones
                     SET descripcion=?
@@ -2481,7 +2486,8 @@ class MainWindow(QtWidgets.QMainWindow):
             clase = tabla.item(row, 2).text()
             datosNuevos = [clase, cat,]
             try:
-                if not datos:
+                idd = tabla.item(row, 0).text()
+                if not idd.isnumeric():
                     bdd.cur.execute(
                         "INSERT INTO clases VALUES(NULL, ?, ?)",
                         (clase, idCat[0],)
@@ -2489,7 +2495,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.insertarHistorial(
                         self.usuario, 'Inserción', 'Clases', clase, None, datosNuevos[1:])
                 else:
-                    idd = int(tabla.item(row, 0).text())
+                    idd = int(idd)
                     datosViejos = [fila for fila in datos if fila[0] == idd][0]
                     if cat != datosViejos[2] and dal.verifElimClases(idd):
                         mensaje = "La clase que desea cambiar de categoría tiene personal relacionado. Por motivos de seguridad, debe eliminar primero el personal relacionado antes de modificar la categoría de la clase."
