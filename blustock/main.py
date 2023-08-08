@@ -280,9 +280,6 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.saveSubgrupos, self.fetchSubgrupos),                
                 self.deleteSubgrupos, self.habilitarSaves,
                 core.camposSubgrupos[0], [sugerenciasGruposS]))
-        # Además, escondemos la primera columna. Esto es porque es la
-        # columna id es necesaria para tener el número de fila pero no
-        # queremos que la vean los usuarios porque no es info necesaria
         self.pantallaSubgrupos.botonGuardar.clicked.connect(
             lambda: core.saveAll(
                 self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
@@ -293,8 +290,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaGrupos.tableWidget, self.saveGrupos,
+                self.pantallaGrupos.tableWidget,
+                lambda: self.saveOne(self.pantallaGrupos.tableWidget,
+                        self.saveGrupos, self.fetchGrupos),
                 self.deleteGrupos, self.habilitarSaves, core.camposGrupos[0]))
+        self.pantallaGrupos.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaGrupos.tableWidget, self.saveGrupos,
+                dal.obtenerDatos("grupos", self.pantallaGrupos.lineEdit.text()
+                                 ), self.fetchGrupos))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -304,8 +308,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
-                self.saveAlumnos, self.deleteAlumnos,  self.habilitarSaves,
+                lambda: self.saveOne(self.pantallaGrupos.tableWidget,
+                        self.saveAlumnos, self.fetchAlumnos),
+                self.deleteAlumnos,  self.habilitarSaves,
                 core.camposAlumnos[0], [sugerenciasClasesA]))
+        self.pantallaAlumnos.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaAlumnos.tableWidget, self.saveAlumnos,
+                dal.obtenerDatos(
+                    "alumnos", self.pantallaAlumnos.lineEdit.text()),
+                self.fetchGrupos))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
@@ -1272,14 +1284,17 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             cursos = ParamEdit(sugerencias, rowData[2])
-            cursos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            cursos.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, cursos)
             tabla.setItem(
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             core.generarBotones(
-                lambda: self.saveAlumnos(datos), lambda: self.deleteAlumnos(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveAlumnos, self.fetchAlumnos, datos),
+                lambda: self.deleteAlumnos(datos), tabla, rowNum)
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
@@ -1294,7 +1309,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(1)
 
-    def saveAlumnos(self, datos: list | None = None):
+    def saveAlumnos(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla alumnos de la base de datos.
 
@@ -1304,9 +1319,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla alumnos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaAlumnos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
         iCampos = (1, 2, 3)
 
         for iCampo in iCampos:
@@ -1366,11 +1378,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchAlumnos()
-            barra.setValue(posicion)
+            return True
 
     def deleteAlumnos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1572,7 +1580,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
 
             core.generarBotones(
-                lambda: self.saveGrupos(datos), lambda: self.deleteGrupos(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveGrupos, self.fetchGrupos, datos),
+                lambda: self.deleteGrupos(datos), tabla, rowNum)
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
                 if item is not None:
@@ -1587,7 +1597,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(2)
 
-    def saveGrupos(self, datos: list | None = None):
+    def saveGrupos(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla grupos de la base de datos.
 
@@ -1597,10 +1607,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla grupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaGrupos.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
-
         if tabla.item(row, 1).text() == "":
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
@@ -1632,9 +1638,6 @@ class MainWindow(QtWidgets.QMainWindow):
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchGrupos()
-            barra.setValue(posicion)
 
     def deleteGrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
