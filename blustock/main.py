@@ -266,9 +266,17 @@ class MainWindow(QtWidgets.QMainWindow):
         sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
+                self.pantallaOtroPersonal.tableWidget, lambda: self.saveOne(
+                    self.pantallaOtroPersonal.tableWidget,
+                    self.saveOtroPersonal, self.fetchOtroPersonal),
                 self.deleteOtroPersonal, self.habilitarSaves,
                 core.camposOtroPersonal[0], [sugerenciasClasesP]))
+        self.pantallaOtroPersonal.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
+                dal.obtenerDatos(
+                    "otro_personal", self.pantallaOtroPersonal.lineEdit.text()
+                    ), self.fetchOtroPersonal))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
 
         sugerenciasGruposS=[i[0] for i in bdd.cur.execute(
@@ -1718,7 +1726,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             core.generarBotones(
-                lambda: self.saveOtroPersonal(datos), lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveOtroPersonal, self.fetchOtroPersonal,
+                    datos),
+                lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -1732,7 +1743,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(5)
 
-    def saveOtroPersonal(self, datos: list | None = None):
+    def saveOtroPersonal(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla personal de la base de datos.
 
@@ -1742,9 +1753,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla personal, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaOtroPersonal.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
         iCampos = (1, 2, 3)
         for iCampo in iCampos:
             if iCampo==2:
@@ -1805,9 +1813,6 @@ class MainWindow(QtWidgets.QMainWindow):
             bdd.con.commit()
             info = "Los datos se han guardado con éxito."
             PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchOtroPersonal()
-            barra.setValue(posicion)
 
     def saveSubgrupos(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
