@@ -238,7 +238,7 @@ def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.Function
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
 def saveAll(tabla, funcSave, datos, funcFetch):
-    info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
+    info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila?"
     popup = PopUp("Pregunta", info).exec()
     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
         exito=False

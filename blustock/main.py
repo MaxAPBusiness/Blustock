@@ -1019,7 +1019,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos los ids de los campos que no podemos dejar vacíos.
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             exito=funcSave(tabla, row, datos)
@@ -1050,9 +1050,9 @@ class MainWindow(QtWidgets.QMainWindow):
             rep = tabla.item(row, 3).text()
             baja = tabla.item(row, 4).text()
             prest = tabla.item(row, 5).text()
-            if prest in ("-", None):
+            if prest in ("-", ""):
                 prest = 0
-            if rep not in ("-", "") or baja not in ("-", ""):
+            if rep not in ("-", "") and baja not in ("-", ""):
                 rep = int(rep)
                 baja = int(baja)
 
