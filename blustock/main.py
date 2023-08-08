@@ -210,7 +210,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionTurnos.triggered.connect(self.fetchTurnos)
         self.opcionMovimientos.triggered.connect(self.fetchMovimientos)
         self.opcionUsuarios.triggered.connect(self.fetchUsuarios)
-        self.GestionUbicaciones.triggered.connect(self.fetchUbicaciones)
+        self.GestionUbicaciones.triggered.connect(self.fetchUbis)
         self.GestionClases.triggered.connect(self.fetchClases)
         self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
         self.GestionReparacion.triggered.connect(self.fetchReparaciones)
@@ -285,7 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget,
                 lambda: self.saveOne(self.pantallaSubgrupos.tableWidget,
-                        self.saveSubgrupos, self.fetchSubgrupos),                
+                        self.saveSubgrupos, self.fetchSubgrupos),
                 self.deleteSubgrupos, self.habilitarSaves,
                 core.camposSubgrupos[0], [sugerenciasGruposS]))
         self.pantallaSubgrupos.botonGuardar.clicked.connect(
@@ -332,18 +332,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaUbis.tableWidget, self.saveUbicaciones,
+                self.pantallaUbis.tableWidget, lambda: self.saveOne(
+                    self.pantallaUbis.tableWidget, self.saveUbis, self.fetchUbis),
                 self.deleteUbicaciones, self.habilitarSaves,
                 core.camposUbis[0]))
+        self.pantallaUbis.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaUbis.tableWidget, self.saveUbis,
+                dal.obtenerDatos("ubicaciones", self.pantallaUbis.lineEdit.text()),
+                self.fetchUbis))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
 
         sugerenciasCat=[i[0] for i in bdd.cur.execute(
             'SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-            self.pantallaClases.tableWidget, self.saveClases,
-            self.deleteClases, self.habilitarSaves, core.camposClases[0],
-            [sugerenciasCat]))
+            self.pantallaClases.tableWidget, lambda: self.saveOne(
+                self.pantallaClases.tableWidget, self.saveClases,
+                self.fetchClases), self.deleteClases, self.habilitarSaves,
+            core.camposClases[0], [sugerenciasCat]))
+        self.pantallaClases.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
+                self.pantallaClases.tableWidget, self.saveClases,
+                dal.obtenerDatos("clases", self.pantallaClases.lineEdit.text()
+                                 ), self.fetchClases))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
 
         sql='''SELECT c.descripcion FROM clases c
@@ -352,9 +364,16 @@ class MainWindow(QtWidgets.QMainWindow):
         sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
+                self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
+                    self.pantallaUsuarios.tableWidget, self.saveUsuarios,
+                    self.fetchUsuarios), self.deleteUsuarios,
+                self.habilitarSaves, core.camposUsuarios[0],
+                [sugerenciasClasesU]))
+        self.pantallaUsuarios.botonGuardar.clicked.connect(
+            lambda: core.saveAll(
                 self.pantallaUsuarios.tableWidget, self.saveUsuarios,
-                self.deleteUsuarios, self.habilitarSaves,
-                core.camposUsuarios[0], [sugerenciasClasesU]))
+                dal.obtenerDatos("usuarios", self.pantallaUsuarios.lineEdit.text()),
+                self.fetchUsuarios))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
         # Conectamos los parámetros de las gestiones y listados para
@@ -388,7 +407,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
         self.pantallaUbis.lineEdit.editingFinished.connect(
-            self.fetchUbicaciones)
+            self.fetchUbis)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
@@ -1348,45 +1367,42 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 1).text()
-            clase = tabla.cellWidget(row, 2).text()
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
 
-            idClase = bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=1", (
-                    clase,)
-            ).fetchone()
-            if not idClase:
-                info = "El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno. Regístrelo o revise los datos ya ingresados."
-                return PopUp("Error", info).exec()
-            datosNuevos = [nombre, clase, dni]
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                        (nombre, dni, idClase[0],)
-                    )
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    bdd.cur.execute(
-                        """UPDATE personal
-                        SET nombre_apellido=?, id_clase=?, dni=?
-                        WHERE id = ?""",
-                        (nombre, idClase[0], dni, idd,)
-                    )
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
-                return PopUp("Error", info).exec()
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=1", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = "El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno. Regístrelo o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+        datosNuevos = [nombre, clase, dni]
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, dni, idClase[0],)
+                )
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
+            else:
+                idd = int(tabla.item(row, 0).text())
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase[0], dni, idd,)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
 
-            bdd.con.commit()
-            return True
+        bdd.con.commit()
+        return True
 
     def deleteAlumnos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1619,33 +1635,29 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            grupo = tabla.item(row, 1).text()
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Grupos', grupo, None, None)
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    bdd.cur.execute(
-                        "UPDATE grupos SET descripcion = ? WHERE id = ?",
-                        (grupo, idd,)
-                    )
-                    datosNuevos = [grupo]
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Grupos', datosViejos[1], None, datosNuevos)
-            except sqlite3.IntegrityError:
-                mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
-                return PopUp("Error", mensaje).exec()
+        grupo = tabla.item(row, 1).text()
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Grupos', grupo, None, None)
+            else:
+                idd = int(tabla.item(row, 0).text())
+                bdd.cur.execute(
+                    "UPDATE grupos SET descripcion = ? WHERE id = ?",
+                    (grupo, idd,)
+                )
+                datosNuevos = [grupo]
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Grupos', datosViejos[1], None, datosNuevos)
+        except sqlite3.IntegrityError:
+            mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
+            return PopUp("Error", mensaje).exec()
 
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
+        bdd.con.commit()
+        return True
 
     def deleteGrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1773,46 +1785,43 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 1).text()
-            clase = tabla.cellWidget(row, 2).text()
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
 
-            idClase = bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
-                    clase,)
-            ).fetchone()
-            if not idClase:
-                info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
-                return PopUp("Error", info).exec()
-            
-            datosNuevos = [nombre, clase, dni,]
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
-                        (nombre, dni, idClase[0],)
-                    )
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    bdd.cur.execute(
-                        """UPDATE personal
-                        SET nombre_apellido=?, dni=?, id_clase=?
-                        WHERE id = ?""",
-                        (nombre, dni, idClase[0], idd,)
-                    )
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[2:], datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
-                return PopUp("Error", info).exec()
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
+            return PopUp("Error", info).exec()
+        
+        datosNuevos = [nombre, clase, dni,]
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, dni, idClase[0],)
+                )
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
+            else:
+                idd = int(tabla.item(row, 0).text())
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, dni=?, id_clase=?
+                    WHERE id = ?""",
+                    (nombre, dni, idClase[0], idd,)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Personal', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
+        
+        bdd.con.commit()
+        return True
 
     def saveSubgrupos(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
@@ -2101,7 +2110,8 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(
                 rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
             core.generarBotones(
-                lambda: self.saveUsuarios(datos),
+                lambda: self.saveOne(
+                    tabla, self.saveUsuarios, self.fetchUsuarios, datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
@@ -2113,7 +2123,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(8)
 
-    def saveUsuarios(self, datos: list | None = None):
+    def saveUsuarios(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla alumnos de la base de datos.
 
@@ -2123,9 +2133,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla alumnos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaUsuarios.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
         iCampos = (1, 2, 3, 4, 5)
 
         for iCampo in iCampos:
@@ -2147,51 +2154,44 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            nombre = tabla.item(row, 1).text()
-            clase = tabla.cellWidget(row, 2).text()
-            usuario = tabla.item(row, 4).text()
-            contrasena = tabla.item(row, 5).text()
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
+        usuario = tabla.item(row, 4).text()
+        contrasena = tabla.item(row, 5).text()
 
-            idClase = bdd.cur.execute(
-                "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
-                    clase,)
-            ).fetchone()
-            if not idClase:
-                info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
-                return PopUp("Error", info).exec()
-            # datosNuevos = [nombre, dni, clase, usuario]
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
-                        (nombre, dni, idClase[0], usuario, contrasena)
-                    )
-                    # dal.insertarHistorial(
-                        # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    bdd.cur.execute(
-                        """UPDATE personal
-                        SET nombre_apellido=?, id_clase=?, dni=?
-                        WHERE id = ?""",
-                        (nombre, idClase[0], dni, idd,)
-                    )
-                    # datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    # dal.insertarHistorial(
-                    #     self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
-                return PopUp("Error", info).exec()
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+        # datosNuevos = [nombre, dni, clase, usuario]
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
+                    (nombre, dni, idClase[0], usuario, contrasena)
+                )
+                # dal.insertarHistorial(
+                    # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+            else:
+                idd = int(tabla.item(row, 0).text())
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase[0], dni, idd,)
+                )
+                # datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                # dal.insertarHistorial(
+                #     self.usuario, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
 
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchUsuarios()
-            barra.setValue(posicion)
+        bdd.con.commit()
+        return True
 
     def deleteUsuarios(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -2233,29 +2233,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def fetchClases(self):
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
+
         try:
             tabla.disconnect()
         except:
             pass
-
-
         tabla.setSortingEnabled(False)
+        tabla.setRowCount(0)
 
         datos = dal.obtenerDatos("clases", barraBusqueda.text())
-
-        tabla.setRowCount(0)
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
             sugerencias=[i[0] for i in
                 bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
-            cats = ParamEdit(sugerencias, rowData[2])
+            cats = ParamEdit(sugerencias, rowData[1])
             cats.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
-            tabla.setCellWidget(rowNum, 2, cats)
+            tabla.setCellWidget(rowNum, 1, cats)
+            tabla.setItem(
+                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
 
             for col in range(tabla.columnCount()):
                 item = tabla.item(rowNum, col)
@@ -2263,18 +2261,20 @@ class MainWindow(QtWidgets.QMainWindow):
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             core.generarBotones(
-                lambda: self.saveClases(datos), lambda: self.deleteClases(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveClases, self.fetchClases, datos),
+                lambda: self.deleteClases(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(10)
 
-    def fetchUbicaciones(self):
+    def fetchUbis(self):
         tabla = self.pantallaUbis.tableWidget
         barraBusqueda = self.pantallaUbis.lineEdit
         tabla.setSortingEnabled(False)
@@ -2302,7 +2302,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
             core.generarBotones(
-                lambda: self.saveUbicaciones(datos), lambda: self.deleteUbicaciones(datos), tabla, rowNum)
+                lambda: self.saveOne(
+                    tabla, self.saveUbis, self.fetchUbis, datos),
+                lambda: self.deleteUbicaciones(datos), tabla, rowNum)
 
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
@@ -2313,7 +2315,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(12)
 
-    def saveUbicaciones(self, datos: list | None = None):
+    def saveUbis(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla subgrupos de la base de datos.
 
@@ -2323,60 +2325,39 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
+        if tabla.item(row, 1).text() == "":
+            # Le pide al usuario que termine de llenar los campos
+            # y corta la función.
+            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+            return PopUp("Error", mensaje).exec()
 
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
-        tabla = self.pantallaUbis.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
+        ubicacion = tabla.item(row, 1).text()
+        try:
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO ubicaciones VALUES(NULL, ?)",
+                    (ubicacion,)
+                )
+                dal.insertarHistorial(
+                    self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
+            else:
+                idd = int(tabla.item(row, 0).text())
+                bdd.cur.execute(
+                    """UPDATE ubicaciones
+                    SET descripcion=?
+                    WHERE id = ?""",
+                    (ubicacion, idd)
+                )
+                datosNuevos = [ubicacion,]
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], None, datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
 
-        iCampos = (1,)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo).text() == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
-                return PopUp("Error", mensaje).exec()
-
-        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila en la base de datos?"
-        popup = PopUp("Pregunta", info).exec()
-        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            ubicacion = tabla.item(row, 1).text()
-            try:
-                if not datos:
-                    bdd.cur.execute(
-                        "INSERT INTO ubicaciones VALUES(NULL, ?)",
-                        (ubicacion,)
-                    )
-                    dal.insertarHistorial(
-                        self.usuario, 'Inserción', 'Ubicaciones', ubicacion, None, None)
-                else:
-                    idd = int(tabla.item(row, 0).text())
-                    bdd.cur.execute(
-                        """UPDATE ubicaciones
-                        SET descripcion=?
-                        WHERE id = ?""",
-                        (ubicacion, idd)
-                    )
-                    datosNuevos = [ubicacion,]
-                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                    dal.insertarHistorial(
-                        self.usuario, 'Edición', 'Ubicaciones', datosViejos[1], None, datosNuevos)
-            except sqlite3.IntegrityError:
-                info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
-                return PopUp("Error", info).exec()
-
-            bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchUbicaciones()
-            barra.setValue(posicion)
+        bdd.con.commit()
+        return True
 
     def deleteUbicaciones(self, datos: list | None = None) -> None:
         tabla = self.pantallaUbis.tableWidget
@@ -2400,7 +2381,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.usuario, "Eliminación", "Ubicaciones", des, None)
             dal.eliminarDatos('ubicaciones', idd)
             posicion = barra.value()
-            self.fetchUbicaciones()
+            self.fetchUbis()
             barra.setValue(posicion)
 
     def fetchReparaciones(self):
@@ -2461,7 +2442,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(11)
 
-    def saveClases(self, datos: list | None = None):
+    def saveClases(self, tabla, row, datos: list | None = None):
         """Este método guarda los cambios hechos en la tabla de la ui
         en la tabla subgrupos de la base de datos.
 
@@ -2471,10 +2452,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 Los datos de la tabla subgrupos, que se usarán para
                 obtener el id de la fila en la tabla.
         """
-        tabla = self.pantallaClases.tableWidget
-        row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
-
         iCampos = (1, 2,)
         for iCampo in iCampos:
             if tabla.item(row, iCampo) is not None:
@@ -2484,7 +2461,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
-        cat = tabla.cellWidget(row, 2).text()
+        cat = tabla.cellWidget(row, 1).text()
         idCat = bdd.cur.execute(
             'SELECT id FROM cats_clase WHERE descripcion LIKE ?', (cat,)).fetchone()
         if not idCat:
@@ -2494,7 +2471,7 @@ class MainWindow(QtWidgets.QMainWindow):
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            clase = tabla.item(row, 1).text()
+            clase = tabla.item(row, 2).text()
             datosNuevos = [clase, cat,]
             try:
                 if not datos:
@@ -2524,11 +2501,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 return PopUp("Error", info).exec()
 
             bdd.con.commit()
-            info = "Los datos se han guardado con éxito."
-            PopUp("Aviso", info).exec()
-            posicion = barra.value()
-            self.fetchClases()
-            barra.setValue(posicion)
+            return True
 
     def deleteClases(self, datos: list | None = None):
         tabla = self.pantallaClases.tableWidget
