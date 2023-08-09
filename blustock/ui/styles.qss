@@ -190,5 +190,5 @@ QLineEdit{
 
 #lineEdit, #desdeFecha, #hastaFecha, QComboBox, QSpinBox, #label_3, #label_4,
 #label_5, #label_6, #label_7, #label_8, QRadioButton, QMenu:QAction{
-    font-size:13pt;
+    font-size:16pt;
 }

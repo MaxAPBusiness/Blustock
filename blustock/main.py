@@ -14,23 +14,25 @@ import os
 os.chdir(f"{os.path.abspath(__file__)}{os.sep}..")
 
 # Ahora sí, hacemos todos los imports
-import sys
-import sqlite3
-import pandas as pd
-import core
-import types
-from unidecode import unidecode
-from textwrap import dedent
-from datetime import date, datetime
-from dateutil.relativedelta import relativedelta
-from db.bdd import bdd
-from dal.dal import dal
-from ui.presets.popup import PopUp
-from ui.presets.param_edit import ParamEdit
-from ui.presets.Toolbotoon import toolboton
 from PyQt6 import QtWidgets, QtCore, QtGui, uic
+from ui.presets.Toolbotoon import toolboton
+from ui.presets.param_edit import ParamEdit
+from ui.presets.popup import PopUp
+from dal.dal import dal
+from db.bdd import bdd
+from dateutil.relativedelta import relativedelta
+from datetime import date, datetime
+from textwrap import dedent
+from unidecode import unidecode
+import core
+import pandas as pd
+import sqlite3
+from types import FunctionType as function
+import sys
+
 
 bdd.refrescarBDD()
+
 
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
@@ -44,27 +46,49 @@ class MainWindow(QtWidgets.QMainWindow):
 
             Crea la ventana principal con un menú inicialmente
             escondido y una colección de pantallas.
+        
+        actualizarSug(self):
+            Refresca las sugerencias de todos los campos con
+            sugerencias del sistema.
 
         actualizarHastaFechas(self):
             Actualiza los filtros de fecha y hora con la fecha y hora
             actuales.
-        
+
         habilitarSaves(self, row: int | None = None,
                        col: int | None = None,
                        tabla: QtWidgets.QTableWidget | None = None):
             Habilita el botón de guardar de una fila de una tabla de
             una gestión.
-        
+
         actualizarTotal(self, row: int, col: int,
                         tabla: QtWidgets.QTableWidget | None = None):
             Actualiza el campo total de la tabla stock cuando se
             modifican las cantidades.
-        
-        fetchStock(self):
+
+        actualizarSugSubgrupos(self):
             Actualiza las sugerencias de los campos de subgrupos al
             editar lo ingresado en un campo de grupos relacionado, ya
             que las sugerencias de subgrupos deben estar relacionadas
             al grupo ingresado.
+        
+        fetchStock(self):
+            Refresca la tabla y los filtros de la pantalla stock.
+        
+        saveOne(self, tabla: QtWidgets.QTableWidget,
+                funcSave: function, funcFetch: function,
+                datos: list | None = None):
+            Guarda los cambios hechos en una fila de una tabla de una
+            gestión.
+        
+        saveAll(self, tabla: QtWidgets.QTableWidget,
+                funcSave: function, funcFetch: function,
+                datos: list | None = None):
+            Guarda todos los cambios hechos en una tabla de una gestión
+        
+        printStock(self):
+            Genera un spreadsheet a partir de la tabla de la pantalla
+            stock.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -75,7 +99,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Inicializamos el menú principal
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
                    f'ui{os.sep}screens_uis{os.sep}main.ui'), self)
-        
+
         # Escondemos el menú para que no se pueda acceder apenas
         # se inicia la aplicación.
         self.menubar.hide()
@@ -84,89 +108,75 @@ class MainWindow(QtWidgets.QMainWindow):
         # # Creamos un widget vacío
         self.pantallaAlumnos = QtWidgets.QWidget()
         # # Guardamos el path al archivo ui
-        pathAlumnos=os.path.join(os.path.abspath(os.getcwd()),
+        pathAlumnos = os.path.join(os.path.abspath(os.getcwd()),
                                  f'ui{os.sep}screens_uis{os.sep}alumnos.ui')
         # # Cargamos el ui al widget vacío
         uic.loadUi(pathAlumnos, self.pantallaAlumnos)
-        
+        # Hacemos lo mismo con el resto de las pantallas.
         self.pantallaGrupos = QtWidgets.QWidget()
         pathGrupos = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}grupos.ui')
         uic.loadUi(pathGrupos, self.pantallaGrupos)
-
         self.pantallaStock = QtWidgets.QWidget()
         pathStock = os.path.join(os.path.abspath(os.getcwd()),
                                  f'ui{os.sep}screens_uis{os.sep}stock.ui')
         uic.loadUi(pathStock, self.pantallaStock)
-
         self.pantallaHistorial = QtWidgets.QWidget()
         pathHistorial = os.path.join(
-                            os.path.abspath(os.getcwd()),
-                            f'ui{os.sep}screens_uis{os.sep}historial.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}historial.ui')
         uic.loadUi(pathHistorial, self.pantallaHistorial)
-
         self.pantallaMovs = QtWidgets.QWidget()
         pathMovs = os.path.join(
-                    os.path.abspath(os.getcwd()),
-                    f'ui{os.sep}screens_uis{os.sep}movimientos.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}movimientos.ui')
         uic.loadUi(pathMovs, self.pantallaMovs)
-
         self.pantallaOtroPersonal = QtWidgets.QWidget()
         pathOtroPersonal = os.path.join(
-                            os.path.abspath(os.getcwd()),
-                            f'ui{os.sep}screens_uis{os.sep}otro_personal.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}otro_personal.ui')
         uic.loadUi(pathOtroPersonal, self.pantallaOtroPersonal)
-
         self.pantallaSubgrupos = QtWidgets.QWidget()
         pathSubgrupos = os.path.join(
-                            os.path.abspath(os.getcwd()),
-                            f'ui{os.sep}screens_uis{os.sep}subgrupos.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}subgrupos.ui')
         uic.loadUi(pathSubgrupos, self.pantallaSubgrupos)
-
         self.pantallaTurnos = QtWidgets.QWidget()
         pathTurnos = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}turnos.ui')
         uic.loadUi(pathTurnos, self.pantallaTurnos)
-
         self.pantallaUsuarios = QtWidgets.QWidget()
         pathUsuarios = os.path.join(
-                                os.path.abspath(os.getcwd()),
-                                f'ui{os.sep}screens_uis{os.sep}usuarios.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}usuarios.ui')
         uic.loadUi(pathUsuarios, self.pantallaUsuarios)
-
         self.pantallaLogin = QtWidgets.QWidget()
         pathLogin = os.path.join(os.path.abspath(os.getcwd()),
                                  f'ui{os.sep}screens_uis{os.sep}login.ui')
         uic.loadUi(pathLogin, self.pantallaLogin)
-
         self.pantallaClases = QtWidgets.QWidget()
         pathClases = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}clases.ui')
         uic.loadUi(pathClases, self.pantallaClases)
-
         self.pantallaReps = QtWidgets.QWidget()
         pathReps = os.path.join(
-                    os.path.abspath(os.getcwd()),
-                    f'ui{os.sep}screens_uis{os.sep}reparaciones.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}reparaciones.ui')
         uic.loadUi(pathReps, self.pantallaReps)
-
         self.pantallaUbis = QtWidgets.QWidget()
         pathUbis = os.path.join(
-                    os.path.abspath(os.getcwd()),
-                    f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}ubicaciones.ui')
         uic.loadUi(pathUbis, self.pantallaUbis)
-
         self.pantallaRealizarMov = QtWidgets.QWidget()
         pathRealizarMov = os.path.join(
-                            os.path.abspath(os.getcwd()),
-                            f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui')
+            os.path.abspath(os.getcwd()),
+            f'ui{os.sep}screens_uis{os.sep}n-movimiento.ui')
         uic.loadUi(pathRealizarMov, self.pantallaRealizarMov)
-
         self.pantallaDeudas = QtWidgets.QWidget()
         pathDeudas = os.path.join(os.path.abspath(os.getcwd()),
                                   f'ui{os.sep}screens_uis{os.sep}deudas.ui')
         uic.loadUi(pathDeudas, self.pantallaDeudas)
-
         self.pantallaResumen = QtWidgets.QWidget()
         pathResumen = os.path.join(os.path.abspath(os.getcwd()),
                                    f'ui{os.sep}screens_uis{os.sep}resumen.ui')
@@ -230,106 +240,102 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: core.mostrarContrasena(
                 self.pantallaLogin.showPass,
                 self.pantallaLogin.passwordLineEdit))
-                
+
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         # Empezamos a conectar los botones de agregar de todas las
         # gestiones.
-        # Primero obtenemos sugerencias para los campos con cuadro de 
-        # sugerencia de las tablas.
-        sugerenciasGrupos=[i[0] for i in bdd.cur.execute(
-            'SELECT descripcion FROM grupos').fetchall()]
-        sugerenciasUbis=[i[0] for i in bdd.cur.execute(
-            'SELECT descripcion FROM ubicaciones').fetchall()]
+        # Inicializamos las sugerencias.
+        self.actualizarSug()
         # Conectamos el botón.
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-                self.pantallaStock.tableWidget, 
+                self.pantallaStock.tableWidget,
                 lambda: self.saveOne(self.pantallaStock.tableWidget,
-                                     self.saveStock, self.fetchStock),
+                                     dal.saveStock, self.fetchStock),
                 self.deleteStock, self.actualizarTotal, core.camposStock[0],
-                (sugerenciasGrupos, [], sugerenciasUbis,),
-                self.actualizarSugerenciasSubgrupos))
-        # Además, escondemos la primera columna. Esto es porque es la
+                (self.sGrupos, [], self.sUbis,),
+                self.actualizarSugSubgrupos))
+        # Conectamos el boton de guardar cambios
+        self.pantallaStock.botonGuardar.clicked.connect(
+            lambda: self.saveAll(
+                self.pantallaStock.tableWidget, dal.saveStock,
+                self.fetchStock, dal.obtenerDatos(
+                    "stock", self.pantallaStock.lineEdit.text())))
+        # Escondemos la primera columna. Esto es porque es la
         # columna id es necesaria para tener el número de fila pero no
         # queremos que la vean los usuarios porque no es info necesaria
-        self.pantallaStock.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
-                self.pantallaStock.tableWidget, self.saveStock,
-                dal.obtenerDatos("stock", self.pantallaStock.lineEdit.text()),
-                self.fetchStock))
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
-
-        sql='''SELECT c.descripcion FROM clases c
-               JOIN cats_clase cat ON c.id_cat=cat.id
-               WHERE cat.descripcion='Personal';'''
-        sugerenciasClasesP=[i[0] for i in bdd.cur.execute(sql).fetchall()]
+        # Hacemos que algunas columnas se expandan al ampliar la
+        # pantalla. Esto lo hacemos para que la tabla se ajuste siempre
+        # al ancho de la pantalla.
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            9, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        # Hacemos lo mismo con las otras pantallas
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, lambda: self.saveOne(
                     self.pantallaOtroPersonal.tableWidget,
                     self.saveOtroPersonal, self.fetchOtroPersonal),
                 self.deleteOtroPersonal, self.habilitarSaves,
-                core.camposOtroPersonal[0], [sugerenciasClasesP]))
+                core.camposOtroPersonal[0], [self.sClasesP]))
         self.pantallaOtroPersonal.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaOtroPersonal.tableWidget, self.saveOtroPersonal,
-                dal.obtenerDatos(
+                self.fetchOtroPersonal, dal.obtenerDatos(
                     "otro_personal", self.pantallaOtroPersonal.lineEdit.text()
-                    ), self.fetchOtroPersonal))
+                )))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
-
-        sugerenciasGruposS=[i[0] for i in bdd.cur.execute(
-            'SELECT descripcion FROM grupos').fetchall()]
+        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget,
                 lambda: self.saveOne(self.pantallaSubgrupos.tableWidget,
-                        self.saveSubgrupos, self.fetchSubgrupos),
+                                     self.saveSubgrupos, self.fetchSubgrupos),
                 self.deleteSubgrupos, self.habilitarSaves,
-                core.camposSubgrupos[0], [sugerenciasGruposS]))
+                core.camposSubgrupos[0], [self.sGruposS]))
         self.pantallaSubgrupos.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaSubgrupos.tableWidget, self.saveSubgrupos,
-                dal.obtenerDatos(
-                    "subgrupos", self.pantallaSubgrupos.lineEdit.text()),
-                self.fetchSubgrupos))
+                self.fetchSubgrupos, dal.obtenerDatos(
+                    "subgrupos", self.pantallaSubgrupos.lineEdit.text())))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
-
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget,
                 lambda: self.saveOne(self.pantallaGrupos.tableWidget,
-                        self.saveGrupos, self.fetchGrupos),
+                                     self.saveGrupos, self.fetchGrupos),
                 self.deleteGrupos, self.habilitarSaves, core.camposGrupos[0]))
         self.pantallaGrupos.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaGrupos.tableWidget, self.saveGrupos,
-                dal.obtenerDatos("grupos", self.pantallaGrupos.lineEdit.text()
-                                 ), self.fetchGrupos))
+                self.fetchGrupos, dal.obtenerDatos(
+                    "grupos", self.pantallaGrupos.lineEdit.text())))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
-
-        sql='''SELECT c.descripcion FROM clases c
-               JOIN cats_clase cat ON c.id_cat=cat.id
-               WHERE cat.descripcion='Alumno';'''
-        sugerenciasClasesA=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
                 lambda: self.saveOne(self.pantallaGrupos.tableWidget,
-                        self.saveAlumnos, self.fetchAlumnos),
+                                     self.saveAlumnos, self.fetchAlumnos),
                 self.deleteAlumnos,  self.habilitarSaves,
-                core.camposAlumnos[0], [sugerenciasClasesA]))
+                core.camposAlumnos[0], [self.sClasesA]))
         self.pantallaAlumnos.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaAlumnos.tableWidget, self.saveAlumnos,
-                dal.obtenerDatos(
-                    "alumnos", self.pantallaAlumnos.lineEdit.text()),
-                self.fetchAlumnos))
+                self.fetchAlumnos, dal.obtenerDatos(
+                    "alumnos", self.pantallaAlumnos.lineEdit.text())))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
-
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
@@ -337,73 +343,64 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.deleteUbicaciones, self.habilitarSaves,
                 core.camposUbis[0]))
         self.pantallaUbis.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
-                self.pantallaUbis.tableWidget, self.saveUbis,
-                dal.obtenerDatos("ubicaciones", self.pantallaUbis.lineEdit.text()),
-                self.fetchUbis))
+            lambda: self.saveAll(
+                self.pantallaUbis.tableWidget, self.saveUbis, self.fetchUbis,
+                dal.obtenerDatos(
+                    "ubicaciones", self.pantallaUbis.lineEdit.text())))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
-
-        sugerenciasCat=[i[0] for i in bdd.cur.execute(
-            'SELECT descripcion FROM cats_clase').fetchall()]
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
-            self.pantallaClases.tableWidget, lambda: self.saveOne(
+                self.pantallaClases.tableWidget, lambda: self.saveOne(
                 self.pantallaClases.tableWidget, self.saveClases,
                 self.fetchClases), self.deleteClases, self.habilitarSaves,
-            core.camposClases[0], [sugerenciasCat]))
+                core.camposClases[0], [self.sCat]))
         self.pantallaClases.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaClases.tableWidget, self.saveClases,
-                dal.obtenerDatos("clases", self.pantallaClases.lineEdit.text()
-                                 ), self.fetchClases))
+                self.fetchClases, dal.obtenerDatos(
+                    "clases", self.pantallaClases.lineEdit.text())))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
-
-        sql='''SELECT c.descripcion FROM clases c
-               JOIN cats_clase cat ON c.id_cat=cat.id
-               WHERE cat.descripcion='Usuario';'''
-        sugerenciasClasesU=[i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
                     self.pantallaUsuarios.tableWidget, self.saveUsuarios,
                     self.fetchUsuarios), self.deleteUsuarios,
                 self.habilitarSaves, core.camposUsuarios[0],
-                [sugerenciasClasesU]))
+                [self.sClasesU]))
         self.pantallaUsuarios.botonGuardar.clicked.connect(
-            lambda: core.saveAll(
+            lambda: self.saveAll(
                 self.pantallaUsuarios.tableWidget, self.saveUsuarios,
-                dal.obtenerDatos("usuarios", self.pantallaUsuarios.lineEdit.text()),
-                self.fetchUsuarios))
+                self.fetchUsuarios, dal.obtenerDatos(
+                    "usuarios", self.pantallaUsuarios.lineEdit.text())))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
-        # Conectamos los parámetros de las gestiones y listados para
-        # que se refresquen las tablas cada vez que el usuario cambie
-        # un parámetro.
+        # Conectamos los cambios en la tabla stock para actualizar el
+        # valor del campo total cada vez que se haga un cambio en una
+        # cantidad.
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
+        # Conectamos la barra de búsqueda
         self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        # Conectamos el botón de imprimir
         self.pantallaStock.botonImprimir.clicked.connect(self.printStock)
 
+        # Conectamos las otras barras de búsqueda y los otros filtros
         self.pantallaAlumnos.lineEdit.editingFinished.connect(
             self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
-
         self.pantallaMovs.lineEdit.editingFinished.connect(
             self.fetchMovimientos)
         self.pantallaMovs.nId.valueChanged.connect(
             self.fetchMovimientos)
         self.pantallaMovs.nTurno.valueChanged.connect(
             self.fetchMovimientos)
-
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
         self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
-
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
-
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
         self.pantallaUbis.lineEdit.editingFinished.connect(
@@ -411,7 +408,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-        self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(self.check)
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(
+            self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
@@ -419,9 +417,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(self.alumnos)
-        self.pantallaRealizarMov.pushButton.clicked.connect(self.saveMovimiento)
-
+        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
+            self.alumnos)
+        self.pantallaRealizarMov.pushButton.clicked.connect(
+            self.saveMovimiento)
         self.boton = toolboton("usuario", self)
         self.boton.setIconSize(QtCore.QSize(60, 40))
         self.label = QtWidgets.QLabel(str("El pañolero en turno es: "))
@@ -430,20 +429,24 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QHBoxLayout(widget_with_layout)
         layout.addWidget(self.label)
         layout.addWidget(self.boton)
-        self.menubar.setCornerWidget(widget_with_layout,QtCore.Qt.Corner.TopRightCorner)
+        self.menubar.setCornerWidget(
+            widget_with_layout, QtCore.Qt.Corner.TopRightCorner)
 
         # Actualizamos las fechas a los valores actuales.
         self.actualizarHastaFechas()
 
         # Hacemos un timer que actualice las fechas máximas cada 5 minutos
-        timer=QtCore.QTimer()
+        timer = QtCore.QTimer()
+        # Conectamos el timer
         timer.timeout.connect(self.actualizarHastaFechas)
+        # Hacemos que se refresque cada 5 minutos
         timer.start(300000)
+        # Hacemos que la pantalla principal no se vea como ventana.
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         # Establecemos la pantalla del login como pantalla por defecto.
         self.stackedWidget.setCurrentIndex(0)
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
-        self.move(0,0)
+        self.move(0, 0)
         self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
         boton = QtWidgets.QPushButton()
         boton.setObjectName("prueba")
@@ -452,13 +455,39 @@ class MainWindow(QtWidgets.QMainWindow):
         boton.setVisible(True)
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'
         pixmap = QtGui.QPixmap(path)
-        boton.clicked.connect(lambda:self.close())
-        self.pantallaLogin.gridLayout.addWidget(boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
+        boton.clicked.connect(lambda: self.close())
+        self.pantallaLogin.gridLayout.addWidget(
+            boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
         # self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
-        self.show()  
-      
+        # Mostramos la ventana principal.
+        self.show()
+
+    def actualizarSug(self):
+        """Este método refresca las sugerencias de todos los campos
+        con sugerencias del sistema."""
+        self.sGrupos = [i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
+        self.sUbis = [i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM ubicaciones').fetchall()]
+        sql = '''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Personal';'''
+        self.sClasesP = [i[0] for i in bdd.cur.execute(sql).fetchall()]
+        self.sGruposS = [i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM grupos').fetchall()]
+        sql = '''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Alumno';'''
+        self.sClasesA = [i[0] for i in bdd.cur.execute(sql).fetchall()]
+        self.sCat = [i[0] for i in bdd.cur.execute(
+            'SELECT descripcion FROM cats_clase').fetchall()]
+        sql = '''SELECT c.descripcion FROM clases c
+               JOIN cats_clase cat ON c.id_cat=cat.id
+               WHERE cat.descripcion='Usuario';'''
+        self.sClasesU = [i[0] for i in bdd.cur.execute(sql).fetchall()]
+
     def closeEvent(self, event: QtGui.QCloseEvent):
-        if self.sender() != None:
+        if self.sender() is not None:
             event.accept()
         else:
             event.ignore()
@@ -492,12 +521,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
                 self.fetchStock()
-                if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
+                if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?", (self.usuario,)).fetchone()[0] != "Director de Taller":
                     self.menubar.actions()[4].setVisible(False)
-                pañolero = bdd.cur.execute("select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
+                pañolero = bdd.cur.execute(
+                    "select nombre_apellido from turnos join personal p on p.id = id_panolero WHERE fecha_egr is null").fetchone()
                 if pañolero != None:
                     mensaje = "Hay un turno sin finalizar, desea continuarlo o finalizarlo?"
-                    popup = PopUp("Turno",mensaje)
+                    popup = PopUp("Turno", mensaje)
 
                     class sopas(QtCore.QObject):
                         def eventFilter(self, obj, event):
@@ -505,46 +535,53 @@ class MainWindow(QtWidgets.QMainWindow):
                             if event.type() in [QtCore.QEvent.Type.KeyPress, QtCore.QEvent.Type.KeyRelease]:
                                 return True  # Return True to indicate the event has been handled and should be ignored
                             return super().eventFilter(obj, event)
-                        
+
                     filtro = sopas(popup)
                     popup.installEventFilter(filtro)
-                    popup.setWindowFlags(QtCore.Qt.WindowType.CustomizeWindowHint)
+                    popup.setWindowFlags(
+                        QtCore.Qt.WindowType.CustomizeWindowHint)
                     popup.setWindowFlag(QtCore.Qt.WindowType.WindowTitleHint)
-                    popup.button(QtWidgets.QMessageBox.StandardButton.Cancel).hide()
-                    popup = PopUp("Turno",mensaje).exec()
+                    popup.button(
+                        QtWidgets.QMessageBox.StandardButton.Cancel).hide()
+                    popup = PopUp("Turno", mensaje).exec()
                     if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-                        self.label.setText("El pañolero en turno es: " + pañolero[0])
+                        self.label.setText(
+                            "El pañolero en turno es: " + pañolero[0])
                         self.label.setObjectName("sopas")
                         self.boton.menu().actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(False)
                         for i in range(7):
                             if i != 1:
                                 self.menubar.actions()[i].setVisible(False)
-                                
+
                     if popup == QtWidgets.QMessageBox.StandardButton.No:
                         profe = dal.obtenerDatos("usuarios", self.usuario,)
                         hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                        bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
+                        bdd.cur.execute(
+                            """UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                         bdd.con.commit()
-                        self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
+                        self.label.setText("Usuario: " + bdd.cur.execute(
+                            "SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()[0])
                         for i in range(7):
                             if i != 1:
                                 self.menubar.actions()[i].setVisible(True)
-                                
-                        if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?",(self.usuario,)).fetchone()[0] != "Director de Taller":
+
+                        if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?", (self.usuario,)).fetchone()[0] != "Director de Taller":
                             self.menubar.actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(True)
                         self.boton.menu().actions()[4].setVisible(True)
 
                 else:
-                    self.label.setText("Usuario: " + bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()[0])
+                    self.label.setText("Usuario: " + bdd.cur.execute(
+                        "SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()[0])
 
                 self.menubar.show()
                 self.pantallaLogin.usuarioState.setText("")
                 self.pantallaLogin.passwordState.setText("")
 
             else:
-                self.pantallaLogin.passwordState.setText("contraseña incorrecta")
+                self.pantallaLogin.passwordState.setText(
+                    "contraseña incorrecta")
                 self.pantallaLogin.usuarioState.setText("")
 
         else:
@@ -559,7 +596,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
             self.pantallaRealizarMov.estadoComboBox.itemText
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
         else:
             for i in dal.obtenerDatos("estados", ""):
                 if 2 == self.pantallaRealizarMov.estadoComboBox.count():
@@ -571,7 +609,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.estadoComboBox.clear()
         self.pantallaRealizarMov.cursoComboBox.clear()
         self.pantallaRealizarMov.ubicacionComboBox.clear()
-        
+
         for i in dal.obtenerDatos("tipos_mov", ""):
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
@@ -583,7 +621,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for i in dal.obtenerDatos("clases", ""):
             self.pantallaRealizarMov.cursoComboBox.addItem(i[1])
-        
+
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
@@ -593,27 +631,27 @@ class MainWindow(QtWidgets.QMainWindow):
             self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
-    
-    def sumar(self,cant,herramienta,estado):
-            try:
-                estado = estado[estado.index(" "):]
-                estado = estado[1:]
-            except:
-                pass
-            estado = unidecode(estado)
-            estado = "cant_" + estado.lower()
-            query = f"select {estado} from stock WHERE id = ?"
-            params = (herramienta,)
-            if bdd.cur.execute(query,params)==None:
-                query = f"UPDATE stock SET {estado} = 0 + ? WHERE id = ?"
-            else:
-                query = f"UPDATE stock SET {estado} = {estado} + ? WHERE id = ?"
-                params = (cant, herramienta)
-            self.sopas=True
-            bdd.cur.execute(query,params)
 
-    def restar(self,cant,herramienta,estado):
-        if bdd.cur.execute("select cant_condiciones from stock").fetchall()[0][0]-cant>=0:
+    def sumar(self, cant, herramienta, estado):
+        try:
+            estado = estado[estado.index(" "):]
+            estado = estado[1:]
+        except:
+            pass
+        estado = unidecode(estado)
+        estado = "cant_" + estado.lower()
+        query = f"select {estado} from stock WHERE id = ?"
+        params = (herramienta,)
+        if bdd.cur.execute(query,params) ==None:
+            query = f"UPDATE stock SET {estado} = 0 + ? WHERE id = ?"
+        else:
+            query = f"UPDATE stock SET {estado} = {estado} + ? WHERE id = ?"
+            params = (cant, herramienta)
+        self.sopas = True
+        bdd.cur.execute(query, params)
+
+    def restar(self, cant,herramienta,estado):
+        if bdd.cur.execute("select cant_condiciones from stock").fetchall()[0][0]-cant >=0:
             try:
                 estado = estado[estado.index(" "):]
                 estado = estado[1:]
@@ -623,15 +661,15 @@ class MainWindow(QtWidgets.QMainWindow):
             estado = "cant_" + estado.lower()
             query = f"select {estado} from stock WHERE id = ?"
             params = (herramienta,)
-            if bdd.cur.execute(query,params)==None:
+            if bdd.cur.execute(query,params) ==None:
                 query = f"UPDATE stock SET {estado} = 0 - ? WHERE id = ?"
             else:
                 query = f"UPDATE stock SET {estado} = {estado} - ? WHERE id = ?"
                 params = (cant, herramienta)
             bdd.cur.execute(query, params)
-            self.sopas=True
+            self.sopas = True
         else:
-            self.sopas=False
+            self.sopas = False
 
     def saveMovimiento(self):
         turno = bdd.cur.execute(
@@ -654,7 +692,7 @@ class MainWindow(QtWidgets.QMainWindow):
             JOIN subgrupos sub ON s.id_subgrupo = sub.id
             JOIN grupos g ON sub.id_grupo=g.id
             JOIN ubicaciones u ON s.id_ubi=u.id
-            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" ,(self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
+            where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" , (self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
         descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
         fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -664,24 +702,24 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             if persona != "" and persona != None:
                 if turno == " " or turno == None or turno == []:
-                    turno = bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?",(self.usuario,)).fetchone()
+                    turno = bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()
                 bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
                                 (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                 if tipo[0][0] == 1:
-                    self.sumar(cant,herramienta[0],estado[0][1])
+                    self.sumar(cant, herramienta[0],estado[0][1])
                 if tipo[0][0] == 2:
-                    self.restar(cant,herramienta[0],estado[0][1])
-                    self.sumar(cant,herramienta[0],"En reparacion")
+                    self.restar(cant, herramienta[0],estado[0][1])
+                    self.sumar(cant, herramienta[0],"En reparacion")
                 if tipo[0][0] == 3:
-                    self.restar(cant,herramienta[0],estado[0][1])
-                    self.sumar(cant,herramienta[0],"prest")
+                    self.restar(cant, herramienta[0],estado[0][1])
+                    self.sumar(cant, herramienta[0],"prest")
                 if tipo[0][0] == 4:
-                    self.sumar(cant,herramienta[0],estado[0][1])
-                    self.restar(cant,herramienta[0],"prest")
+                    self.sumar(cant, herramienta[0],estado[0][1])
+                    self.restar(cant, herramienta[0],"prest")
                 if tipo[0][0] == 5:
-                    self.restar(cant,herramienta[0],estado[0][1])
-                    self.sumar(cant,herramienta[0],"De baja")
-                
+                    self.restar(cant, herramienta[0],estado[0][1])
+                    self.sumar(cant, herramienta[0],"De baja")
+
                 bdd.con.commit()
                 if self.sopas == True:
                     self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
@@ -696,7 +734,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     return PopUp("Error", mensaje).exec()
 
 
-            else:            
+            else:
                 mensaje = """Por favor ingrese el nombre del alumno solicitante."""
                 return PopUp("Error", mensaje).exec()
 
@@ -722,9 +760,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 Default:None
         """
         if tabla is None:
-            tabla=self.sender()
+            tabla = self.sender()
         if row is None:
-            row=tabla.indexAt(self.sender().pos()).row()
+            row = tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row: int, col: int,
@@ -745,7 +783,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         # Si no se pasó una tabla por parámetro...
         if tabla is None:
-            #... se usa la tabla de la pantalla stock.
+            # ... se usa la tabla de la pantalla stock.
             tabla = self.pantallaStock.tableWidget
         # Si esta función se ejecuta, significa que el usuario
         # modificó una fila de la tabla. Por eso, habilitamos los saves
@@ -758,43 +796,47 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si la columna modificada es de cantidad en condiciones,
         # cantidad en reparación o cantidad de baja...
         if col in (2, 3, 4, 5):
-            total=0
-            # ...obtenemos los textos de las celdas de cantidades en una tupla
-            cantidades = (tabla.item(row, 2).text(),
-                          tabla.item(row, 3).text(), 
-                          tabla.item(row, 4).text(),
-                          tabla.item(row, 5).text())
-            # Por cada texto en celda de cantidad...
-            for cantidad in cantidades:
-                # Si se ingresó un número...
-                if cantidad.isnumeric():
-                    # ... se suma al total. De esta manera, si se
-                    # ingreso algo que no es un número, no se suma.
+            #...inicializamos la variable del total
+            total = 0
+            # obtenemos las cantidades en una tupla
+            cantidades = (tabla.item(row, 2).data(0),
+                          tabla.item(row, 3).data(0),
+                          tabla.item(row, 4).data(0),
+                          tabla.item(row, 5).data(0),)
+            # Por cada cantidad y su índice...
+            for col, cantidad in enumerate(cantidades):
+                # Si el número ingresado es negativo...
+                if cantidad < 0:
+                    # Se cambia a 0
+                    tabla.item(row, col + 2).setData(0, 0)
+                # Si no...
+                else:
+                    # ... se suma al total. 
                     total += int(cantidad)
             # Creamos el item que vamos a meter en la tabla
-            item=QtWidgets.QTableWidgetItem(str(total))
+            item = QtWidgets.QTableWidgetItem(str(total))
             # Hacemos que no sea editable
             item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                        QtCore.Qt.ItemFlag.ItemIsEnabled)
+                          QtCore.Qt.ItemFlag.ItemIsEnabled)
             # Lo insertamos a la tabla
-            tabla.setItem(row, 6, total)
+            tabla.setItem(row, 6, item)
 
-    def actualizarSugerenciasSubgrupos(self):
+    def actualizarSugSubgrupos(self):
         """Este método actualiza las sugerencias de los campos de
         subgrupos al editar lo ingresado en un campo de grupos
         relacionado, ya que las sugerencias de subgrupos deben estar
         relacionadas al grupo ingresado.
         """
         # Usamos la tabla de stock.
-        tabla=self.pantallaStock.tableWidget
+        tabla = self.pantallaStock.tableWidget
         # Obtenemos la fila del campo de grupos modificado.
         row = tabla.indexAt(self.sender().pos()).row()
         # Obtenemos los nuevos datos.
-        grupo=tabla.cellWidget(row, 7).text()
+        grupo = tabla.cellWidget(row, 7).text()
         # Obtenemos el cuadro de sugerencias del campo subgrupos.
-        completer=tabla.cellWidget(row, 8).completer()
+        completer = tabla.cellWidget(row, 8).completer()
         # Obtenemos sugerencias actualizadas.
-        sugerencias=[i[0] for i in 
+        sugerencias =[i[0] for i in 
                      bdd.cur.execute('''SELECT s.descripcion FROM subgrupos s
                      JOIN grupos g ON s.id_grupo = g.id
                      WHERE g.descripcion LIKE ?''', (grupo,)).fetchall()]
@@ -803,13 +845,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # Habilitamos el boton de guardar para que el usuario pueda
         # guardar los cambios.
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
-    
+
     def fetchStock(self):
-        """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario.
+        """Este método refresca la tabla y los filtros de la pantalla
+        stock.
         """
-        # La mayoría de métodos de stock son parecidos a este, por lo
-        # que solo voy a documentar esta función.
+        # Los métodos de fetch son parecidos a este, por lo que solo
+        # voy a documentar esta función. Si hay una acción especial
+        # en algún otro método fetch, lo voy a documentar.
         # Obtenemos la tabla.
         tabla = self.pantallaStock.tableWidget
         # Desactivamos el sorting por defecto porque si alguien
@@ -821,14 +864,15 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.disconnect()
         except:
             pass
-        
-        # Guardamos los filtros.
+        # Se refresca la tabla, eliminando todas las filas anteriores.
+        tabla.setRowCount(0)
+
+        # Obtenemos los filtros.
         barraBusqueda = self.pantallaStock.lineEdit
         listaUbi = self.pantallaStock.listaUbi
-
         # Desconectamos el filtro por la misma razón que la tabla.
         listaUbi.disconnect()
-        # Obtenemos el texto seleccionado.
+        # Obtenemos el texto seleccionado en el filtro.
         ubiSeleccionada = listaUbi.currentText()
         # Volvemos a buscar sugerencias.
         ubis = bdd.cur.execute("""SELECT DISTINCT u.descripcion
@@ -844,17 +888,16 @@ class MainWindow(QtWidgets.QMainWindow):
         # Volvemos a seleccionar la opción que estaba seleccionada
         # desde antes de refrescar.
         listaUbi.setCurrentIndex(listaUbi.findText(ubiSeleccionada))
-
+        # Si la ubi seleccionada es "todas", no aplicamos un filtro.
         if ubiSeleccionada == "Todas":
             filtroUbi = (None,)
+        # Lo guardamos en una tupla porque la dal recibe por parámetro
+        # una tupla.
         else:
             filtroUbi = (ubiSeleccionada,)
 
         # Se obtienen los datos de la base de datos.
         datos = dal.obtenerDatos("stock", barraBusqueda.text(), filtroUbi)
-
-        # Se refresca la tabla, eliminando todas las filas anteriores.
-        tabla.setRowCount(0)
 
         # Por cada número de fila y los contenidos de ésta en los datos
         # obtenidos...
@@ -863,22 +906,24 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.insertRow(rowNum)
 
             # Empezamos a añadir los items.
-            item0=QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
             # Los centramos.
             item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             tabla.setItem(rowNum, 0, item0)
-            item1=QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
             item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             tabla.setItem(rowNum, 1, item1)
-            item2=QtWidgets.QTableWidgetItem()
+            item2 = QtWidgets.QTableWidgetItem()
+            # Los items numéricos los ponemos de esta forma para que qt
+            # los reconozca como números y los ordene numéricamente.
             item2.setData(0, rowData[2])
             item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             tabla.setItem(rowNum, 2, item2)
-            item3=QtWidgets.QTableWidgetItem()
+            item3 = QtWidgets.QTableWidgetItem()
             item3.setData(0, rowData[3])
             item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             tabla.setItem(rowNum, 3, item3)
-            item4=QtWidgets.QTableWidgetItem()
+            item4 = QtWidgets.QTableWidgetItem()
             item4.setData(0, rowData[4])
             item4.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             tabla.setItem(rowNum, 4, item4)
@@ -899,177 +944,134 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
             # Creamos el campo con sugerencia.
-            paramGrupos=ParamEdit(sugerencias, rowData[7])
+            paramGrupos = ParamEdit(sugerencias, rowData[7])
             # Cuando termina de editarse, hacemos que actualice el
             # cuadro de sugerencias del campo grupos.
-            paramGrupos.editingFinished.connect(self.actualizarSugerenciasSubgrupos)
+            paramGrupos.editingFinished.connect(self.actualizarSugSubgrupos)
             tabla.setCellWidget(rowNum, 7, paramGrupos)
             sql = '''SELECT s.descripcion FROM subgrupos s
                    JOIN grupos g ON s.id_grupo = g.id
                    WHERE g.descripcion LIKE ?'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql, (rowData[7],)).fetchall()]
-            subgrupos=ParamEdit(sugerencias, rowData[8])
-            subgrupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            subgrupos = ParamEdit(sugerencias, rowData[8])
+            subgrupos.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
-            ubicaciones=ParamEdit(sugerencias, rowData[9])
-            ubicaciones.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            ubicaciones = ParamEdit(sugerencias, rowData[9])
+            ubicaciones.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 9, ubicaciones)
 
             # Generamos los botones para la fila de la tabla
             core.generarBotones(
                 lambda: self.saveOne(
-                    tabla, self.saveStock, self.fetchStock, datos),
+                    tabla, dal.saveStock, self.fetchStock, datos),
                 lambda: self.deleteStock(datos), tabla, rowNum)
 
         # Cambiamos la altura de la fila.
-        tabla.setRowHeight(0, 35)
+        tabla.setRowHeight(rowNum, 35)
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
         tabla.resizeColumnsToContents()
 
-        # Hacemos que las columnas se expandan al ampliar la pantalla.
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            9, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        
         # Hacemos que cada vez que se edite una celda de una tabla, se
         # ejecuta la función.
         tabla.cellChanged.connect(self.actualizarTotal)
+        # Volvemos a habilitar el sorting.
         tabla.setSortingEnabled(True)
+        # Volvemos a conectar el filtro.
         listaUbi.currentIndexChanged.connect(self.fetchStock)
+        # Mostramos la pantalla de stock.
         self.stackedWidget.setCurrentIndex(3)
 
-    def saveOne(self, tabla, funcSave, funcFetch, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla stock de la base de datos.
+    def saveOne(self, tabla: QtWidgets.QTableWidget, funcSave: function,
+                funcFetch: function, datos: list | None = None):
+        """Este método guarda los cambios hechos en una fila de una
+        tabla de una gestión.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la fila a guardar.
+            funcSave: function
+                La función de guardar relacionada a la gestión.
+            funcFetch: function
+                La función de refrescar relacionada a la gestión.
             datos: list | None = None
-                Los datos de la tabla stock, que se usarán para obtener
-                el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
-        # Se pregunta al usuario si desea guardar los cambios en la
-        # tabla. NOTA: Esos tabs en el string son para mantener la
-        # misma identación en todas las líneas así dedent funciona,
-        # sino le da ansiedad.
-        # Obtenemos los ids de los campos que no podemos dejar vacíos.
+        # Obtenemos el id de la fila, que es la posición donde se
+        # apretó el boton de guardar.
         row = tabla.indexAt(self.sender().pos()).row()
+        # Obtenemos la scrollbar
         barra = tabla.verticalScrollBar()
+        # Preguntamos si el usuario quiere guardar los cambios.
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila?"
         popup = PopUp("Pregunta", info).exec()
+        # Si respondió que sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            exito=funcSave(tabla, row, datos)
-            if exito == True:    
+            # Se ejecuta la función de guardado.
+            exito = funcSave(tabla, row, self.usuario, datos)
+            # Si el guardado fue exitoso...
+            if exito == True:
+                # Se muestra que el guardado fue con éxito.
                 info = "Los datos se han guardado con éxito."
                 PopUp("Aviso", info).exec()
+                # Se obtiene el valor de la barra.
                 posicion = barra.value()
+                # Se refresca la pantalla.
                 funcFetch()
+                # Se devuelve la barra a su posición original.
                 barra.setValue(posicion)
-    
-    def saveStock(self, tabla, row, datos):
-        iCampos = (1, 2, 7, 8, 9)
-        # Por cada campo que no debe ser nulo...
-        for iCampo in iCampos:
-            # Si el campo está vacio...
-            if tabla.item(row, iCampo) is not None:
-                texto = tabla.item(row, iCampo).text()
-            else:
-                texto = tabla.cellWidget(row, iCampo).text()
-            if texto == "":
-                # Le pide al usuario que termine de llenar los campos
-                # y corta la función.
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
-                return PopUp("Error", mensaje).exec()
+                # Se actualizan las sugerencias.
+                self.actualizarSug()
 
-        try:
-            cond = int(tabla.item(row, 2).text())
-            rep = tabla.item(row, 3).text()
-            baja = tabla.item(row, 4).text()
-            prest = tabla.item(row, 5).text()
-            if rep.isnumeric() and baja.isnumeric():
-                rep = int(rep)
-                baja = int(baja)
-            else:
-                rep = None
-                baja = None
-                prest = 0
-        except:
-            mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
-            return PopUp("Error", mensaje).exec()
+    def saveAll(self, tabla: QtWidgets.QTableWidget, funcSave: function,
+                funcFetch: function, datos: list | None = None):
+        """Este método guarda todos los cambios hechos en una tabla de
+        una gestión.
 
-        # Se obtiene el texto de todas las celdas.
-        desc = tabla.item(row, 1).text()
-        grupo = tabla.cellWidget(row, 7).text()
-        subgrupo = tabla.cellWidget(row, 8).text()
-        ubi = tabla.cellWidget(row, 9).text()
-
-        # Verificamos que el grupo esté registrado.
-        idGrupo = bdd.cur.execute(
-            "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
-        ).fetchone()
-        # Si no lo está...
-        if not idGrupo:
-            # Muestra un mensaje de error al usuario y termina la
-            # función.
-            info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
-            return PopUp("Error", info).exec()
-
-        # Verificamos que el subgrupo esté registrado y que
-        # coincida con el grupo ingresado.
-        idSubgrupo = bdd.cur.execute(
-            "SELECT id FROM subgrupos WHERE descripcion LIKE ? AND id_grupo = ?",
-            (subgrupo, idGrupo[0],)
-        ).fetchone()
-        if not idSubgrupo:
-            info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
-            return PopUp("Error", info).exec()
-
-        idUbi = bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion LIKE ?",
-                                (ubi,)).fetchone()
-        if not idUbi:
-            info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
-            return PopUp("Error", info).exec()
-
-        datosNuevos = ["" if cell in ("-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
-        try:
-            idd = tabla.item(row, 0).text()
-            if not idd:
-                bdd.cur.execute(
-                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
-                    (desc, cond, rep, baja, prest,
-                        idSubgrupo[0], idUbi[0],)
-                )
-                dal.insertarHistorial(
-                    self.usuario, 'Inserción', 'Stock', desc, None, datosNuevos)
-            else:
-                idd=int(idd)
-                # Guardamos los datos de la fila en
-                bdd.cur.execute(
-                    """UPDATE stock
-                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                    cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
-                    WHERE id = ?""",
-                    (desc, cond, rep, baja, prest,
-                        idSubgrupo[0], idUbi[0], idd,)
-                )
-                datosViejos = [["" if cellData in ("-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
-                    self.usuario, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
-        except sqlite3.IntegrityError:
-            info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
-            return PopUp("Error", info).exec()
-
-        bdd.con.commit()
-        return True
+        Parámetros
+        ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la fila a guardar.
+            funcSave: function
+                La función de guardar relacionada a la gestión.
+            funcFetch: function
+                La función de refrescar relacionada a la gestión.
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        """
+        # Esta función es igual a saveOne, asi que solo documento
+        # la diferencia.
+        info = "Esta acción no se puede deshacer. ¿Desea guardar todos los cambios?"
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            # Inicializamos el exito de antes porque puede no
+            # inicializarse.
+            exito=False
+            # Por cada fila de la tabla...
+            for i in range(tabla.rowCount()):
+                #...si se hicieron cambios en la fila...
+                # Si el botón de guardar está habilitado, significa
+                # que la fila fue modificada.
+                if tabla.cellWidget(i, tabla.columnCount()-2).isEnabled():
+                    # guardamos los cambios.
+                    exito=funcSave(tabla, i, self.usuario, datos)
+                    if exito != True:
+                        break
+            if exito==True:
+                info = "Los datos se han guardado con éxito."
+                PopUp("Aviso", info).exec() 
+                funcFetch()
+                self.actualizarSug()
 
     def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1087,7 +1089,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos la fila que se va a eliminar.
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
         # Si no se pasó el argumento idd, significa que la fila no está
         # relacionada con la base de datos. Eso significa que la fila
         # se insertó en la tabla de la UI, pero aún no se guardaron los
@@ -1095,7 +1097,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not idd:
             # ...solo debemos sacarla de la UI.
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
         # Si está relacionada con la base de datos, antes de eliminar,
         # tenemos que verificar que la PK de la fila no
         # tenga relaciones foráneas con otras tablas. Si llegase a
@@ -1134,19 +1136,19 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método genera un spreadsheet a partir de la tabla de la
         pantalla stock.
         """
-        info = "Los datos que se imprimirán serán los datos guardados en la base de datos. Guarde todos los cambios antes de imprimir."
+        info = "Los cambios no guardados no se imprimirán. Guarde todos los cambios antes de imprimir."
         boton = PopUp('Advertencia', info).exec()
+        # Si se cerro sin apretar ok, no se ejecuta.
         if boton == QtWidgets.QMessageBox.StandardButton.Ok:
-            dialog = QtWidgets.QFileDialog(self)
-            dialog.setDirectory(os.path.expanduser('~documents'))
-            dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
-            dialog.setOption(QtWidgets.QFileDialog.Option.ShowDirsOnly)
-            dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
-            dialog.setDefaultSuffix('xlsx')
-            dialog.setWindowTitle('Guardar archivo')
-            filename = dialog.getSaveFileName()[0]
+            # Creamos la ventana filedialog.
+            filename = QtWidgets.QFileDialog(self).getSaveFileName(self,
+                'Guardar archivo', os.path.expanduser('~documents'),
+                'Hoja de cálculo (*.xlsx)'
+            );
+            # Si no se abrió un archivo, corta la función
             if not filename:
                 return
+
             barraBusqueda = self.pantallaStock.lineEdit
             listaUbi = self.pantallaStock.listaUbi
             if listaUbi.currentText() == "Todas":
@@ -1154,31 +1156,26 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 filtroUbi = (listaUbi.currentText(),)
 
-            rawData = dal.obtenerDatos(
+            datos = dal.obtenerDatos(
                 "stock", barraBusqueda.text(), filtroUbi)
-            datos = []
-            for rowNum, rawRow in enumerate(rawData):
-                datos.append([rawRow[1], rawRow[2], rawRow[3], rawRow[4],
-                              rawRow[5], rawRow[6], rawRow[7], rawRow[8]])
-                if rawRow[3] == "-":
-                    datos[rowNum].insert(5, rawRow[2])
-                else:
-                    total = rawRow[2] + rawRow[3] + rawRow[4] + rawRow[5]
-                    datos[rowNum].insert(5, total)
             columnas = ["Elemento", "Cant. en Condiciones",
                         "Cant. en Reparación", "Cant. de Baja",
                         "Cant. Prestadas", "Total", "Grupo", "Subgrupo",
                         "Ubicación"]
-            df = pd.DataFrame(datos, columns=columnas)
-            df.to_excel(filename)
-            info = "Los datos se imprimieron exitosamente."
-            PopUp('Aviso', info).exec()
+            df = pd.DataFrame([i[1:] for i in datos], columns=columnas)
+            try:
+                df.to_excel(filename[0])
+                info = "Los datos se imprimieron exitosamente."
+                PopUp('Aviso', info).exec()
+            except PermissionError:
+                info = "Ocurrió un error al imprimir la tabla. Esto pudo haber ocurrido porque intentó reemplazar un documento que tenía abierto o estaba siendo usado por otra app. Por favor, verifique que el documento que desea reemplazar esté cerrado y no esté siendo usado por ningún otra app."
+                PopUp('Aviso', info).exec()
 
     def cargarPlanilla(self):
         info = '¿La planilla está en el formato de tutorvip?'
         formato = PopUp('Pregunta-Info', info).exec()
         if formato == QtWidgets.QMessageBox.StandardButton.Yes:
-            info = '¿Desea usar el formato de cursos del tutorvip o el formato de cursos simplificado?'
+            info = 'El formato de los cursos del sistema puede ser diferente al del tutorvip.\n¿Desea reemplazar el formato de cursos actual con el formato de la planilla?'
             actualizarCursos = PopUp('Pregunta', info).exec()
             if actualizarCursos in (QtWidgets.QMessageBox.StandardButton.Yes,
                                     QtWidgets.QMessageBox.StandardButton.No):
@@ -1190,7 +1187,7 @@ class MainWindow(QtWidgets.QMainWindow):
             info = 'Esta acción no se puede deshacer. Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
             if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
                 return
-            actualizarCursos=True
+            actualizarCursos = True
         else:
             return
         formato = formato == QtWidgets.QMessageBox.StandardButton.Yes
@@ -1199,31 +1196,32 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setDirectory(os.path.expanduser('~documents'))
         dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
         dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
-        dialog.setNameFilter("Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
+        dialog.setNameFilter(
+            "Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
         dialog.setWindowTitle('Abrir archivo')
         if dialog.exec():
             filename = dialog.selectedFiles()[0]
         else:
             return
         try:
-            df=pd.read_excel(filename)
+            df = pd.read_excel(filename)
         except:
-            info='El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
+            info = 'El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
             return PopUp('Error', info).exec()
         cols = list(df.columns.values)
-                
+
         if len(cols) != 3:
-            info='La plantilla proporcionada tiene una cantidad de columnas distinta al formato requerido. Proporcione la cantidad justa de columnas.'
+            info = 'La plantilla proporcionada tiene una cantidad de columnas distinta al formato requerido. Proporcione la cantidad justa de columnas.'
             return PopUp('Error', info).exec()
-        
+
         if formato:
-            df=df[[cols[2], cols[0], cols[1]]]
+            df = df[[cols[2], cols[0], cols[1]]]
             cols = list(df.columns.values)
- 
+
         if ("dni" in cols[0].lower() or "curso" in cols[0].lower()
             or "dni" in cols[1].lower() or "curso" in cols[2].lower()
-            or "nombre" in cols[2].lower()):
-            info='Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
+                or "nombre" in cols[2].lower()):
+            info = 'Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
             return PopUp('Error', info).exec()
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
         self.fetchAlumnos()
@@ -1240,7 +1238,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
         tabla.setSortingEnabled(False)
 
         datos = dal.obtenerDatos("alumnos", barraBusqueda.text())
@@ -1254,7 +1251,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            sql='''SELECT c.descripcion FROM clases c
+            sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Alumno';'''
             sugerencias = [sugerencia[0] for sugerencia in
@@ -1279,7 +1276,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        
+
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1299,9 +1296,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for iCampo in iCampos:
             if iCampo == 2:
-                texto=tabla.cellWidget(row, iCampo).text()
+                texto = tabla.cellWidget(row, iCampo).text()
             else:
-                texto=tabla.item(row, iCampo).text()
+                texto = tabla.item(row, iCampo).text()
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
@@ -1368,13 +1365,13 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaAlumnos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
-        
-        idd=tabla.item(row, 0).text()
+
+        idd = tabla.item(row, 0).text()
 
         if not idd:
             return tabla.removeRow(row)
-        
-        idd=int(idd)
+
+        idd = int(idd)
 
         hayRelacion = dal.verifElimAlumnos(idd)
         if hayRelacion:
@@ -1539,7 +1536,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
         tabla.setSortingEnabled(False)
 
         datos = dal.obtenerDatos("grupos", barraBusqueda.text())
@@ -1625,10 +1621,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimGrupos(idd)
         if hayRelacion:
@@ -1658,7 +1654,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
         tabla.setSortingEnabled(False)
 
         datos = dal.obtenerDatos("otro_personal", barraBusqueda.text())
@@ -1671,13 +1666,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            sql='''SELECT c.descripcion FROM clases c
+            sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Personal';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             clases = ParamEdit(sugerencias, rowData[2])
-            clases.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            clases.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
             tabla.setItem(
@@ -1697,10 +1693,6 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowHeight(0, 35)
         tabla.resizeColumnsToContents()
 
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1718,10 +1710,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         iCampos = (1, 2, 3)
         for iCampo in iCampos:
-            if iCampo==2:
-                texto=tabla.cellWidget(row, iCampo).text()
+            if iCampo ==2:
+                texto = tabla.cellWidget(row, iCampo).text()
             else:
-                texto=tabla.item(row, iCampo).text()
+                texto = tabla.item(row, iCampo).text()
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
@@ -1746,7 +1738,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not idClase:
             info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
             return PopUp("Error", info).exec()
-        
+
         datosNuevos = [nombre, clase, dni,]
         try:
             idd = tabla.item(row, 0).text()
@@ -1771,7 +1763,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except sqlite3.IntegrityError:
             info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
             return PopUp("Error", info).exec()
-        
+
         bdd.con.commit()
         return True
 
@@ -1788,9 +1780,9 @@ class MainWindow(QtWidgets.QMainWindow):
         iCampos = (1, 2)
         for iCampo in iCampos:
             if iCampo == 2:
-                texto=tabla.cellWidget(row, iCampo).text()
+                texto = tabla.cellWidget(row, iCampo).text()
             else:
-                texto=tabla.item(row, iCampo).text()
+                texto = tabla.item(row, iCampo).text()
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
@@ -1850,10 +1842,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimOtroPersonal(idd)
         if hayRelacion:
@@ -1883,7 +1875,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
         tabla.setSortingEnabled(False)
         datos = dal.obtenerDatos("subgrupos", barraBusqueda.text())
         tabla.setRowCount(0)
@@ -1893,10 +1884,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            sugerencias=[i[0] for i in
-                bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
-            grupos=ParamEdit(sugerencias, rowData[2])
-            grupos.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            sugerencias =[i[0] for i in
+                         bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+            grupos = ParamEdit(sugerencias, rowData[2])
+            grupos.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 2, grupos)
 
             core.generarBotones(
@@ -1916,12 +1908,11 @@ class MainWindow(QtWidgets.QMainWindow):
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        
+
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(6)
-
 
     def deleteSubgrupos(self, datos: list | None = None) -> None:
         """Este método elimina una fila de una tabla de la base de
@@ -1938,10 +1929,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = tabla.indexAt(self.sender().pos()).row()
         barra = tabla.verticalScrollBar()
 
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
         hayRelacion = dal.verifElimSubgrupos(idd)
         if hayRelacion:
             mensaje = "El subgrupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este subgrupo."
@@ -2036,7 +2027,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-
         datos = dal.obtenerDatos("usuarios", barraBusqueda.text())
 
         tabla.setRowCount(0)
@@ -2047,13 +2037,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
             tabla.setItem(
                 rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            sql='''SELECT c.descripcion FROM clases c
+            sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Usuario';'''
             sugerencias = [sugerencia[0] for sugerencia in
                            bdd.cur.execute(sql).fetchall()]
             clases = ParamEdit(sugerencias, rowData[2])
-            clases.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            clases.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
             tabla.setItem(
@@ -2090,9 +2081,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for iCampo in iCampos:
             if iCampo == 2:
-                texto=tabla.cellWidget(row, iCampo).text()
+                texto = tabla.cellWidget(row, iCampo).text()
             else:
-                texto=tabla.item(row, iCampo).text()
+                texto = tabla.item(row, iCampo).text()
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
@@ -2121,14 +2112,14 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp("Error", info).exec()
         # datosNuevos = [nombre, dni, clase, usuario]
         try:
-            idd=tabla.item(row, 0).text()
+            idd = tabla.item(row, 0).text()
             if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
                     (nombre, dni, idClase[0], usuario, contrasena)
                 )
                 # dal.insertarHistorial(
-                    # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                   # self.usuario, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -2201,10 +2192,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setItem(
                 rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            sugerencias=[i[0] for i in
-                bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
+            sugerencias =[i[0] for i in
+                         bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
             cats = ParamEdit(sugerencias, rowData[1])
-            cats.textChanged.connect(lambda: self.habilitarSaves(None, None, tabla))
+            cats.textChanged.connect(
+                lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 1, cats)
             tabla.setItem(
                 rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
@@ -2236,7 +2228,6 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.disconnect()
         except:
             pass
-
 
         datos = dal.obtenerDatos("ubicaciones", barraBusqueda.text())
 
@@ -2319,10 +2310,10 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
         if not idd:
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimUbi(idd)
         if hayRelacion:
@@ -2410,9 +2401,9 @@ class MainWindow(QtWidgets.QMainWindow):
         iCampos = (1, 2,)
         for iCampo in iCampos:
             if tabla.item(row, iCampo) is not None:
-                texto=tabla.item(row, iCampo).text()
+                texto = tabla.item(row, iCampo).text()
             else:
-                texto=tabla.cellWidget(row, iCampo).text()
+                texto = tabla.cellWidget(row, iCampo).text()
             if texto == "":
                 mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
@@ -2422,7 +2413,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not idCat:
             mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
             return PopUp("Error", mensaje).exec()
-        
+
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -2464,11 +2455,11 @@ class MainWindow(QtWidgets.QMainWindow):
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
 
-        idd=tabla.item(row, 0).text()
+        idd = tabla.item(row, 0).text()
 
         if not idd:
             return tabla.removeRow(row)
-        idd=int(idd)
+        idd = int(idd)
 
         hayRelacion = dal.verifElimClases(idd)
         if hayRelacion:
@@ -2887,8 +2878,10 @@ class MainWindow(QtWidgets.QMainWindow):
         hastaFecha.dateChanged.connect(self.fetchResumen)
         self.stackedWidget.setCurrentIndex(15)
 
+
 app = QtWidgets.QApplication(sys.argv)
-app.setStyleSheet(open(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}styles.qss'), 'r').read())
+app.setStyleSheet(open(os.path.join(os.path.abspath(
+    os.getcwd()), f'ui{os.sep}styles.qss'), 'r').read())
 for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
     QtGui.QFontDatabase.addApplicationFont(
         os.path.join(os.path.abspath(os.getcwd()),
