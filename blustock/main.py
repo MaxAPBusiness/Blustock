@@ -89,6 +89,14 @@ class MainWindow(QtWidgets.QMainWindow):
         printStock(self):
             Genera un spreadsheet a partir de la tabla de la pantalla
             stock.
+        
+        cargarPlanilla(self):
+            Crea un dataframe para la carga de datos de una spreadsheet
+            en la base de datos de la gestión alumnos.
+        
+        fetchAlumnos(self):
+            Obtiene los datos de la tabla personal y los inserta en la
+            tabla de la interfaz de usuario.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -336,6 +344,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
+        self.pantallaAlumnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
@@ -805,17 +816,20 @@ class MainWindow(QtWidgets.QMainWindow):
                           tabla.item(row, 5).data(0),)
             # Por cada cantidad y su índice...
             for col, cantidad in enumerate(cantidades):
-                # Si el número ingresado es negativo...
                 try:
+                    # Vemos si la cantidad es un entero. Si tira error
+                    # es texto.
                     cantidad = int(cantidad)
+                    # Si el número es negativo...
                     if cantidad < 0:
+                        #...se ingresa un 0 en su lugar
                         tabla.item(row, col + 2).setData(0, 0)
                     # Si no...
                     else:
                         # ... se suma al total. 
                         total += int(cantidad)
                 except:
-                    # Se cambia a 0
+                    # Se establece en 0
                     tabla.item(row, col + 2).setData(0, 0)
             # Creamos el item que vamos a meter en la tabla
             item = QtWidgets.QTableWidgetItem(str(total))
@@ -1153,49 +1167,79 @@ class MainWindow(QtWidgets.QMainWindow):
             if not filename:
                 return
 
+            # Obtenemos los filtros
             barraBusqueda = self.pantallaStock.lineEdit
             listaUbi = self.pantallaStock.listaUbi
+            # Obtenemos los datos de los filtros.
             if listaUbi.currentText() == "Todas":
                 filtroUbi = (None,)
             else:
                 filtroUbi = (listaUbi.currentText(),)
 
+            # Obtenemos los datos usando los filtros ingresados.
             datos = dal.obtenerDatos(
                 "stock", barraBusqueda.text(), filtroUbi)
+            # Definimos las columnas de la spreadsheet en una lista
             columnas = ["Elemento", "Cant. en Condiciones",
                         "Cant. en Reparación", "Cant. de Baja",
                         "Cant. Prestadas", "Total", "Grupo", "Subgrupo",
                         "Ubicación"]
+            # Creamos el dataframe. Usamos la list comprehension
+            # para ignorar el campo id de las filas al generarlo.
             df = pd.DataFrame([i[1:] for i in datos], columns=columnas)
+            # Intentamos...
             try:
+                #... crear el xlsx a partir del dataframe.
                 df.to_excel(filename[0])
                 info = "Los datos se imprimieron exitosamente."
                 PopUp('Aviso', info).exec()
+            # Excepto que el sistema no permita la generación...
             except PermissionError:
+                # suele ocurrir porque se quiere reemplazar un archivo
+                # que está siendo usado por otra app, y windows no deja
+                # hacer eso.
                 info = "Ocurrió un error al imprimir la tabla. Esto pudo haber ocurrido porque intentó reemplazar un documento que tenía abierto o estaba siendo usado por otra app. Por favor, verifique que el documento que desea reemplazar esté cerrado y no esté siendo usado por ningún otra app."
                 PopUp('Aviso', info).exec()
 
     def cargarPlanilla(self):
+        """Este método crea un dataframe para la carga de datos
+        de una spreadsheet en la base de datos de la gestión alumnos.
+        """
         info = '¿La planilla está en el formato de tutorvip?'
         formato = PopUp('Pregunta-Info', info).exec()
+        # Si está en el formato de tutorvip...
         if formato == QtWidgets.QMessageBox.StandardButton.Yes:
+            #...pregunta al usuario si quiere reemplazar el sistema de
+            # cursos.
             info = 'El formato de los cursos del sistema puede ser diferente al del tutorvip.\n¿Desea reemplazar el formato de cursos actual con el formato de la planilla?'
             actualizarCursos = PopUp('Pregunta', info).exec()
+            # Si el usuario respondio que si o que no...
             if actualizarCursos in (QtWidgets.QMessageBox.StandardButton.Yes,
                                     QtWidgets.QMessageBox.StandardButton.No):
+                #...cargamos un valor bool de si respondio si o no.
                 actualizarCursos = (QtWidgets.QMessageBox.StandardButton.Yes
                                     == actualizarCursos)
+            # Si cerro sin responder, corta la función
             else:
                 return
+        # Si no usa el formato de tutorvip...
         elif formato == QtWidgets.QMessageBox.StandardButton.No:
+            #...advierte al usuario.
             info = 'Esta acción no se puede deshacer. Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
+            # Si cerro sin responder, corta la función.
             if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
                 return
+            # Como se van a reemplazar los cursos si o si en esta
+            # opción, inicializamos la variable como true.
             actualizarCursos = True
+        # Si cerró sin responder (no respondío si ni no), corta.
         else:
             return
+        # Cargamos formato con el valor bool de si usa el formato de
+        # tutorvip o no.
         formato = formato == QtWidgets.QMessageBox.StandardButton.Yes
 
+        # Creamos el dialog.
         dialog = QtWidgets.QFileDialog(self)
         dialog.setDirectory(os.path.expanduser('~documents'))
         dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
@@ -1203,37 +1247,50 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setNameFilter(
             "Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
         dialog.setWindowTitle('Abrir archivo')
+        # Si abrió un archivo el usuario...
         if dialog.exec():
+            # Obtenemos el nombre
             filename = dialog.selectedFiles()[0]
+        # Si no abrió un archivo, corta la función
         else:
             return
+        
+        # Intentamos hacer el dataframe a partir del excel
         try:
             df = pd.read_excel(filename)
+        # Si el archivo no es válido, avisamos y cortamos la funcion.
         except:
             info = 'El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
             return PopUp('Error', info).exec()
+        # Obtenemos las columnas
         cols = list(df.columns.values)
 
+        # Si la cantidad de columnas es menor a 3, corta
         if len(cols) != 3:
             info = 'La plantilla proporcionada tiene una cantidad de columnas distinta al formato requerido. Proporcione la cantidad justa de columnas.'
             return PopUp('Error', info).exec()
 
+        # Si va con formato de tutorvip, cambiamos las columnas de 
+        # orden
         if formato:
             df = df[[cols[2], cols[0], cols[1]]]
             cols = list(df.columns.values)
 
+        # Si las columnas están en el orden incorrecto, corta
         if ("dni" in cols[0].lower() or "curso" in cols[0].lower()
             or "dni" in cols[1].lower() or "curso" in cols[2].lower()
                 or "nombre" in cols[2].lower()):
             info = 'Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
             return PopUp('Error', info).exec()
+        
+        # Ejecutamos el cargar planilla del dal.
         dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
+        # Refrescamos la gestión de alumnos.
         self.fetchAlumnos()
         PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
     def fetchAlumnos(self):
-        """Este método obtiene los datos de la tabla personal y los
-        inserta en la tabla de la interfaz de usuario.
+        """Este método refresca la gestión de alumnos
         """
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
@@ -1241,12 +1298,10 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.disconnect()
         except:
             pass
-
         tabla.setSortingEnabled(False)
+        tabla.setRowCount(0)
 
         datos = dal.obtenerDatos("alumnos", barraBusqueda.text())
-
-        tabla.setRowCount(0)
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
@@ -1275,12 +1330,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
