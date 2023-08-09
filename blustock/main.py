@@ -806,13 +806,17 @@ class MainWindow(QtWidgets.QMainWindow):
             # Por cada cantidad y su índice...
             for col, cantidad in enumerate(cantidades):
                 # Si el número ingresado es negativo...
-                if cantidad < 0:
+                try:
+                    cantidad = int(cantidad)
+                    if cantidad < 0:
+                        tabla.item(row, col + 2).setData(0, 0)
+                    # Si no...
+                    else:
+                        # ... se suma al total. 
+                        total += int(cantidad)
+                except:
                     # Se cambia a 0
                     tabla.item(row, col + 2).setData(0, 0)
-                # Si no...
-                else:
-                    # ... se suma al total. 
-                    total += int(cantidad)
             # Creamos el item que vamos a meter en la tabla
             item = QtWidgets.QTableWidgetItem(str(total))
             # Hacemos que no sea editable
@@ -971,8 +975,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     tabla, dal.saveStock, self.fetchStock, datos),
                 lambda: self.deleteStock(datos), tabla, rowNum)
 
-        # Cambiamos la altura de la fila.
-        tabla.setRowHeight(rowNum, 35)
+            # Cambiamos la altura de la fila.
+            tabla.setRowHeight(rowNum, 35)
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
         tabla.resizeColumnsToContents()
