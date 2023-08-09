@@ -726,52 +726,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if row is None:
             row=tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
-    def insertarFilas(self, tabla: QtWidgets.QTableWidget,
-                      funcGuardar: types.FunctionType,
-                      funcEliminar: types.FunctionType,
-                      camposObligatorios: tuple | None = None,
-                      camposNoEditables: tuple | None = None,
-                      camposSugeridos: tuple | None = None,
-                      sugerencias: tuple | list | None= None,
-                      campoEspecial: int | None = None):
-        """Este método inserta una nueva fila en la tabla stock.
-
-        Si la fila anterior fue recientemente ingresada y los datos no
-        fueron modificados, en vez de añadir una nueva fila se le
-        muestra un mensaje al usuario pidiéndole que ingrese los datos
-        primero.
-
-        Parámetros
-        ----------
-            row: int | None = None
-                La fila en la que está el boton.
-                Default: None.
-            col: int | None = None
-                La columna de la que se ejecutó la función, no se usa
-                pero es necesario declararla porque, si se ejecuta
-                de una forma especial, esa ejecución pasa por defecto
-                un parámetor de columna que, si no guardaramos en ese
-                parámetro, estaría sobreescribiendo el parámetro tabla.
-                Default: None.
-            tabla: QtWidgets.QTableWidget | None = None
-                La tabla en la que está el botón.
-                Default:None
-        """
-        # Si no se pasa la tabla por parámetro, se asume que la tabla
-        # modificada es quien llamó a este método. Esto es porque
-        # cuando se llama a este método desde una tabla modificada, hay
-        # ocasiones en las que la tabla
-        if tabla is None:
-            tabla=self.sender()
-        
-        # Si la fila no se pasa, se asume que fue un widget quien llamó
-        # a este método.
-        if row is None:
-            # Se obtiene la posicion de la fila a través del widget.
-            row=tabla.indexAt(self.sender().pos()).row()
-        # Habilitamos el botón de saves para que el usuario pueda hacer
-        # cambios.
-        tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
 
     def actualizarTotal(self, row: int, col: int,
                         tabla: QtWidgets.QTableWidget | None = None):
@@ -804,35 +758,26 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si la columna modificada es de cantidad en condiciones,
         # cantidad en reparación o cantidad de baja...
         if col in (2, 3, 4, 5):
-            # ...obtenemos los valores de las cantidades
-            try:
-                cantCond = int(tabla.item(row, 2).text())
-                cantRep = tabla.item(row, 3).text()
-                cantBaja = tabla.item(row, 4).text()
-                cantPrest = tabla.item(row, 5).text()
-                # Las cantidades en reparación y de baja pueden no ser
-                # numéricas ("-", significa dato nulo), por lo que hay que
-                # checkear si el usuario las ingresó como numéricas o no
-                # antes de hacer cuentas.
-                # Si las cantidades en reparación y de baja son numéricas..
-                if (cantRep.isnumeric() and cantBaja.isnumeric() and cantPrest.isnumeric()):
-                    #... se calcula el total sumando todas las cantidades
-                    total = QtWidgets.QTableWidgetItem(
-                                str(cantCond + int(cantRep)
-                                + int(cantBaja) + int(cantPrest)))
-                # Si no...
-                else:
-                    #... se calcula el total sumando solamente las
-                    # cantidades en condiciones y adeudadas.
-                    total = QtWidgets.QTableWidgetItem(str(cantCond))
-                # El campo se hace no editable y se guarda en la tabla
-                total.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
-                            QtCore.Qt.ItemFlag.ItemIsEnabled)
-                tabla.setItem(row, 6, total)
-            except:
-                print('Sos un boludo')
-                return
-
+            total=0
+            # ...obtenemos los textos de las celdas de cantidades en una tupla
+            cantidades = (tabla.item(row, 2).text(),
+                          tabla.item(row, 3).text(), 
+                          tabla.item(row, 4).text(),
+                          tabla.item(row, 5).text())
+            # Por cada texto en celda de cantidad...
+            for cantidad in cantidades:
+                # Si se ingresó un número...
+                if cantidad.isnumeric():
+                    # ... se suma al total. De esta manera, si se
+                    # ingreso algo que no es un número, no se suma.
+                    total += int(cantidad)
+            # Creamos el item que vamos a meter en la tabla
+            item=QtWidgets.QTableWidgetItem(str(total))
+            # Hacemos que no sea editable
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                        QtCore.Qt.ItemFlag.ItemIsEnabled)
+            # Lo insertamos a la tabla
+            tabla.setItem(row, 6, total)
 
     def actualizarSugerenciasSubgrupos(self):
         """Este método actualiza las sugerencias de los campos de
