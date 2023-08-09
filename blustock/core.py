@@ -205,6 +205,7 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     tabla.setSortingEnabled(True)
     # Conectamos a la tabla a su función anterior
     tabla.cellChanged.connect(funcTabla)
+    tabla.setCurrentCell(indiceFinal, 1)
 
 def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
                    tabla: QtWidgets.QTableWidget, numFila: int):

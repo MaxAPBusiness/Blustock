@@ -496,7 +496,421 @@ class DAL():
 
         bdd.con.commit()
         return True
+    
+    def saveAlumnos(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
 
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        iCampos = (1, 2, 3)
+
+        for iCampo in iCampos:
+            if iCampo == 2:
+                texto = tabla.cellWidget(row, iCampo).text()
+            else:
+                texto = tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            dni = int(tabla.item(row, 3).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**8:
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
+            return PopUp("Error", mensaje).exec()
+
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
+
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=1", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = "El curso ingresado no está registrado o no está vinculado correctamente a la categoría alumno. Regístrelo o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+        datosNuevos = [nombre, clase, dni]
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, dni, idClase[0],)
+                )
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
+            else:
+                idd = int(idd)
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase[0], dni, idd,)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
+    
+    def saveGrupos(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla grupos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla grupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        if tabla.item(row, 1).text() == "":
+            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+            return PopUp("Error", mensaje).exec()
+
+        grupo = tabla.item(row, 1).text()
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
+                bdd.cur.execute(
+                    "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Grupos', grupo, None, None)
+            else:
+                idd = int(idd)
+                bdd.cur.execute(
+                    "UPDATE grupos SET descripcion = ? WHERE id = ?",
+                    (grupo, idd,)
+                )
+                datosNuevos = [grupo]
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Grupos', datosViejos[1], None, datosNuevos)
+        except sqlite3.IntegrityError:
+            mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
+            return PopUp("Error", mensaje).exec()
+
+        bdd.con.commit()
+        return True
+    
+    def saveOtroPersonal(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla personal de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla personal, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        iCampos = (1, 2, 3)
+        for iCampo in iCampos:
+            if iCampo ==2:
+                texto = tabla.cellWidget(row, iCampo).text()
+            else:
+                texto = tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            dni = int(tabla.item(row, 3).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**8:
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
+            return PopUp("Error", mensaje).exec()
+
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
+
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion = ? AND id_cat=2", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = 'La clase ingresada no está registrada o no está vinculada a la categoría "Personal". Regístrela o revise los datos ya ingresados.'
+            return PopUp("Error", info).exec()
+
+        datosNuevos = [nombre, clase, dni,]
+        try:
+            idd = tabla.item(row, 0).text()
+            if not datos:
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
+                    (nombre, dni, idClase[0],)
+                )
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
+            else:
+                idd = int(idd)
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, dni=?, id_clase=?
+                    WHERE id = ?""",
+                    (nombre, dni, idClase[0], idd,)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Personal', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
+
+    def saveSubgrupos(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        iCampos = (1, 2)
+        for iCampo in iCampos:
+            if iCampo == 2:
+                texto = tabla.cellWidget(row, iCampo).text()
+            else:
+                texto = tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        subgrupo = tabla.item(row, 1).text()
+        grupo = tabla.cellWidget(row, 2).text()
+
+        idGrupo = bdd.cur.execute(
+            "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
+        ).fetchone()
+        if not idGrupo:
+            info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
+            return PopUp("Error", info).exec()
+
+        datosNuevos = [subgrupo, grupo]
+
+        try:
+            idd = tabla.item(row, 0).text()
+            if not datos or not idd.isnumeric():
+                bdd.cur.execute(
+                    "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
+                    (subgrupo, idGrupo[0])
+                )
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
+            else:
+                idd = int(idd)
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE subgrupos
+                    SET descripcion=?, id_grupo=?
+                    WHERE id = ?""",
+                    (subgrupo, idGrupo[0], idd)
+                )
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
+    
+    def saveUsuarios(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla alumnos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla alumnos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        iCampos = (1, 2, 3, 4, 5)
+
+        for iCampo in iCampos:
+            if iCampo == 2:
+                texto = tabla.cellWidget(row, iCampo).text()
+            else:
+                texto = tabla.item(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            dni = int(tabla.item(row, 3).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingreselos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        if dni > 10**8:
+            mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
+            return PopUp("Error", mensaje).exec()
+
+        nombre = tabla.item(row, 1).text()
+        clase = tabla.cellWidget(row, 2).text()
+        usuario = tabla.item(row, 4).text()
+        contrasena = tabla.item(row, 5).text()
+
+        idClase = bdd.cur.execute(
+            "SELECT id FROM clases WHERE descripcion LIKE ? AND id_cat=3", (
+                clase,)
+        ).fetchone()
+        if not idClase:
+            info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+        # datosNuevos = [nombre, dni, clase, usuario]
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
+                bdd.cur.execute(
+                    "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
+                    (nombre, dni, idClase[0], usuario, contrasena)
+                )
+                # dal.insertarHistorial(
+                   # user, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+            else:
+                idd = int(idd)
+                bdd.cur.execute(
+                    """UPDATE personal
+                    SET nombre_apellido=?, id_clase=?, dni=?
+                    WHERE id = ?""",
+                    (nombre, idClase[0], dni, idd,)
+                )
+                # datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                # dal.insertarHistorial(
+                #     user, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
+    
+    def saveUbis(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        if tabla.item(row, 1).text() == "":
+            # Le pide al usuario que termine de llenar los campos
+            # y corta la función.
+            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+            return PopUp("Error", mensaje).exec()
+
+        ubicacion = tabla.item(row, 1).text()
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd.isnumeric():
+                bdd.cur.execute(
+                    "INSERT INTO ubicaciones VALUES(NULL, ?)",
+                    (ubicacion,)
+                )
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Ubicaciones', ubicacion, None, None)
+            else:
+                idd = int(idd)
+                bdd.cur.execute(
+                    """UPDATE ubicaciones
+                    SET descripcion=?
+                    WHERE id = ?""",
+                    (ubicacion, idd)
+                )
+                datosNuevos = [ubicacion,]
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Ubicaciones', datosViejos[1], None, datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
+
+    def saveClases(self, tabla, row, user, datos: list | None = None):
+        """Este método guarda los cambios hechos en la tabla de la ui
+        en la tabla subgrupos de la base de datos.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Los datos de la tabla subgrupos, que se usarán para
+                obtener el id de la fila en la tabla.
+        """
+        iCampos = (1, 2,)
+        for iCampo in iCampos:
+            if tabla.item(row, iCampo) is not None:
+                texto = tabla.item(row, iCampo).text()
+            else:
+                texto = tabla.cellWidget(row, iCampo).text()
+            if texto == "":
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+        cat = tabla.cellWidget(row, 1).text()
+        idCat = bdd.cur.execute(
+            'SELECT id FROM cats_clase WHERE descripcion LIKE ?', (cat,)).fetchone()
+        if not idCat:
+            mensaje = "La categoría ingresada no está registrada. Ingresela e intente nuevamente."
+            return PopUp("Error", mensaje).exec()
+
+        info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
+        popup = PopUp("Pregunta", info).exec()
+        if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+            clase = tabla.item(row, 2).text()
+            datosNuevos = [clase, cat,]
+            try:
+                idd = tabla.item(row, 0).text()
+                if not idd.isnumeric():
+                    bdd.cur.execute(
+                        "INSERT INTO clases VALUES(NULL, ?, ?)",
+                        (clase, idCat[0],)
+                    )
+                    dal.insertarHistorial(
+                        user, 'Inserción', 'Clases', clase, None, datosNuevos[1:])
+                else:
+                    idd = int(idd)
+                    datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                    if cat != datosViejos[2] and dal.verifElimClases(idd):
+                        mensaje = "La clase que desea cambiar de categoría tiene personal relacionado. Por motivos de seguridad, debe eliminar primero el personal relacionado antes de modificar la categoría de la clase."
+                        return PopUp("Advertencia", mensaje).exec()
+                    bdd.cur.execute(
+                        """UPDATE clases
+                        SET descripcion=?,
+                        id_cat=?
+                        WHERE id = ?""",
+                        (clase, idCat[0], idd)
+                    )
+                    dal.insertarHistorial(
+                        user, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
+            except sqlite3.IntegrityError:
+                info = "La clase ingresada ya está registrada. Ingrese otra o revise los datos ya ingresados."
+                return PopUp("Error", info).exec()
+
+            bdd.con.commit()
+            return True
 
 # Se crea el objeto que será usado por los demás módulos para acceder
 # a las funciones.
