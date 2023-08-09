@@ -10,6 +10,7 @@ from db.bdd import bdd
 from ui.presets.popup import PopUp
 from datetime import datetime
 import sqlite3
+from PyQt6 import QtWidgets
 
 class DAL():
     """Esta clase contiene métodos que gestionan el envío de datos
@@ -389,6 +390,112 @@ class DAL():
                 bdd.cur.execute('DELETE FROM personal WHERE id=?', (egresado[0],))
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
+        
+    def saveStock(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None):
+        """Este método guarda los cambios de la gestión stock en la
+        base de datos.
+
+        Parámetros
+        ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        """
+        iCampos = (1, 2, 7, 8, 9)
+        # Por cada campo que no debe ser nulo...
+        for iCampo in iCampos:
+            # Si el campo está vacio...
+            if tabla.item(row, iCampo) is not None:
+                texto = tabla.item(row, iCampo).text()
+            else:
+                texto = tabla.cellWidget(row, iCampo).text()
+            if texto == "":
+                # Le pide al usuario que termine de llenar los campos
+                # y corta la función.
+                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                return PopUp("Error", mensaje).exec()
+
+        try:
+            cond = int(tabla.item(row, 2).text())
+            rep = int(tabla.item(row, 3).text())
+            baja = int(tabla.item(row, 4).text())
+            prest = int(tabla.item(row, 5).text())
+        except:
+            mensaje = "Los datos ingresados no son válidos. Por favor, ingrese los datos correctamente."
+            return PopUp("Error", mensaje).exec()
+
+        # Se obtiene el texto de todas las celdas.
+        desc = tabla.item(row, 1).text()
+        grupo = tabla.cellWidget(row, 7).text()
+        subgrupo = tabla.cellWidget(row, 8).text()
+        ubi = tabla.cellWidget(row, 9).text()
+
+        # Verificamos que el grupo esté registrado.
+        idGrupo = bdd.cur.execute(
+            "SELECT id FROM grupos WHERE descripcion LIKE ?", (grupo,)
+        ).fetchone()
+        # Si no lo está...
+        if not idGrupo:
+            # Muestra un mensaje de error al usuario y termina la
+            # función.
+            info = "El grupo ingresado no está registrado. Regístrelo e ingrese nuevamente"
+            return PopUp("Error", info).exec()
+
+        # Verificamos que el subgrupo esté registrado y que
+        # coincida con el grupo ingresado.
+        idSubgrupo = bdd.cur.execute(
+            "SELECT id FROM subgrupos WHERE descripcion LIKE ? AND id_grupo = ?",
+            (subgrupo, idGrupo[0],)
+        ).fetchone()
+        if not idSubgrupo:
+            info = "El subgrupo ingresado no está registrado o no pertenece al grupo ingresado. Regístrelo o asegúrese que esté relacionado al grupo e ingrese nuevamente."
+            return PopUp("Error", info).exec()
+
+        idUbi = bdd.cur.execute("SELECT id FROM ubicaciones WHERE descripcion LIKE ?",
+                                (ubi,)).fetchone()
+        if not idUbi:
+            info = "La ubicación ingresada no está registrada. Regístrela e intente nuevamente."
+            return PopUp("Error", info).exec()
+
+        datosNuevos = ["" if cell in (
+            "-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
+        try:
+            idd = tabla.item(row, 0).text()
+            if not idd:
+                bdd.cur.execute(
+                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
+                    (desc, cond, rep, baja, prest,
+                        idSubgrupo[0], idUbi[0],)
+                )
+                dal.insertarHistorial(
+                    user, 'Inserción', 'Stock', desc, None, datosNuevos)
+            else:
+                idd = int(idd)
+                # Guardamos los datos de la fila en
+                bdd.cur.execute(
+                    """UPDATE stock
+                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
+                    cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
+                    WHERE id = ?""",
+                    (desc, cond, rep, baja, prest,
+                        idSubgrupo[0], idUbi[0], idd,)
+                )
+                datosViejos = [["" if cellData in (
+                    "-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
+                dal.insertarHistorial(
+                    user, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
+        except sqlite3.IntegrityError:
+            info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
+            return PopUp("Error", info).exec()
+
+        bdd.con.commit()
+        return True
 
 
 # Se crea el objeto que será usado por los demás módulos para acceder
