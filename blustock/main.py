@@ -150,6 +150,12 @@ class MainWindow(QtWidgets.QMainWindow):
         
         fetchHistorial(self):
             Refresca el historial.
+        
+        fetchDeudas(self):
+            Refresca el listado de deudas.
+        
+        fetchResumen(self):
+            Refresca el resumen de deudas.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -492,6 +498,24 @@ class MainWindow(QtWidgets.QMainWindow):
         ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaTurnos.tableWidget.horizontalHeader(
         ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaDeudas.horizontalHeader(
+        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaDeudas.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaDeudas.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaDeudas.horizontalHeader(
+        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaBaja.horizontalHeader(
+        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaBaja.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaBaja.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaBaja.horizontalHeader(
+        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaResumen.tablaBaja.horizontalHeader(
+        ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
         self.pantallaUbis.lineEdit.editingFinished.connect(
@@ -510,6 +534,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
+        self.pantallaDeudas.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
@@ -2359,9 +2385,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(9)
 
     def fetchDeudas(self):
-        """Este método obtiene los datos de la tabla deudas y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca el listado de deudas."""
         radioHerramienta = self.pantallaDeudas.radioHerramienta
         listaTablas = self.pantallaDeudas.stackedWidget
 
@@ -2415,67 +2439,86 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = dal.obtenerDatos("deudas", barraBusqueda.text(), filtros)
 
         tabla.setRowCount(0)
-        grupo = ''
+        # Este fetch es especial porque trabaja con dos tablas.
+        # La idea es que van ordenadas de forma especial.
+        # Primero, inicializamos los contadores.
+
         contGrupo = 1
         cant = 0
+        # Dependiendo de qué forma de ordenar esté activada, mostramos
+        # una u otra tabla y inicializará la variable coldata de forma
+        # diferente, lo que indica si la columna herramientas va antes
+        # o despues.
         if radioHerramienta.isChecked():
             colData = 0
         else:
             colData = 2
+        grupo = datos[0][colData]
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
+            # Sumamos la cantidad, para que muestre la cantidad total
+            # de deudas de la herramienta/alumno y no una cantidad por
+            # entrada.
             cant += rowData[1]
 
+            # Si el elemento coincide con el grupo de deudas que
+            # iniciamos...
             if rowData[colData] == grupo:
+                #...sumamos 1 al contador de grupo
                 contGrupo += 1
+            # Si no...
             else:
+                #...se rompió el grupo, entonces establecemos el nombre
+                # del grupo de filas y la cantidad total adeudada del
+                # elemento/pérsona
                 # Está bien que printee lo de QTableView, no es un error
-                tabla.setSpan(rowNum+1-contGrupo, 0, contGrupo, 1)
-                tabla.setSpan(rowNum+1-contGrupo, 1, contGrupo, 1)
-                tabla.setItem(rowNum+1-contGrupo, 0,
-                              QtWidgets.QTableWidgetItem(rowData[colData]))
-                tabla.setItem(rowNum+1-contGrupo, 1,
-                              QtWidgets.QTableWidgetItem(str(cant)))
-                contGrupo = 0
+                tabla.setSpan(rowNum-contGrupo, 0, contGrupo, 1)
+                tabla.setSpan(rowNum-contGrupo, 1, contGrupo, 1)
+                # Usamos el rowNum -1 porque, al romper el grupo con un
+                # nuevo dato, queremos usar el dato anterior.
+                itemP=QtWidgets.QTableWidgetItem(datos[rowNum-1][colData])
+                itemP.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                              QtCore.Qt.ItemFlag.ItemIsEnabled)
+                tabla.setItem(rowNum-contGrupo, 0, itemP)
+                itemCant=QtWidgets.QTableWidgetItem()
+                itemCant.setData(cant)
+                itemCant.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                              QtCore.Qt.ItemFlag.ItemIsEnabled)
+                tabla.setItem(rowNum-contGrupo, 1, itemCant)
+                contGrupo = 1
                 cant = 0
+                grupo = datos[rowNum][colData]
 
+            # Buscamos cual dato es mediante el cual no agrupamos y lo
+            # insertamos en la fila de forma normal, sin span.
             if not colData:
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(rowData[2]))
+                itemOtro=QtWidgets.QTableWidgetItem(rowData[2])
             else:
-                tabla.setItem(
-                    rowNum, 2, QtWidgets.QTableWidgetItem(rowData[0]))
+                itemOtro=QtWidgets.QTableWidgetItem(rowData[0])
+            itemOtro.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 2, itemOtro)
 
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[1])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 6, QtWidgets.QTableWidgetItem(str(rowData[5])))
-            tabla.setItem(
-                rowNum, 7, QtWidgets.QTableWidgetItem(str(rowData[6])))
-
-        tabla.setRowHeight(0, 35)
-        tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        for i in range(tabla.rowCount()):
-            for j in range(tabla.columnCount()):
-                item = QtWidgets.QTableWidgetItem(tabla.item(i, j).text())
+            # Añadimos el resto de la fila normal mediante un bucle
+            for i in range(3, 8):
+                # Si i es 3, necesitamos el dato de la cantidad, que es
+                # el 1.
+                if i == 3:
+                    item=QtWidgets.QTableWidgetItem(str(rowData[1]))
+                # Si no, usamos el dato anterior a i
+                else:
+                    item=QtWidgets.QTableWidgetItem(str(rowData[i-1]))
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
-                tabla.setItem(i, j, item)
+                tabla.setItem(rowNum, i, item)
+        tabla.resizeColumnsToContents()
 
         listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 
         self.stackedWidget.setCurrentIndex(14)
 
     def fetchResumen(self):
-        """Este método obtiene datos para insertar en la tabla de la
-        interfaz de usuario.
-        """
+        """Este método refresca el resumen de deudas."""
         hastaFecha = self.pantallaResumen.hastaFecha
         tablaDeudas = self.pantallaResumen.tablaDeudas
         tablaBaja = self.pantallaResumen.tablaBaja
@@ -2490,14 +2533,18 @@ class MainWindow(QtWidgets.QMainWindow):
         hastaFecha.setMaximumDate(QtCore.QDate.fromString(
             (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
+        # Este fetch tiene dos tablas, asi que hacemos dos veces
         rawData = dal.obtenerDatos("resumen_deudas")
         datos = []
+        # Filtramos por fecha
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[7][:10], 'yyyy/MM/dd')
             if fecha == hastaFecha.date():
                 datos.append(rawRow)
 
+        # Si se encontraron datos de la primera tabla
         if datos:
+            # Se muestra la tabla
             labelDeudas.setText('Han quedado herramientas adeudadas:')
             tablaDeudas.setRowCount(0)
 
@@ -2505,26 +2552,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 tablaDeudas.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
                     item = QtWidgets.QTableWidgetItem(str(cellData))
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
-                    tablaDeudas.setItem(
-                        rowNum, cellNum, QtWidgets.QTableWidgetItem(str(cellData)))
-
-            tablaDeudas.setRowHeight(0, 35)
+                    tablaDeudas.setItem(rowNum, cellNum, item)
+                tablaDeudas.setRowHeight(rowNum, 35)
             tablaDeudas.resizeColumnsToContents()
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                5, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.show()
+        # Si no
         else:
+            # no se muestra.
             labelDeudas.setText('No han quedado herramientas adeudadas.')
             tablaDeudas.hide()
 
+        # Hacemos lo mismo con la segunda tabla
         rawData = dal.obtenerDatos("resumen_baja")
         datos = []
         for rawRow in rawData:
@@ -2537,23 +2578,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 tablaBaja.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
                     item = QtWidgets.QTableWidgetItem(str(cellData))
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
-                    tablaBaja.setItem(
-                        rowNum, cellNum, QtWidgets.QTableWidgetItem(str(cellData)))
+                    tablaBaja.setItem(rowNum, cellNum, item)
 
             tablaBaja.setRowHeight(0, 35)
             tablaBaja.resizeColumnsToContents()
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-            tablaDeudas.horizontalHeader().setSectionResizeMode(
-                6, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
             tablaBaja.show()
         else:
             labelBaja.setText(
@@ -2564,14 +2596,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(15)
 
 
+# Creamos la app
 app = QtWidgets.QApplication(sys.argv)
+# Le cargamos la stylesheet
 app.setStyleSheet(open(os.path.join(os.path.abspath(
     os.getcwd()), f'ui{os.sep}styles.qss'), 'r').read())
-for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()), f'ui{os.sep}rsc{os.sep}fonts')):
-    QtGui.QFontDatabase.addApplicationFont(
-        os.path.join(os.path.abspath(os.getcwd()),
-                     f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}')
-    )
 
+# Cargamos las fuentes que usamos en la app
+core.cargarFuentes()
+
+# Hacemos el objeto de la clase de la ventana principal
 window = MainWindow()
+# Ejecutamos la app
 app.exec()

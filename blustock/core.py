@@ -240,3 +240,9 @@ def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.Function
         tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
+def cargarFuentes():
+    for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()),
+                                          f'ui{os.sep}rsc{os.sep}fonts')):
+        QtGui.QFontDatabase.addApplicationFont(
+            os.path.join(os.path.abspath(os.getcwd()),
+                        f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}'))
