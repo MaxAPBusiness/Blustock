@@ -1935,6 +1935,7 @@ class MainWindow(QtWidgets.QMainWindow):
         barra.setValue(posicion)
 
     def fetchClases(self):
+        """Este método """
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
 
