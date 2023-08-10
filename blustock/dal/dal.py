@@ -607,7 +607,7 @@ class DAL():
             return PopUp("Error", info).exec()
 
         datosNuevos = ["" if cell in (
-            "-", None) else cell for cell in [desc, cond, rep, baja, prest, grupo, subgrupo, ubi]]
+            "-", None) else cell for cell in [cond, rep, baja, prest, grupo, subgrupo, ubi]]
         try:
             idd = tabla.item(row, 0).text()
             if not idd:
