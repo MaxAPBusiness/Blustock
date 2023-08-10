@@ -4,6 +4,8 @@ entre la base de datos y la IU.
 Clases
 ------
     DAL():
+        Contiene métodos que gestionan el envío de datos entre la base
+        de datos y la IU.
 """
 import os
 from db.bdd import bdd
@@ -49,12 +51,17 @@ class DAL():
         # pedida...
         filtro = []
         
+        # Si se pasaron filtros extra por parámetro...
         if filtrosExtra:
+            # Se obtiene la cantidad
             cantFiltrosExtra=len(filtrosExtra)
-            # Insertamos los filtros extra en la lista de filtros
+            # Por cada filtro extra...
             for filtroExtra in filtrosExtra:
+                # Si no es None...
                 if filtroExtra:
+                    # Lo agregamos al filtro final
                     filtro.append(filtroExtra)
+                # Si no...
                 else:
                     filtro.append('%%')
         else:

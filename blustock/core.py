@@ -5,6 +5,7 @@ Funciones
     mostrarContrasena(boton, entry: QtWidgets.QLineEdit):
         Muestra o esconde lo ingresado en el campo de contraseña
         vinculado dependiendo del estado de activación del botón.
+
     insertarFilas(tabla: QtWidgets.QTableWidget,
                   funcGuardar: types.FunctionType,
                   funcEliminar: types.FunctionType,
@@ -12,11 +13,15 @@ Funciones
                   sugerencias: tuple | list | None = None,
                   funcEspecial: types.FunctionType | None = None):
         Inserta una nueva fila en una tabla de una gestión.
+
     generarBotones(funcGuardar: types.FunctionType,
                    funcEliminar: types.FunctionType,
                    tabla: QtWidgets.QTableWidget, numFila: int):
         Genera botones para guardar cambios y eliminar filas y los
         inserta en una fila de una tabla de la UI.
+    
+    cargarFuentes():
+        Carga fuentes a la aplicación.
 """
 import os
 import types
@@ -80,25 +85,31 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     ----------
         tabla: QtWidgets.QTableWidget
             La tabla a la que se le van a insertar los elementos.
+
         funcGuardar: types.FunctionType
             La función guardar que el botón guardar de la fila
             ejecutará.
+
         funcEliminar: types.FunctionType
             La función eliminar que el botón eliminar de la fila
             ejecutará.
+
         funcTabla: types.FunctionType | None = None
             La función que se conectará con la tabla, que se desconecta
             para evitar bugs.
+
         campos: tuple
             Una tupla que contenga cada campo de la tabla y su tipo.
             Para ver una lista de qué significa cada tipo de campo, ver
             el readme.
+
         sugerencias: tuple | list | None = None
             Una lista que debe contener una lista de sugerencia, que
             contenga todas las sugerencias, por cada campo que lleve un
             cuadro de sugerencia. Si se pasa None, se entenderá que la
             tabla no tiene cuadros de sugerencia.
             Default: None.
+
         funcEspecial: types.FunctionType | None = None
             Una función que se ejecutará al finalizar la edición de un
             campo determinado. Si se pasa None, se entenderá que la
