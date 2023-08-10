@@ -86,6 +86,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 datos: list | None = None):
             Guarda todos los cambios hechos en una tabla de una gestión
         
+        deleteStock(self, datos: list | None = None) -> None:
+            Elimina una fila de la tabla de la gestión stock.
+        
         printStock(self):
             Genera un spreadsheet a partir de la tabla de la pantalla
             stock.
@@ -95,8 +98,40 @@ class MainWindow(QtWidgets.QMainWindow):
             en la base de datos de la gestión alumnos.
         
         fetchAlumnos(self):
-            Obtiene los datos de la tabla personal y los inserta en la
-            tabla de la interfaz de usuario.
+            Refresca la gestión de alumnos.
+        
+        deleteAlumnos(self, datos: list | None = None) -> None:
+            Elimina una fila de la tabla de la gestión alumnos.
+        
+        fetchMovs(self):
+            Refresca el listado de movimientos.
+        
+        fetchGrupos(self):
+            Refresca la gestión de grupos.
+        
+        deleteGrupos(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión de grupos.
+        
+        fetchOtroPersonal(self):
+            Refresca la gestión del personal.
+        
+        deleteOtroPersonal(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión del personal.
+        
+        fetchSubgrupos(self):
+            Refresca la gestión subgrupos.
+        
+        deleteSubgrupos(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión subgrupos.
+        
+        fetchTurnos(self):
+            Refresca el listado de turnos.
+        
+        fetchUsuarios(self):
+            Refresca la gestión usuarios.
+        
+        deleteUsuarios(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión usuarios.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -226,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
         self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
         self.opcionTurnos.triggered.connect(self.fetchTurnos)
-        self.opcionMovimientos.triggered.connect(self.fetchMovimientos)
+        self.opcionMovimientos.triggered.connect(self.fetchMovs)
         self.opcionUsuarios.triggered.connect(self.fetchUsuarios)
         self.GestionUbicaciones.triggered.connect(self.fetchUbis)
         self.GestionClases.triggered.connect(self.fetchClases)
@@ -317,6 +352,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchSubgrupos, dal.obtenerDatos(
                     "subgrupos", self.pantallaSubgrupos.lineEdit.text())))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
+        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget,
@@ -329,6 +368,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchGrupos, dal.obtenerDatos(
                     "grupos", self.pantallaGrupos.lineEdit.text())))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
+        self.pantallaGrupos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
@@ -400,18 +441,29 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchAlumnos)
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
-        self.pantallaMovs.lineEdit.editingFinished.connect(
-            self.fetchMovimientos)
-        self.pantallaMovs.nId.valueChanged.connect(
-            self.fetchMovimientos)
-        self.pantallaMovs.nTurno.valueChanged.connect(
-            self.fetchMovimientos)
+        self.pantallaMovs.lineEdit.editingFinished.connect(self.fetchMovs)
+        self.pantallaMovs.nId.valueChanged.connect(self.fetchMovs)
+        self.pantallaMovs.nTurno.valueChanged.connect(self.fetchMovs)
+        self.pantallaMovs.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
         self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaTurnos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
         self.pantallaUbis.lineEdit.editingFinished.connect(
@@ -960,7 +1012,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Creamos el campo de sugerencias del campo grupos.
             sugerencias = [sugerencia[0] for sugerencia in
-                           bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+                           bdd.cur.execute('SELECT descripcion FROM grupos'
+                           ).fetchall()]
             # Creamos el campo con sugerencia.
             paramGrupos = ParamEdit(sugerencias, rowData[7])
             # Cuando termina de editarse, hacemos que actualice el
@@ -977,7 +1030,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 8, subgrupos)
             sugerencias = [sugerencia[0] for sugerencia in
-                           bdd.cur.execute('SELECT descripcion FROM ubicaciones').fetchall()]
+                           bdd.cur.execute(
+                           'SELECT descripcion FROM ubicaciones').fetchall()]
             ubicaciones = ParamEdit(sugerencias, rowData[9])
             ubicaciones.textChanged.connect(
                 lambda: self.habilitarSaves(None, None, tabla))
@@ -1092,29 +1146,29 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.actualizarSug()
 
     def deleteStock(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
+        """Este método elimina una fila de la tabla de la gestión
+        stock.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
-        # Obtenemos la tabla a la que vamos a realizarle la eliminación
+        # Obtenemos la tabla stock
         tabla = self.pantallaStock.tableWidget
-        # Obtenemos la fila que se va a eliminar.
+        # Obtenemos la fila en la que se presionó el botón eliminar
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
         idd = tabla.item(row, 0).text()
-        # Si no se pasó el argumento idd, significa que la fila no está
-        # relacionada con la base de datos. Eso significa que la fila
-        # se insertó en la tabla de la UI, pero aún no se guardaron los
-        # cambios en la base de datos. En ese caso...
+        # Si el id de la tabla está en blanco, significa que la tabla
+        # fue recientemente agregada, entonces...
         if not idd:
-            # ...solo debemos sacarla de la UI.
+            # ...no esta registrada en la base de datos, solo debemos
+            # sacarla de la UI. Acá cortamos la función.
             return tabla.removeRow(row)
+        # Transformamos el id en número.
         idd = int(idd)
         # Si está relacionada con la base de datos, antes de eliminar,
         # tenemos que verificar que la PK de la fila no
@@ -1142,10 +1196,11 @@ class MainWindow(QtWidgets.QMainWindow):
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
 
             # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(
-                self.usuario, "Eliminación", "Stock", datosEliminados[1], datosEliminados[1:])
+            dal.insertarHistorial(self.usuario, "Eliminación", "Stock",
+                                  datosEliminados[1], datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
+            # Refrescamos.
             posicion = barra.value()
             self.fetchStock()
             barra.setValue(posicion)
@@ -1227,7 +1282,8 @@ class MainWindow(QtWidgets.QMainWindow):
             #...advierte al usuario.
             info = 'Esta acción no se puede deshacer. Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y los cursos en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión alumnos sean correctos, de lo contrario se pueden originar alumnos duplicados. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, curso y dni.'
             # Si cerro sin responder, corta la función.
-            if PopUp('Advertencia', info).exec() != QtWidgets.QMessageBox.StandardButton.Ok:
+            if (PopUp('Advertencia', info).exec() !=
+                QtWidgets.QMessageBox.StandardButton.Ok):
                 return
             # Como se van a reemplazar los cursos si o si en esta
             # opción, inicializamos la variable como true.
@@ -1290,8 +1346,7 @@ class MainWindow(QtWidgets.QMainWindow):
         PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
     def fetchAlumnos(self):
-        """Este método refresca la gestión de alumnos
-        """
+        """Este método refresca la gestión de alumnos."""
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
         try:
@@ -1327,9 +1382,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.saveOne(
                     tabla, dal.saveAlumnos, self.fetchAlumnos, datos),
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
-
-            self.pantallaAlumnos.tableWidget.setRowHeight(0, 35)
-
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.setSortingEnabled(True)
@@ -1338,15 +1390,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(1)
 
     def deleteAlumnos(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
+        """Este método elimina una fila de la tabla de la gestión
+        alumnos.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
         tabla = self.pantallaAlumnos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
@@ -1369,18 +1421,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(
-                self.usuario, "Eliminación", "Alumnos", datosEliminados[1], datosEliminados[2:])
+            dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos",
+                                  datosEliminados[1], datosEliminados[2:])
 
             dal.eliminarDatos('personal', idd)
             posicion = barra.value()
             self.fetchAlumnos()
             barra.setValue(posicion)
 
-    def fetchMovimientos(self):
-        """Este método obtiene los datos de la tabla movimientos y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+    def fetchMovs(self):
+        """Este método refresca el listado de movimientos."""
         tabla = self.pantallaMovs.tableWidget
         barraBusqueda = self.pantallaMovs.lineEdit
         nId = self.pantallaMovs.nId
@@ -1405,19 +1455,18 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        desdeFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
+                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                "yyyy/MM/dd HH:mm:ss"))
+        hastaFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime(
+                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
 
         elemSeleccionado = listaElem.currentText()
         elems = bdd.cur.execute("""SELECT DISTINCT s.descripcion
                                 FROM movimientos m
                                 JOIN stock s
                                 ON s.id=m.id_elem""").fetchall()
-
         listaElem.clear()
         listaElem.addItem("Todos")
         for elem in elems:
@@ -1496,25 +1545,19 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
-
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        listaElem.currentIndexChanged.connect(self.fetchMovimientos)
-        listaPersona.currentIndexChanged.connect(self.fetchMovimientos)
-        listaPanolero.currentIndexChanged.connect(self.fetchMovimientos)
-        desdeFecha.dateTimeChanged.connect(self.fetchMovimientos)
-        hastaFecha.dateTimeChanged.connect(self.fetchMovimientos)
+        listaElem.currentIndexChanged.connect(self.fetchMovs)
+        listaPersona.currentIndexChanged.connect(self.fetchMovs)
+        listaPanolero.currentIndexChanged.connect(self.fetchMovs)
+        desdeFecha.dateTimeChanged.connect(self.fetchMovs)
+        hastaFecha.dateTimeChanged.connect(self.fetchMovs)
 
         self.stackedWidget.setCurrentIndex(4)
 
     def fetchGrupos(self):
-        """Este método obtiene los datos de la tabla grupos y los
-        inserta en la tabla de la interfaz de usuario.
-        """
-
+        """Este método refresca la gestión de grupos."""
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
         try:
@@ -1529,40 +1572,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
 
             core.generarBotones(
                 lambda: self.saveOne(
                     tabla, dal.saveGrupos, self.fetchGrupos, datos),
                 lambda: self.deleteGrupos(datos), tabla, rowNum)
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-        tabla.setRowHeight(0, 35)
+                    
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(2)
 
-    def deleteGrupos(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
+    def deleteGrupos(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión de
+        grupos.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
         tabla = self.pantallaGrupos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
@@ -1583,36 +1621,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Grupos', datosEliminados[1], None)
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos',
+                                  datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
             posicion = barra.value()
             self.fetchGrupos()
             barra.setValue(posicion)
 
     def fetchOtroPersonal(self):
-        """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca la gestión del personal."""
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
         try:
             tabla.disconnect()
         except:
             pass
-
         tabla.setSortingEnabled(False)
+        tabla.setRowCount(0)
 
         datos = dal.obtenerDatos("otro_personal", barraBusqueda.text())
 
-        tabla.setRowCount(0)
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
             sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Personal';'''
@@ -1623,13 +1660,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item3 = QtWidgets.QTableWidgetItem(str(rowData[3]))
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 3, item3)
 
             core.generarBotones(
                 lambda: self.saveOne(
@@ -1637,24 +1670,23 @@ class MainWindow(QtWidgets.QMainWindow):
                     datos),
                 lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(5)
 
-    def deleteOtroPersonal(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos 
+    def deleteOtroPersonal(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión del
+        personal.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
         tabla = self.pantallaOtroPersonal.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
@@ -1675,17 +1707,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos = [fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Personal', datosViejos[1], datosViejos[2:])
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal',
+                                  datosViejos[1], datosViejos[2:])
             dal.eliminarDatos('personal', idd)
             posicion = barra.value()
             self.fetchOtroPersonal()
             barra.setValue(posicion)
 
     def fetchSubgrupos(self):
-        """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca la gestión subgrupos."""
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
         try:
@@ -1698,12 +1728,15 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.setRowCount(0)
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
             sugerencias =[i[0] for i in
-                         bdd.cur.execute('SELECT descripcion FROM grupos').fetchall()]
+                         bdd.cur.execute('SELECT descripcion FROM grupos'
+                         ).fetchall()]
             grupos = ParamEdit(sugerencias, rowData[2])
             grupos.textChanged.connect(
                 lambda: self.habilitarSaves(None, None, tabla))
@@ -1714,34 +1747,23 @@ class MainWindow(QtWidgets.QMainWindow):
                     tabla, dal.saveSubgrupos, self.fetchSubgrupos, datos),
                 lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(6)
 
-    def deleteSubgrupos(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
+    def deleteSubgrupos(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión
+        subgrupos.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
         tabla = self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
@@ -1761,17 +1783,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos = [fila for fila in datos if fila[0] == idd][0]
-            dal.insertarHistorial(
-                self.usuario, 'Eliminación', 'Subgrupos', datosViejos[1], datosViejos[2:])
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos',
+                                  datosViejos[1], datosViejos[2:])
             dal.eliminarDatos('subgrupos', idd)
             posicion = barra.value()
             self.fetchSubgrupos()
             barra.setValue(posicion)
 
     def fetchTurnos(self):
-        """Este método obtiene los datos de la tabla turnos y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca la gestión de turnos."""
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
         nId = self.pantallaTurnos.nId
@@ -1814,28 +1834,13 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
-
-        # Método setRowHeight: cambia la altura de una fila.
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(7)
 
     def fetchUsuarios(self):
-        """Este método obtiene los datos de la tabla stock y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca la gestión usuarios."""
         tabla = self.pantallaUsuarios.tableWidget
         barraBusqueda = self.pantallaUsuarios.lineEdit
 
@@ -1848,13 +1853,16 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = dal.obtenerDatos("usuarios", barraBusqueda.text())
 
         tabla.setRowCount(0)
+
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
             sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Usuario';'''
@@ -1865,18 +1873,23 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(
                 rowNum, 2, clases)
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
-            tabla.setItem(
-                rowNum, 4, QtWidgets.QTableWidgetItem(str(rowData[4])))
-            tabla.setItem(
-                rowNum, 5, QtWidgets.QTableWidgetItem(str(rowData[5])))
+            item3 = QtWidgets.QTableWidgetItem(str(rowData[3]))
+            # Los centramos.
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 3, item3)
+            item4 = QtWidgets.QTableWidgetItem(str(rowData[4]))
+            item4.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 4, item4)
+            item5 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item5.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 5, item5)
+
             core.generarBotones(
                 lambda: self.saveOne(
                     tabla, dal.saveUsuarios, self.fetchUsuarios, datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
@@ -1885,16 +1898,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.stackedWidget.setCurrentIndex(8)
 
-    def deleteUsuarios(self, datos: list | None = None) -> None:
-        """Este método elimina una fila de una tabla de la base de
-        datos
+    def deleteUsuarios(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión
+        usuarios.
 
         Parámetros
         ----------
-        idd: int | None = None
-            El número que relaciona la fila de la tabla de la UI con la
-            fila de la tabla de la base de datos.
-            Default: None
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
         """
         tabla = self.pantallaUsuarios.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
@@ -1914,8 +1927,7 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            # dal.insertarHistorial(self.usuario, "eliminación", "stock", row, datosEliminados)
-            # # Eliminamos los datos
+            dal.insertarHistorial(self.usuario, "eliminación", "usuarios", row, datos)
             dal.eliminarDatos('personal', idd)
 
         posicion = barra.value()
