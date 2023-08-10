@@ -1,3 +1,6 @@
+/*Obtenemos la herramienta, cantidad adeudada, persona que adeuda,
+fecha y hora del registro de la deuda, id de movimiento, id de turno,
+nombre y curso del pañolero a cargo del turno*/
 SELECT h.descripcion, d.cant, pe.nombre_apellido || ' ' || cpe.descripcion,
 m.fecha_hora, m.id, m.id_turno, pa.nombre_apellido || ' ' || cpa.descripcion
 FROM deudas d

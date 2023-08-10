@@ -24,6 +24,87 @@ class DAL():
         filtrosExtra: list | tuple | dict | None = None) -> list:
             Obtiene datos de la base de datos y los devuelve en forma
             de lista.
+        
+        insertarHistorial(self, usuario: int, tipo: str, gestion: str,
+                          fila: int,
+                          listaDatosViejos: list | None = None,
+                          listaDatosNuevos: list | None = None):
+            Inserta información sobre cambios realizados a la base de
+            datos en la tabla historial.
+        
+        verifElimStock(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión stock tiene
+            relaciones en la base de datos.
+        
+        verifElimStock(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión stock tiene
+            relaciones en la base de datos.
+        
+        verifElimSubgrupos(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión subgrupos
+            tiene relaciones en la base de datos.
+        
+        verifElimGrupos(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión grupos tiene
+            relaciones en la base de datos.
+        
+        verifElimAlumnos(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión alumnos
+            tiene relaciones en la base de datos.
+        
+        verifElimOtroPersonal(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión otro
+            personal tiene relaciones en la base de datos.
+        
+        verifElimClases(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión clases tiene
+            relaciones en la base de datos.
+        
+        verifElimUsuarios(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión usuarios
+            tiene relaciones en la base de datos.
+        
+        verifElimUbi(self, idd: int) -> bool:
+            Verifica si una fila de la tabla de la gestión ubicaciones
+            tiene relaciones en la base de datos.
+        
+        eliminarDatos(self, tabla: str, idd: str):
+            Elimina datos de una tabla.
+        
+        cargarPlanilla(self, datos: list, actualizarCursos: bool):
+            Carga los datos de una lista en la base de datos de alumnos
+        
+        saveStock(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión stock.
+        
+        saveSubgrupos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión subgrupos.
+        
+        saveGrupos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión grupos.
+        
+        saveAlumnos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión alumnos.
+        
+        saveOtroPersonal(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión otropersonal.
+        
+        saveClases(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión clases.
+        
+        saveUsuario(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión usuario.
+        
+        saveUbi(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+            Guarda los cambios de la gestión ubicaciones.
     """
     def obtenerDatos(self, tabla: str, busqueda: str | None = None, 
         filtrosExtra: list | tuple | None = None) -> list:
@@ -61,8 +142,9 @@ class DAL():
                 if filtroExtra:
                     # Lo agregamos al filtro final
                     filtro.append(filtroExtra)
-                # Si no...
+                # Si es None...
                 else:
+                    #...se pasa el filtro pero vacío.
                     filtro.append('%%')
         else:
             cantFiltrosExtra=0
@@ -88,9 +170,11 @@ class DAL():
         # contando los "?" y restando la cantidad de filtros extra.
         for i in range(query.count('?')-cantFiltrosExtra):
             filtro.append(f"%{busqueda}%")
-                # Consulta los datos y los devuelve.
+        # Consultamos los datos
         datos = bdd.cur.execute(query, filtro).fetchall()
-        return [["-" if cellData == None else cellData for cellData in rowData] for rowData in datos]
+        # Los datos none los reemplazamos con un guión "-".
+        return [["-" if cellData == None else cellData
+                 for cellData in rowData] for rowData in datos]
 
     def insertarHistorial(self, usuario: int, tipo: str, gestion: str,
                           fila: int, listaDatosViejos: list | None = None,
@@ -102,30 +186,44 @@ class DAL():
         ----------
             usuario: int
                 El id del usuario que realizó el cambio.
+
             tipo: str
                 El tipo de cambio.
-            tabla: str
-                La tabla donde se realizó el cambio.
+
+            gestion: str
+                La gestión donde se realizó el cambio.
+
             fila: int
                 El número de la fila que se modificó.
-            datosViejos: str | None = None
+
+            listaDatosViejos: str | None = None
                 Los datos que fueron eliminados o reemplazados.
                 Default: None
-            datosNuevos: str | None = None
+
+            listaDatosNuevos: str | None = None
                 Los datos que se añadieron o reemplazaron otros datos.
                 Default: None
         """
+        # Obtenemos el tipo de cambio y la gestión.
         idTipo=bdd.cur.execute('SELECT id FROM tipos_cambio WHERE descripcion=?', (tipo,)).fetchone()[0]
         idGestion=bdd.cur.execute('SELECT id FROM gestiones WHERE descripcion=?', (gestion,)).fetchone()[0]
+        # Si no están, entonces cometimos un error de programación.
         if not idTipo or not idGestion:
             info="ERROR DE PROGRAMACION: SE PASARON DATOS EQUIVOCADOS EN LA LLAMADA AL HISTORIAL"
             return PopUp('Error', info).exec()
+        # Si se pasó la lista de datos viejos...
         if listaDatosViejos:
+            # Lo guardamos como texto como si fuera csv
+            # Inicializamos la variable
             datosViejos=''
+            # Por cada dato en la lista de datos viejos
             for datoViejo in listaDatosViejos:
+                # Lo añadimos al texto con el separador ";"
                 datosViejos += f'{datoViejo};'
+        # Si no, el texto de datos viejos lo dejamos como None
         else:
             datosViejos=None
+        # Hacemos lo mismo con datos nuevos
         if listaDatosNuevos:
             datosNuevos=''
             for datoNuevo in listaDatosNuevos:
@@ -133,14 +231,18 @@ class DAL():
         else:
             datosNuevos=None
         
-        idUsuario=bdd.cur.execute('SELECT id FROM personal WHERE dni = ?', (usuario,)).fetchone()[0]
-        datos=(idUsuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"), idTipo, idGestion, fila, datosViejos, datosNuevos,)
+        # Obtenemos el usuario
+        idUsuario=bdd.cur.execute('SELECT id FROM personal WHERE dni = ?',
+                                  (usuario,)).fetchone()[0]
+        # Obtenemos los datos a insertar en el historial
+        datos=(idUsuario, datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+               idTipo, idGestion, fila, datosViejos, datosNuevos,)
         bdd.cur.execute('INSERT INTO historial VALUES(?,?,?,?,?,?,?)', datos)
         bdd.con.commit()
     
     def verifElimStock(self, idd: int) -> bool:
-        """Esta función verifica si la PK de una fila de la tabla stock
-        está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        stock tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -161,8 +263,8 @@ class DAL():
             return False
     
     def verifElimSubgrupos(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila de la tabla
-        subgrupos está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        subgrupos tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -181,8 +283,8 @@ class DAL():
             return False
     
     def verifElimGrupos(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila de la tabla grupos
-        está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        grupos tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -201,8 +303,8 @@ class DAL():
             return False
     
     def verifElimClases(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila de la tabla
-        clases está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        clases tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -221,8 +323,8 @@ class DAL():
             return False
     
     def verifElimUbi(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila de la tabla
-        ubicaciones está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        ubicaciones tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -243,8 +345,8 @@ class DAL():
             return False
     
     def verifElimAlumnos(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila (que represente un
-        alumno) de la tabla personal está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        alumnos tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -265,9 +367,8 @@ class DAL():
             return False
     
     def verifElimUsuario(self, idd: int) -> bool:
-        """Este método verifica si la PK de una fila (que represente un
-        usuario) de la tabla personal está relacionada con otras
-        tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        usuarios tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -295,9 +396,8 @@ class DAL():
             return False
     
     def verifElimOtroPersonal(self, idd: int) -> bool:
-        """Esta función verifica si la PK de una fila (que represente 
-        personal que no sea alumno ni usuario) de la tabla personal
-        está relacionada con otras tablas.
+        """Este método verifica si una fila de la tabla de la gestión
+        del personal tiene relaciones en la base de datos.
         
         Parámetros
         ----------
@@ -316,7 +416,7 @@ class DAL():
             return False
     
     def eliminarDatos(self, tabla: str, idd: str):
-        """Esta función elimina datos de una tabla.
+        """Este método elimina datos de una tabla.
         
         Parámetros
         ----------
@@ -329,34 +429,58 @@ class DAL():
         bdd.con.commit()
     
     def cargarPlanilla(self, datos: list, actualizarCursos: bool):
+        """Este método carga los datos de una lista en la base de datos
+        de alumnos"""
+        # Por el numero de fila y el contenido de esta en la lista...
         for n, fila in enumerate(datos):
+            # Si los cursos no se reemplazan, se entiende que los
+            # cursos usados son en el formato de tutorvip.
             if not actualizarCursos:
                 datos[n][1]=f'{fila[1][0]}{fila[1][-1]}'
                 
+            # Si se pasó un dni que es solo número...
             if isinstance(fila[2], int):
+                # Si el largo del dni supera el máximo, corta.
                 if fila[2] > 10**8:
                     info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
                     return PopUp('Error', info).exec()
-                continue
+                # Si no, continua.
+                else:
+                    continue
+            # Si se pasó un dni que es texto...
             elif isinstance(fila[2], str):
+                # ... se quitan los puntos del dni.
                 dni = ''.join(fila[2].split("."))
+                # Si, al quitar los puntos, queda un número...
                 if dni.isnumeric():
+                    # transformamos el dni a int
                     dni = int(dni)
+                    # checkeamos si supera la longitud que queremos
                     if dni > 10**8:
                         info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
                         return PopUp('Error', info).exec()
+                    # Reemplazamos el dni viejo con el dni hecho número
                     datos[n][2] = dni
                     continue
+            # Si el dni no era entero ni numero, no es válido.
             info = 'Un dni proporcionado en la planilla no es válido. Revise los dni de la plantilla e intente nuevamente.'
             return PopUp('Error', info).exec()
                 
+        # Obtenemos todos los cursos distintos nuevos
         cursos=set([fila[1] for fila in datos])
+        # Intentamos agregarlos a la base de datos.
         for curso in cursos:
             try:
                 bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (curso,))
+            # Si ya estaban en la base de datos, ignoramos el error y no lo
+            # agregamos
             except sqlite3.IntegrityError:
                 pass
         
+        # Creamos una tabla e ingresamos todos los alumnos nuevos acá
+        # Esto podría hacerse super facil con un merge, pero sqlite no
+        # lo soporta. Por esto recomiendo cambiar de motor de base de
+        # datos.
         bdd.cur.execute('''CREATE TABLE alumnos_nuevos(
                            nombre_apellido VARCHAR(100) NOT NULL,
                            id_curso INTEGER NOT NULL,
@@ -366,9 +490,15 @@ class DAL():
             try:
                 bdd.cur.execute('INSERT INTO alumnos_nuevos VALUES(?, ?, ?)',
                                 (fila[0], idCurso, fila[2],))
+            # Si el curso está repetido, ignoramos ingresarlo.
             except sqlite3.IntegrityError:
                 pass
-                
+
+        # Acá hacemos un 'merge' hecho código:
+        # Verificamos la tabla vieja con la nueva, si el alumno esta en
+        # la nueva, se reemplazan los datos viejos con los nuevos, si
+        # no, se inserta el alumno nuevo. Si el alumno no está en la
+        # lista nueva, se deja como 'egresado' del sistema.     
         with open(f"dal{os.sep}queries{os.sep}merge_alumnos.sql", 'r') as queryText:
             sql=queryText.read()
         mergeSelect = bdd.cur.execute(sql).fetchall()
@@ -392,16 +522,18 @@ class DAL():
                         ) WHERE dni = ?''', (mergeRow[2], mergeRow[3], mergeRow[1],))
         egresados=bdd.cur.execute('''SELECT * FROM personal WHERE id_clase IN (
                 SELECT id FROM clases WHERE descripcion='Egresado');''').fetchall()
+        # Los alumnos egresados sin relaciones en el sistema son
+        # eliminados para no ocupar espacio innecesario.
         for egresado in egresados:
             if not self.verifElimAlumnos(egresado[0]):
                 bdd.cur.execute('DELETE FROM personal WHERE id=?', (egresado[0],))
+        # Eliminamos la tabla que hicimos para el ingreso.
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
         
     def saveStock(self, tabla: QtWidgets.QTableWidget, row: int,
-                  user: int, datos: list | None = None):
-        """Este método guarda los cambios de la gestión stock en la
-        base de datos.
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión stock.
 
         Parámetros
         ----------
@@ -413,6 +545,10 @@ class DAL():
                 Datos por defecto que se usarán para guardar registro
                 en el historial.
                 Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 7, 8, 9)
         # Por cada campo que no debe ser nulo...
@@ -480,7 +616,7 @@ class DAL():
                     (desc, cond, rep, baja, prest,
                         idSubgrupo[0], idUbi[0],)
                 )
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Stock', desc, None, datosNuevos)
             else:
                 idd = int(idd)
@@ -495,7 +631,7 @@ class DAL():
                 )
                 datosViejos = [["" if cellData in (
                     "-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
@@ -504,15 +640,24 @@ class DAL():
         bdd.con.commit()
         return True
     
-    def saveAlumnos(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla alumnos de la base de datos.
+    def saveAlumnos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión alumnos.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla alumnos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 3)
 
@@ -553,7 +698,7 @@ class DAL():
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                     (nombre, dni, idClase[0],)
                 )
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
             else:
                 idd = int(idd)
@@ -564,7 +709,7 @@ class DAL():
                     (nombre, idClase[0], dni, idd,)
                 )
                 datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
@@ -573,15 +718,24 @@ class DAL():
         bdd.con.commit()
         return True
     
-    def saveGrupos(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla grupos de la base de datos.
+    def saveGrupos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión grupos.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla grupos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         if tabla.item(row, 1).text() == "":
             mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
@@ -593,7 +747,7 @@ class DAL():
             if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Grupos', grupo, None, None)
             else:
                 idd = int(idd)
@@ -603,7 +757,7 @@ class DAL():
                 )
                 datosNuevos = [grupo]
                 datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Grupos', datosViejos[1], None, datosNuevos)
         except sqlite3.IntegrityError:
             mensaje = "El grupo que desea ingresar ya está ingresado. Ingrese otro grupo o revise los datos ya ingresados."
@@ -612,15 +766,24 @@ class DAL():
         bdd.con.commit()
         return True
     
-    def saveOtroPersonal(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla personal de la base de datos.
+    def saveOtroPersonal(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión del personal.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla personal, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 3)
         for iCampo in iCampos:
@@ -661,7 +824,7 @@ class DAL():
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                     (nombre, dni, idClase[0],)
                 )
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
             else:
                 idd = int(idd)
@@ -672,7 +835,7 @@ class DAL():
                     (nombre, dni, idClase[0], idd,)
                 )
                 datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Personal', datosViejos[1], datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "El dni ingresado ya está registrado. Ingrese uno nuevo o revise la información ya ingresada."
@@ -681,15 +844,24 @@ class DAL():
         bdd.con.commit()
         return True
 
-    def saveSubgrupos(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla subgrupos de la base de datos.
+    def saveSubgrupos(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión stock.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla subgrupos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2)
         for iCampo in iCampos:
@@ -720,7 +892,7 @@ class DAL():
                     "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                     (subgrupo, idGrupo[0])
                 )
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
             else:
                 idd = int(idd)
@@ -732,7 +904,7 @@ class DAL():
                     (subgrupo, idGrupo[0], idd)
                 )
                 datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Subgrupos', datosViejos[1], datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "El subgrupo ingresado ya está registrado en el grupo. Ingrese un subgrupo distinto, ingreselo en un grupo distinto o revise los datos ya ingresados."
@@ -741,15 +913,24 @@ class DAL():
         bdd.con.commit()
         return True
     
-    def saveUsuarios(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla alumnos de la base de datos.
+    def saveUsuarios(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión stock.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla alumnos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 3, 4, 5)
 
@@ -784,7 +965,7 @@ class DAL():
         if not idClase:
             info = "La clase ingresada no está registrada o no está vinculada correctamente a la categoría usuario. Regístrela o revise los datos ya ingresados."
             return PopUp("Error", info).exec()
-        # datosNuevos = [nombre, dni, clase, usuario]
+        datosNuevos = [nombre, dni, clase, usuario]
         try:
             idd = tabla.item(row, 0).text()
             if not idd.isnumeric():
@@ -792,8 +973,8 @@ class DAL():
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, ?, ?)",
                     (nombre, dni, idClase[0], usuario, contrasena)
                 )
-                # dal.insertarHistorial(
-                   # user, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                self.insertarHistorial(
+                   user, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -802,9 +983,9 @@ class DAL():
                     WHERE id = ?""",
                     (nombre, idClase[0], dni, idd,)
                 )
-                # datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                # dal.insertarHistorial(
-                #     user, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
+                datosViejos = [fila for fila in datos if fila[0] == idd][0]
+                self.insertarHistorial(
+                    user, 'Edición', 'Alumnos', datosViejos[1], datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "El dni ingresado ya está registrado. Regístre uno nuevo o revise la información ya ingresada."
             return PopUp("Error", info).exec()
@@ -812,15 +993,24 @@ class DAL():
         bdd.con.commit()
         return True
     
-    def saveUbis(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla subgrupos de la base de datos.
+    def saveUbis(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión ubicaciones.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla subgrupos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         if tabla.item(row, 1).text() == "":
             # Le pide al usuario que termine de llenar los campos
@@ -836,7 +1026,7 @@ class DAL():
                     "INSERT INTO ubicaciones VALUES(NULL, ?)",
                     (ubicacion,)
                 )
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Inserción', 'Ubicaciones', ubicacion, None, None)
             else:
                 idd = int(idd)
@@ -848,7 +1038,7 @@ class DAL():
                 )
                 datosNuevos = [ubicacion,]
                 datosViejos = [fila for fila in datos if fila[0] == idd][0]
-                dal.insertarHistorial(
+                self.insertarHistorial(
                     user, 'Edición', 'Ubicaciones', datosViejos[1], None, datosNuevos)
         except sqlite3.IntegrityError:
             info = "El subgrupo ingresado ya está registrado en ese grupo. Ingrese otro subgrupo, ingreselo en otro grupo o revise los datos ya ingresados."
@@ -857,15 +1047,24 @@ class DAL():
         bdd.con.commit()
         return True
 
-    def saveClases(self, tabla, row, user, datos: list | None = None):
-        """Este método guarda los cambios hechos en la tabla de la ui
-        en la tabla subgrupos de la base de datos.
+    def saveClases(self, tabla: QtWidgets.QTableWidget, row: int,
+                  user: int, datos: list | None = None) -> bool:
+        """Este método guarda los cambios de la gestión stock.
 
         Parámetros
         ----------
+            tabla: QtWidgets.QTableWidget
+                La tabla de la gestión stock.
+            row: int
+                La fila que fue modificada de la tabla.
             datos: list | None = None
-                Los datos de la tabla subgrupos, que se usarán para
-                obtener el id de la fila en la tabla.
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        
+        Devuelve
+        --------
+            bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2,)
         for iCampo in iCampos:
@@ -895,7 +1094,7 @@ class DAL():
                         "INSERT INTO clases VALUES(NULL, ?, ?)",
                         (clase, idCat[0],)
                     )
-                    dal.insertarHistorial(
+                    self.insertarHistorial(
                         user, 'Inserción', 'Clases', clase, None, datosNuevos[1:])
                 else:
                     idd = int(idd)
@@ -910,7 +1109,7 @@ class DAL():
                         WHERE id = ?""",
                         (clase, idCat[0], idd)
                     )
-                    dal.insertarHistorial(
+                    self.insertarHistorial(
                         user, 'Edición', 'Clases', datosViejos[1], datosViejos[2:], datosNuevos)
             except sqlite3.IntegrityError:
                 info = "La clase ingresada ya está registrada. Ingrese otra o revise los datos ya ingresados."
