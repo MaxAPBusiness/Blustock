@@ -333,17 +333,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # columna id es necesaria para tener el número de fila pero no
         # queremos que la vean los usuarios porque no es info necesaria
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
-        # Hacemos que algunas columnas se expandan al ampliar la
-        # pantalla. Esto lo hacemos para que la tabla se ajuste siempre
-        # al ancho de la pantalla.
-        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
-            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
-            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
-            9, QtWidgets.QHeaderView.ResizeMode.Stretch)
         # Hacemos lo mismo con las otras pantallas
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
@@ -359,10 +348,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     "otro_personal", self.pantallaOtroPersonal.lineEdit.text()
                 )))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
-        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget,
@@ -376,10 +361,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchSubgrupos, dal.obtenerDatos(
                     "subgrupos", self.pantallaSubgrupos.lineEdit.text())))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
-        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget,
@@ -392,8 +373,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchGrupos, dal.obtenerDatos(
                     "grupos", self.pantallaGrupos.lineEdit.text())))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
-        self.pantallaGrupos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
@@ -409,9 +388,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
-        self.pantallaAlumnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
@@ -424,8 +400,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "ubicaciones", self.pantallaUbis.lineEdit.text())))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
-        self.pantallaUbis.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaClases.tableWidget, lambda: self.saveOne(
@@ -438,8 +412,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchClases, dal.obtenerDatos(
                     "clases", self.pantallaClases.lineEdit.text())))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
-        self.pantallaClases.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
@@ -472,50 +444,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovs.lineEdit.editingFinished.connect(self.fetchMovs)
         self.pantallaMovs.nId.valueChanged.connect(self.fetchMovs)
         self.pantallaMovs.nTurno.valueChanged.connect(self.fetchMovs)
-        self.pantallaMovs.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             self.fetchOtroPersonal)
         self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
-        self.pantallaReps.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaReps.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaReps.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaTurnos.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaDeudas.horizontalHeader(
-        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaDeudas.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaDeudas.horizontalHeader(
-        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaDeudas.horizontalHeader(
-        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaBaja.horizontalHeader(
-        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaBaja.horizontalHeader(
-        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaBaja.horizontalHeader(
-        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaBaja.horizontalHeader(
-        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaResumen.tablaBaja.horizontalHeader(
-        ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
             self.fetchSubgrupos)
         self.pantallaUbis.lineEdit.editingFinished.connect(
@@ -523,10 +457,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-        self.pantallaHistorial.tableWidget.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        self.pantallaHistorial.tableWidget.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(
             self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
@@ -534,8 +464,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
-        self.pantallaDeudas.tableWidget.horizontalHeader(
-        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
@@ -1442,6 +1370,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1605,6 +1535,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaElem.currentIndexChanged.connect(self.fetchMovs)
         listaPersona.currentIndexChanged.connect(self.fetchMovs)
@@ -1644,6 +1576,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        self.pantallaGrupos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1730,6 +1664,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1807,6 +1745,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -1894,6 +1836,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(6, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.stackedWidget.setCurrentIndex(7)
 
@@ -2030,6 +1984,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -2066,6 +2022,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -2152,6 +2110,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         desdeFecha.dateChanged.connect(self.fetchReparaciones)
         hastaFecha.dateChanged.connect(self.fetchReparaciones)
@@ -2377,6 +2341,10 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaGestion.currentIndexChanged.connect(self.fetchHistorial)
         desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
@@ -2453,7 +2421,10 @@ class MainWindow(QtWidgets.QMainWindow):
             colData = 0
         else:
             colData = 2
-        grupo = datos[0][colData]
+        try:
+            grupo = datos[0][colData]
+        except:
+            pass
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             # Sumamos la cantidad, para que muestre la cantidad total
@@ -2512,6 +2483,8 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 tabla.setItem(rowNum, i, item)
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader(
+        ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 
@@ -2558,6 +2531,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     tablaDeudas.setItem(rowNum, cellNum, item)
                 tablaDeudas.setRowHeight(rowNum, 35)
             tablaDeudas.resizeColumnsToContents()
+            tablaDeudas.horizontalHeader(
+            ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader(
+            ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader(
+            ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.horizontalHeader(
+            ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.show()
         # Si no
         else:
@@ -2583,8 +2564,16 @@ class MainWindow(QtWidgets.QMainWindow):
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
                     tablaBaja.setItem(rowNum, cellNum, item)
 
-            tablaBaja.setRowHeight(0, 35)
+                tablaBaja.setRowHeight(rowNum, 35)
             tablaBaja.resizeColumnsToContents()
+            tablaBaja.horizontalHeader(
+            ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaBaja.horizontalHeader(
+            ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaBaja.horizontalHeader(
+            ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaBaja.horizontalHeader(
+            ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
             tablaBaja.show()
         else:

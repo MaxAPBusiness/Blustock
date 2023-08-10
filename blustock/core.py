@@ -86,6 +86,9 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
         funcEliminar: types.FunctionType
             La función eliminar que el botón eliminar de la fila
             ejecutará.
+        funcTabla: types.FunctionType | None = None
+            La función que se conectará con la tabla, que se desconecta
+            para evitar bugs.
         campos: tuple
             Una tupla que contenga cada campo de la tabla y su tipo.
             Para ver una lista de qué significa cada tipo de campo, ver
@@ -101,9 +104,6 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
             campo determinado. Si se pasa None, se entenderá que la
             tabla no tiene campos de este tipo.
             Default: None.
-        funcTabla: types.FunctionType | None = None
-            La función que se conectará con la tabla, que se desconecta
-            para evitar bugs.
     """
     # Desconectamos la tabla para que no genere problemas
     try:
@@ -224,25 +224,27 @@ def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.Function
                 La fila en la que se insertarán los botones.
         """
         # Se crean dos botones: uno de editar y uno de eliminar
-        # Para saber que hacen BotonFila, vayan al código de la
-        # clase.
         guardar = BotonFila("guardar")
         # Conectamos el botón a su función guardar correspondiente.
         guardar.clicked.connect(funcGuardar)
+        # Lo dejamos desactivado por defecto para que el usuario solo
+        # pueda guardar si modifica algo.
         guardar.setEnabled(False)
+        # Hacemos lo mismo con el boton eliminar, pero no lo
+        # desactivamos
         borrar = BotonFila("eliminar")
         borrar.clicked.connect(funcEliminar)
 
         # Se añaden los botones a cada fila.
-        # Método setCellWidget(row, column, widget): añade un
-        # widget a la celda de una tabla.
-
         tabla.setCellWidget(numFila, tabla.columnCount() - 2, guardar)
         tabla.setCellWidget(numFila, tabla.columnCount() - 1, borrar)
 
 def cargarFuentes():
+    """Esta función carga fuentes a la aplicación."""
+    # Por cada fuente en la carpeta de fuentes...
     for fuente in os.listdir(os.path.join(os.path.abspath(os.getcwd()),
                                           f'ui{os.sep}rsc{os.sep}fonts')):
+        #...la cargamos.
         QtGui.QFontDatabase.addApplicationFont(
             os.path.join(os.path.abspath(os.getcwd()),
                         f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}'))
