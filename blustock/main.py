@@ -132,6 +132,24 @@ class MainWindow(QtWidgets.QMainWindow):
         
         deleteUsuarios(self, datos: list | None = None):
             Elimina una fila de la tabla de la gestión usuarios.
+        
+        fetchClases(self):
+            Refresca la gestión clases.
+        
+        fetchUbis(self):
+            Refresca la gestión ubicaciones.
+        
+        deleteUbis(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión ubicaciones.
+        
+        fetchReparaciones(self):
+            Refresca el listado de reparaciones.
+        
+        deleteClases(self, datos: list | None = None):
+            Elimina una fila de la tabla de la gestión clases.
+        
+        fetchHistorial(self):
+            Refresca el historial.
     """
     def __init__(self):
         """El constructor, crea la ventana principal con un menú
@@ -392,7 +410,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
                     self.pantallaUbis.tableWidget, dal.saveUbis, self.fetchUbis),
-                self.deleteUbicaciones, self.habilitarSaves,
+                self.deleteUbis, self.habilitarSaves,
                 core.camposUbis[0]))
         self.pantallaUbis.botonGuardar.clicked.connect(
             lambda: self.saveAll(
@@ -400,6 +418,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "ubicaciones", self.pantallaUbis.lineEdit.text())))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
+        self.pantallaUbis.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaClases.tableWidget, lambda: self.saveOne(
@@ -412,6 +432,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fetchClases, dal.obtenerDatos(
                     "clases", self.pantallaClases.lineEdit.text())))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
+        self.pantallaClases.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
@@ -450,6 +472,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchOtroPersonal)
         self.pantallaReps.lineEdit.editingFinished.connect(
             self.fetchReparaciones)
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.tableWidget.horizontalHeader(
@@ -471,6 +499,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
+        self.pantallaHistorial.tableWidget.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaHistorial.tableWidget.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(
             self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
@@ -1927,7 +1959,9 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            dal.insertarHistorial(self.usuario, "eliminación", "usuarios", row, datos)
+            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Usuarios',
+                                  datosViejos[1], datosViejos[2:])
             dal.eliminarDatos('personal', idd)
 
         posicion = barra.value()
@@ -1935,7 +1969,7 @@ class MainWindow(QtWidgets.QMainWindow):
         barra.setValue(posicion)
 
     def fetchClases(self):
-        """Este método """
+        """Este método refresca la gestión clases."""
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
 
@@ -1950,37 +1984,33 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
             sugerencias =[i[0] for i in
                          bdd.cur.execute('SELECT descripcion FROM cats_clase').fetchall()]
             cats = ParamEdit(sugerencias, rowData[1])
             cats.textChanged.connect(
                 lambda: self.habilitarSaves(None, None, tabla))
             tabla.setCellWidget(rowNum, 1, cats)
-            tabla.setItem(
-                rowNum, 2, QtWidgets.QTableWidgetItem(str(rowData[2])))
-
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item2 = QtWidgets.QTableWidgetItem(str(rowData[2]))
+            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 2, item2)
 
             core.generarBotones(
                 lambda: self.saveOne(
                     tabla, dal.saveClases, self.fetchClases, datos),
                 lambda: self.deleteClases(datos), tabla, rowNum)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(10)
 
     def fetchUbis(self):
+        """Este método refresca la gestión ubicaciones."""
         tabla = self.pantallaUbis.tableWidget
         barraBusqueda = self.pantallaUbis.lineEdit
         tabla.setSortingEnabled(False)
@@ -1996,31 +2026,36 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
 
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
-
-            for col in range(tabla.columnCount()):
-                item = tabla.item(rowNum, col)
-                if item is not None:
-                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
 
             core.generarBotones(
                 lambda: self.saveOne(
                     tabla, dal.saveUbis, self.fetchUbis, datos),
-                lambda: self.deleteUbicaciones(datos), tabla, rowNum)
+                lambda: self.deleteUbis(datos), tabla, rowNum)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
         self.stackedWidget.setCurrentIndex(12)
 
-    def deleteUbicaciones(self, datos: list | None = None) -> None:
+    def deleteUbis(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión
+        ubicaciones.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        """
         tabla = self.pantallaUbis.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
@@ -2037,15 +2072,16 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            des = tabla.item(row, 1).text()
-            dal.insertarHistorial(
-                self.usuario, "Eliminación", "Ubicaciones", des, None)
+            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            dal.insertarHistorial(self.usuario, 'Eliminación', 'Ubicaciones',
+                                  datosViejos[1], None)
             dal.eliminarDatos('ubicaciones', idd)
             posicion = barra.value()
             self.fetchUbis()
             barra.setValue(posicion)
 
     def fetchReparaciones(self):
+        """Este método refresca el listado de reparaciones."""
         tabla = self.pantallaReps.tableWidget
         barraBusqueda = self.pantallaReps.lineEdit
         desdeFecha = self.pantallaReps.desdeFecha
@@ -2088,15 +2124,8 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
-
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         desdeFecha.dateChanged.connect(self.fetchReparaciones)
         hastaFecha.dateChanged.connect(self.fetchReparaciones)
@@ -2104,6 +2133,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(11)
 
     def deleteClases(self, datos: list | None = None):
+        """Este método elimina una fila de la tabla de la gestión
+        clases.
+
+        Parámetros
+        ----------
+            datos: list | None = None
+                Datos por defecto que se usarán para guardar registro
+                en el historial.
+                Default: None.
+        """
         tabla = self.pantallaClases.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
         barra = tabla.verticalScrollBar()
@@ -2131,9 +2170,7 @@ class MainWindow(QtWidgets.QMainWindow):
             barra.setValue(posicion)
 
     def fetchHistorial(self):
-        """Este método obtiene los datos de la tabla historial y los
-        inserta en la tabla de la interfaz de usuario.
-        """
+        """Este método refresca el historial."""
         tabla = self.pantallaHistorial.tableWidget
         barraBusqueda = self.pantallaHistorial.lineEdit
         desdeFecha = self.pantallaHistorial.desdeFecha
@@ -2311,14 +2348,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
 
-        tabla.setRowHeight(0, 35)
+            tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
-
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaGestion.currentIndexChanged.connect(self.fetchHistorial)
         desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
