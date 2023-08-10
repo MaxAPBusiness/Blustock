@@ -5,9 +5,6 @@ Clases
     BotonEditar(qtw.QPushButton):
         Genera un botón que se ubicará en las filas de las tablas de la
         UI del programa.
-    BotonMostrarContrasena(qtw.QCheckBox):
-        Crea un botón checkbox para mostrar o esconder lo ingresado en
-        un campo de contraseña.
 """
 from PyQt6 import QtWidgets, QtCore, QtGui
 import os

@@ -1166,14 +1166,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # un profe se equivoca y elimina todo, no hay vuelta atrás.
         # Para esta verificación, llamamos a la función del dal.
         hayRelacion = dal.verifElimStock(idd)
+        desc=tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "La herramienta/insumo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
+            mensaje = f"El elemento {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
             return PopUp('Advertencia', mensaje).exec()
 
         # Si no está relacionado, pregunta al usuario si confirma
         # eliminar la fila y le advierte que la acción no se puede
         # deshacer.
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la herramienta/insumo?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el elemento {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         # Si el usuario presionó el boton sí...
@@ -1400,11 +1401,12 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimAlumnos(idd)
+        nombre=tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "El alumno tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este alumno."
+            mensaje = f"El alumno {nombre} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este alumno."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el alumno/a?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el alumno/a {nombre}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1604,11 +1606,12 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimGrupos(idd)
+        desc=tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "El grupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este grupo."
+            mensaje = f"El grupo {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este grupo."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el grupo?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el grupo {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1694,11 +1697,12 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimOtroPersonal(idd)
+        desc=tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "El personal tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar el personal."
+            mensaje = f"El personal {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar el personal."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el personal?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el personal {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1774,11 +1778,12 @@ class MainWindow(QtWidgets.QMainWindow):
             return tabla.removeRow(row)
         idd = int(idd)
         hayRelacion = dal.verifElimSubgrupos(idd)
+        desc = tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "El subgrupo tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este subgrupo."
+            mensaje = f"El subgrupo {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este subgrupo."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el subgrupo?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el subgrupo {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -1931,11 +1936,12 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimUsuario(idd)
+        desc = tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "El usuario tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este usuario."
+            mensaje = f"El usuario {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar este usuario."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar el usuario?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el usuario {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -2050,10 +2056,11 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimUbi(idd)
+        desc = tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "La ubicacion está relacionada con registros en otras gestiones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta ubicacion."
+            mensaje = f"La ubicacion {desc} está relacionada con registros en otras gestiones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta ubicacion."
             return PopUp('Advertencia', mensaje).exec()
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosViejos = [fila for fila in datos if fila[0] == idd][0]
@@ -2144,11 +2151,12 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimClases(idd)
+        desc = tabla.item(row, 1).text()
         if hayRelacion:
-            mensaje = "La clase tiene relaciones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta clase."
+            mensaje = f"La clase {desc} tiene relaciones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta clase."
             return PopUp('Advertencia', mensaje).exec()
 
-        mensaje = "Esta acción no se puede deshacer. ¿Desea eliminar la clase?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar la clase {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             datosEliminados = [fila for fila in datos if fila[0] == idd][0]
