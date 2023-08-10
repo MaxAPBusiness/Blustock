@@ -1,3 +1,7 @@
+--Obtenemos id, tipo de movimiento, elemento, estado del elemento,
+--cantidad, motivo, persona que hico el movimiento, fecha y hora,
+--turno, ubicación, nombre del pañolero y nombre del profesor que
+--autorizó el ingreso del turno.
 SELECT m.id, ti.descripcion, s.descripcion, e.descripcion, m.cant,
 m.descripcion, p.nombre_apellido || ' ' || c.descripcion, m.fecha_hora,
 m.id_turno, u.descripcion, pa.nombre_apellido || ' ' || ca.descripcion,

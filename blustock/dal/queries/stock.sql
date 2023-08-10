@@ -1,7 +1,7 @@
+-- Obtenemos id, nombre, cantidad en condiciones, reparacion, baja y
+--adeudadas, total, grupo, subgrupo y ubicación.
 SELECT s.id, s.descripcion, s.cant_condiciones, s.cant_reparacion,
-s.cant_baja, s.cant_prest, (CASE 
-WHEN s.cant_reparacion IS NULL THEN s.cant_condiciones + s.cant_prest
-ELSE s.cant_condiciones + s.cant_reparacion + s.cant_baja + s.cant_prest END) total,
+s.cant_baja, s.cant_prest, s.cant_condiciones + s.cant_reparacion + s.cant_baja + s.cant_prest total,
 g.descripcion, sub.descripcion, u.descripcion
 FROM stock s
 JOIN subgrupos sub ON s.id_subgrupo = sub.id

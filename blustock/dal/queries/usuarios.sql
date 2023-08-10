@@ -1,3 +1,4 @@
+-- Obtenemos id, nombre, clase, dni, usuario y contraseña
 SELECT p.id, p.nombre_apellido, c.descripcion, p.dni, p.usuario, p.contrasena
 FROM personal p
 JOIN clases c ON c.id = p.id_clase

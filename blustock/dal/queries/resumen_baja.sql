@@ -1,3 +1,5 @@
+--Obtenemos persona, herramienta, cantidad, motivo de baja, id,
+--pañolero, ubicación, id del turno y fecha y hora del movimiento.
 SELECT p.nombre_apellido || ' ' || c.descripcion, s.descripcion, m.cant,
 m.descripcion, m.id, pa.nombre_apellido || ' ' || ca.descripcion,
 u.descripcion, m.id_turno, m.fecha_hora

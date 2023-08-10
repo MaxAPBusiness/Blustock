@@ -1,3 +1,4 @@
+--Obtenemos id, subgrupo y grupo.
 SELECT s.id, s.descripcion, g.descripcion
 FROM subgrupos s
 JOIN grupos g

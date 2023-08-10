@@ -1,3 +1,5 @@
+--Obtenemos el usuario, hora, gestión, tipo de cambio, id de fila,
+--datos viejos y datos nuevos.
 SELECT u.nombre_apellido || ' ' || u.usuario, h.fecha_hora, g.descripcion,
 t.descripcion, h.id_fila, h.datos_viejos, h.datos_nuevos
 FROM historial h

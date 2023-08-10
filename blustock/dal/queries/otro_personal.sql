@@ -1,3 +1,4 @@
+--Obtenemos id, nombre, clase y dni de personal filtrado por personal
 SELECT p.id, p.nombre_apellido, cl.descripcion, p.dni 
 FROM personal p
 JOIN clases cl ON cl.id = p.id_clase
