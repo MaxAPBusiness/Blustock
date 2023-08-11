@@ -318,16 +318,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaStock.tableWidget,
-                lambda: self.saveOne(self.pantallaStock.tableWidget,
-                                     dal.saveStock, self.fetchStock),
+                lambda: self.saveOne(
+                    self.pantallaStock.tableWidget, dal.saveStock),
                 self.deleteStock, self.actualizarTotal, core.camposStock[0],
                 (self.sGrupos, [], self.sUbis,),
                 self.actualizarSugSubgrupos))
         # Conectamos el boton de guardar cambios
         self.pantallaStock.botonGuardar.clicked.connect(
-            lambda: self.saveAll(
-                self.pantallaStock.tableWidget, dal.saveStock,
-                self.fetchStock, dal.obtenerDatos(
+            lambda: self.saveAll(self.pantallaStock.tableWidget,
+                dal.saveStock, dal.obtenerDatos(
                     "stock", self.pantallaStock.lineEdit.text())))
         # Escondemos la primera columna. Esto es porque es la
         # columna id es necesaria para tener el número de fila pero no
@@ -338,52 +337,52 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: core.insertarFilas(
                 self.pantallaOtroPersonal.tableWidget, lambda: self.saveOne(
                     self.pantallaOtroPersonal.tableWidget,
-                    dal.saveOtroPersonal, self.fetchOtroPersonal),
-                self.deleteOtroPersonal, self.habilitarSaves,
-                core.camposOtroPersonal[0], [self.sClasesP]))
+                    dal.saveOtroPersonal), self.deleteOtroPersonal,
+                self.habilitarSaves, core.camposOtroPersonal[0],
+                [self.sClasesP]))
         self.pantallaOtroPersonal.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaOtroPersonal.tableWidget, dal.saveOtroPersonal,
-                self.fetchOtroPersonal, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "otro_personal", self.pantallaOtroPersonal.lineEdit.text()
                 )))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget,
-                lambda: self.saveOne(self.pantallaSubgrupos.tableWidget,
-                                     dal.saveSubgrupos, self.fetchSubgrupos),
+                lambda: self.saveOne(
+                    self.pantallaSubgrupos.tableWidget, dal.saveSubgrupos),
                 self.deleteSubgrupos, self.habilitarSaves,
                 core.camposSubgrupos[0], [self.sGruposS]))
         self.pantallaSubgrupos.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaSubgrupos.tableWidget, dal.saveSubgrupos,
-                self.fetchSubgrupos, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "subgrupos", self.pantallaSubgrupos.lineEdit.text())))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget,
-                lambda: self.saveOne(self.pantallaGrupos.tableWidget,
-                                     dal.saveGrupos, self.fetchGrupos),
+                lambda: self.saveOne(
+                    self.pantallaGrupos.tableWidget, dal.saveGrupos),
                 self.deleteGrupos, self.habilitarSaves, core.camposGrupos[0]))
         self.pantallaGrupos.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaGrupos.tableWidget, dal.saveGrupos,
-                self.fetchGrupos, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "grupos", self.pantallaGrupos.lineEdit.text())))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
-                lambda: self.saveOne(self.pantallaGrupos.tableWidget,
-                                     dal.saveAlumnos, self.fetchAlumnos),
+                lambda: self.saveOne(
+                    self.pantallaGrupos.tableWidget, dal.saveAlumnos),
                 self.deleteAlumnos,  self.habilitarSaves,
                 core.camposAlumnos[0], [self.sClasesA]))
         self.pantallaAlumnos.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaAlumnos.tableWidget, dal.saveAlumnos,
-                self.fetchAlumnos, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "alumnos", self.pantallaAlumnos.lineEdit.text())))
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
@@ -391,38 +390,36 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
-                    self.pantallaUbis.tableWidget, dal.saveUbis, self.fetchUbis),
-                self.deleteUbis, self.habilitarSaves,
-                core.camposUbis[0]))
+                    self.pantallaUbis.tableWidget, dal.saveUbis),
+                    self.deleteUbis, self.habilitarSaves,
+                    core.camposUbis[0]))
         self.pantallaUbis.botonGuardar.clicked.connect(
             lambda: self.saveAll(
-                self.pantallaUbis.tableWidget, dal.saveUbis, self.fetchUbis,
-                dal.obtenerDatos(
+                self.pantallaUbis.tableWidget, dal.saveUbis, dal.obtenerDatos(
                     "ubicaciones", self.pantallaUbis.lineEdit.text())))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaClases.tableWidget, lambda: self.saveOne(
-                self.pantallaClases.tableWidget, dal.saveClases,
-                self.fetchClases), self.deleteClases, self.habilitarSaves,
+                self.pantallaClases.tableWidget, dal.saveClases),
+                self.deleteClases, self.habilitarSaves,
                 core.camposClases[0], [self.sCat]))
         self.pantallaClases.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaClases.tableWidget, dal.saveClases,
-                self.fetchClases, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "clases", self.pantallaClases.lineEdit.text())))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
-                    self.pantallaUsuarios.tableWidget, dal.saveUsuarios,
-                    self.fetchUsuarios), self.deleteUsuarios,
-                self.habilitarSaves, core.camposUsuarios[0],
-                [self.sClasesU]))
+                    self.pantallaUsuarios.tableWidget, dal.saveUsuarios),
+                self.deleteUsuarios, self.habilitarSaves,
+                core.camposUsuarios[0], [self.sClasesU]))
         self.pantallaUsuarios.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaUsuarios.tableWidget, dal.saveUsuarios,
-                self.fetchUsuarios, dal.obtenerDatos(
+                dal.obtenerDatos(
                     "usuarios", self.pantallaUsuarios.lineEdit.text())))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
 
@@ -1025,8 +1022,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Generamos los botones para la fila de la tabla
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveStock, self.fetchStock, datos),
+                lambda: self.saveOne(tabla, dal.saveStock, datos),
                 lambda: self.deleteStock(datos), tabla, rowNum)
 
             # Cambiamos la altura de la fila.
@@ -1046,7 +1042,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentIndex(3)
 
     def saveOne(self, tabla: QtWidgets.QTableWidget, funcSave: function,
-                funcFetch: function, datos: list | None = None):
+                datos: list | None = None):
         """Este método guarda los cambios hechos en una fila de una
         tabla de una gestión.
 
@@ -1066,8 +1062,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Obtenemos el id de la fila, que es la posición donde se
         # apretó el boton de guardar.
         row = tabla.indexAt(self.sender().pos()).row()
-        # Obtenemos la scrollbar
-        barra = tabla.verticalScrollBar()
         # Preguntamos si el usuario quiere guardar los cambios.
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios hechos en la fila?"
         popup = PopUp("Pregunta", info).exec()
@@ -1080,17 +1074,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 # Se muestra que el guardado fue con éxito.
                 info = "Los datos se han guardado con éxito."
                 PopUp("Aviso", info).exec()
-                # Se obtiene el valor de la barra.
-                posicion = barra.value()
-                # Se refresca la pantalla.
-                funcFetch()
-                # Se devuelve la barra a su posición original.
-                barra.setValue(posicion)
-                # Se actualizan las sugerencias.
+                tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(False)
                 self.actualizarSug()
 
     def saveAll(self, tabla: QtWidgets.QTableWidget, funcSave: function,
-                funcFetch: function, datos: list | None = None):
+                datos: list | None = None):
         """Este método guarda todos los cambios hechos en una tabla de
         una gestión.
 
@@ -1114,7 +1102,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Inicializamos el exito de antes porque puede no
             # inicializarse.
-            exito=False
+            exito=True
             # Por cada fila de la tabla...
             for i in range(tabla.rowCount()):
                 #...si se hicieron cambios en la fila...
@@ -1122,14 +1110,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 # que la fila fue modificada.
                 if tabla.cellWidget(i, tabla.columnCount()-2).isEnabled():
                     # guardamos los cambios.
-                    exito=funcSave(tabla, i, self.usuario, datos)
-                    if exito != True:
-                        break
+                    if not funcSave(tabla, i, self.usuario, datos):
+                        exito=False
+                    else:
+                        tabla.cellWidget(i, tabla.columnCount()-2).setEnabled(False)
+
             if exito==True:
                 info = "Los datos se han guardado con éxito."
-                PopUp("Aviso", info).exec() 
-                funcFetch()
+                PopUp("Aviso", info).exec()
                 self.actualizarSug()
+            else:
+                info = "Los datos se han guardado con errores. Revise los campos que quedaron sin guardar."
+                PopUp("Advertencia", info).exec()
 
     def deleteStock(self, datos: list | None = None) -> None:
         """Este método elimina una fila de la tabla de la gestión
@@ -1366,8 +1358,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveAlumnos, self.fetchAlumnos, datos),
+                lambda: self.saveOne(tabla, dal.saveAlumnos, datos),
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
@@ -1572,8 +1563,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(rowNum, 1, item1)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveGrupos, self.fetchGrupos, datos),
+                lambda: self.saveOne(tabla, dal.saveGrupos, datos),
                 lambda: self.deleteGrupos(datos), tabla, rowNum)
                     
             tabla.setRowHeight(rowNum, 35)
@@ -1660,9 +1650,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(rowNum, 3, item3)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveOtroPersonal, self.fetchOtroPersonal,
-                    datos),
+                lambda: self.saveOne(tabla, dal.saveOtroPersonal, datos),
                 lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
@@ -1743,8 +1731,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setCellWidget(rowNum, 2, grupos)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveSubgrupos, self.fetchSubgrupos, datos),
+                lambda: self.saveOne(tabla, dal.saveSubgrupos, datos),
                 lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
@@ -1902,8 +1889,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(rowNum, 5, item5)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveUsuarios, self.fetchUsuarios, datos),
+                lambda: self.saveOne(tabla, dal.saveUsuarios, datos),
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
@@ -1984,8 +1970,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(rowNum, 2, item2)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveClases, self.fetchClases, datos),
+                lambda: self.saveOne(tabla, dal.saveClases, datos),
                 lambda: self.deleteClases(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
@@ -2022,8 +2007,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setItem(rowNum, 1, item1)
 
             core.generarBotones(
-                lambda: self.saveOne(
-                    tabla, dal.saveUbis, self.fetchUbis, datos),
+                lambda: self.saveOne(tabla, dal.saveUbis, datos),
                 lambda: self.deleteUbis(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
