@@ -151,9 +151,9 @@
          </property>
          <property name="dateTime">
           <datetime>
-           <hour>19</hour>
-           <minute>6</minute>
-           <second>30</second>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
            <year>1963</year>
            <month>3</month>
            <day>9</day>
@@ -161,9 +161,9 @@
          </property>
          <property name="minimumDateTime">
           <datetime>
-           <hour>19</hour>
-           <minute>6</minute>
-           <second>30</second>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
            <year>1963</year>
            <month>3</month>
            <day>9</day>
@@ -204,9 +204,9 @@
          </property>
          <property name="minimumDateTime">
           <datetime>
-           <hour>19</hour>
-           <minute>6</minute>
-           <second>30</second>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
            <year>1963</year>
            <month>3</month>
            <day>9</day>
@@ -250,6 +250,18 @@
            <string>Todas</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
         </widget>
        </item>
       </layout>

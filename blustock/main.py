@@ -393,8 +393,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaUbis.tableWidget, dal.saveUbis),
                     self.deleteUbis, self.habilitarSaves,
                     core.camposUbis[0]))
-        self.pantallaAlumnos.tableWidget.setColumnWidth(2, 100)
-        self.pantallaAlumnos.tableWidget.setColumnWidth(3, 100)
         self.pantallaUbis.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaUbis.tableWidget, dal.saveUbis, dal.obtenerDatos(
@@ -1341,11 +1339,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
-
-            tabla.setItem(
-                rowNum, 0, QtWidgets.QTableWidgetItem(str(rowData[0])))
-            tabla.setItem(
-                rowNum, 1, QtWidgets.QTableWidgetItem(str(rowData[1])))
+            item0 = QtWidgets.QTableWidgetItem(str(rowData[0]))
+            item0.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem(str(rowData[1]))
+            item1.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 1, item1)
             sql ='''SELECT c.descripcion FROM clases c
             JOIN cats_clase cat ON c.id_cat=cat.id
             WHERE cat.descripcion='Alumno';'''
@@ -1354,10 +1353,10 @@ class MainWindow(QtWidgets.QMainWindow):
             cursos = ParamEdit(sugerencias, rowData[2])
             cursos.textChanged.connect(
                 lambda: self.habilitarSaves(None, None, tabla))
-            tabla.setCellWidget(
-                rowNum, 2, cursos)
-            tabla.setItem(
-                rowNum, 3, QtWidgets.QTableWidgetItem(str(rowData[3])))
+            tabla.setCellWidget(rowNum, 2, cursos)
+            item3 = QtWidgets.QTableWidgetItem(str(rowData[3]))
+            item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            tabla.setItem(rowNum, 3, item3)
 
             core.generarBotones(
                 lambda: self.saveOne(tabla, dal.saveAlumnos, datos),
@@ -1366,6 +1365,10 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.resizeColumnsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 

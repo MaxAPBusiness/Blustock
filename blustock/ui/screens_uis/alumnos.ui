@@ -107,7 +107,7 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>🔎 Buscar...</string>
+          <string>Buscar...</string>
          </property>
          <property name="placeholderText">
           <string>Buscar...</string>
@@ -126,6 +126,18 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
