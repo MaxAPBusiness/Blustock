@@ -106,6 +106,9 @@
          <property name="styleSheet">
           <string notr="true"/>
          </property>
+         <property name="text">
+          <string>🔎 Buscar...</string>
+         </property>
          <property name="placeholderText">
           <string>Buscar...</string>
          </property>

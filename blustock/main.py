@@ -394,6 +394,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaUbis.tableWidget, dal.saveUbis, self.fetchUbis),
                 self.deleteUbis, self.habilitarSaves,
                 core.camposUbis[0]))
+        self.pantallaAlumnos.tableWidget.setColumnWidth(2, 100)
+        self.pantallaAlumnos.tableWidget.setColumnWidth(3, 100)
         self.pantallaUbis.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaUbis.tableWidget, dal.saveUbis, self.fetchUbis,
