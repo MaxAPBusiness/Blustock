@@ -26,7 +26,6 @@ from textwrap import dedent
 from unidecode import unidecode
 import core
 import pandas as pd
-import sqlite3
 from types import FunctionType as function
 import sys
 
@@ -467,6 +466,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.alumnos)
         self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
+        self.pantallaRealizarMov.ubicacionComboBox.currentTextChanged.connect(
+            self.herramientas)
+
         self.boton = toolboton("usuario", self)
         self.boton.setIconSize(QtCore.QSize(60, 40))
         self.label = QtWidgets.QLabel(str("El pañolero en turno es: "))
@@ -620,7 +622,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute(
                         "SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()[0])
-
+                
+                self.boton.menu().actions()[2].setVisible(False)
                 self.menubar.show()
                 self.pantallaLogin.usuarioState.setText("")
                 self.pantallaLogin.passwordState.setText("")
@@ -638,6 +641,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+    def herramientas(self):
+        self.pantallaRealizarMov.herramientaComboBox.clear()
+        for i in dal.obtenerDatos("stock", self.pantallaRealizarMov.ubicacionComboBox.currentText(),):
+            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
 
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
@@ -651,7 +658,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def realizarMovimiento(self):
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
-        self.pantallaRealizarMov.herramientaComboBox.clear()
         self.pantallaRealizarMov.estadoComboBox.clear()
         self.pantallaRealizarMov.cursoComboBox.clear()
         self.pantallaRealizarMov.ubicacionComboBox.clear()
@@ -659,22 +665,14 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in dal.obtenerDatos("tipos_mov", ""):
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
-        for i in dal.obtenerDatos("stock", ""):
-            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
-
         for i in dal.obtenerDatos("estados", ""):
             self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("clases", ""):
-            self.pantallaRealizarMov.cursoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
 
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
-
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
-            self.alumnos)
-        self.pantallaRealizarMov.pushButton.clicked.connect(
-            self.saveMovimiento)
 
         self.stackedWidget.setCurrentIndex(13)
 
@@ -767,6 +765,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.sumar(cant, herramienta[0],"De baja")
 
                 bdd.con.commit()
+
                 if self.sopas == True:
                     self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
                     self.pantallaRealizarMov.herramientaComboBox.clear()
