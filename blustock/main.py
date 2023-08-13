@@ -641,6 +641,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+        for i in dal.obtenerDatos("otro_personal", self.pantallaRealizarMov.cursoComboBox.currentText(),):
+            self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+
     def herramientas(self):
         self.pantallaRealizarMov.herramientaComboBox.clear()
         for i in dal.obtenerDatos("stock", self.pantallaRealizarMov.ubicacionComboBox.currentText(),):
@@ -669,7 +672,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("clases", ""):
-            self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
+            if i[2]!="Previas":
+                self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
 
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
