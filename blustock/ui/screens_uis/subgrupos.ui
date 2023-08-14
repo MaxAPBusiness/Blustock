@@ -122,7 +122,16 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+        <widget class="QPushButton" name="botonRefresh">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

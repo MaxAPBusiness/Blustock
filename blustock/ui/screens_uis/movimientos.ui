@@ -227,6 +227,18 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="botonRefresh">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

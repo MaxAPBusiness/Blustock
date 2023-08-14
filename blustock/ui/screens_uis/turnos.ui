@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>949</width>
+    <width>1006</width>
     <height>551</height>
    </rect>
   </property>
@@ -247,7 +247,16 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+        <widget class="QPushButton" name="botonRefresh">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>🔄 Refrescar</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
