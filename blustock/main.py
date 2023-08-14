@@ -496,18 +496,36 @@ class MainWindow(QtWidgets.QMainWindow):
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.move(0, 0)
         self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
+        self.minimizar = QtWidgets.QPushButton()
+        self.minimizar.setObjectName("mini")
+        self.minimizar.setText("1")
+        self.minimizar.setFixedSize(40, 40)
+        self.minimizar.setVisible(True)
+        self.minimizar.clicked.connect(self.desbloquear)
+
         boton = QtWidgets.QPushButton()
         boton.setObjectName("prueba")
         boton.setText("X")
         boton.setFixedSize(40, 40)
         boton.setVisible(True)
-        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'
-        pixmap = QtGui.QPixmap(path)
         boton.clicked.connect(lambda: self.close())
         self.pantallaLogin.gridLayout.addWidget(
             boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
-        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        self.pantallaLogin.gridLayout.addWidget(
+            self.minimizar, 0, 0, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
+
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         # Mostramos la ventana principal.
+        self.show()
+
+    def desbloquear(self):
+        if self.windowFlags() & QtCore.Qt.WindowType.WindowStaysOnTopHint:
+            self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowType.WindowStaysOnTopHint)
+            self.minimizar.setText("2")
+
+        else:    
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+            self.minimizar.setText("1")
         self.show()
 
     def actualizarSug(self):
