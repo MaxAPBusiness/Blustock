@@ -429,15 +429,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         # Conectamos la barra de búsqueda
-        self.pantallaStock.lineEdit.editingFinished.connect(self.fetchStock)
+        self.pantallaStock.lineEdit.editingFinished.connect(core.refresh(
+                self.pantallaStock.tableWidget, self.fetchStock))
         # Conectamos el botón de imprimir
         self.pantallaStock.botonImprimir.clicked.connect(self.printStock)
 
         # Conectamos las otras barras de búsqueda y los otros filtros
-        self.pantallaAlumnos.lineEdit.editingFinished.connect(
-            self.fetchAlumnos)
-        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
-        self.pantallaGrupos.lineEdit.editingFinished.connect(self.fetchGrupos)
+        self.pantallaAlumnos.lineEdit.editingFinished.connect(core.refresh(
+            self.pantallaAlumnos.tableWidget, self.fetchAlumnos))
+        self.pantallaClases.lineEdit.editingFinished.connect(core.refresh(
+                self.pantallaClases.tableWidget, self.fetchClases))
+        self.pantallaGrupos.lineEdit.editingFinished.connect(core.refresh(
+                self.pantallaGrupos.tableWidget, self.fetchGrupos))
         self.pantallaMovs.lineEdit.editingFinished.connect(self.fetchMovs)
         self.pantallaMovs.nId.valueChanged.connect(self.fetchMovs)
         self.pantallaMovs.nTurno.valueChanged.connect(self.fetchMovs)
