@@ -263,8 +263,11 @@ def cargarFuentes():
 def refresh(tabla, funcFetch):
     """Este método revisa si se hicieron cambios en la tabla y avisa al
     usuario antes de refrescar la pantalla."""
-    for row in tabla.rowCount():
+    for row in range(tabla.rowCount()):
         if tabla.cellWidget(row, tabla.columnCount()-2).isEnabled():
             resp=PopUp('Pregunta', 'Esta acción refrescará la tabla y hay cambios sin guardar. Si realiza esta acción, los cambios no guardados se perderán.\n¿Desea refrescar y descartar los cambios?')
             if resp==QtWidgets.QMessageBox.StandardButton.Yes:
                 funcFetch()
+                return
+    funcFetch()
+    return

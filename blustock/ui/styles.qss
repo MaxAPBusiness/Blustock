@@ -4,19 +4,6 @@
     font-size: 20px;
 }
 
-#prueba{
-    background-color: #293045;
-    font-weight: 1000;
-    font-size: 30px;
-    text-align: center;
-    font-family: math;
-}
-
-#prueba:hover{
-    background-color: #768AC5;
-    color:white;
-}
-
 QComboBox{
     border-radius: 5px;
     background-color: #BABFCE;
@@ -111,6 +98,31 @@ QLineEdit{
     background-color: #BABFCE;
 }
 
+#mini{
+    text-align: center;
+    font-family: 'marlett';
+    font-size: 26px;
+    font-weight: 1000px;
+}
+
+#mini:hover{
+    background-color: #768AC5;
+    color:white;
+}
+
+#prueba{
+    background-color: #293045;
+    font-weight: 1000;
+    font-size: 30px;
+    text-align: center;
+    font-family: math;
+}
+
+#prueba:hover{
+    background-color: #768AC5;
+    color:white;
+}
+
 #sopas{
     border:none;
     padding:6px;
@@ -129,7 +141,7 @@ QLineEdit{
 #usuario{
     border:none;
     background-color: #293045;
-    margin-right:15px;
+    margin-right:5px;
 }
 #usuario::menu-indicator{
     image:none;

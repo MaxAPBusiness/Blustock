@@ -26,7 +26,6 @@ from textwrap import dedent
 from unidecode import unidecode
 import core
 import pandas as pd
-import sqlite3
 from types import FunctionType as function
 import sys
 
@@ -142,7 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
         deleteUbis(self, datos: list | None = None):
             Elimina una fila de la tabla de la gestión ubicaciones.
         
-        fetchReparaciones(self):
+        fetchReps(self):
             Refresca el listado de reparaciones.
         
         deleteClases(self, datos: list | None = None):
@@ -279,20 +278,32 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass
 
         # Conectamos las opciones del menú a sus respectivas pantallas
-        self.opcionStock.triggered.connect(self.fetchStock)
-        self.opcionSubgrupos.triggered.connect(self.fetchSubgrupos)
-        self.opcionGrupos.triggered.connect(self.fetchGrupos)
-        self.opcionAlumnos.triggered.connect(self.fetchAlumnos)
-        self.opcionOtroPersonal.triggered.connect(self.fetchOtroPersonal)
-        self.opcionTurnos.triggered.connect(self.fetchTurnos)
-        self.opcionMovimientos.triggered.connect(self.fetchMovs)
-        self.opcionUsuarios.triggered.connect(self.fetchUsuarios)
+        self.opcionStock.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(3))
+        self.opcionSubgrupos.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(6))
+        self.opcionGrupos.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(2))
+        self.opcionAlumnos.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(1))
+        self.opcionOtroPersonal.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(5))
+        self.opcionTurnos.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(7))
+        self.opcionMovimientos.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(4))
+        self.opcionUsuarios.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(8))
         self.GestionUbicaciones.triggered.connect(self.fetchUbis)
-        self.GestionClases.triggered.connect(self.fetchClases)
+        self.GestionClases.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(10))
         self.realizarMovimientos.triggered.connect(self.realizarMovimiento)
-        self.GestionReparacion.triggered.connect(self.fetchReparaciones)
-        self.opcionHistorial.triggered.connect(self.fetchHistorial)
-        self.opcionDeudas.triggered.connect(self.fetchDeudas)
+        self.GestionReparacion.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(11))
+        self.opcionHistorial.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(9))
+        self.opcionDeudas.triggered.connect(
+            lambda: self.stackedWidget.setCurrentIndex(14))
         self.opcionResumen.triggered.connect(self.fetchResumen)
 
         # Añadimos un botón de mostrar contraseña para la pantalla de
@@ -429,47 +440,60 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.tableWidget.cellChanged.connect(
             self.actualizarTotal)
         # Conectamos la barra de búsqueda
-        self.pantallaStock.lineEdit.editingFinished.connect(core.refresh(
-                self.pantallaStock.tableWidget, self.fetchStock))
+        self.pantallaStock.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaStock.tableWidget,
+                                 self.fetchStock))
+        self.pantallaStock.listaUbi.currentIndexChanged.connect(
+            lambda: core.refresh(self.pantallaStock.tableWidget,
+                                 self.fetchStock))
         # Conectamos el botón de imprimir
         self.pantallaStock.botonImprimir.clicked.connect(self.printStock)
 
         # Conectamos las otras barras de búsqueda y los otros filtros
-        self.pantallaAlumnos.lineEdit.editingFinished.connect(core.refresh(
-            self.pantallaAlumnos.tableWidget, self.fetchAlumnos))
-        self.pantallaClases.lineEdit.editingFinished.connect(core.refresh(
-                self.pantallaClases.tableWidget, self.fetchClases))
-        self.pantallaGrupos.lineEdit.editingFinished.connect(core.refresh(
-                self.pantallaGrupos.tableWidget, self.fetchGrupos))
+        self.pantallaAlumnos.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaAlumnos.tableWidget,
+                                 self.fetchAlumnos))
+        self.pantallaClases.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaClases.tableWidget,
+                                 self.fetchClases))
+        self.pantallaGrupos.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaGrupos.tableWidget,
+                                 self.fetchGrupos))
         self.pantallaMovs.lineEdit.editingFinished.connect(self.fetchMovs)
         self.pantallaMovs.nId.valueChanged.connect(self.fetchMovs)
         self.pantallaMovs.nTurno.valueChanged.connect(self.fetchMovs)
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
-            self.fetchOtroPersonal)
-        self.pantallaReps.lineEdit.editingFinished.connect(
-            self.fetchReparaciones)
+            lambda: core.refresh(self.pantallaOtroPersonal.tableWidget,
+                                 self.fetchMovs))
+        self.pantallaReps.lineEdit.editingFinished.connect(self.fetchReps)
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
-            self.fetchSubgrupos)
+            lambda: core.refresh(self.pantallaSubgrupos.tableWidget,
+                                 self.fetchSubgrupos))
         self.pantallaUbis.lineEdit.editingFinished.connect(
-            self.fetchUbis)
-        self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
+            lambda: core.refresh(self.pantallaUbis.tableWidget,
+                                 self.fetchUbis))
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-        self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.activated.connect(
             self.check)
-        self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
+        self.pantallaDeudas.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaDeudas.tableWidget,
+                                 self.fetchDeudas))
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.cursoComboBox.activated.connect(
             self.alumnos)
         self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
+        self.pantallaRealizarMov.ubicacionComboBox.activated.connect(
+            self.herramientas)
+
         self.boton = toolboton("usuario", self)
         self.boton.setIconSize(QtCore.QSize(60, 40))
         self.label = QtWidgets.QLabel(str("El pañolero en turno es: "))
@@ -497,18 +521,36 @@ class MainWindow(QtWidgets.QMainWindow):
         # Cambiamos el titulo de la ventana y la hacemos pantalla completa.
         self.move(0, 0)
         self.setFixedSize(QtGui.QGuiApplication.primaryScreen().size())
+        self.minimizar = QtWidgets.QPushButton()
+        self.minimizar.setObjectName("mini")
+        self.minimizar.setText("1")
+        self.minimizar.setFixedSize(40, 40)
+        self.minimizar.setVisible(True)
+        self.minimizar.clicked.connect(self.desbloquear)
+
         boton = QtWidgets.QPushButton()
         boton.setObjectName("prueba")
         boton.setText("X")
         boton.setFixedSize(40, 40)
         boton.setVisible(True)
-        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}cerrar.png'
-        pixmap = QtGui.QPixmap(path)
         boton.clicked.connect(lambda: self.close())
         self.pantallaLogin.gridLayout.addWidget(
             boton, 0, 1, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
-        # self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        self.pantallaLogin.gridLayout.addWidget(
+            self.minimizar, 0, 0, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
+
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         # Mostramos la ventana principal.
+        self.show()
+
+    def desbloquear(self):
+        if self.windowFlags() & QtCore.Qt.WindowType.WindowStaysOnTopHint:
+            self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowType.WindowStaysOnTopHint)
+            self.minimizar.setText("2")
+
+        else:    
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+            self.minimizar.setText("1")
         self.show()
 
     def actualizarSug(self):
@@ -569,7 +611,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if check[0] == 1:
                 self.usuario = bdd.cur.execute("SELECT dni FROM personal WHERE usuario = ? and contrasena = ?", (
                     self.pantallaLogin.usuariosLineEdit.text(), self.pantallaLogin.passwordLineEdit.text(),)).fetchall()[0][0]
-                self.fetchStock()
+                self.stackedWidget.setCurrentIndex(3)
                 if bdd.cur.execute("SELECT c.descripcion FROM clases c join personal p on p.id_clase = c.id WHERE dni = ?", (self.usuario,)).fetchone()[0] != "Director de Taller":
                     self.menubar.actions()[4].setVisible(False)
                 pañolero = bdd.cur.execute(
@@ -623,7 +665,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute(
                         "SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()[0])
-
+                
+                self.boton.menu().actions()[2].setVisible(False)
                 self.menubar.show()
                 self.pantallaLogin.usuarioState.setText("")
                 self.pantallaLogin.passwordState.setText("")
@@ -641,6 +684,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+        for i in dal.obtenerDatos("otro_personal", self.pantallaRealizarMov.cursoComboBox.currentText(),):
+            self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+
+    def herramientas(self):
+        self.pantallaRealizarMov.herramientaComboBox.clear()
+        for i in dal.obtenerDatos("stock", self.pantallaRealizarMov.ubicacionComboBox.currentText(),):
+            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
 
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
@@ -654,7 +704,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def realizarMovimiento(self):
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
-        self.pantallaRealizarMov.herramientaComboBox.clear()
         self.pantallaRealizarMov.estadoComboBox.clear()
         self.pantallaRealizarMov.cursoComboBox.clear()
         self.pantallaRealizarMov.ubicacionComboBox.clear()
@@ -662,23 +711,17 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in dal.obtenerDatos("tipos_mov", ""):
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
-        for i in dal.obtenerDatos("stock", ""):
-            self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
-
         for i in dal.obtenerDatos("estados", ""):
             self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
         for i in dal.obtenerDatos("clases", ""):
-            self.pantallaRealizarMov.cursoComboBox.addItem(i[1])
+            if i[2]!="Previas":
+                self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
 
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
-            self.alumnos)
-        self.pantallaRealizarMov.pushButton.clicked.connect(
-            self.saveMovimiento)
-
+        self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
         self.stackedWidget.setCurrentIndex(13)
 
     def sumar(self, cant, herramienta, estado):
@@ -770,12 +813,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.sumar(cant, herramienta[0],"De baja")
 
                 bdd.con.commit()
+
                 if self.sopas == True:
-                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
-                    self.pantallaRealizarMov.herramientaComboBox.clear()
-                    self.pantallaRealizarMov.estadoComboBox.clear()
-                    self.pantallaRealizarMov.cursoComboBox.clear()
-                    self.pantallaRealizarMov.ubicacionComboBox.clear()
+                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.descripcionLineEdit.setText("")
+                    self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
                     mensaje = """Movimiento cargado con exito."""
                     return PopUp("Aviso", mensaje).exec()
                 else:
@@ -922,9 +969,10 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
         # Se refresca la tabla, eliminando todas las filas anteriores.
         tabla.setRowCount(0)
-
+        
         # Obtenemos los filtros.
         barraBusqueda = self.pantallaStock.lineEdit
+
         listaUbi = self.pantallaStock.listaUbi
         # Desconectamos el filtro por la misma razón que la tabla.
         listaUbi.disconnect()
@@ -1075,9 +1123,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # Si el guardado fue exitoso...
             if exito == True:
                 # Se muestra que el guardado fue con éxito.
+                tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(False)
                 info = "Los datos se han guardado con éxito."
                 PopUp("Aviso", info).exec()
-                tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(False)
                 self.actualizarSug()
 
     def saveAll(self, tabla: QtWidgets.QTableWidget, funcSave: function,
@@ -1331,6 +1379,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de alumnos."""
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
+
         try:
             tabla.disconnect()
         except:
@@ -1422,6 +1471,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca el listado de movimientos."""
         tabla = self.pantallaMovs.tableWidget
         barraBusqueda = self.pantallaMovs.lineEdit
+
         nId = self.pantallaMovs.nId
         listaElem = self.pantallaMovs.listaElem
         listaPersona = self.pantallaMovs.listaPersona
@@ -1551,6 +1601,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de grupos."""
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
+
         try:
             tabla.disconnect()
         except:
@@ -1625,6 +1676,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión del personal."""
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
+
         try:
             tabla.disconnect()
         except:
@@ -1714,6 +1766,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión subgrupos."""
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
+
         try:
             tabla.disconnect()
         except:
@@ -1794,9 +1847,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de turnos."""
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
+
         nId = self.pantallaTurnos.nId
-        desdeFecha = self.pantallaReps.desdeFecha
-        hastaFecha = self.pantallaReps.hastaFecha
+        desdeFecha = self.pantallaTurnos.desdeFecha
+        hastaFecha = self.pantallaTurnos.hastaFecha
 
         try:
             tabla.disconnect()
@@ -1994,7 +2048,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión ubicaciones."""
         tabla = self.pantallaUbis.tableWidget
         barraBusqueda = self.pantallaUbis.lineEdit
+
         tabla.setSortingEnabled(False)
+        if not barraBusqueda.text():
+            return
         try:
             tabla.disconnect()
         except:
@@ -2063,10 +2120,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchUbis()
             barra.setValue(posicion)
 
-    def fetchReparaciones(self):
+    def fetchReps(self):
         """Este método refresca el listado de reparaciones."""
         tabla = self.pantallaReps.tableWidget
         barraBusqueda = self.pantallaReps.lineEdit
+
         desdeFecha = self.pantallaReps.desdeFecha
         hastaFecha = self.pantallaReps.hastaFecha
         try:
@@ -2116,8 +2174,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader(
         ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
-        desdeFecha.dateChanged.connect(self.fetchReparaciones)
-        hastaFecha.dateChanged.connect(self.fetchReparaciones)
+        desdeFecha.dateChanged.connect(self.fetchReps)
+        hastaFecha.dateChanged.connect(self.fetchReps)
 
         self.stackedWidget.setCurrentIndex(11)
 
@@ -2163,6 +2221,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca el historial."""
         tabla = self.pantallaHistorial.tableWidget
         barraBusqueda = self.pantallaHistorial.lineEdit
+
         desdeFecha = self.pantallaHistorial.desdeFecha
         hastaFecha = self.pantallaHistorial.hastaFecha
         listaGestion = self.pantallaHistorial.listaGestion
@@ -2366,6 +2425,8 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla = listaTablas.findChild(
                 QtWidgets.QTableWidget, "tablaPersona")
         barraBusqueda = self.pantallaDeudas.lineEdit
+        if not barraBusqueda.text():
+            return
         nMov = self.pantallaDeudas.nMov
         nTurno = self.pantallaDeudas.nTurno
         listaPanolero = self.pantallaDeudas.listaPanolero

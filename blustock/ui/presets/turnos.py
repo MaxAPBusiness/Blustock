@@ -23,12 +23,12 @@ class NuevoTurno(QDialog):
         self.setWindowTitle("Cargar turno")
 
         for i in dal.obtenerDatos("clases",""):
-            self.cursoComboBox.addItem(i[1])
+            self.cursoComboBox.addItem(i[2])
         
         for i in dal.obtenerDatos("ubicaciones",""):
             self.comboBox.addItem(i[1])
 
-        self.cursoComboBox.currentTextChanged.connect(self.curso)
+        self.cursoComboBox.activated.connect(self.curso)
         self.buttonBox.accepted.connect(self.turno)
 
         self.show()

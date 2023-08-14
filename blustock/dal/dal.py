@@ -610,7 +610,7 @@ class DAL():
             "-", None) else cell for cell in [cond, rep, baja, prest, grupo, subgrupo, ubi]]
         try:
             idd = tabla.item(row, 0).text()
-            if not idd:
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
                     (desc, cond, rep, baja, prest,
@@ -618,13 +618,16 @@ class DAL():
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Stock', desc, None, datosNuevos)
+                sql='SELECT id FROM stock WHERE descripcion = ? AND id_ubi ?'
+                a = bdd.cur.execute(sql, (desc, idUbi[0])).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
-                # Guardamos los datos de la fila en
+                # Guardamos los datos de la fila en la base de datos
                 bdd.cur.execute(
                     """UPDATE stock
-                    SET descripcion = ?, cant_condiciones = ?, cant_reparacion=?,
-                    cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
+                    SET descripcion = ?, cant_condiciones = ?,
+                    cant_reparacion=?, cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
                     WHERE id = ?""",
                     (desc, cond, rep, baja, prest,
                         idSubgrupo[0], idUbi[0], idd,)
@@ -700,6 +703,9 @@ class DAL():
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
+                sql='''SELECT id FROM personal WHERE dni=?'''
+                a = bdd.cur.execute(sql, (dni,)).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -749,6 +755,9 @@ class DAL():
                     "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
                 self.insertarHistorial(
                     user, 'Inserción', 'Grupos', grupo, None, None)
+                sql='''SELECT id FROM grupos WHERE grupo=?'''
+                a = bdd.cur.execute(sql, (grupo,)).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -819,13 +828,16 @@ class DAL():
         datosNuevos = [nombre, clase, dni,]
         try:
             idd = tabla.item(row, 0).text()
-            if not datos:
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO personal VALUES(NULL, ?, ?, ?, NULL, NULL)",
                     (nombre, dni, idClase[0],)
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
+                sql='''SELECT id FROM personal WHERE dni=?'''
+                a = bdd.cur.execute(sql, (dni,)).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -887,13 +899,17 @@ class DAL():
 
         try:
             idd = tabla.item(row, 0).text()
-            if not datos or not idd.isnumeric():
+            if not idd.isnumeric():
                 bdd.cur.execute(
                     "INSERT INTO subgrupos VALUES(NULL, ?, ?)",
                     (subgrupo, idGrupo[0])
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Subgrupos', subgrupo, None, datosNuevos[1:])
+                sql='''SELECT id FROM subgrupos
+                       WHERE descripcion = ? AND id_grupo = ?'''
+                a = bdd.cur.execute(sql, (subgrupo, idGrupo[0])).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 # Guardamos los datos de la fila en
@@ -975,6 +991,9 @@ class DAL():
                 )
                 self.insertarHistorial(
                    user, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
+                sql='''SELECT id FROM personal WHERE dni=?'''
+                a = bdd.cur.execute(sql, (dni,)).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -1028,6 +1047,9 @@ class DAL():
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Ubicaciones', ubicacion, None, None)
+                sql='''SELECT id FROM ubicaciones WHERE descripcion = ?'''
+                a = bdd.cur.execute(sql, (ubicacion,)).fetchone()
+                tabla.item(row, 0).setText(a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -1096,6 +1118,10 @@ class DAL():
                     )
                     self.insertarHistorial(
                         user, 'Inserción', 'Clases', clase, None, datosNuevos[1:])
+                    sql='''SELECT id FROM clases
+                    WHERE descripcion = ? AND id_cat = ?'''
+                    a = bdd.cur.execute(sql, (clase, idCat[0])).fetchone()
+                    tabla.item(row, 0).setText(a[0])
                 else:
                     idd = int(idd)
                     datosViejos = [fila for fila in datos if fila[0] == idd][0]
