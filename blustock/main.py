@@ -696,6 +696,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
+        self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
         self.stackedWidget.setCurrentIndex(13)
 
     def sumar(self, cant, herramienta, estado):
@@ -789,11 +790,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 bdd.con.commit()
 
                 if self.sopas == True:
-                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
-                    self.pantallaRealizarMov.herramientaComboBox.clear()
-                    self.pantallaRealizarMov.estadoComboBox.clear()
-                    self.pantallaRealizarMov.cursoComboBox.clear()
-                    self.pantallaRealizarMov.ubicacionComboBox.clear()
+                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
+                    self.pantallaRealizarMov.descripcionLineEdit.setText("")
+                    self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
                     mensaje = """Movimiento cargado con exito."""
                     return PopUp("Aviso", mensaje).exec()
                 else:
