@@ -208,10 +208,16 @@
         <property name="text">
          <string>Descripción</string>
         </property>
+        <property name="textAlignment">
+         <set>AlignCenter</set>
+        </property>
        </column>
        <column>
         <property name="text">
          <string>En Condiciones</string>
+        </property>
+        <property name="textAlignment">
+         <set>AlignCenter</set>
         </property>
        </column>
        <column>

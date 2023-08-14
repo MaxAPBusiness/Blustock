@@ -972,8 +972,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Obtenemos los filtros.
         barraBusqueda = self.pantallaStock.lineEdit
-        if not barraBusqueda.text():
-            return
+
         listaUbi = self.pantallaStock.listaUbi
         # Desconectamos el filtro por la misma razón que la tabla.
         listaUbi.disconnect()
@@ -1380,8 +1379,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de alumnos."""
         tabla = self.pantallaAlumnos.tableWidget
         barraBusqueda = self.pantallaAlumnos.lineEdit
-        if not barraBusqueda.text():
-            return
+
         try:
             tabla.disconnect()
         except:
@@ -1473,8 +1471,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca el listado de movimientos."""
         tabla = self.pantallaMovs.tableWidget
         barraBusqueda = self.pantallaMovs.lineEdit
-        if not barraBusqueda.text():
-            return
+
         nId = self.pantallaMovs.nId
         listaElem = self.pantallaMovs.listaElem
         listaPersona = self.pantallaMovs.listaPersona
@@ -1604,8 +1601,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de grupos."""
         tabla = self.pantallaGrupos.tableWidget
         barraBusqueda = self.pantallaGrupos.lineEdit
-        if not barraBusqueda.text():
-            return
+
         try:
             tabla.disconnect()
         except:
@@ -1680,8 +1676,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión del personal."""
         tabla = self.pantallaOtroPersonal.tableWidget
         barraBusqueda = self.pantallaOtroPersonal.lineEdit
-        if not barraBusqueda.text():
-            return
+
         try:
             tabla.disconnect()
         except:
@@ -1771,8 +1766,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión subgrupos."""
         tabla = self.pantallaSubgrupos.tableWidget
         barraBusqueda = self.pantallaSubgrupos.lineEdit
-        if not barraBusqueda.text():
-            return
+
         try:
             tabla.disconnect()
         except:
@@ -1853,11 +1847,10 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión de turnos."""
         tabla = self.pantallaTurnos.tableWidget
         barraBusqueda = self.pantallaTurnos.lineEdit
-        if not barraBusqueda.text():
-            return
+
         nId = self.pantallaTurnos.nId
-        desdeFecha = self.pantallaReps.desdeFecha
-        hastaFecha = self.pantallaReps.hastaFecha
+        desdeFecha = self.pantallaTurnos.desdeFecha
+        hastaFecha = self.pantallaTurnos.hastaFecha
 
         try:
             tabla.disconnect()
@@ -1916,8 +1909,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión usuarios."""
         tabla = self.pantallaUsuarios.tableWidget
         barraBusqueda = self.pantallaUsuarios.lineEdit
-        if not barraBusqueda.text():
-            return
 
         tabla.setSortingEnabled(False)
         try:
@@ -2015,8 +2006,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión clases."""
         tabla = self.pantallaClases.tableWidget
         barraBusqueda = self.pantallaClases.lineEdit
-        if not barraBusqueda.text():
-            return
 
         try:
             tabla.disconnect()
@@ -2059,8 +2048,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca la gestión ubicaciones."""
         tabla = self.pantallaUbis.tableWidget
         barraBusqueda = self.pantallaUbis.lineEdit
-        if not barraBusqueda.text():
-            return
+
         tabla.setSortingEnabled(False)
         if not barraBusqueda.text():
             return
@@ -2136,8 +2124,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca el listado de reparaciones."""
         tabla = self.pantallaReps.tableWidget
         barraBusqueda = self.pantallaReps.lineEdit
-        if not barraBusqueda.text():
-            return
+
         desdeFecha = self.pantallaReps.desdeFecha
         hastaFecha = self.pantallaReps.hastaFecha
         try:
@@ -2234,8 +2221,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Este método refresca el historial."""
         tabla = self.pantallaHistorial.tableWidget
         barraBusqueda = self.pantallaHistorial.lineEdit
-        if not barraBusqueda.text():
-            return
+
         desdeFecha = self.pantallaHistorial.desdeFecha
         hastaFecha = self.pantallaHistorial.hastaFecha
         listaGestion = self.pantallaHistorial.listaGestion
