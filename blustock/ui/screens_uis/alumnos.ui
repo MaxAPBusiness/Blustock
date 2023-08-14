@@ -107,7 +107,7 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>Buscar...</string>
+          <string/>
          </property>
          <property name="placeholderText">
           <string>Buscar...</string>

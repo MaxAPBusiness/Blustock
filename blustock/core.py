@@ -261,11 +261,12 @@ def cargarFuentes():
                         f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}'))
 
 def refresh(tabla, funcFetch):
-    for row in tabla.rowCount():
+    for row in range(tabla.rowCount()):
         if tabla.cellWidget(row, tabla.columnCount()-2).isEnabled():
             msg='Esta acción refrescará la tabla. Usted tiene cambios sin guardar. Refrescar la tabla descartará los cambios.\n¿Desea seguir y descartarlos?'
             popup=PopUp('Pregunta', msg).exec()
             if popup==QtWidgets.QMessageBox.StandardButton.Yes:
                 funcFetch()
                 return
+    funcFetch()
     return
