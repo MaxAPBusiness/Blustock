@@ -453,7 +453,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaClases.lineEdit.editingFinished.connect(self.fetchClases)
         self.pantallaHistorial.lineEdit.editingFinished.connect(
             self.fetchHistorial)
-        self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.activated.connect(
             self.check)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
@@ -462,11 +462,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
         self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaRealizarMov.cursoComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.cursoComboBox.activated.connect(
             self.alumnos)
         self.pantallaRealizarMov.pushButton.clicked.connect(
             self.saveMovimiento)
-        self.pantallaRealizarMov.ubicacionComboBox.currentTextChanged.connect(
+        self.pantallaRealizarMov.ubicacionComboBox.activated.connect(
             self.herramientas)
 
         self.boton = toolboton("usuario", self)
