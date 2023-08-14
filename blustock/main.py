@@ -1093,9 +1093,9 @@ class MainWindow(QtWidgets.QMainWindow):
             # Si el guardado fue exitoso...
             if exito == True:
                 # Se muestra que el guardado fue con éxito.
+                tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(False)
                 info = "Los datos se han guardado con éxito."
                 PopUp("Aviso", info).exec()
-                tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(False)
                 self.actualizarSug()
 
     def saveAll(self, tabla: QtWidgets.QTableWidget, funcSave: function,
