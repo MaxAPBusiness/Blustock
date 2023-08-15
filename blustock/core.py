@@ -162,7 +162,8 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
         # Si el tipo de campo no es con sugerencia...
         if tipoCampo in {0, 1, 2}:
             # Se crea el campo como un TableWidgetItem
-            item=QtWidgets.QTableWidgetItem("")
+            item=QtWidgets.QTableWidgetItem()
+            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # Si el tipo de campo es no editable...
             if tipoCampo == 2:
                 # Hacemos que el campo sea solo seleccionable.
@@ -217,6 +218,7 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     # Conectamos a la tabla a su función anterior
     tabla.cellChanged.connect(funcTabla)
     tabla.setCurrentCell(indiceFinal, 1)
+    tabla.setRowHeight(indiceFinal, 35)
 
 def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
                    tabla: QtWidgets.QTableWidget, numFila: int):
