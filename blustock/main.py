@@ -777,15 +777,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 if tipo[0][0] == 2:
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"En reparacion")
+                    bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, self.usuario,descripcion, fecha))
                 if tipo[0][0] == 3:
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"prest")
+                    bdd.cur.execute("INSERT INTO deudas (id_mov, cant) SELECT id, ? FROM movimientos ORDER BY id DESC LIMIT 1", (cant,))
                 if tipo[0][0] == 4:
                     self.sumar(cant, herramienta[0],estado[0][1])
                     self.restar(cant, herramienta[0],"prest")
+                    id = bdd.cur.execute("SELECT id FROM movimientos where id_elem=? and id_persona=? and cant=? and id_tipo=?", (herramienta[0],persona[0],cant,3)).fetchone()[0]
+                    if persona != "" and persona != None:
+                        bdd.cur.execute("DELETE FROM deudas WHERE id_mov = ?",(id,))
+                    else:
+                        mensaje = """ No se ha encontrado el movimiento """
+                        return PopUp("Aviso", mensaje)
+                    
                 if tipo[0][0] == 5:
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"De baja")
+                if tipo[0][0] == 6:
+                    self.sumar(cant,herramienta[0],estado[0][1])
+                    self.restar(cant, herramienta[0],"En reparacion")
+                    bdd.cur.execute("DELETE FROM reparaciones WHERE cantidad = ? and id_herramienta = ?",(cant,herramienta[0]))
 
                 bdd.con.commit()
 
@@ -798,7 +811,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
                     self.pantallaRealizarMov.descripcionLineEdit.setText("")
                     self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
-                    mensaje = """Movimiento cargado con exito."""
+                    mensaje = """Movimiento realizado con exito."""
                     return PopUp("Aviso", mensaje).exec()
                 else:
                     mensaje = """Movimiento cancelado no hay suficientes herramientas para realizar el movimiento."""
