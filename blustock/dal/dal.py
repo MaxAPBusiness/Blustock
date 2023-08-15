@@ -620,7 +620,7 @@ class DAL():
                     user, 'Inserción', 'Stock', desc, None, datosNuevos)
                 sql='SELECT id FROM stock WHERE descripcion = ? AND id_ubi ?'
                 a = bdd.cur.execute(sql, (desc, idUbi[0])).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 # Guardamos los datos de la fila en la base de datos
@@ -705,7 +705,7 @@ class DAL():
                     user, 'Inserción', 'Alumnos', nombre, None, datosNuevos[1:])
                 sql='''SELECT id FROM personal WHERE dni=?'''
                 a = bdd.cur.execute(sql, (dni,)).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -755,9 +755,9 @@ class DAL():
                     "INSERT INTO grupos VALUES(NULL, ?)", (grupo,))
                 self.insertarHistorial(
                     user, 'Inserción', 'Grupos', grupo, None, None)
-                sql='''SELECT id FROM grupos WHERE grupo=?'''
+                sql='''SELECT id FROM grupos WHERE descripcion=?'''
                 a = bdd.cur.execute(sql, (grupo,)).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -837,7 +837,7 @@ class DAL():
                     user, 'Inserción', 'Personal', nombre, None, datosNuevos[1:])
                 sql='''SELECT id FROM personal WHERE dni=?'''
                 a = bdd.cur.execute(sql, (dni,)).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -909,7 +909,7 @@ class DAL():
                 sql='''SELECT id FROM subgrupos
                        WHERE descripcion = ? AND id_grupo = ?'''
                 a = bdd.cur.execute(sql, (subgrupo, idGrupo[0])).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 # Guardamos los datos de la fila en
@@ -993,7 +993,7 @@ class DAL():
                    user, 'Inserción', 'Alumnos', nombre, None, datosNuevos)
                 sql='''SELECT id FROM personal WHERE dni=?'''
                 a = bdd.cur.execute(sql, (dni,)).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -1049,7 +1049,7 @@ class DAL():
                     user, 'Inserción', 'Ubicaciones', ubicacion, None, None)
                 sql='''SELECT id FROM ubicaciones WHERE descripcion = ?'''
                 a = bdd.cur.execute(sql, (ubicacion,)).fetchone()
-                tabla.item(row, 0).setText(a[0])
+                tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
                 bdd.cur.execute(
@@ -1121,7 +1121,7 @@ class DAL():
                     sql='''SELECT id FROM clases
                     WHERE descripcion = ? AND id_cat = ?'''
                     a = bdd.cur.execute(sql, (clase, idCat[0])).fetchone()
-                    tabla.item(row, 0).setText(a[0])
+                    tabla.item(row, 0).setData(0, a[0])
                 else:
                     idd = int(idd)
                     datosViejos = [fila for fila in datos if fila[0] == idd][0]

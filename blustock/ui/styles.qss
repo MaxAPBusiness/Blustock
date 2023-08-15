@@ -195,7 +195,7 @@ QLineEdit{
     background-color: transparent;
 }
 
-#guardar:disabled{
+#guardar:disabled, #botonGuardar:disabled{
     background-color:gray;
     border-color: dark;
 }

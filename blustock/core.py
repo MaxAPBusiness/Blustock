@@ -162,7 +162,8 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
         # Si el tipo de campo no es con sugerencia...
         if tipoCampo in {0, 1, 2}:
             # Se crea el campo como un TableWidgetItem
-            item=QtWidgets.QTableWidgetItem("")
+            item=QtWidgets.QTableWidgetItem()
+            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # Si el tipo de campo es no editable...
             if tipoCampo == 2:
                 # Hacemos que el campo sea solo seleccionable.
@@ -217,6 +218,7 @@ def insertarFilas(tabla: QtWidgets.QTableWidget,
     # Conectamos a la tabla a su función anterior
     tabla.cellChanged.connect(funcTabla)
     tabla.setCurrentCell(indiceFinal, 1)
+    tabla.setRowHeight(indiceFinal, 35)
 
 def generarBotones(funcGuardar: types.FunctionType, funcEliminar: types.FunctionType,
                    tabla: QtWidgets.QTableWidget, numFila: int):
@@ -261,11 +263,15 @@ def cargarFuentes():
                         f'ui{os.sep}rsc{os.sep}fonts{os.sep}{fuente}'))
 
 def refresh(tabla, funcFetch):
-    for row in tabla.rowCount():
+    """Este método revisa si se hicieron cambios en la tabla y avisa al
+    usuario antes de refrescar la pantalla."""
+    for row in range(tabla.rowCount()):
         if tabla.cellWidget(row, tabla.columnCount()-2).isEnabled():
-            msg='Esta acción refrescará la tabla. Usted tiene cambios sin guardar. Refrescar la tabla descartará los cambios.\n¿Desea seguir y descartarlos?'
-            popup=PopUp('Pregunta', msg).exec()
-            if popup==QtWidgets.QMessageBox.StandardButton.Yes:
+            resp=PopUp('Pregunta', 'Esta acción refrescará la tabla y hay cambios sin guardar. Si realiza esta acción, los cambios no guardados se perderán.\n¿Desea refrescar y descartar los cambios?').exec()
+            if resp==QtWidgets.QMessageBox.StandardButton.Yes:
                 funcFetch()
+                tabla.parent().botonGuardar.setEnabled(False)
                 return
+    funcFetch()
+    tabla.parent().botonGuardar.setEnabled(False)
     return
