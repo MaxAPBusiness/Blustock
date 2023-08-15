@@ -343,6 +343,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # columna id es necesaria para tener el número de fila pero no
         # queremos que la vean los usuarios porque no es info necesaria
         self.pantallaStock.tableWidget.setColumnHidden(0, True)
+        self.pantallaStock.tableWidget.resizeColumnsToContents()
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaStock.tableWidget.horizontalHeader().setSectionResizeMode(
+            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
         # Hacemos lo mismo con las otras pantallas
         self.pantallaOtroPersonal.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
@@ -358,6 +365,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     "otro_personal", self.pantallaOtroPersonal.lineEdit.text()
                 )))
         self.pantallaOtroPersonal.tableWidget.setColumnHidden(0, True)
+        self.pantallaOtroPersonal.tableWidget.resizeColumnsToContents()
+        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaSubgrupos.tableWidget,
@@ -371,6 +383,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "subgrupos", self.pantallaSubgrupos.lineEdit.text())))
         self.pantallaSubgrupos.tableWidget.setColumnHidden(0, True)
+        self.pantallaSubgrupos.tableWidget.resizeColumnsToContents()
+        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaSubgrupos.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaGrupos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaGrupos.tableWidget,
@@ -383,6 +400,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "grupos", self.pantallaGrupos.lineEdit.text())))
         self.pantallaGrupos.tableWidget.setColumnHidden(0, True)
+        self.pantallaGrupos.tableWidget.resizeColumnsToContents()
+        self.pantallaGrupos.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaAlumnos.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
@@ -398,6 +418,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.botonCargar.clicked.connect(
             self.cargarPlanilla)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
+        self.pantallaAlumnos.tableWidget.resizeColumnsToContents()
+        self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUbis.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUbis.tableWidget, lambda: self.saveOne(
@@ -409,6 +436,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.pantallaUbis.tableWidget, dal.saveUbis, dal.obtenerDatos(
                     "ubicaciones", self.pantallaUbis.lineEdit.text())))
         self.pantallaUbis.tableWidget.setColumnHidden(0, True)
+        self.pantallaUbis.tableWidget.resizeColumnsToContents()
+        self.pantallaUbis.tableWidget.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaClases.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaClases.tableWidget, lambda: self.saveOne(
@@ -421,6 +451,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "clases", self.pantallaClases.lineEdit.text())))
         self.pantallaClases.tableWidget.setColumnHidden(0, True)
+        self.pantallaClases.tableWidget.resizeColumnsToContents()
+        self.pantallaClases.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.pantallaUsuarios.pushButton_2.clicked.connect(
             lambda: core.insertarFilas(
                 self.pantallaUsuarios.tableWidget, lambda: self.saveOne(
@@ -433,6 +466,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "usuarios", self.pantallaUsuarios.lineEdit.text())))
         self.pantallaUsuarios.tableWidget.setColumnHidden(0, True)
+        self.pantallaUsuarios.tableWidget.resizeColumnsToContents()
+        self.pantallaUsuarios.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         # Conectamos los cambios en la tabla stock para actualizar el
         # valor del campo total cada vez que se haga un cambio en una
@@ -1081,6 +1117,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
         tabla.resizeColumnsToContents()
+        tabla.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            7, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            8, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         # Hacemos que cada vez que se edite una celda de una tabla, se
         # ejecuta la función.
