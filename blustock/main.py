@@ -50,10 +50,6 @@ class MainWindow(QtWidgets.QMainWindow):
             Refresca las sugerencias de todos los campos con
             sugerencias del sistema.
 
-        actualizarHastaFechas(self):
-            Actualiza los filtros de fecha y hora con la fecha y hora
-            actuales.
-
         habilitarSaves(self, row: int | None = None,
                        col: int | None = None,
                        tabla: QtWidgets.QTableWidget | None = None):
@@ -937,6 +933,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if row is None:
             row = tabla.indexAt(self.sender().pos()).row()
         tabla.cellWidget(row, tabla.columnCount()-2).setEnabled(True)
+        tabla.parent().botonGuardar.setEnabled(True)
 
     def actualizarTotal(self, row: int, col: int,
                         tabla: QtWidgets.QTableWidget | None = None):
@@ -1309,7 +1306,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Si el usuario presionó el boton sí...
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
             # Obtenemos los datos para guardarlos en el historial.
-            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM stock WHERE id=?', (idd,)).fetchone()
 
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(self.usuario, "Eliminación", "Stock",
@@ -1544,7 +1546,12 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos",
                                   datosEliminados[1], datosEliminados[2:])
 
@@ -1747,7 +1754,12 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM grupos WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos',
                                   datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
@@ -1837,9 +1849,14 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal',
-                                  datosViejos[1], datosViejos[2:])
+                                  datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
             posicion = barra.value()
             self.fetchOtroPersonal()
@@ -1918,9 +1935,14 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM subgrupos WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos',
-                                  datosViejos[1], datosViejos[2:])
+                                  datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('subgrupos', idd)
             posicion = barra.value()
             self.fetchSubgrupos()
@@ -2074,9 +2096,14 @@ class MainWindow(QtWidgets.QMainWindow):
         popup = PopUp("Pregunta", mensaje).exec()
 
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Usuarios',
-                                  datosViejos[1], datosViejos[2:])
+                                  datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
 
         posicion = barra.value()
@@ -2192,9 +2219,14 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar la ubicacion {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosViejos = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM ubicaciones WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Ubicaciones',
-                                  datosViejos[1], None)
+                                  datosEliminados[1], None)
             dal.eliminarDatos('ubicaciones', idd)
             posicion = barra.value()
             self.fetchUbis()
@@ -2287,7 +2319,12 @@ class MainWindow(QtWidgets.QMainWindow):
         mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar la clase {desc}?"
         popup = PopUp("Pregunta", mensaje).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            datosEliminados = [fila for fila in datos if fila[0] == idd][0]
+            try:
+                datosEliminados = [fila for fila in datos
+                                   if fila[0] == idd][0]
+            except TypeError:
+                datosEliminados = bdd.cur.execute(
+                    'SELECT * FROM clases WHERE id=?', (idd,)).fetchone()
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('clases', idd)

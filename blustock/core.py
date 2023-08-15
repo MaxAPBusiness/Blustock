@@ -265,9 +265,11 @@ def refresh(tabla, funcFetch):
     usuario antes de refrescar la pantalla."""
     for row in range(tabla.rowCount()):
         if tabla.cellWidget(row, tabla.columnCount()-2).isEnabled():
-            resp=PopUp('Pregunta', 'Esta acción refrescará la tabla y hay cambios sin guardar. Si realiza esta acción, los cambios no guardados se perderán.\n¿Desea refrescar y descartar los cambios?')
+            resp=PopUp('Pregunta', 'Esta acción refrescará la tabla y hay cambios sin guardar. Si realiza esta acción, los cambios no guardados se perderán.\n¿Desea refrescar y descartar los cambios?').exec()
             if resp==QtWidgets.QMessageBox.StandardButton.Yes:
                 funcFetch()
+                tabla.parent().botonGuardar.setEnabled(False)
                 return
     funcFetch()
+    tabla.parent().botonGuardar.setEnabled(False)
     return
