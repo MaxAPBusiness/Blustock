@@ -469,6 +469,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaUsuarios.tableWidget.resizeColumnsToContents()
         self.pantallaUsuarios.tableWidget.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaMovs.tableWidget.resizeColumnsToContents()
+        self.pantallaMovs.tableWidget.horizontalHeader().setSectionResizeMode(
+            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         # Conectamos los cambios en la tabla stock para actualizar el
         # valor del campo total cada vez que se haga un cambio en una
@@ -482,6 +485,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaStock.listaUbi.currentIndexChanged.connect(
             lambda: core.refresh(self.pantallaStock.tableWidget,
                                  self.fetchStock))
+        self.pantallaStock.botonRefresh.clicked.connect(
+            lambda: core.refresh(self.pantallaStock.tableWidget,
+                                 self.fetchStock))
         # Conectamos el botón de imprimir
         self.pantallaStock.botonImprimir.clicked.connect(self.printStock)
 
@@ -489,28 +495,50 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaAlumnos.lineEdit.editingFinished.connect(
             lambda: core.refresh(self.pantallaAlumnos.tableWidget,
                                  self.fetchAlumnos))
+        self.pantallaAlumnos.botonRefresh.clicked.connect(
+            lambda: core.refresh(self.pantallaAlumnos.tableWidget,
+                                 self.fetchAlumnos))
         self.pantallaClases.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaClases.tableWidget,
+                                 self.fetchClases))
+        self.pantallaClases.botonRefresh.clicked.connect(
             lambda: core.refresh(self.pantallaClases.tableWidget,
                                  self.fetchClases))
         self.pantallaGrupos.lineEdit.editingFinished.connect(
             lambda: core.refresh(self.pantallaGrupos.tableWidget,
                                  self.fetchGrupos))
+        self.pantallaGrupos.botonRefresh.clicked.connect(
+            lambda: core.refresh(self.pantallaGrupos.tableWidget,
+                                 self.fetchGrupos))
         self.pantallaMovs.lineEdit.editingFinished.connect(self.fetchMovs)
         self.pantallaMovs.nId.valueChanged.connect(self.fetchMovs)
         self.pantallaMovs.nTurno.valueChanged.connect(self.fetchMovs)
+        self.pantallaMovs.botonRefresh.clicked.connect(self.fetchMovs)
         self.pantallaOtroPersonal.lineEdit.editingFinished.connect(
             lambda: core.refresh(self.pantallaOtroPersonal.tableWidget,
-                                 self.fetchMovs))
+                                 self.fetchOtroPersonal))
+        self.pantallaOtroPersonal.botonRefresh.clicked.connect(
+            lambda: core.refresh(self.pantallaOtroPersonal.tableWidget,
+                                 self.fetchOtroPersonal))
         self.pantallaReps.lineEdit.editingFinished.connect(self.fetchReps)
+        self.pantallaReps.botonRefresh.clicked.connect(self.fetchReps)
         self.pantallaTurnos.lineEdit.editingFinished.connect(self.fetchTurnos)
         self.pantallaTurnos.nId.valueChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.botonRefresh.clicked.connect(self.fetchTurnos)
+        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaSubgrupos.lineEdit.editingFinished.connect(
+            lambda: core.refresh(self.pantallaSubgrupos.tableWidget,
+                                 self.fetchSubgrupos))
+        self.pantallaSubgrupos.botonRefresh.clicked.connect(
             lambda: core.refresh(self.pantallaSubgrupos.tableWidget,
                                  self.fetchSubgrupos))
         self.pantallaUbis.lineEdit.editingFinished.connect(
             lambda: core.refresh(self.pantallaUbis.tableWidget,
                                  self.fetchUbis))
         self.pantallaHistorial.lineEdit.editingFinished.connect(
+            self.fetchHistorial)
+        self.pantallaHistorial.botonRefresh.clicked.connect(
             self.fetchHistorial)
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.activated.connect(
             self.check)
@@ -521,8 +549,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
         self.pantallaDeudas.nTurno.valueChanged.connect(self.fetchDeudas)
-        self.pantallaTurnos.desdeFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
         self.pantallaRealizarMov.cursoComboBox.activated.connect(
             self.alumnos)
         self.pantallaRealizarMov.pushButton.clicked.connect(
@@ -540,16 +566,47 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.boton)
         self.menubar.setCornerWidget(
             widget_with_layout, QtCore.Qt.Corner.TopRightCorner)
+        
+        self.pantallaReps.hastaFecha.setDate(QtCore.QDate.fromString(
+            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
+            "yyyy/MM/dd"))
+        self.pantallaReps.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
+            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
+            "yyyy/MM/dd"))
+        self.pantallaReps.hastaFecha.dateChanged.connect(self.fetchReps)
+        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
+            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
+            "yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
+            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
+            "yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
+        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime(
+                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovs.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)).strftime(
+                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovs.hastaFecha.dateChanged.connect(self.fetchMovs)
+        self.pantallaHistorial.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString(datetime.now(
+                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.setMaximumDateTime(
+            QtCore.QDateTime.fromString(
+                (datetime.now()+relativedelta(years=100)
+                ).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.dateChanged.connect(
+            self.fetchHistorial)
+        self.pantallaResumen.hastaFecha.setDate(
+            QtCore.QDate.fromString(date.today().strftime("%Y/%m/%d"),
+                "yyyy/MM/dd"))
+        self.pantallaResumen.hastaFecha.setMaximumDate(
+            QtCore.QDate.fromString(
+                (date.today()+relativedelta(days=1)).strftime("%Y/%m/%d"),
+                "yyyy/MM/dd"))
+        self.pantallaResumen.hastaFecha.dateChanged.connect(self.fetchResumen)
 
-        # Actualizamos las fechas a los valores actuales.
-        self.actualizarHastaFechas()
-
-        # Hacemos un timer que actualice las fechas máximas cada 5 minutos
-        timer = QtCore.QTimer()
-        # Conectamos el timer
-        timer.timeout.connect(self.actualizarHastaFechas)
-        # Hacemos que se refresque cada 5 minutos
-        timer.start(300000)
         # Hacemos que la pantalla principal no se vea como ventana.
         self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         # Establecemos la pantalla del login como pantalla por defecto.
@@ -618,22 +675,6 @@ class MainWindow(QtWidgets.QMainWindow):
             event.accept()
         else:
             event.ignore()
-
-    def actualizarHastaFechas(self):
-        """Este método actualiza los filtros de fecha y hora con la
-        fecha y hora actuales.
-        """
-        self.pantallaReps.hastaFecha.setDate(
-            QtCore.QDate.fromString(
-                date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
-            datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
-            datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaResumen.hastaFecha.setDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
     def login(self):
         self.boton.show()
@@ -917,6 +958,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if tabla is None:
             # ... se usa la tabla de la pantalla stock.
             tabla = self.pantallaStock.tableWidget
+        tabla.setSortingEnabled(False)
         # Si esta función se ejecuta, significa que el usuario
         # modificó una fila de la tabla. Por eso, habilitamos los saves
         # de la fila para que el usuario pueda guardar los cambios.
@@ -957,8 +999,10 @@ class MainWindow(QtWidgets.QMainWindow):
             # Hacemos que no sea editable
             item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                           QtCore.Qt.ItemFlag.ItemIsEnabled)
+            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # Lo insertamos a la tabla
             tabla.setItem(row, 6, item)
+            tabla.setSortingEnabled(True)
 
     def actualizarSugSubgrupos(self):
         """Este método actualiza las sugerencias de los campos de
@@ -1539,9 +1583,6 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                 "yyyy/MM/dd HH:mm:ss"))
-        hastaFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime(
-                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
 
         elemSeleccionado = listaElem.currentText()
         elems = bdd.cur.execute("""SELECT DISTINCT s.descripcion
@@ -1906,8 +1947,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
         if nId.value():
             filtro = (nId.value(),)
@@ -2092,8 +2131,7 @@ class MainWindow(QtWidgets.QMainWindow):
         barraBusqueda = self.pantallaUbis.lineEdit
 
         tabla.setSortingEnabled(False)
-        if not barraBusqueda.text():
-            return
+
         try:
             tabla.disconnect()
         except:
@@ -2181,8 +2219,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         desdeFecha.setMaximumDate(QtCore.QDate.fromString(
             date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
-        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
         datosCrudos = dal.obtenerDatos("reparaciones", barraBusqueda.text())
         datos = []
@@ -2281,9 +2317,6 @@ class MainWindow(QtWidgets.QMainWindow):
         desdeFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
                 datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
 
         gestionSeleccionada = listaGestion.currentText()
         gestiones = bdd.cur.execute("""SELECT DISTINCT g.descripcion
@@ -2605,9 +2638,6 @@ class MainWindow(QtWidgets.QMainWindow):
             hastaFecha.disconnect()
         except:
             pass
-
-        hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"), "yyyy/MM/dd"))
 
         # Este fetch tiene dos tablas, asi que hacemos dos veces
         rawData = dal.obtenerDatos("resumen_deudas")
