@@ -12,9 +12,11 @@ LEFT JOIN turnos t ON m.id_turno = t.id
 LEFT JOIN personal pa ON t.id_panolero=pa.id
 LEFT JOIN clases cpa ON pa.id_clase = cpa.id
 WHERE m.id LIKE ?
-AND m.id_turno LIKE ?
-AND pa.nombre_apellido || ' ' || cpa.descripcion LIKE ?
-AND (h.descripcion LIKE ?
+AND (m.id_turno LIKE ? OR m.id_turno IS NULL)
+AND (
+    pa.nombre_apellido || ' ' || cpa.descripcion LIKE ?
+    OR pa.nombre_apellido || ' ' || cpa.descripcion IS NULL
+) AND (h.descripcion LIKE ?
 OR d.cant LIKE ?
 OR pe.nombre_apellido || ' ' || cpe.descripcion LIKE ?
 OR m.fecha_hora LIKE ?

@@ -551,9 +551,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fetchHistorial)
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.activated.connect(
             self.check)
-        self.pantallaDeudas.lineEdit.editingFinished.connect(
-            lambda: core.refresh(self.pantallaDeudas.tableWidget,
-                                 self.fetchDeudas))
+        self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
+        self.pantallaDeudas.botonRefresh.clicked.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.radioPersona.toggled.connect(self.fetchDeudas)
         self.pantallaDeudas.nMov.valueChanged.connect(self.fetchDeudas)
@@ -925,7 +924,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 (turno[0][0], herramienta[0], estado[0][0], cant, usuario, fecha, tipo[0][0], descripcion))
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"En reparacion")
-                    bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha))
+                    bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
                 elif tipo[0][0] == 3:
                     bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
                                 (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
@@ -2668,8 +2667,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla = listaTablas.findChild(
                 QtWidgets.QTableWidget, "tablaPersona")
         barraBusqueda = self.pantallaDeudas.lineEdit
-        if not barraBusqueda.text():
-            return
+
         nMov = self.pantallaDeudas.nMov
         nTurno = self.pantallaDeudas.nTurno
         listaPanolero = self.pantallaDeudas.listaPanolero
@@ -2708,15 +2706,14 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             filtros.append(panoleroSeleccionado)
 
-        datos = dal.obtenerDatos("deudas", barraBusqueda.text(), filtros)
-
         tabla.setRowCount(0)
+
         # Este fetch es especial porque trabaja con dos tablas.
         # La idea es que van ordenadas de forma especial.
         # Primero, inicializamos los contadores.
-
-        contGrupo = 1
+        contGrupo = 0
         cant = 0
+
         # Dependiendo de qué forma de ordenar esté activada, mostramos
         # una u otra tabla y inicializará la variable coldata de forma
         # diferente, lo que indica si la columna herramientas va antes
@@ -2725,6 +2722,10 @@ class MainWindow(QtWidgets.QMainWindow):
             colData = 0
         else:
             colData = 2
+        
+        
+        datos = dal.obtenerDatos("deudas", barraBusqueda.text(), filtros)
+        datos = sorted(datos, key=lambda i:i[colData])
         try:
             grupo = datos[0][colData]
         except:
@@ -2734,34 +2735,49 @@ class MainWindow(QtWidgets.QMainWindow):
             # Sumamos la cantidad, para que muestre la cantidad total
             # de deudas de la herramienta/alumno y no una cantidad por
             # entrada.
-            cant += rowData[1]
-
+            ultimaFila=0
             # Si el elemento coincide con el grupo de deudas que
             # iniciamos...
-            if rowData[colData] == grupo:
+            if rowData[colData] == grupo and rowNum<len(datos)-1:
                 #...sumamos 1 al contador de grupo
                 contGrupo += 1
+                cant += rowData[1]
             # Si no...
             else:
+                if rowNum==len(datos)-1:
+                    if rowData[colData] == grupo:
+                        cant += rowData[1]
+                        contGrupo += 1
+                        ultimaFila=1
+                    else:
+                        itemo=QtWidgets.QTableWidgetItem(str(datos[rowNum][colData]))
+                        itemo.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                                    QtCore.Qt.ItemFlag.ItemIsEnabled)
+                        tabla.setItem(rowNum, 0, itemo)
+                        itemCantt=QtWidgets.QTableWidgetItem()
+                        itemCantt.setData(0, cant)
+                        itemCantt.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                                    QtCore.Qt.ItemFlag.ItemIsEnabled)
+                        tabla.setItem(rowNum, 1, itemCantt)
                 #...se rompió el grupo, entonces establecemos el nombre
                 # del grupo de filas y la cantidad total adeudada del
                 # elemento/pérsona
                 # Está bien que printee lo de QTableView, no es un error
-                tabla.setSpan(rowNum-contGrupo, 0, contGrupo, 1)
-                tabla.setSpan(rowNum-contGrupo, 1, contGrupo, 1)
+                tabla.setSpan(rowNum - contGrupo + ultimaFila, 0, contGrupo, 1)
+                tabla.setSpan(rowNum - contGrupo + ultimaFila, 1, contGrupo, 1)
                 # Usamos el rowNum -1 porque, al romper el grupo con un
                 # nuevo dato, queremos usar el dato anterior.
-                itemP=QtWidgets.QTableWidgetItem(datos[rowNum-1][colData])
+                itemP=QtWidgets.QTableWidgetItem(str(datos[rowNum-1][colData]))
                 itemP.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
-                tabla.setItem(rowNum-contGrupo, 0, itemP)
+                tabla.setItem(rowNum - contGrupo + ultimaFila, 0, itemP)
                 itemCant=QtWidgets.QTableWidgetItem()
-                itemCant.setData(cant)
+                itemCant.setData(0, cant)
                 itemCant.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
-                tabla.setItem(rowNum-contGrupo, 1, itemCant)
+                tabla.setItem(rowNum - contGrupo + ultimaFila, 1, itemCant)
                 contGrupo = 1
-                cant = 0
+                cant = rowData[1]
                 grupo = datos[rowNum][colData]
 
             # Buscamos cual dato es mediante el cual no agrupamos y lo
