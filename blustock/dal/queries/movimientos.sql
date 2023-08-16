@@ -18,19 +18,25 @@ LEFT JOIN personal pa ON tu.id_panolero = pa.id
 LEFT JOIN clases ca ON pa.id_clase=ca.id
 LEFT JOIN personal pr ON tu.id_prof_ing = pr.id
 WHERE m.id LIKE ?
-AND m.id_turno LIKE ?
-AND s.descripcion LIKE ?
-AND p.nombre_apellido || ' ' || c.descripcion LIKE ?
-AND pa.nombre_apellido || ' ' || ca.descripcion LIKE ?
-AND (m.id_turno LIKE ?
-OR s.descripcion LIKE ?
-OR e.descripcion LIKE ?
-OR p.nombre_apellido LIKE ?
-OR m.fecha_hora LIKE ?
-OR m.cant LIKE ?
-OR ti.descripcion LIKE ?
-OR u.descripcion LIKE ?
-OR m.id LIKE ?
-OR pa.nombre_apellido LIKE ?
-OR pr.nombre_apellido LIKE ?
-OR m.descripcion LIKE ?);
+AND (m.id_turno LIKE ? OR m.id_turno IS NULL)
+AND (s.descripcion LIKE ? OR s.descripcion IS NULL)
+AND (
+    p.nombre_apellido || ' ' || c.descripcion LIKE ?
+    OR p.nombre_apellido || ' ' || c.descripcion IS NULL
+) AND (
+    pa.nombre_apellido || ' ' || ca.descripcion LIKE ?
+    OR pa.nombre_apellido || ' ' || ca.descripcion IS NULL
+) AND (
+    m.id_turno LIKE ?
+    OR s.descripcion LIKE ?
+    OR e.descripcion LIKE ?
+    OR p.nombre_apellido LIKE ?
+    OR m.fecha_hora LIKE ?
+    OR m.cant LIKE ?
+    OR ti.descripcion LIKE ?
+    OR u.descripcion LIKE ?
+    OR m.id LIKE ?
+    OR pa.nombre_apellido LIKE ?
+    OR pr.nombre_apellido LIKE ?
+    OR m.descripcion LIKE ?
+);

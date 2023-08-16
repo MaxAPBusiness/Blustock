@@ -202,7 +202,7 @@ QLineEdit{
     background-color: transparent;
 }
 
-#guardar:disabled, #botonGuardar:disabled{
+#guardar:disabled, #botonGuardar:disabled, #eliminar:disabled{
     background-color:gray;
     border-color: dark;
 }
