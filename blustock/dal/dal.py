@@ -71,7 +71,8 @@ class DAL():
         eliminarDatos(self, tabla: str, idd: str):
             Elimina datos de una tabla.
         
-        cargarPlanilla(self, datos: list, actualizarCursos: bool):
+        cargarPlanillaAlumnos(self, datos: list,
+                              actualizarCursos: bool):
             Carga los datos de una lista en la base de datos de alumnos
         
         saveStock(self, tabla: QtWidgets.QTableWidget, row: int,
@@ -428,7 +429,7 @@ class DAL():
         bdd.cur.execute(f"DELETE FROM {tabla} WHERE id = ?", (idd,))
         bdd.con.commit()
     
-    def cargarPlanilla(self, datos: list, actualizarCursos: bool):
+    def cargarPlanillaAlumnos(self, datos: list, actualizarCursos: bool):
         """Este método carga los datos de una lista en la base de datos
         de alumnos"""
         # Por el numero de fila y el contenido de esta en la lista...
@@ -531,6 +532,104 @@ class DAL():
         bdd.cur.execute('DROP TABLE alumnos_nuevos')
         bdd.con.commit()
         
+    def cargarPlanillaPersonal(self, datos: list):
+        """Este método carga los datos de una lista en la base de datos
+        de personal"""
+        # Por el numero de fila y el contenido de esta en la lista...
+        for n, fila in enumerate(datos):                
+            # Si se pasó un dni que es solo número...
+            if isinstance(fila[2], int):
+                # Si el largo del dni supera el máximo, corta.
+                if fila[2] > 10**8:
+                    info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
+                    return PopUp('Error', info).exec()
+                # Si no, continua.
+                else:
+                    continue
+            # Si se pasó un dni que es texto...
+            elif isinstance(fila[2], str):
+                # ... se quitan los puntos del dni.
+                dni = ''.join(fila[2].split("."))
+                # Si, al quitar los puntos, queda un número...
+                if dni.isnumeric():
+                    # transformamos el dni a int
+                    dni = int(dni)
+                    # checkeamos si supera la longitud que queremos
+                    if dni > 10**8:
+                        info = 'Un dni proporcionado en la planilla es demasiado largo. Revise los dni de la plantilla e intente nuevamente.'
+                        return PopUp('Error', info).exec()
+                    # Reemplazamos el dni viejo con el dni hecho número
+                    datos[n][2] = dni
+                    continue
+            # Si el dni no era entero ni numero, no es válido.
+            info = 'Un dni proporcionado en la planilla no es válido. Revise los dni de la plantilla e intente nuevamente.'
+            return PopUp('Error', info).exec()
+                
+        # Obtenemos todas las clases distintas nuevas
+        clases=set([fila[1] for fila in datos])
+        # Intentamos agregarlos a la base de datos.
+        for clase in clases:
+            try:
+                bdd.cur.execute('INSERT INTO clases VALUES(NULL, ?, 1)', (clase,))
+            # Si ya estaban en la base de datos, ignoramos el error y no lo
+            # agregamos
+            except sqlite3.IntegrityError:
+                pass
+        
+        # Creamos una tabla e ingresamos todos los alumnos nuevos acá
+        # Esto podría hacerse super facil con un merge, pero sqlite no
+        # lo soporta. Por esto recomiendo cambiar de motor de base de
+        # datos.
+        bdd.cur.execute('''CREATE TABLE personal_nuevo(
+                           nombre_apellido VARCHAR(100) NOT NULL,
+                           id_clase INTEGER NOT NULL,
+                           dni INTEGER UNIQUE NOT NULL);''')
+        for fila in datos:
+            idCurso=bdd.cur.execute('SELECT id FROM clases WHERE descripcion LIKE ?', (fila[1],)).fetchone()[0]
+            try:
+                bdd.cur.execute('INSERT INTO personal_nuevo VALUES(?, ?, ?)',
+                                (fila[0], idCurso, fila[2],))
+            # Si el curso está repetido, ignoramos ingresarlo.
+            except sqlite3.IntegrityError:
+                pass
+
+        # Acá hacemos un 'merge' hecho código:
+        # Verificamos la tabla vieja con la nueva, si el alumno esta en
+        # la nueva, se reemplazan los datos viejos con los nuevos, si
+        # no, se inserta el alumno nuevo. Si el alumno no está en la
+        # lista nueva, se deja como 'egresado' del sistema.     
+        with open(f"dal{os.sep}queries{os.sep}merge_personal.sql", 'r') as queryText:
+            sql=queryText.read()
+        mergeSelect = bdd.cur.execute(sql).fetchall()
+        for mergeRow in mergeSelect:
+            if mergeRow[2] is None:
+                bdd.cur.execute('''
+                    UPDATE personal SET id_clase = (
+                        SELECT id FROM clases
+                        WHERE descripcion LIKE 'Destituído'
+                    ) WHERE dni = ?''', (mergeRow[1],))
+            else:
+                if mergeRow[0] is None:
+                    bdd.cur.execute('''
+                        INSERT INTO personal VALUES (NULL, ?, ?, (
+                            SELECT id FROM clases WHERE descripcion = ?
+                        ), NULL, NULL)''', (mergeRow[2], mergeRow[1], mergeRow[3],))
+                else:
+                    bdd.cur.execute('''
+                        UPDATE personal SET nombre_apellido = ?, id_clase = (
+                            SELECT id FROM clases WHERE descripcion = ?
+                        ) WHERE dni = ?''', (mergeRow[2], mergeRow[3], mergeRow[1],))
+        destituidos=bdd.cur.execute('''SELECT * FROM personal WHERE id_clase IN (
+                SELECT id FROM clases WHERE descripcion='Destituído');''').fetchall()
+        # Los alumnos egresados sin relaciones en el sistema son
+        # eliminados para no ocupar espacio innecesario.
+        for destituido in destituidos:
+            if not self.verifElimOtroPersonal(destituido):
+                bdd.cur.execute('DELETE FROM personal WHERE id=?', (destituido[0],))
+        # Eliminamos la tabla que hicimos para el ingreso.
+        bdd.cur.execute('DROP TABLE personal_nuevo')
+        bdd.con.commit()
+    
     def saveStock(self, tabla: QtWidgets.QTableWidget, row: int,
                   user: int, datos: list | None = None) -> bool:
         """Este método guarda los cambios de la gestión stock.

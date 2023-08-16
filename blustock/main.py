@@ -88,7 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
             Genera un spreadsheet a partir de la tabla de la pantalla
             stock.
         
-        cargarPlanilla(self):
+        cargarPlanillaAlumnos(self):
             Crea un dataframe para la carga de datos de una spreadsheet
             en la base de datos de la gestión alumnos.
         
@@ -354,6 +354,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     dal.saveOtroPersonal), self.deleteOtroPersonal,
                 self.habilitarSaves, core.camposOtroPersonal[0],
                 [self.sClasesP]))
+        self.pantallaOtroPersonal.botonPlanilla.clicked.connect(
+            self.cargarPlanillaPersonal)
         self.pantallaOtroPersonal.botonGuardar.clicked.connect(
             lambda: self.saveAll(
                 self.pantallaOtroPersonal.tableWidget, dal.saveOtroPersonal,
@@ -412,7 +414,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 dal.obtenerDatos(
                     "alumnos", self.pantallaAlumnos.lineEdit.text())))
         self.pantallaAlumnos.botonCargar.clicked.connect(
-            self.cargarPlanilla)
+            self.cargarPlanillaAlumnos)
         self.pantallaAlumnos.tableWidget.setColumnHidden(0, True)
         self.pantallaAlumnos.tableWidget.resizeColumnsToContents()
         self.pantallaAlumnos.tableWidget.horizontalHeader().setSectionResizeMode(
@@ -1428,7 +1430,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 info = "Ocurrió un error al imprimir la tabla. Esto pudo haber ocurrido porque intentó reemplazar un documento que tenía abierto o estaba siendo usado por otra app. Por favor, verifique que el documento que desea reemplazar esté cerrado y no esté siendo usado por ningún otra app."
                 PopUp('Aviso', info).exec()
 
-    def cargarPlanilla(self):
+    def cargarPlanillaAlumnos(self):
         """Este método crea un dataframe para la carga de datos
         de una spreadsheet en la base de datos de la gestión alumnos.
         """
@@ -1512,11 +1514,64 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp('Error', info).exec()
         
         # Ejecutamos el cargar planilla del dal.
-        dal.cargarPlanilla(df.values.tolist(), actualizarCursos)
+        dal.cargarPlanillaAlumnos(df.values.tolist(), actualizarCursos)
         # Refrescamos la gestión de alumnos.
         self.fetchAlumnos()
         PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
 
+    def cargarPlanillaPersonal(self):
+        """Este método crea un dataframe para la carga de datos
+        de una spreadsheet en la base de datos de la gestión personal.
+        """
+        info = 'Esta acción no se puede deshacer. Los datos de la gestión se actualizarán en base al dni y se actualizarán los nombres y las clases en base a los datos de la planilla. Asegúrese que los dni de la planilla y de la gestión personal sean correctos, de lo contrario se pueden originar personal duplicado. Además, asegúrese de que los datos (columnas) de la planilla esten en el siguiente orden: nombre, clase y dni.'
+        # Si cerro sin responder, corta la función.
+        if (PopUp('Advertencia', info).exec() !=
+            QtWidgets.QMessageBox.StandardButton.Ok):
+            return
+        
+        # Creamos el dialog.
+        dialog = QtWidgets.QFileDialog(self)
+        dialog.setDirectory(os.path.expanduser('~documents'))
+        dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFile)
+        dialog.setViewMode(QtWidgets.QFileDialog.ViewMode.List)
+        dialog.setNameFilter(
+            "Hoja de cálculo (*.xlsx *.xls *.xlsm *.xlsb *.xltx *.xltm *.xlt *.xlam *.xla *.xlw *.xlr)")
+        dialog.setWindowTitle('Abrir archivo')
+        # Si abrió un archivo el usuario...
+        if dialog.exec():
+            # Obtenemos el nombre
+            planilla = dialog.selectedFiles()[0]
+        # Si no abrió un archivo, corta la función
+        else:
+            return
+        
+        # Intentamos hacer el dataframe a partir del excel
+        try:
+            df = pd.read_excel(planilla)
+        # Si el archivo no es válido, avisamos y cortamos la funcion.
+        except:
+            info = 'El archivo proporcionado no es válido como planilla. Proporcione un archivo válido.'
+            return PopUp('Error', info).exec()
+        # Obtenemos las columnas
+        cols = list(df.columns.values)
+
+        # Si la cantidad de columnas es dsitinta a 3, corta
+        if len(cols) != 3:
+            info = 'La plantilla proporcionada tiene una cantidad de columnas distinta al formato requerido. Proporcione la cantidad justa de columnas.'
+            return PopUp('Error', info).exec()
+
+        # Si las columnas están en el orden incorrecto, corta
+        if ("dni" in cols[0].lower() or "dni" in cols[1].lower() 
+                                or "nombre" in cols[2].lower()):
+            info = 'Los datos proporcionados no están ordenados correctamente. Ordene los datos de la planilla correctamente e intente nuevamente.'
+            return PopUp('Error', info).exec()
+        
+        # Ejecutamos el cargar planilla del dal.
+        dal.cargarPlanillaPersonal(df.values.tolist())
+        # Refrescamos la gestión de alumnos.
+        self.fetchOtroPersonal()
+        PopUp('Aviso', 'La planilla se ha cargado con éxito.').exec()
+    
     def fetchAlumnos(self):
         """Este método refresca la gestión de alumnos."""
         tabla = self.pantallaAlumnos.tableWidget
