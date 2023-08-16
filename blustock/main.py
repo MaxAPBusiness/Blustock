@@ -651,7 +651,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'SELECT descripcion FROM ubicaciones').fetchall()]
         sql = '''SELECT c.descripcion FROM clases c
                JOIN cats_clase cat ON c.id_cat=cat.id
-               WHERE cat.descripcion='Personal';'''
+               WHERE cat.descripcion='Personal' or c.descripcion='Director de Taller' or c.descripcion = 'Profesor de Taller';'''
         self.sClasesP = [i[0] for i in bdd.cur.execute(sql).fetchall()]
         self.sGruposS = [i[0] for i in bdd.cur.execute(
             'SELECT descripcion FROM grupos').fetchall()]
@@ -767,12 +767,42 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
-            self.pantallaRealizarMov.estadoComboBox.itemText
-            self.pantallaRealizarMov.estadoComboBox.removeItem(
-                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.cursoComboBox.hide()
+            self.pantallaRealizarMov.alumnoComboBox.hide()
+            self.pantallaRealizarMov.cursoLabel.hide()
+            self.pantallaRealizarMov.alumnoLabel.hide()
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            
+        elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Retiro":
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
+            self.pantallaRealizarMov.cursoComboBox.show()
+            self.pantallaRealizarMov.cursoLabel.show()
+            self.pantallaRealizarMov.alumnoLabel.show()
+            self.pantallaRealizarMov.alumnoComboBox.show()
+
+        elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.cursoComboBox.hide()
+            self.pantallaRealizarMov.alumnoComboBox.hide()
+            self.pantallaRealizarMov.cursoLabel.hide()
+            self.pantallaRealizarMov.alumnoLabel.hide()
+
+        elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
+            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
+            self.pantallaRealizarMov.cursoComboBox.hide()
+            self.pantallaRealizarMov.alumnoComboBox.hide()
+            self.pantallaRealizarMov.cursoLabel.hide()
+            self.pantallaRealizarMov.alumnoLabel.hide()
+
         else:
+            self.pantallaRealizarMov.cursoComboBox.show()
+            self.pantallaRealizarMov.cursoLabel.show()
+            self.pantallaRealizarMov.alumnoLabel.show()
+            self.pantallaRealizarMov.alumnoComboBox.show()
             for i in dal.obtenerDatos("estados", ""):
-                if 2 == self.pantallaRealizarMov.estadoComboBox.count():
+                index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
+                if index == -1:
                     self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
     def realizarMovimiento(self):
@@ -865,56 +895,67 @@ class MainWindow(QtWidgets.QMainWindow):
             mensaje = """Por favor ingrese un valor mayor a 0."""
             return PopUp("Error", mensaje).exec()
         else:
+            texto = self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText()
+            if texto == "Dar De Baja" or texto == "Ingreso de Herramienta Reparada" or texto == "Envío a Reparación":
+                persona = "pass"
             if persona != "" and persona != None:
                 if turno == " " or turno == None or turno == []:
-                    turno = bdd.cur.execute("SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()
-                bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+                    turno = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()
                 if tipo[0][0] == 1:
+                    bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
+                                (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                     self.sumar(cant, herramienta[0],estado[0][1])
-                if tipo[0][0] == 2:
+                elif tipo[0][0] == 2:
+                    usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
+                    bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
+                                (turno[0][0], herramienta[0], estado[0][0], cant, usuario, fecha, tipo[0][0], descripcion))
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"En reparacion")
-                    bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, self.usuario,descripcion, fecha))
-                if tipo[0][0] == 3:
+                    bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha))
+                elif tipo[0][0] == 3:
+                    bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
+                                (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"prest")
                     bdd.cur.execute("INSERT INTO deudas (id_mov, cant) SELECT id, ? FROM movimientos ORDER BY id DESC LIMIT 1", (cant,))
-                if tipo[0][0] == 4:
-                    self.sumar(cant, herramienta[0],estado[0][1])
-                    self.restar(cant, herramienta[0],"prest")
-                    id = bdd.cur.execute("SELECT id FROM movimientos where id_elem=? and id_persona=? and cant=? and id_tipo=?", (herramienta[0],persona[0],cant,3)).fetchone()[0]
-                    if persona != "" and persona != None:
+                elif tipo[0][0] == 4:
+                    id = bdd.cur.execute("SELECT id FROM movimientos where id_elem=? and id_persona=? and cant=? and id_tipo=?", (herramienta[0],cant)).fetchone()
+                    if id != "" and id != None:
+                        self.sumar(cant, herramienta[0],estado[0][1])
+                        self.restar(cant, herramienta[0],"prest")
                         bdd.cur.execute("DELETE FROM deudas WHERE id_mov = ?",(id,))
                     else:
-                        mensaje = """ No se ha encontrado el movimiento """
-                        return PopUp("Aviso", mensaje)
-                    
-                if tipo[0][0] == 5:
+                        mensaje = """No se ha encontrado el movimiento"""
+                        return PopUp("Error", mensaje).exec()
+                elif tipo[0][0] == 5:
                     self.restar(cant, herramienta[0],estado[0][1])
                     self.sumar(cant, herramienta[0],"De baja")
-                if tipo[0][0] == 6:
-                    self.sumar(cant,herramienta[0],estado[0][1])
-                    self.restar(cant, herramienta[0],"En reparacion")
-                    bdd.cur.execute("DELETE FROM reparaciones WHERE cantidad = ? and id_herramienta = ?",(cant,herramienta[0]))
+                elif tipo[0][0] == 6:
+                    id = bdd.cur.execute("SELECT * FROM reparaciones WHERE cantidad = ? and id_herramienta = ?", (herramienta[0],cant)).fetchone()
+                    if id != "" and id != None:
+                        self.sumar(cant,herramienta[0],estado[0][1])
+                        self.restar(cant, herramienta[0],"En reparacion")
+                        bdd.cur.execute("DELETE FROM reparaciones WHERE cantidad = ? and id_herramienta = ?",(cant,herramienta[0]))
+                    else:
+                        mensaje = """No se ha encontrado el movimiento"""
+                        return PopUp("Error", mensaje).exec()
 
                 bdd.con.commit()
-
-                if self.sopas == True:
-                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
-                    self.pantallaRealizarMov.descripcionLineEdit.setText("")
-                    self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
-                    mensaje = """Movimiento realizado con exito."""
-                    return PopUp("Aviso", mensaje).exec()
-                else:
-                    mensaje = """Movimiento cancelado no hay suficientes herramientas para realizar el movimiento."""
-                    return PopUp("Error", mensaje).exec()
-
+                if hasattr(self,"sopas"):
+                    if self.sopas == True:
+                        self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
+                        self.pantallaRealizarMov.descripcionLineEdit.setText("")
+                        self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
+                        mensaje = """Movimiento realizado con exito."""
+                        return PopUp("Aviso", mensaje).exec()
+                    else:
+                        mensaje = """Movimiento cancelado no hay suficientes herramientas para realizar el movimiento."""
+                        return PopUp("Error", mensaje).exec()
 
             else:
                 mensaje = """Por favor ingrese el nombre del alumno solicitante."""

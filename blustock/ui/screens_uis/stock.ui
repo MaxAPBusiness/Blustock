@@ -50,8 +50,7 @@
        </property>
        <property name="font">
         <font>
-         <family>Oswald,sans-serif</family>
-         <weight>50</weight>
+         <family>Oswald</family>
          <bold>false</bold>
         </font>
        </property>
@@ -100,9 +99,8 @@
          </property>
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>11</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -167,7 +165,7 @@
           </font>
          </property>
          <property name="text">
-          <string>🔄 Refrescar</string>
+          <string>⟳</string>
          </property>
         </widget>
        </item>
@@ -208,16 +206,10 @@
         <property name="text">
          <string>Descripción</string>
         </property>
-        <property name="textAlignment">
-         <set>AlignCenter</set>
-        </property>
        </column>
        <column>
         <property name="text">
          <string>En Condiciones</string>
-        </property>
-        <property name="textAlignment">
-         <set>AlignCenter</set>
         </property>
        </column>
        <column>
@@ -279,9 +271,8 @@
         <widget class="QPushButton" name="pushButton_2">
          <property name="font">
           <font>
-           <family>Oswald,sans-serif</family>
+           <family>Oswald</family>
            <pointsize>12</pointsize>
-           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
