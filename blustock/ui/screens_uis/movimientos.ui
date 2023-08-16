@@ -212,16 +212,6 @@
            <pointsize>11</pointsize>
           </font>
          </property>
-         <property name="minimumDateTime">
-          <datetime>
-           <hour>19</hour>
-           <minute>6</minute>
-           <second>30</second>
-           <year>1963</year>
-           <month>3</month>
-           <day>9</day>
-          </datetime>
-         </property>
          <property name="displayFormat">
           <string>yyyy/MM/dd HH:mm:ss</string>
          </property>

@@ -577,20 +577,20 @@ class MainWindow(QtWidgets.QMainWindow):
             (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
             "yyyy/MM/dd"))
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime(
-                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovs.hastaFecha.setDateTime(
+            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
+                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovs.hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)).strftime(
+                (datetime.now()+relativedelta(years=1)).strftime(
                 "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaMovs.hastaFecha.dateChanged.connect(self.fetchMovs)
         self.pantallaHistorial.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString(datetime.now(
+            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
                 ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaHistorial.hastaFecha.setMaximumDateTime(
             QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=100)
+                (datetime.now()+relativedelta(years=1)
                 ).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
         self.pantallaHistorial.hastaFecha.dateChanged.connect(
             self.fetchHistorial)
