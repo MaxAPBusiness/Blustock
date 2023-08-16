@@ -1,70 +1,77 @@
+/*A todo el texto del programa le damos fuente Oswald, peso normal y 
+un tamaño de 20 pixeles.*/
 *{
     font-family: 'Oswald', sans-serif;
     font-weight: 400;
     font-size: 20px;
 }
 
-QComboBox{
+/*A los combobox y spinbox le damos un border-radius y un fondo blanco*/
+QComboBox, QSpinBox{
     border-radius: 5px;
     background-color: #BABFCE;
+}
 
-}
-QSpinBox{
-    border-radius: 5px;
-    background-color: #BABFCE;
-}
-QSpinBox::up-button {
+/*A los botones de arriba y abajo de los spinbox les damos un ancho*/
+QSpinBox::up-button, QSpinBox::down-button{
     width: 22px;
 }
 
-QSpinBox::down-button {
-    width: 22px; 
-}
-
+/*A la menubar le damos margin 0, padding 0 y tamaño*/
 QMenuBar{
     margin:0px;
-    background-color: #293045;
     padding: 0;    
     font-size: 20px;
-    color:white;
 }
 
+/*A los items de la menubar les damos un padding y un border radius*/
 QMenuBar:item{
     padding: 17px;
     border-radius: 10px;
 }
 
-QMenuBar:item:selected{
+/*Cuando un item de menubar está seleccionado, le damos otro color de
+fondo, un color de letra diferente y achicamos el border radiusn*/
+QMenuBar:item:selected, QMenu:item:selected{
     background-color: #768AC5;
     color:black;
-    border-radius: 5px;
-    margin: 10px;
 }
 
-QMenu{
+/*Al qmenu y a la qmenubar le damos un color de fondo y un color*/
+QMenu, QMenuBar{
     background-color: #293045;
     color: white;
 }
 
+/*A los items del menu les damos un padding y un border radius */
 QMenu:item{
     padding:5px;
     border-radius:5px;
 }
-Qmenu:item:icon{
+
+/*A los iconos de los items del menu le damos un icon size */
+QMenu:item:icon{
     icon-size:40px;
 }
-QMenu:item:selected{
-    background-color: #768AC5;
-    color:white;
-    border-radius:5px;
+
+/*A los items seleccionados del menubar les damos un margin*/
+QMenuBar:item:selected{
+    margin: 10px;
+    border-radius: 5px;
 }
+
+/*A la qtoolbar le damos un iconsize */
 QToolBar{
     icon-size:50px
 }
-Qmenu#icon{
-   icon:size 40px;   
+
+/*A los iconos del qmenu les damos un iconsize */
+QMenu#icon{
+   icon-size: 40px;   
 }
 
+/*Al qpushbutton le damos color de fondo, estilo, ancho, radio y color
+de borde, color y padding */
 QPushButton{
     border-color:#293045;
     border-style: solid;
@@ -75,14 +82,14 @@ QPushButton{
     padding: 3px 8px;
 
 }
+
+/*Le damos un estilo especial al boton al pasar el mouse por arriba */
 QPushButton:hover{
     background-color:#768AC5;
     color:#293045;
 }
-QPushButton:pressed {
-    background-color: #293045;
-}
 
+/*Le damos estilo de borde al indicador de qradiobutton */
 QRadioButton:indicator{
     border-style: solid;
     border-color:  #293045;
@@ -90,20 +97,27 @@ QRadioButton:indicator{
     border-width:  2px;
     background-color: #BABFCE;
 }
+
+/*Le cambiamos el color del indicador al estar checkeado */
 QRadioButton::indicator:checked{
     background-color: #768AC5;
 }
+
+/*Le damos color de fondo y border radius al qlineedit */
 QLineEdit{
     border-radius: 5px;
     background-color: #BABFCE;
 }
 
+/*Le damos color de fuente, peso normal y padding negativo al boton
+refresh */
 #botonRefresh{
     font-size: 30px;
     font-weight: 400;
     padding-top: -5px;
 }
 
+/*No se que es lo que está abajo, que lo documente tizi */
 #mini{
     text-align: center;
     font-family: 'marlett';
@@ -137,43 +151,49 @@ QLineEdit{
     border-radius:5px;
     background-color: #595e6e;
     color:white;
+
 }
+
+/*Le damos al label de subtítulo un tamaño fijo*/ 
 #label{
     font-size: 45px;
 }
+
+/*Le damos al label de título un tamaño fijo*/ 
 #labelaa{
     font-size: 85px;
 }
 
+/*Esto es tizi*/
 #usuario{
     border:none;
     background-color: #293045;
     margin-right:5px;
 }
+
 #usuario::menu-indicator{
     image:none;
 }
+
 #usuario:hover,pressed{
     background-color: #768AC5;
     color:black;
     border-radius: 5px;
 }
 
-#usuariosLineEdit{
+/*Estilizamos el lineedit de usuario y contraseña*/
+#usuariosLineEdit, #passwordLineEdit{
     width: 170px;
     height: 30px;
     border-radius: 10px;
 }
-#passwordLineEdit{
-    width: 170px;
-    height: 20px;
-    border-radius: 10px;
-}
+
+/*Cambiamos el label profesores */
 #labelprofesores{
     font-size: 26px;
 }
 
-
+/*Le damos tamaños de ancho y alto al título*/
 #title{
     width: 100px;
     height: 200px;
@@ -181,32 +201,34 @@ QLineEdit{
 
 #passwordState, #usuarioState{
     color: red;
-    
 }
 
+/*Le damos al boton de mostrar contraseña un fondo y borde transparente*/
 #showPass{
     border-style:transparent;
     border-width:0;
     background-color:transparent;
 }
 
-
-
+/*Estilizamos el pushbutton5 */
 #pushButton_5{
     padding: 10px;
     background-color: #768AC5;
     border-radius: 15%;
 }
 
+/*Estilizamos los campos con sugerencias */
 #paramEdit{
     background-color: transparent;
 }
 
-#guardar:disabled, #botonGuardar:disabled, #eliminar:disabled{
+/*Hacemos grises los botones deshabilitados*/
+QPushButton:disabled{
     background-color:gray;
     border-color: dark;
 }
 
+/*Le damos a los labels y otro texto en general un tamaño de 16 puntos*/
 #lineEdit, #desdeFecha, #hastaFecha, QComboBox, QSpinBox, #label_3, #label_4,
 #label_5, #label_6, #label_7, #label_8, QRadioButton, QMenu:QAction{
     font-size:16pt;

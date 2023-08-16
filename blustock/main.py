@@ -2775,37 +2775,56 @@ class MainWindow(QtWidgets.QMainWindow):
                 cant += rowData[1]
             # Si no...
             else:
+                # Hay que comprobar que el elemento no sea el último, porque,
+                # como está programado, recorre todos los elementos y finaliza
+                # el grupo al encontrar un elemento distinto, por lo que si el
+                # elemento es el último hay que cerrar el grupo por la fuerza.
                 if rowNum==len(datos)-1:
+                    # Si el último elemento pertenece al grupo anteriormente
+                    # declarado...
                     if rowData[colData] == grupo:
+                        # Sumamos la cantidad y añadimos 1 al contador
+                        # de grupo y ultima fila. 
                         cant += rowData[1]
                         contGrupo += 1
+                        # Ultima fila es importante para cerrar el
+                        # grupo.
                         ultimaFila=1
+                    # Si el último elemento no coincide con el grupo
+                    # anterior, establecemos los items del nuevo y
+                    # último grupo.
                     else:
                         itemo=QtWidgets.QTableWidgetItem(str(datos[rowNum][colData]))
                         itemo.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                     QtCore.Qt.ItemFlag.ItemIsEnabled)
+                        itemo.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                         tabla.setItem(rowNum, 0, itemo)
                         itemCantt=QtWidgets.QTableWidgetItem()
                         itemCantt.setData(0, cant)
                         itemCantt.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                     QtCore.Qt.ItemFlag.ItemIsEnabled)
+                        itemCantt.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                         tabla.setItem(rowNum, 1, itemCantt)
-                #...se rompió el grupo, entonces establecemos el nombre
-                # del grupo de filas y la cantidad total adeudada del
-                # elemento/pérsona
+                #Si no es el último y entró a este bloque, entonces 
+                # es de otro grupo y se rompió el grupo anterior.
+                # establecemos el nombre del grupo de filas y la
+                # cantidad total adeudada del elemento/pérsona
                 # Está bien que printee lo de QTableView, no es un error
                 tabla.setSpan(rowNum - contGrupo + ultimaFila, 0, contGrupo, 1)
                 tabla.setSpan(rowNum - contGrupo + ultimaFila, 1, contGrupo, 1)
                 # Usamos el rowNum -1 porque, al romper el grupo con un
                 # nuevo dato, queremos usar el dato anterior.
                 itemP=QtWidgets.QTableWidgetItem(str(datos[rowNum-1][colData]))
+                # Lo hacemos no editable
                 itemP.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
+                itemP.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum - contGrupo + ultimaFila, 0, itemP)
                 itemCant=QtWidgets.QTableWidgetItem()
                 itemCant.setData(0, cant)
                 itemCant.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
+                itemCant.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum - contGrupo + ultimaFila, 1, itemCant)
                 contGrupo = 1
                 cant = rowData[1]
