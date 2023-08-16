@@ -30,9 +30,6 @@ from types import FunctionType as function
 import sys
 
 
-bdd.refrescarBDD()
-
-
 class MainWindow(QtWidgets.QMainWindow):
     """Esta clase crea la ventana principal.
 
