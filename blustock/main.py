@@ -789,6 +789,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
+            self.pantallaRealizarMov.descripcionLabel.SetText("Ubicacion de destino")
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
