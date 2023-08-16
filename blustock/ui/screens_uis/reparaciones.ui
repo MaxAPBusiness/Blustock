@@ -217,7 +217,7 @@
           </font>
          </property>
          <property name="text">
-          <string>🔄 Refrescar</string>
+          <string>⟳</string>
          </property>
         </widget>
        </item>
