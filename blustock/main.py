@@ -315,6 +315,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.pantallaLogin.showPass,
                 self.pantallaLogin.passwordLineEdit))
 
+        self.pantallaLogin.usuariosLineEdit.returnPressed.connect(
+            lambda: self.pantallaLogin.passwordLineEdit.setFocus()
+        )
+        self.pantallaLogin.passwordLineEdit.returnPressed.connect(self.login)
         self.pantallaLogin.Ingresar.clicked.connect(self.login)
 
         # Empezamos a conectar los botones de agregar de todas las
@@ -892,7 +896,7 @@ class MainWindow(QtWidgets.QMainWindow):
             where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" , (self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
         descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
-        fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        fecha = datetime.now().strftime("%Y%m/%d/ %H:%M:%S")
         if cant == 0:
             mensaje = """Por favor ingrese un valor mayor a 0."""
             return PopUp("Error", mensaje).exec()
@@ -2243,14 +2247,24 @@ class MainWindow(QtWidgets.QMainWindow):
             cats = ParamEdit(sugerencias, rowData[1])
             cats.textChanged.connect(
                 lambda: self.habilitarSaves(None, None, tabla))
+            if rowData[2] in {"Egresado", "Destituído"}:
+                cats.setEnabled(False)
             tabla.setCellWidget(rowNum, 1, cats)
-            item2 = QtWidgets.QTableWidgetItem(str(rowData[2]))
-            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-            tabla.setItem(rowNum, 2, item2)
 
+            
             core.generarBotones(
                 lambda: self.saveOne(tabla, dal.saveClases, datos),
                 lambda: self.deleteClases(datos), tabla, rowNum)
+            
+            item2 = QtWidgets.QTableWidgetItem(str(rowData[2]))
+            item2.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            if rowData[2] in {"Egresado", "Destituído"}:
+                item2.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                              QtCore.Qt.ItemFlag.ItemIsEnabled)
+                tabla.cellWidget(
+                    rowNum, tabla.columnCount()-1).setEnabled(False)
+            tabla.setItem(rowNum, 2, item2)
+
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
