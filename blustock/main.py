@@ -474,6 +474,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaMovs.tableWidget.resizeColumnsToContents()
         self.pantallaMovs.tableWidget.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaReps.tableWidget.resizeColumnsToContents()
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.pantallaReps.tableWidget.horizontalHeader(
+        ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         # Conectamos los cambios en la tabla stock para actualizar el
         # valor del campo total cada vez que se haga un cambio en una
@@ -896,7 +903,7 @@ class MainWindow(QtWidgets.QMainWindow):
             where s.descripcion LIKE ? and s.id_ubi  LIKE ?""" , (self.pantallaRealizarMov.herramientaComboBox.currentText(), ubicacion[0][0])).fetchone()
 
         descripcion = self.pantallaRealizarMov.descripcionLineEdit.text()
-        fecha = datetime.now().strftime("%Y%m/%d/ %H:%M:%S")
+        fecha = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         if cant == 0:
             mensaje = """Por favor ingrese un valor mayor a 0."""
             return PopUp("Error", mensaje).exec()

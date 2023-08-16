@@ -144,11 +144,15 @@ class cerrarSesion(QDialog):
         boton.setIconSize(QtCore.QSize(25, 25))
 
     def cerrar(self):
-        if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
-            mensaje = """Esta seguro que desea cerrar la aplicacion?"""
-            popup = PopUp("Pregunta", mensaje).exec()
-            if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-                self.turnFinalized = True
-        else:
+        try:
+            if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
+                mensaje = """¿Está seguro de que desea cerrar la aplicacion?"""
+                popup = PopUp("Pregunta", mensaje).exec()
+                if popup == QtWidgets.QMessageBox.StandardButton.Yes:
+                    self.turnFinalized = True
+            else:
+                mensaje = """Contraseña incorrecta. No es posible cerrar la aplicacion"""
+                PopUp("Error", mensaje).exec()
+        except IndexError:
             mensaje = """Contraseña incorrecta. No es posible cerrar la aplicacion"""
             PopUp("Error", mensaje).exec()

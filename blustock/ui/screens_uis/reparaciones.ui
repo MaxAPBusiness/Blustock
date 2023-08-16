@@ -279,7 +279,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Fecha de EnvÍo</string>
+         <string>Fecha de Envío</string>
         </property>
        </column>
        <column>
