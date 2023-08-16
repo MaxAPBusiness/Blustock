@@ -764,18 +764,36 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.pantallaLogin.usuarioState.setText("usuario incorrecto")
             self.pantallaLogin.passwordState.setText("")
+    
+    def completar(self,sugerencias):
+        cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
+        cuadroSugerencias.setCaseSensitivity(
+            QtCore.Qt.CaseSensitivity.CaseInsensitive)
+        cuadroSugerencias.setCompletionMode(
+            QtWidgets.QCompleter.CompletionMode.PopupCompletion)
+        cuadroSugerencias.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
+        return cuadroSugerencias
 
     def alumnos(self):
+        sugerencias = []
         self.pantallaRealizarMov.alumnoComboBox.clear()
         for i in dal.obtenerDatos("alumnos", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+            sugerencias.append(i[1])
         for i in dal.obtenerDatos("otro_personal", self.pantallaRealizarMov.cursoComboBox.currentText(),):
             self.pantallaRealizarMov.alumnoComboBox.addItem(i[1])
+            sugerencias.append(i[1])
+
+        self.pantallaRealizarMov.alumnoComboBox.setCompleter(self.completar(sugerencias))
+
 
     def herramientas(self):
         self.pantallaRealizarMov.herramientaComboBox.clear()
+        sugerencias = []
         for i in dal.obtenerDatos("stock", self.pantallaRealizarMov.ubicacionComboBox.currentText(),):
             self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
+            sugerencias.append(i[1])
+        self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
 
     def check(self):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
@@ -784,7 +802,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
-            
+            self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
+
+        elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
+            self.pantallaRealizarMov.alumnoComboBox.hide()
+            self.pantallaRealizarMov.alumnoLabel.hide()
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
+
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Retiro":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
@@ -792,6 +816,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.cursoLabel.show()
             self.pantallaRealizarMov.alumnoLabel.show()
             self.pantallaRealizarMov.alumnoComboBox.show()
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
@@ -799,7 +824,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
-            self.pantallaRealizarMov.descripcionLabel.SetText("Ubicacion de destino")
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
@@ -807,6 +832,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
         else:
             self.pantallaRealizarMov.cursoComboBox.show()
@@ -817,12 +843,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
                 if index == -1:
                     self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
     def realizarMovimiento(self):
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.clear()
         self.pantallaRealizarMov.estadoComboBox.clear()
         self.pantallaRealizarMov.cursoComboBox.clear()
         self.pantallaRealizarMov.ubicacionComboBox.clear()
+        sugerencias=[]
 
         for i in dal.obtenerDatos("tipos_mov", ""):
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
@@ -833,10 +861,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in dal.obtenerDatos("clases", ""):
             if i[2]!="Previas":
                 self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
+            sugerencias.append(i[2])
 
         for i in dal.obtenerDatos("ubicaciones", ""):
             self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
+        self.pantallaRealizarMov.cursoComboBox.setCompleter(self.completar(sugerencias))
+        self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
         self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
         self.stackedWidget.setCurrentIndex(13)
 
@@ -909,7 +940,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return PopUp("Error", mensaje).exec()
         else:
             texto = self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText()
-            if texto == "Dar De Baja" or texto == "Ingreso de Herramienta Reparada" or texto == "Envío a Reparación":
+            if texto == "Dar De Baja" or texto == "Ingreso de Herramienta Reparada" or texto == "Envío a Reparación" or texto == "Ingreso":
                 persona = "pass"
             if persona != "" and persona != None:
                 if turno == " " or turno == None or turno == []:
