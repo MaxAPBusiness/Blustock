@@ -32,7 +32,7 @@ Las librerías de Python usadas son:
 - **sys**: Qt lo necesita para funcionar.
 - **sqlite3**: permite crear la base de datos.
 
-El proyecto se estructura de la siguiente forma:
+El proyecto se estructura de la siguiente forma:  
 Blustock/                        > raíz  
 ├── .git                         > archivo automático de git  
 ├── blustock/                    > carpeta principal del proyecto  

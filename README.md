@@ -2,7 +2,7 @@
 
 *Esta es la versión del README en inglés. Para ver la versión en español, ir al siguiente enlance (This is the english README translation. To see the spanish version, go to the following link):* [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/MaxAPBusiness/Blustock/blob/main/README.es.md)
 
-Blustock es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
+Blustock is a desktop app designed for managing the entry and es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
 
 La aplicación funciona como un **CRUD**, compuesta de tres capas:
 - La interfaz de usuario.
@@ -32,7 +32,7 @@ Las librerías de Python usadas son:
 - **sys**: Qt lo necesita para funcionar.
 - **sqlite3**: permite crear la base de datos.
 
-El proyecto se estructura de la siguiente forma:
+El proyecto se estructura de la siguiente forma:  
 Blustock/                        > raíz  
 ├── .git                         > archivo automático de git  
 ├── blustock/                    > carpeta principal del proyecto  
