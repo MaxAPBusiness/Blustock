@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blustock"
-version = "0.1.5"
+version = "0.2.1"
 description = ""
 authors = ["Maximo Alejandro Pellegrino <mapellegrinobusiness@gmail.com>"]
 readme = "README.md"
