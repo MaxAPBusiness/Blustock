@@ -500,7 +500,7 @@ class DAL():
         # la nueva, se reemplazan los datos viejos con los nuevos, si
         # no, se inserta el alumno nuevo. Si el alumno no está en la
         # lista nueva, se deja como 'egresado' del sistema.     
-        with open(f"dal{os.sep}queries{os.sep}merge_alumnos.sql", 'r') as queryText:
+        with open(f"dal{os.sep}queries{os.sep}merge{os.sep}alumnos.sql", 'r') as queryText:
             sql=queryText.read()
         mergeSelect = bdd.cur.execute(sql).fetchall()
         for mergeRow in mergeSelect:
@@ -598,7 +598,7 @@ class DAL():
         # la nueva, se reemplazan los datos viejos con los nuevos, si
         # no, se inserta el alumno nuevo. Si el alumno no está en la
         # lista nueva, se deja como 'egresado' del sistema.     
-        with open(f"dal{os.sep}queries{os.sep}merge_personal.sql", 'r') as queryText:
+        with open(f"dal{os.sep}queries{os.sep}merge{os.sep}personal.sql", 'r') as queryText:
             sql=queryText.read()
         mergeSelect = bdd.cur.execute(sql).fetchall()
         for mergeRow in mergeSelect:

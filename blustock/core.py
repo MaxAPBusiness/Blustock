@@ -1,4 +1,4 @@
-"""Este módulo contiene funciones miscelánea útiles para el programa.
+"""Este módulo contiene funciones varias útiles para el programa.
 
 Funciones
 ---------

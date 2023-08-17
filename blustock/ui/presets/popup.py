@@ -1,4 +1,4 @@
-"""Este módulo crea una función para mostrar un mensaje en la pantalla.
+"""Este módulo contiene una clase que genera un mensaje emergente.
 
 Clases
 ---------

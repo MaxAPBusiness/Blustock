@@ -1,4 +1,5 @@
-"""Este módulo crea la conexión a la base de datos.
+"""Este módulo contiene una clase que crea la conexión y el cursor de
+la base de datos.
 
 Clases
 ------

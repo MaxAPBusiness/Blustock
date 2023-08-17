@@ -1,5 +1,9 @@
-"""Este módulo contiene una clase para crear lineEdits parametrizados
-para celdas de una tabla de la ui.
+"""Este módulo contiene una clase para crear lineEdits con sugerencias.
+
+Clases
+------
+    ParamEdit(QtWidgets.QLineEdit):
+        Crea un lineEdit con un campo de sugerencia.
 """
 from PyQt6 import QtWidgets, QtCore
 

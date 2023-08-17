@@ -1,4 +1,4 @@
-"""Este módulo contiene clases relacionadas con crear botones.
+"""Este módulo contiene una clase que crea botones preconfigurados.
 
 Clases
 ------

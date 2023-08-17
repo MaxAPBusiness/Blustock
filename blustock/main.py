@@ -904,7 +904,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Resta la cantidad de herramientas a la base de datos
     def restar(self, cant,herramienta,estado):
-        if bdd.cur.execute("select cant_condiciones from stock where descripcion = ?",(herramienta)).fetchall()[0][0]-cant >=0:
+        if bdd.cur.execute("select cant_condiciones from stock where descripcion = ?",(herramienta,)).fetchall()[0][0]-cant >=0:
             try:
                 estado = estado[estado.index(" "):]
                 estado = estado[1:]
@@ -2894,7 +2894,7 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
         # Este fetch tiene dos tablas, asi que hacemos dos veces
-        rawData = dal.obtenerDatos("resumen_deudas")
+        rawData = dal.obtenerDatos(f"resumen{os.sep}deudas")
         datos = []
         # Filtramos por fecha
         for rawRow in rawData:
@@ -2934,7 +2934,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tablaDeudas.hide()
 
         # Hacemos lo mismo con la segunda tabla
-        rawData = dal.obtenerDatos("resumen_baja")
+        rawData = dal.obtenerDatos(f"resumen{os.sep}baja")
         datos = []
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[8], 'yyyy/MM/dd')
