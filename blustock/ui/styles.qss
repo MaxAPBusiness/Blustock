@@ -117,7 +117,8 @@ refresh */
     padding-top: -5px;
 }
 
-/*No se que es lo que está abajo, que lo documente tizi */
+/*Este es el boton que usamos para sacar o poner la flag que hace que la ventana este siempre arriba */
+
 #mini{
     text-align: center;
     font-family: 'marlett';
@@ -125,12 +126,12 @@ refresh */
     font-weight: 1000px;
     padding-right: 5px;
 }
-
+/* Le damos un estilo especial al boton al pasar el mouse por arriba */
 #mini:hover{
     background-color: #768AC5;
     color:white;
 }
-
+/* Este es el boton en el inicio de sesion que nos permite cerrar la aplicacion */
 #prueba{
     background-color: #293045;
     font-weight: 1000;
@@ -138,12 +139,12 @@ refresh */
     text-align: center;
     font-family: math;
 }
-
+/*Le damos un estilo especial al boton al pasar el mouse por arriba*/
 #prueba:hover{
     background-color: #768AC5;
     color:white;
 }
-
+/*Esta es la label que nos dice si hay alguien en un turno o cual es el usuario*/
 #sopas{
     border:none;
     padding:6px;
@@ -164,17 +165,17 @@ refresh */
     font-size: 85px;
 }
 
-/*Esto es tizi*/
+/*toolboton con el iconito de usuario le sacamos los bordes, le damos color y le ponemos un margen a la derecha para que se vea bien*/
 #usuario{
     border:none;
     background-color: #293045;
     margin-right:5px;
 }
-
+/*Le sacamos el inicador de menu al toolboton*/
 #usuario::menu-indicator{
     image:none;
 }
-
+/*Le damos un estilo especial al boton al pasar el mouse por arriba*/
 #usuario:hover,pressed{
     background-color: #768AC5;
     color:black;
