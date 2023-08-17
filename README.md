@@ -1,11 +1,14 @@
 # Blustock
 
-Blustock es una aplicación de escritorio diseñada para gestionar el stock de un taller.
+Blustock es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
 
 La aplicación funciona como un **CRUD**, compuesta de tres capas:
 - La interfaz de usuario.
 - La capa de acceso de datos.
 - La base de datos.
+
+Para ver como funciona la app en profundidad, leer la guía de usuario (link próximamente).
+Está diseñada específicamente para gestionar la entrada y salida de herramientas de un taller de un colegio, pero puede ser adaptada a cualquier taller que tenga pañoleros y requiera gestionar la entrada y salida de herramientas si se cambia mediante código.
 
 El framework usado es **PyQt**, una adaptación del framwork **Qt** de **c++** para Python.
 
@@ -102,11 +105,18 @@ Blustock/                        > raíz
 │   │       └── styles.qss       > la página de estilos de todo el programa
 │   ├── core.py                  > contiene funciones varias útiles para el programa
 │   └── main.py                  > el archivo principal. Genera la ventana principal y ejecuta la aplicación.
-├── build
-├── dist
-├── pyproject.toml
-├── README.es.md
-└── README.MD
+├── build                        > las distribuciones
+├── dist                         > las distribuciones
+├── pyproject.toml               > las especificaciones del proyecto
+├── README.es.md                 > 📍 Usted está aquí.
+└── README.MD                    > El README que estás leyendo, pero en inglés.
+
+Los colaboradores del proyecto son:
+- **maxapbusiness**: El dueño del repositorio, jefe de proyecto, encargado del CRUD, la base de datos, el dal y la base lógica de programación de la aplicación. Mail: mapellegrinobusiness@gmail.com
+- **tbuda04**: Jefe de proyecto, encargado de integrar la funcionalidad de usuarios y de registro de movimientos.
+- **Maateoooo**: Encargado de la ui y del diseño general del programa.
+- *
+- **s-anti**
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/jonatasemidio/multilanguage-readme-pattern/blob/master/README.md)
 
 TODO: Añadir los links de los iconos a icons8 por el tema de la licencia.
