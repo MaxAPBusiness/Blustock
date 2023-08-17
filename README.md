@@ -1,7 +1,6 @@
 # Blustock
 
-*Esta es la versión del README en inglés. Para ver la versión en español, ir al siguiente enlance (This is the english README translation. To see the spanish version, go to the following link):*  
-[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/MaxAPBusiness/Blustock/blob/main/README.es.md)
+*Esta es la versión del README en inglés. Para ver la versión en español, ir al siguiente enlance (This is the english README translation. To see the spanish version, go to the following link):* [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/MaxAPBusiness/Blustock/blob/main/README.es.md)
 
 Blustock es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
 
