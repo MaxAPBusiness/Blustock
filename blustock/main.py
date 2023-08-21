@@ -1416,7 +1416,6 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla = self.pantallaStock.tableWidget
         # Obtenemos la fila en la que se presionó el botón eliminar
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
         idd = tabla.item(row, 0).text()
         # Si el id de la tabla está en blanco, significa que la tabla
         # fue recientemente agregada, entonces...
@@ -1437,14 +1436,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # Para esta verificación, llamamos a la función del dal.
         hayRelacion = dal.verifElimStock(idd)
         desc=tabla.item(row, 1).text()
+        ubi=tabla.item(row, 9).text()
         if hayRelacion:
-            mensaje = f"El elemento {desc} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
+            mensaje = f"El elemento {desc} de la ubicación {ubi} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
             return PopUp('Advertencia', mensaje).exec()
 
         # Si no está relacionado, pregunta al usuario si confirma
         # eliminar la fila y le advierte que la acción no se puede
         # deshacer.
-        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el elemento {desc}?"
+        mensaje = f"Esta acción no se puede deshacer. ¿Desea eliminar el elemento {desc} de la ubicación {ubi}?"
         popup = PopUp("Pregunta", mensaje).exec()
 
         # Si el usuario presionó el boton sí...
@@ -1458,14 +1458,12 @@ class MainWindow(QtWidgets.QMainWindow):
                     'SELECT * FROM stock WHERE id=?', (idd,)).fetchone()
 
             # Insertamos los datos en el historial para que quede registro.
-            dal.insertarHistorial(self.usuario, "Eliminación", "Stock",
-                                  datosEliminados[1], datosEliminados[1:])
+            dal.insertarHistorial(
+                self.usuario, "Eliminación", "Stock",
+                f'{datosEliminados[1]} {datosEliminados[9]}',
+                datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
-            # Refrescamos.
-            posicion = barra.value()
-            self.fetchStock()
-            barra.setValue(posicion)
 
     def printStock(self):
         """Este método genera un spreadsheet a partir de la tabla de la
@@ -1724,7 +1722,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaAlumnos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
 
@@ -1753,9 +1750,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                   datosEliminados[1], datosEliminados[2:])
 
             dal.eliminarDatos('personal', idd)
-            posicion = barra.value()
-            self.fetchAlumnos()
-            barra.setValue(posicion)
 
     def fetchMovs(self):
         """Este método refresca el listado de movimientos."""
@@ -1934,7 +1928,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaGrupos.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
         if not idd:
@@ -1960,9 +1953,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos',
                                   datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
-            posicion = barra.value()
-            self.fetchGrupos()
-            barra.setValue(posicion)
 
     def fetchOtroPersonal(self):
         """Este método refresca la gestión del personal."""
@@ -2029,7 +2019,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaOtroPersonal.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
         if not idd:
@@ -2055,9 +2044,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
-            posicion = barra.value()
-            self.fetchOtroPersonal()
-            barra.setValue(posicion)
 
     def fetchSubgrupos(self):
         """Este método refresca la gestión subgrupos."""
@@ -2116,7 +2102,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaSubgrupos.tableWidget
         row = tabla.indexAt(self.sender().pos()).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
         if not idd:
@@ -2141,9 +2126,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('subgrupos', idd)
-            posicion = barra.value()
-            self.fetchSubgrupos()
-            barra.setValue(posicion)
 
     def fetchTurnos(self):
         """Este método refresca la gestión de turnos."""
@@ -2276,7 +2258,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaUsuarios.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
         if not idd:
@@ -2302,10 +2283,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Usuarios',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
-
-        posicion = barra.value()
-        self.fetchUsuarios()
-        barra.setValue(posicion)
 
     def fetchClases(self):
         """Este método refresca la gestión clases."""
@@ -2411,7 +2388,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaUbis.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
         if not idd:
@@ -2435,9 +2411,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Ubicaciones',
                                   datosEliminados[1], None)
             dal.eliminarDatos('ubicaciones', idd)
-            posicion = barra.value()
-            self.fetchUbis()
-            barra.setValue(posicion)
 
     def fetchReps(self):
         """Este método refresca el listado de reparaciones."""
@@ -2509,7 +2482,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         tabla = self.pantallaClases.tableWidget
         row = (tabla.indexAt(self.sender().pos())).row()
-        barra = tabla.verticalScrollBar()
 
         idd = tabla.item(row, 0).text()
 
@@ -2535,10 +2507,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('clases', idd)
-            posicion = barra.value()
-            self.fetchClases()
-            barra.setValue(posicion)
-
+            
     def fetchHistorial(self):
         """Este método refresca el historial."""
         tabla = self.pantallaHistorial.tableWidget

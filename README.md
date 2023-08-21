@@ -1,28 +1,24 @@
 # Blustock
 
-*Esta es la versión del README en inglés. Para ver la versión en español, ir al siguiente enlance (This is the english README translation. To see the spanish version, go to the following link):* [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/MaxAPBusiness/Blustock/blob/main/README.es.md)
+*Esta es la versión del README en inglés. La versión en español es más detallada. Para ver la versión en español, ir al siguiente enlance (This is the english README translation. The spanish version is more detailed. To see the spanish version, go to the following link):* [![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/MaxAPBusiness/Blustock/blob/main/README.es.md)
 
-Blustock is a desktop app designed for managing the entry and es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
+Blustock is a desktop app designed for registering and managing a school warehouse's flow of elements.
 
-La aplicación funciona como un **CRUD**, compuesta de tres capas:
-- La interfaz de usuario.
-- La capa de acceso de datos.
-- La base de datos.
+The app also works as a **CRUD**, and it is composed of three layers: the UI, a DAL and the DB.
 
-Para ver como funciona la app en profundidad, leer la guía de usuario (link próximamente).
-Está diseñada específicamente para gestionar la entrada y salida de herramientas de un taller de un colegio, pero puede ser adaptada a cualquier taller que tenga pañoleros y requiera gestionar la entrada y salida de herramientas si se cambia mediante código.
+If the app receives support, I am going to explain specifically how the app works. For the moment, see the user guide (it is in spanish though, sorry) (TODO: put link here).
 
-El framework usado es **PyQt**, una adaptación del framwork **Qt** de **c++** para Python.
+The app is designed specifically for registering and managing a school warehouse's flow of elements, but it can also be adapted to any workshop that needs registry and managing by playing with the code. The app is also currently in spanish only, though, if the project receives support, i could work in an english translation. 
 
-Los lenguajes usados son:
-- **Python**, como lenguaje de programación general.
-- **Ui/xml**, como lenguaje especial para diseño de ui prehecha.
-- **QSS**, como lenguaje de estilos.
-- **SQL**, como lenguaje de consultas de base de datos.
+The implemented framework is **PyQt**. The app languages are:
+- **Python**, as general programming language.
+- **Ui/xml**, as language for prebuilt ui files.
+- **QSS**, as style language.
+- **SQL**, as database query language.
 
-Las librerías de Python usadas son:
-- **PyQt**: el framework.
-- **os**: permite manejar las rutas de archivo de forma estable y portable.
+The Python libraries used are:
+- **PyQt**: the framework.
+- **os**: for managing paths in a consistent and portable way.
 - **datetime**: permite el manejo de datos de fecha.
 - **dateutil**: permite, a una fecha, sumarle y restarle un tiempo específico relativo a ella.
 - **textwrap**: permite quitar la identación a texto multilínea.
@@ -32,7 +28,8 @@ Las librerías de Python usadas son:
 - **sys**: Qt lo necesita para funcionar.
 - **sqlite3**: permite crear la base de datos.
 
-El proyecto se estructura de la siguiente forma:  
+The project is structured in the following way:  *Notes are in spanish, I will later translate them into english.*  
+
 Blustock/                        > raíz  
 ├── .git                         > archivo automático de git  
 ├── blustock/                    > carpeta principal del proyecto  
@@ -113,12 +110,12 @@ Blustock/                        > raíz
 ├── README.es.md                 > 📍 Usted está aquí.  
 └── README.MD                    > El README que estás leyendo, pero en inglés.  
 
-Los colaboradores del proyecto son:
-- **maxapbusiness**: El dueño del repositorio, jefe de proyecto, encargado del CRUD, la base de datos, el dal y la base lógica de programación de la aplicación. Mail: mapellegrinobusiness@gmail.com
-- **tbuda04**: Jefe de proyecto, encargado de integrar la funcionalidad de usuarios y de registro de movimientos.
-- **Maateoooo**: Encargado de la ui y del diseño general del programa.
-- **valenbru**: Encargada de la ui y del diseño general del programa.
-- **s-anti**: Ayudante en la ui.
-- **Santy-git**: Ayudante en la ui.
+The project's collaborators are:
+- **maxapbusiness**: the repository owner, project leader, made the CRUD (database, dal, connecting ui with the database), implemented the history functionality and documented all the project (the one who wrote this readme :p). Mail: mapellegrinobusiness@gmail.com
+- **tbuda04**: project leader, implemented the movement and user functionality.
+- **Maateoooo**: implemented ui structure and design and app icon.
+- **valenbru**: implemented design.
+- **s-anti**: helped with ui and coding.
+- **Santy-git**: helped with ui and coding.
 
-*Esta aplicación usa contenido de icons8. Link a la página oficial de icons8:* https://icons8.com
+*This app uses icons8 content. Link to the official icons8 page:* https://icons8.com
