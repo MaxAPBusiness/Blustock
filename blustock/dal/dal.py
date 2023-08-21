@@ -716,7 +716,7 @@ class DAL():
                         idSubgrupo[0], idUbi[0],)
                 )
                 self.insertarHistorial(
-                    user, 'Inserción', 'Stock', desc, None, datosNuevos)
+                    user, 'Inserción', 'Stock', f'{desc} {ubi}', None, datosNuevos)
                 sql='SELECT id FROM stock WHERE descripcion = ? AND id_ubi ?'
                 a = bdd.cur.execute(sql, (desc, idUbi[0])).fetchone()
                 tabla.item(row, 0).setData(0, a[0])
@@ -734,7 +734,7 @@ class DAL():
                 datosViejos = [["" if cellData in (
                     "-", None) else cellData for cellData in fila] for fila in datos if fila[0] == idd][0]
                 self.insertarHistorial(
-                    user, 'Edición', 'Stock', datosViejos[1], datosViejos[2:], datosNuevos)
+                    user, 'Edición', 'Stock', f'{datosViejos[1]} {datosViejos[9]}', datosViejos[2:], datosNuevos)
         except sqlite3.IntegrityError:
             info = "La herramienta que desea ingresar ya está ingresada. Ingrese otra información o revise la información ya ingresada"
             return PopUp("Error", info).exec()

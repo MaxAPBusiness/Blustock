@@ -335,7 +335,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Fila</string>
+         <string>Registro</string>
         </property>
        </column>
        <column>
