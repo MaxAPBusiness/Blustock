@@ -28,7 +28,7 @@ The Python libraries used are:
 - **sys**: Qt lo necesita para funcionar.
 - **sqlite3**: permite crear la base de datos.
 
-The project is structured in the following way:  *Notes are in spanish, I will later translate them into english.*
+The project is structured in the following way:  *Notes are in spanish, I will later translate them into english.*  
 Blustock/                        > raíz  
 ├── .git                         > archivo automático de git  
 ├── blustock/                    > carpeta principal del proyecto  
