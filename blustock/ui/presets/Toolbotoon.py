@@ -98,6 +98,7 @@ class toolboton(QtWidgets.QToolButton):
                 self.menu().actions()[0].setVisible(False)
                 self.menu().actions()[4].setVisible(False)
                 self.menu().actions()[2].setVisible(True)
+            self.nw.realizarMovimiento()
 
     def cerrar(self):
         self.popup=TerminarTurno(self.nw.usuario)

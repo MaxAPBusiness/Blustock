@@ -21,25 +21,35 @@ class NuevoTurno(QDialog):
         uic.loadUi(os.path.join(os.path.abspath(os.pardir),os.getcwd(),"ui", 'screens_uis', 'cargar_turno.ui'), self)
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.setWindowTitle("Cargar turno")
-
+        sugerencias=[]
+        self.setFixedSize(600, 400)
         for i in dal.obtenerDatos("clases",""):
             self.cursoComboBox.addItem(i[2])
-        
+            sugerencias.append(i[2])
+
         for i in dal.obtenerDatos("ubicaciones",""):
             self.comboBox.addItem(i[1])
 
-        self.cursoComboBox.activated.connect(self.curso)
+        cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
+        cuadroSugerencias.setCaseSensitivity(
+            QtCore.Qt.CaseSensitivity.CaseInsensitive)
+        cuadroSugerencias.setCompletionMode(
+            QtWidgets.QCompleter.CompletionMode.PopupCompletion)
+        cuadroSugerencias.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
+        
+        self.cursoComboBox.setCurrentIndex(-1)
+        self.cursoComboBox.setCompleter(cuadroSugerencias)
+        self.cursoComboBox.textActivated.connect(self.curso)
         self.buttonBox.accepted.connect(self.turno)
-
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Save).setText("Crear turno")
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
         self.show()
     
     def curso(self):
         self.alumnoComboBox.clear()
 
         for i in dal.obtenerDatos("alumnos",self.cursoComboBox.currentText(),):
-
             self.alumnoComboBox.addItem(i[1])
-
 
     def turno(self):
         if bdd.cur.execute("select count(*) from turnos WHERE fecha_egr is null").fetchall()[0][0] == 0:
@@ -47,7 +57,7 @@ class NuevoTurno(QDialog):
                 profe = dal.obtenerDatos("usuarios",self.usuario,)
                 alumno = dal.obtenerDatos("alumnos",self.alumnoComboBox.currentText(),)
                 panol = dal.obtenerDatos("ubicaciones",self.comboBox.currentText(),)
-                fecha = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                fecha = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 bdd.cur.execute("INSERT INTO turnos(id_panolero, fecha_ing, id_prof_ing, id_ubi) VALUES (?, ?, ?, ?)", (alumno[0][0], fecha, profe[0][0], panol[0][0]))
                 bdd.con.commit()
                 mensaje = """El turno se cargo con exito."""
@@ -69,16 +79,19 @@ class TerminarTurno(QDialog):
         self.turnFinalized = None
         self.usuario = usuario
         super().__init__()
+        self.setFixedSize(600, 400)
         uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'finalizar_turno.ui'), self)
         self.setWindowTitle("Finalizar turno")
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
-
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
         pixmap = QtGui.QPixmap(path)
         self.showPass.setIcon(QtGui.QIcon(QtGui.QIcon(pixmap)))
         self.showPass.setIconSize(QtCore.QSize(25, 25))
         self.showPass.clicked.connect(lambda: self.mostrarContrasena(self.showPass, self.contrasenaLineEdit))
         self.buttonBox.accepted.connect(self.cerrar)
+        print(self.buttonBox.standardButtons())
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).setText("Terminar turno")
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
 
         self.show()
 
@@ -99,7 +112,7 @@ class TerminarTurno(QDialog):
             if self.contrasenaLineEdit.text() == dal.obtenerDatos("usuarios", self.usuario)[0][5]:
                 self.turnFinalized = True
                 profe = dal.obtenerDatos("usuarios", self.usuario,)
-                hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                hora = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 bdd.cur.execute("""UPDATE turnos SET fecha_egr = ?, id_prof_egr = ? WHERE fecha_egr is null""", (hora, profe[0][0],))
                 bdd.con.commit()
                 mensaje = """El turno se ha finalizado correctamente"""
@@ -128,7 +141,8 @@ class cerrarSesion(QDialog):
         self.showPass.setIconSize(QtCore.QSize(25, 25))
         self.showPass.clicked.connect(lambda: self.mostrarContrasena(self.showPass, self.contrasenaLineEdit))
         self.buttonBox.accepted.connect(self.cerrar)
-
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).setText("Cerar la aplicacion")
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
         self.show()
 
     def mostrarContrasena(self, boton,entry: QtWidgets.QLineEdit):
