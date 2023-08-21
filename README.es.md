@@ -4,7 +4,7 @@
 
 Blustock es una aplicación de escritorio diseñada para gestionar la entrada y salida de herramientas de un taller de un colegio.
 
-La aplicación funciona como un **CRUD**, compuesta de tres capas:
+La aplicación también funciona como un **CRUD**, compuesta de tres capas:
 - La interfaz de usuario.
 - La capa de acceso de datos.
 - La base de datos.
@@ -12,9 +12,7 @@ La aplicación funciona como un **CRUD**, compuesta de tres capas:
 Para ver como funciona la app en profundidad, leer la guía de usuario (link próximamente).
 Está diseñada específicamente para gestionar la entrada y salida de herramientas de un taller de un colegio, pero puede ser adaptada a cualquier taller que tenga pañoleros y requiera gestionar la entrada y salida de herramientas si se cambia mediante código.
 
-El framework usado es **PyQt**, una adaptación del framwork **Qt** de **c++** para Python.
-
-Los lenguajes usados son:
+El framework implementado es **PyQt**. Los lenguajes de la app son:
 - **Python**, como lenguaje de programación general.
 - **Ui/xml**, como lenguaje especial para diseño de ui prehecha.
 - **QSS**, como lenguaje de estilos.
@@ -22,8 +20,8 @@ Los lenguajes usados son:
 
 Las librerías de Python usadas son:
 - **PyQt**: el framework.
-- **os**: permite manejar las rutas de archivo de forma estable y portable.
-- **datetime**: permite el manejo de datos de fecha.
+- **os**: para manejar las rutas de archivo de forma estable y portable.
+- **datetime**: para el manejo de datos de fecha.
 - **dateutil**: permite, a una fecha, sumarle y restarle un tiempo específico relativo a ella.
 - **textwrap**: permite quitar la identación a texto multilínea.
 - **unidecode**
@@ -114,11 +112,11 @@ Blustock/                        > raíz
 └── README.MD                    > El README que estás leyendo, pero en inglés.  
 
 Los colaboradores del proyecto son:
-- **maxapbusiness**: El dueño del repositorio, jefe de proyecto, encargado del CRUD, la base de datos, el dal y la base lógica de programación de la aplicación. Mail: mapellegrinobusiness@gmail.com
+- **maxapbusiness**: El dueño del repositorio, jefe de proyecto, encargado del CRUD (base de datos, dal, conectar ui con la base de datos), implementó la funcionalidad del historial y documentó todo el projecto (escribió este readme :p). Mail: mapellegrinobusiness@gmail.com
 - **tbuda04**: Jefe de proyecto, encargado de integrar la funcionalidad de usuarios y de registro de movimientos.
-- **Maateoooo**: Encargado de la ui y del diseño general del programa.
+- **Maateoooo**: Encargado de la ui y del diseño general del programa, diseñó el logo.
 - **valenbru**: Encargada de la ui y del diseño general del programa.
-- **s-anti**: Ayudante en la ui.
-- **Santy-git**: Ayudante en la ui.
+- **s-anti**: Ayudante en la ui y en código.
+- **Santy-git**: Ayudante en la ui y en código.
 
 *Esta aplicación usa contenido de icons8. Link a la página oficial de icons8:* https://icons8.com
