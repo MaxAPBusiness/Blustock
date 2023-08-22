@@ -726,6 +726,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.label.setText(
                             "El pañolero en turno es: " + pañolero[0])
                         self.label.setObjectName("sopas")
+                        self.boton.menu().actions()[2].setVisible(True)
+                        self.boton.menu().actions()[6].setVisible(True)
                         self.boton.menu().actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(False)
                         for i in range(7):
@@ -748,12 +750,12 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.menubar.actions()[4].setVisible(False)
                         self.boton.menu().actions()[0].setVisible(True)
                         self.boton.menu().actions()[4].setVisible(True)
+                        self.boton.menu().actions()[2].setVisible(False)
 
                 else:
                     self.label.setText("Usuario: " + bdd.cur.execute(
                         "SELECT nombre_apellido FROM personal WHERE dni = ?", (self.usuario,)).fetchone()[0])
                 
-                self.boton.menu().actions()[2].setVisible(False)
                 self.menubar.show()
                 self.pantallaLogin.usuarioState.setText("")
                 self.pantallaLogin.passwordState.setText("")
