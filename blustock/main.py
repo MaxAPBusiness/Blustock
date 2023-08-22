@@ -2769,6 +2769,7 @@ class MainWindow(QtWidgets.QMainWindow):
             filtros.append(panoleroSeleccionado)
 
         tabla.setRowCount(0)
+        tabla.horizontalHeader().setVisible(True)
 
         # Este fetch es especial porque trabaja con dos tablas.
         # La idea es que van ordenadas de forma especial.
@@ -2884,6 +2885,7 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 tabla.setItem(rowNum, i, item)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
         tabla.horizontalHeader(
         ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
