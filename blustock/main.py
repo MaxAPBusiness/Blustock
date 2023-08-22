@@ -783,6 +783,10 @@ class MainWindow(QtWidgets.QMainWindow):
     #Toma la cantidad en condiciones de la herramienta que selecciones en nuevo movimiento y lo pone en una line edit para mostrarnos la cantida de herramientas en stock
     def cant(self):
         valor = bdd.cur.execute("select cant_condiciones from stock WHERE descripcion = ?",(self.pantallaRealizarMov.herramientaComboBox.currentText(),)).fetchall()
+        if valor == None or valor == "" or valor == " " or valor == []:
+            mensaje = "La herramienta que selecciono no existe por favor ingrese una herramienta existente."
+            self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+            return PopUp("Error", mensaje).exec()
         self.pantallaRealizarMov.cantidadSpinBox.setMaximum(valor[0][0])
         self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(valor[0][0]))
 
@@ -964,7 +968,6 @@ class MainWindow(QtWidgets.QMainWindow):
             JOIN clases c ON c.id = p.id_clase
             WHERE p.nombre_apellido LIKE ?
             and c.descripcion LIKE ?;''', (self.pantallaRealizarMov.alumnoComboBox.currentText(), self.pantallaRealizarMov.cursoComboBox.currentText())).fetchone()
-
         ubicacion = dal.obtenerDatos(
             "ubicaciones", self.pantallaRealizarMov.ubicacionComboBox.currentText())
         herramienta = bdd.cur.execute(
@@ -995,7 +998,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     if texto=="Envío a Reparación" and (descripcion ==" " or descripcion =="" or descripcion==None):
                         mensaje = """Por favor ingrese la ubicacion a la que la herramienta sera enviada"""
                         return PopUp("Error", mensaje).exec()
-                    if persona != "" and persona != None:
+                    
+                    if persona != "" and persona != None and persona != []:
                         if turno == " " or turno == None or turno == []:
                             turno = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()
                         if tipo[0][0] == 1:

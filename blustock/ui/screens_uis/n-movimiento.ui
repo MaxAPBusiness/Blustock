@@ -104,6 +104,9 @@
        <property name="editable">
         <bool>false</bool>
        </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
@@ -114,7 +117,14 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="ubicacionComboBox"/>
+      <widget class="QComboBox" name="ubicacionComboBox">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="herramientaLabel">
@@ -127,6 +137,9 @@
       <widget class="QComboBox" name="herramientaComboBox">
        <property name="editable">
         <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
        </property>
       </widget>
      </item>
@@ -228,6 +241,9 @@
        <property name="editable">
         <bool>false</bool>
        </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
+       </property>
       </widget>
      </item>
      <item row="7" column="0">
@@ -242,6 +258,9 @@
        <property name="editable">
         <bool>true</bool>
        </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
+       </property>
       </widget>
      </item>
      <item row="8" column="0">
@@ -255,6 +274,9 @@
       <widget class="QComboBox" name="alumnoComboBox">
        <property name="editable">
         <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
        </property>
       </widget>
      </item>
