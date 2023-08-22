@@ -28,7 +28,7 @@ Hay cosas en el programa que quedaron pendientes y estaría bueno que lo hagan u
 4. Encriptar contraseñas: las contraseñas de los usuarios no están encriptadas. Pueden usar una librería (fernet, por ejemplo) para encriptarlas con Python facilmente.  
 5. Que, en el resumen del día, las deudas en el día se sume la cantidad si la persona y la herramienta y la ubicación son las mismas. Como está hecho ahora, se muestra cada movimiento por separado, vcuando estaría mejor mostrar las deudas agrupadas por herramienta y ubicación y persona.  
 
-**Ojito con querer vender el programa, porque está prohibido por licencia. No se hagan los vivos 👀**
+**Ojito con querer vender el programa, porque está prohibido por licencia. No se hagan los vivos 👀**  
 Link de la licencia en español: https://github.com/MaxAPBusiness/Blustock/blob/main/LICENCIA.es
 
 Está diseñada específicamente para gestionar la entrada y salida de herramientas de un taller de un colegio, pero puede ser adaptada a cualquier taller que tenga pañoleros y requiera gestionar la entrada y salida de herramientas si se cambia mediante código.
