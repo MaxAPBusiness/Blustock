@@ -249,7 +249,7 @@
         <widget class="QSpinBox" name="nId">
          <property name="minimumSize">
           <size>
-           <width>60</width>
+           <width>70</width>
            <height>0</height>
           </size>
          </property>
@@ -280,6 +280,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="listaPersona">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>200</width>
@@ -297,19 +303,6 @@
           </property>
          </item>
         </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QLabel" name="label_9">
@@ -359,7 +352,7 @@
        <item>
         <widget class="QComboBox" name="listaPanolero">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -372,7 +365,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>100</width>
+           <width>1666666</width>
            <height>16777215</height>
           </size>
          </property>
@@ -402,6 +395,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="listaElem">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="font">
           <font>
            <pointsize>11</pointsize>
