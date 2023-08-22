@@ -9,7 +9,25 @@ La aplicación también funciona como un **CRUD**, compuesta de tres capas:
 - La capa de acceso de datos.
 - La base de datos.
 
-Para ver como funciona la app en profundidad, leer la guía de usuario (link próximamente).
+Funciona de la siguiente manera:  
+1. Un usuario (normal o admin) inicia sesión. La diferencia de privilegios está en que el admin puede acceder a la gestión de ubicaciones y el admin no.  
+2. Una vez dentro, pueden:  
+2. 1. Gestionar datos: se puede ver, modificar y eliminar datos.  
+2. 2. Ver listados: solo se pueden ver datos.  
+2. 3. Realizar movimientos: proximamente se explicará.  
+2. 4. Cargar turnos: proximamente se explicará.  
+
+Para ver como funciona la app en profundidad, leer la guía de usuario (https://docs.google.com/document/d/1PsNRFtbi3YwYBC2aCry-U-qTe4iRChxhenEuYK33EQ4/edit).
+
+Para ver cómo funciona cada función, clase, método y módulo, leer la documentación.
+
+Hay cosas en el programa que quedaron pendientes y estaría bueno que lo hagan ustedes, estas son:  
+1. Cambiar el motor de base de datos. Esto es debido a que el motor actual no soporta el dato fecha (lo guardamos como texto y eso genera un peso extra que sería innecesario con otro motor). Además, podrían adaptar el merge rudimentario que hicimos en el sqlite con un merge verdadero de un motor de base de datos pulido. Recomiendo personalmente PostgreSQL, aunque pueden usar cualquier otro motor. Cuando lo cambien, adapten los campos fecha y el merge.  
+2. Añadir gestiones de lugares de reparación. En la gestión debería estar el nombre del lugar e info de referencia (mail, telefono, etc.). Luego, relacionar esa gestión con el listado de seguimientos de reparación.  
+3. Encriptar los archivos del programa para que no puedan acceder asi nomás. Como esta hecha la app y como la distribuimos, esta abierta para que cualquiera que sepa un cachitin de programación pueda entrar, leer y entender el código (eso incluye la base de datos). Vean la forma de encriptarlo y que no se pueda entrar desde afuera.  
+4. Encriptar contraseñas: las contraseñas de los usuarios no están encriptadas. Pueden usar una librería (fernet, por ejemplo) para encriptarlas con Python facilmente.  
+5. Que, en el resumen del día, las deudas en el día se sume la cantidad si la persona y la herramienta y la ubicación son las mismas. Como está hecho ahora, se muestra cada movimiento por separado, vcuando estaría mejor mostrar las deudas agrupadas por herramienta y ubicación y persona.  
+
 Está diseñada específicamente para gestionar la entrada y salida de herramientas de un taller de un colegio, pero puede ser adaptada a cualquier taller que tenga pañoleros y requiera gestionar la entrada y salida de herramientas si se cambia mediante código.
 
 El framework implementado es **PyQt**. Los lenguajes de la app son:

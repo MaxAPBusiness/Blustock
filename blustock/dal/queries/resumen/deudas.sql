@@ -10,6 +10,6 @@ JOIN stock s ON s.id=m.id_elem
 JOIN personal p ON p.id = m.id_persona
 JOIN clases c ON p.id_clase = c.id
 LEFT JOIN turnos tu ON tu.id=m.id_turno
-LEFT JOIN ubicaciones u ON u.id=tu.id_ubi
+JOIN ubicaciones u ON u.id=s.id_ubi
 LEFT JOIN personal pa ON tu.id_panolero = pa.id
 LEFT JOIN clases ca ON pa.id_clase=ca.id;
