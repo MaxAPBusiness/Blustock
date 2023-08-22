@@ -1304,6 +1304,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -1481,7 +1484,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 'Hoja de cálculo (*.xlsx)'
             );
             # Si no se abrió un archivo, corta la función
-            if not filename:
+            if not filename[0]:
                 return
 
             # Obtenemos los filtros
@@ -1700,6 +1703,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -1862,7 +1868,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                if core.camposMov[1][cellNum]:
+                if core.camposMovs[1][cellNum]:
                     item = QtWidgets.QTableWidgetItem(str(cellData))
                 else:
                     item = QtWidgets.QTableWidgetItem()
@@ -1873,6 +1879,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
@@ -1914,6 +1923,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         self.pantallaGrupos.tableWidget.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2003,6 +2015,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2086,6 +2101,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2182,6 +2200,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader(
@@ -2248,6 +2269,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2339,6 +2363,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2378,6 +2405,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2471,6 +2501,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader(
@@ -2706,6 +2739,9 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+        tabla.resizeRowsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2888,6 +2924,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, i, item)
         tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+        tabla.resizeRowsToContents()
         tabla.horizontalHeader(
         ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
@@ -2902,6 +2941,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tablaBaja = self.pantallaResumen.tablaBaja
         labelDeudas = self.pantallaResumen.labelDeudas
         labelBaja = self.pantallaResumen.labelBaja
+        tablaDeudas.setSortingEnabled(False)
+        tablaBaja.setSortingEnabled(False)
 
         try:
             hastaFecha.disconnect()
@@ -2915,7 +2956,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[7][:10], 'yyyy/MM/dd')
             if fecha == hastaFecha.date():
-                datos.append(rawRow)
+                datos.append(rawRow[:7])
 
         # Si se encontraron datos de la primera tabla
         if datos:
@@ -2937,6 +2978,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     tablaDeudas.setItem(rowNum, cellNum, item)
                 tablaDeudas.setRowHeight(rowNum, 35)
             tablaDeudas.resizeColumnsToContents()
+            tablaDeudas.resizeRowsToContents()
+            tablaDeudas.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
             tablaDeudas.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.horizontalHeader(
@@ -2945,6 +2989,7 @@ class MainWindow(QtWidgets.QMainWindow):
             ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.horizontalHeader(
             ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.setSortingEnabled(True)
             tablaDeudas.show()
         # Si no
         else:
@@ -2958,7 +3003,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[8], 'yyyy/MM/dd')
             if fecha == hastaFecha.date():
-                datos.append(rawRow)
+                datos.append(rawRow[:8])
 
         if datos:
             for rowNum, rowData in enumerate(datos):
@@ -2976,6 +3021,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 tablaBaja.setRowHeight(rowNum, 35)
             tablaBaja.resizeColumnsToContents()
+            tablaBaja.resizeRowsToContents()
+            tablaBaja.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
             tablaBaja.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.horizontalHeader(
@@ -2984,6 +3032,7 @@ class MainWindow(QtWidgets.QMainWindow):
             ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.horizontalHeader(
             ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaBaja.setSortingEnabled(True)
 
             tablaBaja.show()
         else:
