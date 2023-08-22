@@ -1860,7 +1860,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposMov[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -2165,7 +2169,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposTurnos[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -2450,7 +2458,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposReps[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -2679,7 +2691,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposHistorial[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -2906,7 +2922,11 @@ class MainWindow(QtWidgets.QMainWindow):
             for rowNum, rowData in enumerate(datos):
                 tablaDeudas.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
-                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                    if core.camposDeudas[1][cellNum]:
+                        item = QtWidgets.QTableWidgetItem(str(cellData))
+                    else:
+                        item = QtWidgets.QTableWidgetItem()
+                        item.setData(0, cellData)
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
@@ -2940,7 +2960,11 @@ class MainWindow(QtWidgets.QMainWindow):
             for rowNum, rowData in enumerate(datos):
                 tablaBaja.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
-                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                    if core.camposBaja[1][cellNum]:
+                        item = QtWidgets.QTableWidgetItem(str(cellData))
+                    else:
+                        item = QtWidgets.QTableWidgetItem()
+                        item.setData(0, cellData)
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)

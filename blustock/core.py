@@ -22,6 +22,9 @@ Funciones
     
     cargarFuentes():
         Carga fuentes a la aplicación.
+
+Variables
+---------
 """
 import os
 import types
@@ -62,7 +65,8 @@ def mostrarContrasena(boton: QtWidgets.QCheckBox, entry: QtWidgets.QLineEdit):
 camposStock=((2, 1, 1, 0, 0, 1, 2, 4, 3, 3), (0, 1, 0, 0, 0, 0, 0, 2, 2, 2))
 camposAlumnos=((2, 1, 3, 1), (0, 1, 2, 0))
 camposClases=((2, 1, 3), (0, 1, 2))
-camposDeudas=((2, 2, 2, 2, 2, 2, 2, 2), (1, 0, 1, 0, 1, 0, 0, 1))
+camposDeudas=((2, 2, 2, 2, 2, 2, 2), (1, 1, 0, 0, 1, 1, 0))
+camposBaja=((2, 2, 2, 2, 2, 2, 2, 2), (1, 1, 0, 0, 1, 1, 1, 0))
 camposGrupos=((2, 1), (0, 1))
 camposHistorial=((2, 2, 2, 2, 2, 2), (1, 1, 1, 1, 1, 1))
 camposMovs=((2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
@@ -72,6 +76,7 @@ camposSubgrupos=((2, 1, 3), (0, 1, 2))
 camposTurnos=((2, 2, 2, 2, 2, 2, 2), (0, 1, 1, 1, 1, 1, 1))
 camposUbis=((2, 1), (0, 1))
 camposUsuarios=((2, 1, 3, 1, 1, 1), (0, 1, 2, 1, 1, 1))
+camposReps=((2, 2, 2, 2, 2, 2, 2), (0, 1, 0, 1, 1, 1, 1))
 
 def insertarFilas(tabla: QtWidgets.QTableWidget,
                   funcGuardar: types.FunctionType,
