@@ -1478,7 +1478,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Para esta verificación, llamamos a la función del dal.
         hayRelacion = dal.verifElimStock(idd)
         desc=tabla.item(row, 1).text()
-        ubi=tabla.item(row, 9).text()
+        ubi=tabla.cellWidget(row, 9).text()
         if hayRelacion:
             mensaje = f"El elemento {desc} de la ubicación {ubi} tiene movimientos o un seguimiento de reparación relacionados. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta herramienta/insumo."
             return PopUp('Advertencia', mensaje).exec()
@@ -1506,6 +1506,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados[1:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
+            tabla.removeRow(row)
 
     def printStock(self):
         """Este método genera un spreadsheet a partir de la tabla de la
@@ -1795,6 +1796,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                   datosEliminados[1], datosEliminados[2:])
 
             dal.eliminarDatos('personal', idd)
+            tabla.removeRow(row)
 
     def fetchMovs(self):
         """Este método refresca el listado de movimientos."""
@@ -2016,6 +2018,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos',
                                   datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
+            tabla.removeRow(row)
 
     def fetchOtroPersonal(self):
         """Este método refresca la gestión del personal."""
@@ -2110,6 +2113,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
+            tabla.removeRow(row)
 
     def fetchSubgrupos(self):
         """Este método refresca la gestión subgrupos."""
@@ -2195,6 +2199,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('subgrupos', idd)
+            tabla.removeRow(row)
 
     def fetchTurnos(self):
         """Este método refresca la gestión de turnos."""
@@ -2362,6 +2367,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Usuarios',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
+            tabla.removeRow(row)
 
     def fetchClases(self):
         """Este método refresca la gestión clases."""
@@ -2496,6 +2502,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Ubicaciones',
                                   datosEliminados[1], None)
             dal.eliminarDatos('ubicaciones', idd)
+            tabla.removeRow(row)
 
     def fetchReps(self):
         """Este método refresca el listado de reparaciones."""
@@ -2599,6 +2606,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('clases', idd)
+            tabla.removeRow(row)
             
     def fetchHistorial(self):
         """Este método refresca el historial."""
