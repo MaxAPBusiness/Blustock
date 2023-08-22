@@ -1347,6 +1347,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Volvemos a habilitar el sorting.
         tabla.setSortingEnabled(True)
         # Volvemos a conectar el filtro.
+        listaUbi.setMinimumWidth(
+            listaUbi.minimumSizeHint().width() + 100
+        )
         listaUbi.currentIndexChanged.connect(self.fetchStock)
         # Mostramos la pantalla de stock.
         self.stackedWidget.setCurrentIndex(3)
@@ -1911,8 +1914,17 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaElem.setMinimumWidth(
+            listaElem.minimumSizeHint().width() + 100
+        )
         listaElem.currentIndexChanged.connect(self.fetchMovs)
+        listaPersona.setMinimumWidth(
+            listaPersona.minimumSizeHint().width() + 100
+        )
         listaPersona.currentIndexChanged.connect(self.fetchMovs)
+        listaPanolero.setMinimumWidth(
+            listaPanolero.minimumSizeHint().width() + 100
+        )
         listaPanolero.currentIndexChanged.connect(self.fetchMovs)
         desdeFecha.dateTimeChanged.connect(self.fetchMovs)
         hastaFecha.dateTimeChanged.connect(self.fetchMovs)
@@ -2772,6 +2784,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaGestion.setMinimumWidth(
+            listaGestion.minimumSizeHint().width() + 100
+        )
         listaGestion.currentIndexChanged.connect(self.fetchHistorial)
         desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
         hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
@@ -2955,6 +2970,9 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.horizontalHeader(
         ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaPanolero.setMinimumWidth(
+            listaPanolero.minimumSizeHint().width() + 100
+        )
         listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 
         self.stackedWidget.setCurrentIndex(14)
