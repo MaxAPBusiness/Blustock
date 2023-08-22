@@ -717,8 +717,8 @@ class DAL():
                 )
                 self.insertarHistorial(
                     user, 'Inserción', 'Stock', f'{desc} {ubi}', None, datosNuevos)
-                sql='SELECT id FROM stock WHERE descripcion = ? AND id_ubi ?'
-                a = bdd.cur.execute(sql, (desc, idUbi[0])).fetchone()
+                sql='SELECT id FROM stock WHERE descripcion = ? AND id_ubi = ?'
+                a = bdd.cur.execute(sql, (desc, idUbi[0],)).fetchone()
                 tabla.item(row, 0).setData(0, a[0])
             else:
                 idd = int(idd)
