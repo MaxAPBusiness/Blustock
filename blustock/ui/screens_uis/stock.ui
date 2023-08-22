@@ -211,27 +211,27 @@
        </column>
        <column>
         <property name="text">
-         <string>H En Condiciones</string>
+         <string>C. En Condiciones</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H En Reparación</string>
+         <string>C. En Reparación</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H De Baja</string>
+         <string>C. De Baja</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H Prestadas</string>
+         <string>C. Prestados</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Total De H</string>
+         <string>Total</string>
         </property>
        </column>
        <column>

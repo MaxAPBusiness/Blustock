@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -257,7 +257,7 @@
   </action>
   <action name="opcionDeudas">
    <property name="text">
-    <string>Listado de Herramientas Adeudadas</string>
+    <string>Listado de Elementos Adeudados</string>
    </property>
    <property name="font">
     <font>
