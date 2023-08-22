@@ -141,7 +141,7 @@ class cerrarSesion(QDialog):
         self.showPass.setIconSize(QtCore.QSize(25, 25))
         self.showPass.clicked.connect(lambda: self.mostrarContrasena(self.showPass, self.contrasenaLineEdit))
         self.buttonBox.accepted.connect(self.cerrar)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).setText("Cerar la aplicacion")
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Ok).setText("Cerrar la aplicacion")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
         self.show()
 
