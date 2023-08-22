@@ -51,11 +51,12 @@
        <property name="font">
         <font>
          <family>Oswald</family>
+         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
        <property name="text">
-        <string>Gestión de Herramientas e Insumos</string>
+        <string>Gestión de Stock</string>
        </property>
       </widget>
      </item>
@@ -101,6 +102,7 @@
           <font>
            <family>Oswald</family>
            <pointsize>11</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -209,27 +211,27 @@
        </column>
        <column>
         <property name="text">
-         <string>H En Condiciones</string>
+         <string>C. En Condiciones</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H En Reparación</string>
+         <string>C. En Reparación</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H De Baja</string>
+         <string>C. De Baja</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>H Prestadas</string>
+         <string>C. Prestados</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Total De H</string>
+         <string>Total</string>
         </property>
        </column>
        <column>
@@ -273,6 +275,7 @@
           <font>
            <family>Oswald</family>
            <pointsize>12</pointsize>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>

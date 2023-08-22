@@ -20,8 +20,7 @@ from ui.presets.param_edit import ParamEdit
 from ui.presets.popup import PopUp
 from dal.dal import dal
 from db.bdd import bdd
-from dateutil.relativedelta import relativedelta
-from datetime import date, datetime
+from datetime import datetime
 from textwrap import dedent
 from unidecode import unidecode
 import core
@@ -549,7 +548,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.textActivated.connect(
             self.check)
         self.pantallaRealizarMov.formLayout.setAlignment(self.pantallaRealizarMov.herramientasDisponiblesLineEdit, QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(self.cant)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.botonRefresh.clicked.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
@@ -574,44 +572,63 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.setCornerWidget(
             widget_with_layout, QtCore.Qt.Corner.TopRightCorner)
         
-        self.pantallaReps.hastaFecha.setDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
-        self.pantallaReps.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
+        self.pantallaReps.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaReps.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaReps.hastaFecha.dateChanged.connect(self.fetchReps)
-        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
-        self.pantallaTurnos.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaTurnos.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaMovs.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovs.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=1)).strftime(
-                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
+        self.pantallaMovs.hastaFecha.setMaximumDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
         self.pantallaMovs.hastaFecha.dateChanged.connect(self.fetchMovs)
-        self.pantallaHistorial.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
+        self.pantallaHistorial.hastaFecha.setMaximumDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
         self.pantallaHistorial.hastaFecha.dateChanged.connect(
             self.fetchHistorial)
-        self.pantallaResumen.hastaFecha.setDate(
-            QtCore.QDate.fromString(date.today().strftime("%Y/%m/%d"),
-                "yyyy/MM/dd"))
-        self.pantallaResumen.hastaFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                (date.today()+relativedelta(days=1)).strftime("%Y/%m/%d"),
-                "yyyy/MM/dd"))
+        self.pantallaResumen.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaResumen.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaResumen.hastaFecha.dateChanged.connect(self.fetchResumen)
 
         # Hacemos que la pantalla principal no se vea como ventana.
@@ -641,6 +658,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.minimizar, 0, 0, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
         #Ponemos las flags
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        #Ponemos el ícono
+        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}blustock.ico'
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(path)))
         # Mostramos la ventana principal.
         self.show()
     #Esta funcion nos permite sacar o poner la flag para que la ventana este siempre arriba
@@ -781,8 +801,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
 
     #Toma la cantidad en condiciones de la herramienta que selecciones en nuevo movimiento y lo pone en una line edit para mostrarnos la cantida de herramientas en stock
-    def cant(self):
-        valor = bdd.cur.execute("select cant_condiciones from stock WHERE descripcion = ?",(self.pantallaRealizarMov.herramientaComboBox.currentText(),)).fetchall()
+    def cant(self,estado):
+        if estado == " " or estado == "" or estado == None:
+            return
+        try:
+            estado = estado[estado.index(" "):]
+            estado = estado[1:]
+        except:
+            pass
+        estado = unidecode(estado)
+        estado = "cant_" + estado.lower()
+        query = f"select {estado} from stock WHERE descripcion = ?"
+        params = (self.pantallaRealizarMov.herramientaComboBox.currentText(),)
+        valor = bdd.cur.execute(query,params).fetchall()
+        if valor == None or valor == "" or valor == " " or valor == []:
+            mensaje = "La herramienta que selecciono no existe por favor ingrese una herramienta existente."
+            self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+            return PopUp("Error", mensaje).exec()
         self.pantallaRealizarMov.cantidadSpinBox.setMaximum(valor[0][0])
         self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(valor[0][0]))
 
@@ -830,7 +865,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
-
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
+            self.pantallaRealizarMov.estadoComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.alumnoComboBox.hide()
@@ -838,7 +874,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.hide()
-
+            try:
+                self.pantallaRealizarMov.herramientaComboBox.textActivated.disconnect()
+                self.pantallaRealizarMov.estadoComboBox.textActivated.disconnect()
+            except:
+                pass
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Retiro":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
@@ -850,6 +890,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
+            self.pantallaRealizarMov.estadoComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
@@ -860,6 +902,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            try:
+                self.pantallaRealizarMov.herramientaComboBox.textActivated.disconnect()
+                self.pantallaRealizarMov.estadoComboBox.textActivated.disconnect()
+            except:
+                pass
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
@@ -870,6 +917,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
+            self.pantallaRealizarMov.estadoComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
 
         else:
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
@@ -964,7 +1013,6 @@ class MainWindow(QtWidgets.QMainWindow):
             JOIN clases c ON c.id = p.id_clase
             WHERE p.nombre_apellido LIKE ?
             and c.descripcion LIKE ?;''', (self.pantallaRealizarMov.alumnoComboBox.currentText(), self.pantallaRealizarMov.cursoComboBox.currentText())).fetchone()
-
         ubicacion = dal.obtenerDatos(
             "ubicaciones", self.pantallaRealizarMov.ubicacionComboBox.currentText())
         herramienta = bdd.cur.execute(
@@ -995,7 +1043,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     if texto=="Envío a Reparación" and (descripcion ==" " or descripcion =="" or descripcion==None):
                         mensaje = """Por favor ingrese la ubicacion a la que la herramienta sera enviada"""
                         return PopUp("Error", mensaje).exec()
-                    if persona != "" and persona != None:
+                    
+                    if persona != "" and persona != None and persona != []:
                         if turno == " " or turno == None or turno == []:
                             turno = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()
                         if tipo[0][0] == 1:
@@ -1004,8 +1053,6 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.sumar(cant, herramienta[0],estado[0][1])
                         elif tipo[0][0] == 2:
                             usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
-                            bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                        (turno[0][0], herramienta[0], estado[0][0], cant, usuario, fecha, tipo[0][0], descripcion))
                             self.restar(cant, herramienta[0],estado[0][1])
                             self.sumar(cant, herramienta[0],"En reparacion")
                             bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
@@ -1302,6 +1349,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -1315,6 +1365,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Volvemos a habilitar el sorting.
         tabla.setSortingEnabled(True)
         # Volvemos a conectar el filtro.
+        listaUbi.setMinimumWidth(
+            listaUbi.minimumSizeHint().width() + 100
+        )
         listaUbi.currentIndexChanged.connect(self.fetchStock)
         # Mostramos la pantalla de stock.
         self.stackedWidget.setCurrentIndex(3)
@@ -1479,7 +1532,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 'Hoja de cálculo (*.xlsx)'
             );
             # Si no se abrió un archivo, corta la función
-            if not filename:
+            if not filename[0]:
                 return
 
             # Obtenemos los filtros
@@ -1698,6 +1751,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -1778,9 +1834,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                "yyyy/MM/dd HH:mm:ss"))
+        desdeFecha.setMaximumDateTime(QtCore.QDateTime.currentDateTime())
+        hastaFecha.setMinimumDateTime(QtCore.QDateTime.currentDateTime())
 
         elemSeleccionado = listaElem.currentText()
         elems = bdd.cur.execute("""SELECT DISTINCT s.descripcion
@@ -1860,18 +1915,34 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposMovs[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaElem.setMinimumWidth(
+            listaElem.minimumSizeHint().width() + 100
+        )
         listaElem.currentIndexChanged.connect(self.fetchMovs)
+        listaPersona.setMinimumWidth(
+            listaPersona.minimumSizeHint().width() + 100
+        )
         listaPersona.currentIndexChanged.connect(self.fetchMovs)
+        listaPanolero.setMinimumWidth(
+            listaPanolero.minimumSizeHint().width() + 100
+        )
         listaPanolero.currentIndexChanged.connect(self.fetchMovs)
         desdeFecha.dateTimeChanged.connect(self.fetchMovs)
         hastaFecha.dateTimeChanged.connect(self.fetchMovs)
@@ -1908,6 +1979,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         self.pantallaGrupos.tableWidget.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -1997,6 +2071,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2080,6 +2157,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2146,8 +2226,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.currentDate())
+        hastaFecha.setMinimumDate(QtCore.QDate.currentDate())
 
         if nId.value():
             filtro = (nId.value(),)
@@ -2165,13 +2245,20 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposTurnos[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader(
@@ -2238,6 +2325,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2329,6 +2419,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2368,6 +2461,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
@@ -2429,8 +2525,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.currentDate())
+        hastaFecha.setMinimumDate(QtCore.QDate.currentDate())
 
         datosCrudos = dal.obtenerDatos("reparaciones", barraBusqueda.text())
         datos = []
@@ -2450,13 +2546,20 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposReps[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
         ).setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader(
@@ -2527,9 +2630,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
+        desdeFecha.setMaximumDateTime(QtCore.QDateTime.currentDateTime())
+        hastaFecha.setMinimumDateTime(QtCore.QDateTime.currentDateTime())
 
         gestionSeleccionada = listaGestion.currentText()
         gestiones = bdd.cur.execute("""SELECT DISTINCT g.descripcion
@@ -2679,7 +2781,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                item = QtWidgets.QTableWidgetItem(str(cellData))
+                if core.camposHistorial[1][cellNum]:
+                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                else:
+                    item = QtWidgets.QTableWidgetItem()
+                    item.setData(0, cellData)
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -2688,11 +2794,17 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+        tabla.resizeRowsToContents()
         tabla.horizontalHeader().setSectionResizeMode(
             0, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaGestion.setMinimumWidth(
+            listaGestion.minimumSizeHint().width() + 100
+        )
         listaGestion.currentIndexChanged.connect(self.fetchHistorial)
         desdeFecha.dateTimeChanged.connect(self.fetchHistorial)
         hastaFecha.dateTimeChanged.connect(self.fetchHistorial)
@@ -2753,6 +2865,7 @@ class MainWindow(QtWidgets.QMainWindow):
             filtros.append(panoleroSeleccionado)
 
         tabla.setRowCount(0)
+        tabla.horizontalHeader().setVisible(True)
 
         # Este fetch es especial porque trabaja con dos tablas.
         # La idea es que van ordenadas de forma especial.
@@ -2868,9 +2981,16 @@ class MainWindow(QtWidgets.QMainWindow):
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 tabla.setItem(rowNum, i, item)
         tabla.resizeColumnsToContents()
+        tabla.resizeRowsToContents()
+        tabla.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+        tabla.resizeRowsToContents()
         tabla.horizontalHeader(
         ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
+        listaPanolero.setMinimumWidth(
+            listaPanolero.minimumSizeHint().width() + 100
+        )
         listaPanolero.currentIndexChanged.connect(self.fetchDeudas)
 
         self.stackedWidget.setCurrentIndex(14)
@@ -2882,6 +3002,8 @@ class MainWindow(QtWidgets.QMainWindow):
         tablaBaja = self.pantallaResumen.tablaBaja
         labelDeudas = self.pantallaResumen.labelDeudas
         labelBaja = self.pantallaResumen.labelBaja
+        tablaDeudas.setSortingEnabled(False)
+        tablaBaja.setSortingEnabled(False)
 
         try:
             hastaFecha.disconnect()
@@ -2895,7 +3017,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[7][:10], 'yyyy/MM/dd')
             if fecha == hastaFecha.date():
-                datos.append(rawRow)
+                datos.append(rawRow[:7])
 
         # Si se encontraron datos de la primera tabla
         if datos:
@@ -2906,13 +3028,20 @@ class MainWindow(QtWidgets.QMainWindow):
             for rowNum, rowData in enumerate(datos):
                 tablaDeudas.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
-                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                    if core.camposDeudas[1][cellNum]:
+                        item = QtWidgets.QTableWidgetItem(str(cellData))
+                    else:
+                        item = QtWidgets.QTableWidgetItem()
+                        item.setData(0, cellData)
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
                     tablaDeudas.setItem(rowNum, cellNum, item)
                 tablaDeudas.setRowHeight(rowNum, 35)
             tablaDeudas.resizeColumnsToContents()
+            tablaDeudas.resizeRowsToContents()
+            tablaDeudas.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
             tablaDeudas.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.horizontalHeader(
@@ -2921,6 +3050,7 @@ class MainWindow(QtWidgets.QMainWindow):
             ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.horizontalHeader(
             ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaDeudas.setSortingEnabled(True)
             tablaDeudas.show()
         # Si no
         else:
@@ -2934,13 +3064,17 @@ class MainWindow(QtWidgets.QMainWindow):
         for rawRow in rawData:
             fecha = QtCore.QDate.fromString(rawRow[8], 'yyyy/MM/dd')
             if fecha == hastaFecha.date():
-                datos.append(rawRow)
+                datos.append(rawRow[:8])
 
         if datos:
             for rowNum, rowData in enumerate(datos):
                 tablaBaja.insertRow(rowNum)
                 for cellNum, cellData in enumerate(rowData):
-                    item = QtWidgets.QTableWidgetItem(str(cellData))
+                    if core.camposBaja[1][cellNum]:
+                        item = QtWidgets.QTableWidgetItem(str(cellData))
+                    else:
+                        item = QtWidgets.QTableWidgetItem()
+                        item.setData(0, cellData)
                     item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
@@ -2948,6 +3082,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 tablaBaja.setRowHeight(rowNum, 35)
             tablaBaja.resizeColumnsToContents()
+            tablaBaja.resizeRowsToContents()
+            tablaBaja.setVerticalScrollBarPolicy(
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
             tablaBaja.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.horizontalHeader(
@@ -2956,6 +3093,7 @@ class MainWindow(QtWidgets.QMainWindow):
             ).setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.horizontalHeader(
             ).setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+            tablaBaja.setSortingEnabled(True)
 
             tablaBaja.show()
         else:
