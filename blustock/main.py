@@ -1477,7 +1477,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 'Hoja de cálculo (*.xlsx)'
             );
             # Si no se abrió un archivo, corta la función
-            if not filename:
+            if not filename[0]:
                 return
 
             # Obtenemos los filtros
