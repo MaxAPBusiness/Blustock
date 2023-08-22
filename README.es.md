@@ -12,10 +12,10 @@ La aplicación también funciona como un **CRUD**, compuesta de tres capas:
 Funciona de la siguiente manera:  
 1. Un usuario (normal o admin) inicia sesión. La diferencia de privilegios está en que el admin puede acceder a la gestión de ubicaciones y el admin no.  
 2. Una vez dentro, pueden:  
-2. 1. Gestionar datos: se puede ver, modificar y eliminar datos.  
-2. 2. Ver listados: solo se pueden ver datos.  
-2. 3. Realizar movimientos: proximamente se explicará.  
-2. 4. Cargar turnos: proximamente se explicará.  
+2. i. Gestionar datos: se puede ver, modificar y eliminar datos.  
+2. ii. Ver listados: solo se pueden ver datos.  
+2. iii. Realizar movimientos: proximamente se explicará.  
+2. iv. Cargar turnos: proximamente se explicará.  
 
 Para ver como funciona la app en profundidad, leer la guía de usuario (https://docs.google.com/document/d/1PsNRFtbi3YwYBC2aCry-U-qTe4iRChxhenEuYK33EQ4/edit).
 
