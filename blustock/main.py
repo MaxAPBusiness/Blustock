@@ -20,8 +20,7 @@ from ui.presets.param_edit import ParamEdit
 from ui.presets.popup import PopUp
 from dal.dal import dal
 from db.bdd import bdd
-from dateutil.relativedelta import relativedelta
-from datetime import date, datetime
+from datetime import datetime
 from textwrap import dedent
 from unidecode import unidecode
 import core
@@ -573,44 +572,63 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.setCornerWidget(
             widget_with_layout, QtCore.Qt.Corner.TopRightCorner)
         
-        self.pantallaReps.hastaFecha.setDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
-        self.pantallaReps.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=1)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
+        self.pantallaReps.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaReps.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaReps.hastaFecha.dateChanged.connect(self.fetchReps)
-        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
-        self.pantallaTurnos.hastaFecha.setMaximumDate(QtCore.QDate.fromString(
-            (date.today()+relativedelta(years=100)).strftime("%Y/%m/%d"),
-            "yyyy/MM/dd"))
+        self.pantallaTurnos.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaTurnos.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaTurnos.hastaFecha.dateChanged.connect(self.fetchTurnos)
-        self.pantallaMovs.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaMovs.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=1)).strftime(
-                "%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaMovs.hastaFecha.setDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
+        self.pantallaMovs.hastaFecha.setMaximumDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
         self.pantallaMovs.hastaFecha.dateChanged.connect(self.fetchMovs)
-        self.pantallaHistorial.hastaFecha.setDateTime(
-            QtCore.QDateTime.fromString((datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
-        self.pantallaHistorial.hastaFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                (datetime.now()+relativedelta(years=1)
-                ).strftime("%Y/%m/%d %H/%M/%S"), "yyyy/MM/dd HH:mm:ss"))
+        self.pantallaHistorial.hastaFecha.setDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
+        self.pantallaHistorial.hastaFecha.setMaximumDateTime(QtCore.QDateTime(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day(),
+            QtCore.QTime.currentTime().hour(),
+            QtCore.QTime.currentTime().minute(),
+            QtCore.QTime.currentTime().second()))
         self.pantallaHistorial.hastaFecha.dateChanged.connect(
             self.fetchHistorial)
-        self.pantallaResumen.hastaFecha.setDate(
-            QtCore.QDate.fromString(date.today().strftime("%Y/%m/%d"),
-                "yyyy/MM/dd"))
-        self.pantallaResumen.hastaFecha.setMaximumDate(
-            QtCore.QDate.fromString(
-                (date.today()+relativedelta(days=1)).strftime("%Y/%m/%d"),
-                "yyyy/MM/dd"))
+        self.pantallaResumen.hastaFecha.setDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
+        self.pantallaResumen.hastaFecha.setMaximumDate(QtCore.QDate(
+            QtCore.QDate.currentDate().year()+1,
+            QtCore.QDate.currentDate().month(),
+            QtCore.QDate.currentDate().day()))
         self.pantallaResumen.hastaFecha.dateChanged.connect(self.fetchResumen)
 
         # Hacemos que la pantalla principal no se vea como ventana.
@@ -1795,9 +1813,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDateTime(QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-                "yyyy/MM/dd HH:mm:ss"))
+        desdeFecha.setMaximumDateTime(QtCore.QDateTime.currentDateTime())
+        hastaFecha.setMinimumDateTime(QtCore.QDateTime.currentDateTime())
 
         elemSeleccionado = listaElem.currentText()
         elems = bdd.cur.execute("""SELECT DISTINCT s.descripcion
@@ -2179,8 +2196,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.currentDate())
+        hastaFecha.setMinimumDate(QtCore.QDate.currentDate())
 
         if nId.value():
             filtro = (nId.value(),)
@@ -2478,8 +2495,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDate(QtCore.QDate.fromString(
-            date.today().strftime("%Y/%m/%d"), "yyyy/MM/dd"))
+        desdeFecha.setMaximumDate(QtCore.QDate.currentDate())
+        hastaFecha.setMinimumDate(QtCore.QDate.currentDate())
 
         datosCrudos = dal.obtenerDatos("reparaciones", barraBusqueda.text())
         datos = []
@@ -2583,9 +2600,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
-        desdeFecha.setMaximumDateTime(
-            QtCore.QDateTime.fromString(
-                datetime.now().strftime("%Y/%m/%d %H:%M:%S"), "yyyy/MM/dd HH:mm:ss"))
+        desdeFecha.setMaximumDateTime(QtCore.QDateTime.currentDateTime())
+        hastaFecha.setMinimumDateTime(QtCore.QDateTime.currentDateTime())
 
         gestionSeleccionada = listaGestion.currentText()
         gestiones = bdd.cur.execute("""SELECT DISTINCT g.descripcion
