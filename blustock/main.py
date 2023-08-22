@@ -1858,7 +1858,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for rowNum, rowData in enumerate(datos):
             tabla.insertRow(rowNum)
             for cellNum, cellData in enumerate(rowData):
-                if core.camposMov[1][cellNum]:
+                if core.camposMovs[1][cellNum]:
                     item = QtWidgets.QTableWidgetItem(str(cellData))
                 else:
                     item = QtWidgets.QTableWidgetItem()
