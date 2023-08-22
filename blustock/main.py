@@ -549,7 +549,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.tipoDeMovimientoComboBox.textActivated.connect(
             self.check)
         self.pantallaRealizarMov.formLayout.setAlignment(self.pantallaRealizarMov.herramientasDisponiblesLineEdit, QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(self.cant)
         self.pantallaDeudas.lineEdit.editingFinished.connect(self.fetchDeudas)
         self.pantallaDeudas.botonRefresh.clicked.connect(self.fetchDeudas)
         self.pantallaDeudas.radioHerramienta.toggled.connect(self.fetchDeudas)
@@ -781,8 +780,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
 
     #Toma la cantidad en condiciones de la herramienta que selecciones en nuevo movimiento y lo pone en una line edit para mostrarnos la cantida de herramientas en stock
-    def cant(self):
-        valor = bdd.cur.execute("select cant_condiciones from stock WHERE descripcion = ?",(self.pantallaRealizarMov.herramientaComboBox.currentText(),)).fetchall()
+    def cant(self,estado):
+        try:
+            estado = estado[estado.index(" "):]
+            estado = estado[1:]
+        except:
+            pass
+        estado = unidecode(estado)
+        estado = "cant_" + estado.lower()
+        query = f"select {estado} from stock WHERE descripcion = ?"
+        params = (self.pantallaRealizarMov.herramientaComboBox.currentText(),)
+        valor = bdd.cur.execute(query,params).fetchall()
         if valor == None or valor == "" or valor == " " or valor == []:
             mensaje = "La herramienta que selecciono no existe por favor ingrese una herramienta existente."
             self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
@@ -834,7 +842,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
-
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.alumnoComboBox.hide()
@@ -842,7 +850,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.hide()
-
+            try:
+                self.pantallaRealizarMov.herramientaComboBox.textActivated.disconnect()
+            except:
+                pass
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Retiro":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
@@ -854,6 +865,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
@@ -874,7 +886,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
-
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(self.pantallaRealizarMov.estadoComboBox.currentText()))
+        
         else:
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
