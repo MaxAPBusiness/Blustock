@@ -658,6 +658,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.minimizar, 0, 0, alignment=QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignRight)
         #Ponemos las flags
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+        #Ponemos el ícono
+        path = f'ui{os.sep}rsc{os.sep}icons{os.sep}blustock.ico'
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(path)))
         # Mostramos la ventana principal.
         self.show()
     #Esta funcion nos permite sacar o poner la flag para que la ventana este siempre arriba
