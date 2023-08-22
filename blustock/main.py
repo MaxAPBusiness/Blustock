@@ -1004,8 +1004,6 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.sumar(cant, herramienta[0],estado[0][1])
                         elif tipo[0][0] == 2:
                             usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
-                            bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                        (turno[0][0], herramienta[0], estado[0][0], cant, usuario, fecha, tipo[0][0], descripcion))
                             self.restar(cant, herramienta[0],estado[0][1])
                             self.sumar(cant, herramienta[0],"En reparacion")
                             bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
