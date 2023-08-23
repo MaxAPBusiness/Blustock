@@ -1507,8 +1507,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM stock WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposStock[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
 
             # Insertamos los datos en el historial para que quede registro.
             dal.insertarHistorial(
@@ -1801,8 +1805,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposAlumnos[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, "Eliminación", "Alumnos",
                                   datosEliminados[1], datosEliminados[2:])
 
@@ -2024,8 +2032,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM grupos WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposGrupos[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Grupos',
                                   datosEliminados[1], None)
             dal.eliminarDatos('grupos', idd)
@@ -2119,8 +2131,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposOtroPersonal[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Personal',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
@@ -2205,8 +2221,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM subgrupos WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposSubgrupos[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Subgrupos',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('subgrupos', idd)
@@ -2373,8 +2393,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM personal WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposUsuarios[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Usuarios',
                                   datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('personal', idd)
@@ -2508,8 +2532,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM ubicaciones WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposUbis[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(self.usuario, 'Eliminación', 'Ubicaciones',
                                   datosEliminados[1], None)
             dal.eliminarDatos('ubicaciones', idd)
@@ -2612,8 +2640,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 datosEliminados = [fila for fila in datos
                                    if fila[0] == idd][0]
             except TypeError:
-                datosEliminados = bdd.cur.execute(
-                    'SELECT * FROM clases WHERE id=?', (idd,)).fetchone()
+                datosEliminados = []
+                for numCol in range(tabla.columnCount() - 2):
+                    if core.camposClases[1][numCol] < 2:
+                        datosEliminados.append(tabla.item(row, numCol).text())
+                    else:
+                        datosEliminados.append(tabla.cellWidget(row, numCol).text())
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Clases", datosEliminados[1], datosEliminados[2:])
             dal.eliminarDatos('clases', idd)
