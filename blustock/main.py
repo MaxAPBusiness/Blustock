@@ -893,10 +893,12 @@ class MainWindow(QtWidgets.QMainWindow):
                    WHERE descripcion = ? AND id_ubi = (
                        SELECT id FROM ubicaciones WHERE descripcion = ?
                    )""",
-                (3, self.pantallaRealizarMov.herramientaComboBox.currentText(),
-                self.pantallaRealizarMov.ubicacionComboBox.currentText())).fetchone()
+                (self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                self.pantallaRealizarMov.ubicacionComboBox.currentText(),)).fetchone()
             try:
                 cant = cant[0]
+                if cant is None:
+                    cant = 0
             except:
                 mensaje = "La herramienta que seleccionó no está registrada en el sistema. Por favor, ingrese una herramienta existente."
                 self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
@@ -998,7 +1000,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
-                lambda: self.cant(4))
+                lambda: self.cant(3))
        
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
@@ -1062,7 +1064,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
-        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() != "Ingreso de Herramienta Reparada" and self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() != "Devolución":
+        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() not in {"Ingreso de Herramienta Reparada", "Devolución", "Envío a Reparación"}:
             self.deactA()
             self.deactB()
             self.herramientas()
