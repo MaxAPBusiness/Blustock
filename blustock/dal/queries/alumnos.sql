@@ -7,4 +7,5 @@ WHERE cat.descripcion = 'Alumno'
 AND (p.nombre_apellido LIKE ?
 OR p.id like ?
 OR cl.descripcion LIKE ?
-OR p.dni LIKE ?);
+OR p.dni LIKE ?)
+ORDER BY p.nombre_apellido;

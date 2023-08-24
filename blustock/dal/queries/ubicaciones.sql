@@ -1,2 +1,3 @@
 SELECT * FROM ubicaciones
-WHERE descripcion LIKE ?;
+WHERE descripcion LIKE ?
+ORDER BY descripcion;

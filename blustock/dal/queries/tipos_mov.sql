@@ -1,2 +1,3 @@
 SELECT * FROM tipos_mov
-WHERE descripcion LIKE ?;
+WHERE descripcion LIKE ?
+ORDER BY descripcion;

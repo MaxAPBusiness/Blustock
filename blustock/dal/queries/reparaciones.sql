@@ -12,4 +12,4 @@ OR r.cantidad LIKE ?
 OR p.nombre_apellido LIKE ?
 OR r.destino LIKE ?
 OR r.fecha_envio LIKE ?
-OR r.fecha_regreso LIKE ? 
+OR r.fecha_regreso LIKE ?;

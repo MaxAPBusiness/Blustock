@@ -7,4 +7,5 @@ WHERE cat.descripcion = 'Usuario'
 AND (p.nombre_apellido LIKE ?
 OR p.usuario LIKE ?
 OR c.descripcion LIKE ?
-OR p.dni LIKE ?);
+OR p.dni LIKE ?)
+ORDER BY p.nombre_apellido;

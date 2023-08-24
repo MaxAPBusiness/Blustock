@@ -6,4 +6,5 @@ JOIN cats_clase cat ON cl.id_cat = cat.id
 WHERE cat.descripcion = 'Personal' 
 AND (p.nombre_apellido LIKE ?
 OR cl.descripcion LIKE ?
-OR p.dni LIKE ?);
+OR p.dni LIKE ?)
+ORDER BY p.nombre_apellido;

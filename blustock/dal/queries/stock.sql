@@ -15,4 +15,5 @@ OR s.cant_baja LIKE ?
 OR g.descripcion LIKE ?
 OR sub.descripcion LIKE ?
 OR u.descripcion LIKE ?
-OR s.cant_prest LIKE ?);
+OR s.cant_prest LIKE ?)
+ORDER BY s.descripcion;

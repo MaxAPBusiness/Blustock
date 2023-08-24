@@ -1,1 +1,2 @@
-SELECT * FROM grupos WHERE descripcion LIKE ?;
+SELECT * FROM grupos WHERE descripcion LIKE ?
+ORDER BY descripcion;
