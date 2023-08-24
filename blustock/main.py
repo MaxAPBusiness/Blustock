@@ -844,10 +844,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText("")
         self.pantallaRealizarMov.cantidadSpinBox.setValue(0)
 
-    #Toma la cantidad en condiciones de la herramienta que selecciones en nuevo movimiento y lo pone en una line edit para mostrarnos la cantida de herramientas en stock
-    def cant(self,mov,estado=None):
+    #Toma la cantidad en condiciones de la herramienta que selecciones
+    # en nuevo movimiento y lo pone en una line edit para mostrarnos 
+    # la cantida de herramientas en stock.
+    def cant(self, mov: int, estado=None):
         if mov == 0:
-            if estado == " " or estado == "" or estado == None:
+            if estado in {" ", "", None}:
                 return
             try:
                 estado = estado[estado.index(" "):]
@@ -856,24 +858,54 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass
             estado = unidecode(estado)
             estado = "cant_" + estado.lower()
-            query = f"select {estado} from stock WHERE descripcion = ?"
-            params = (self.pantallaRealizarMov.herramientaComboBox.currentText(),)
-            valor = bdd.cur.execute(query,params).fetchall()
-            if valor == None or valor == "" or valor == " " or valor == []:
-                mensaje = "La herramienta que selecciono no existe por favor ingrese una herramienta existente."
+            query = f"""SELECT {estado} FROM stock
+                        WHERE descripcion = ? AND id_ubi = (
+                            SELECT id FROM ubicaciones
+                            WHERE descripcion = ?
+                        )"""
+            params = (self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                      self.pantallaRealizarMov.ubicacionComboBox.currentText())
+            valor = bdd.cur.execute(query,params).fetchone()
+            try:
+                if not valor[0]:
+                    valor[0] = 0
+            except:
+                mensaje = "La herramienta que seleccionó no está registrada en el sistema. Por favor, ingrese una herramienta existente."
                 self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
                 return PopUp("Error", mensaje).exec()
-            self.pantallaRealizarMov.cantidadSpinBox.setMaximum(valor[0][0])
-            self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(valor[0][0]))
-        if mov == 1:
+            self.pantallaRealizarMov.cantidadSpinBox.setMaximum(valor[0])
+            self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(valor[0]))
+        elif mov == 1:
             cant = bdd.cur.execute("SELECT sum(cantidad) FROM reparaciones where id_herramienta=(select id from stock where descripcion = ?)", (self.pantallaRealizarMov.herramientaComboBox.currentText(),)).fetchone()[0]
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
-        if mov == 2:
-            cant = bdd.cur.execute("SELECT sum(cantidad) FROM movimientos where id_tipo=? and id_elem=? and id_persona=?", (3,self.pantallaRealizarMov.herramientaComboBox.currentText(),self.pantallaRealizarMov.alumnoComboBox.currentText())).fetchone()[0]
+        elif mov == 2:
+            cant = bdd.cur.execute(
+                """SELECT sum(cantidad) FROM movimientos
+                   WHERE id_tipo=? AND id_elem=? AND id_persona=?""",
+                (3, self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                self.pantallaRealizarMov.alumnoComboBox.currentText())).fetchone()[0]
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
-
+        elif mov == 3:
+            cant = bdd.cur.execute(
+                """SELECT cant_baja FROM stock
+                   WHERE descripcion = ? AND id_ubi = (
+                       SELECT id FROM ubicaciones WHERE descripcion = ?
+                   )""",
+                (self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                self.pantallaRealizarMov.ubicacionComboBox.currentText(),)).fetchone()
+            try:
+                cant = cant[0]
+                if cant is None:
+                    cant = 0
+            except:
+                mensaje = "La herramienta que seleccionó no está registrada en el sistema. Por favor, ingrese una herramienta existente."
+                self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+                return PopUp("Error", mensaje).exec()
+            self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
+            self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(
+                str(cant))
     #El completer que esta en core pero sin convertirte todo en un line edit
     def completar(self,sugerencias):
         cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
@@ -960,10 +992,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoLabel.hide()
+            self.pantallaRealizarMov.estadoComboBox.hide()
+            self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(
+                self.pantallaRealizarMov.estadoComboBox.findData("De Baja"))
             self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
+                lambda: self.cant(3))
        
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
@@ -1027,7 +1064,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
 
-        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() != "Ingreso de Herramienta Reparada" and self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() != "Devolución":
+        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() not in {"Ingreso de Herramienta Reparada", "Devolución", "Envío a Reparación"}:
             self.deactA()
             self.deactB()
             self.herramientas()
@@ -3026,7 +3063,6 @@ class MainWindow(QtWidgets.QMainWindow):
             colData = 0
         else:
             colData = 2
-        
         
         datos = dal.obtenerDatos("deudas", barraBusqueda.text(), filtros)
         datos = sorted(datos, key=lambda i:i[colData])
