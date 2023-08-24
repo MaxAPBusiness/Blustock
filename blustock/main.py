@@ -414,7 +414,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaOtroPersonal.botonRefresh.clicked.connect(
             lambda: core.refresh(self.pantallaOtroPersonal.tableWidget,
                                  self.fetchOtroPersonal))
-
+        self.pantallaOtroPersonal.tableWidget.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         
         #Pantalla subgrupos
         self.pantallaSubgrupos.pushButton_2.clicked.connect(
@@ -472,7 +473,7 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: core.insertarFilas(
                 self.pantallaAlumnos.tableWidget,
                 lambda: self.saveOne(
-                    self.pantallaGrupos.tableWidget, dal.saveAlumnos),
+                    self.pantallaAlumnos.tableWidget, dal.saveAlumnos),
                 self.deleteAlumnos,  self.habilitarSaves,
                 core.camposAlumnos[0], [self.sClasesA]))
         self.pantallaAlumnos.botonGuardar.clicked.connect(
@@ -1847,8 +1848,6 @@ class MainWindow(QtWidgets.QMainWindow):
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             2, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.setSortingEnabled(True)
         tabla.cellChanged.connect(self.habilitarSaves)
 
@@ -2712,7 +2711,7 @@ class MainWindow(QtWidgets.QMainWindow):
         idd = int(idd)
 
         hayRelacion = dal.verifElimClases(idd)
-        desc = tabla.item(row, 1).text()
+        desc = tabla.item(row, 2).text()
         if hayRelacion:
             mensaje = f"La clase {desc} tiene relaciones. Por motivos de seguridad, debe eliminar primero los registros relacionados antes de eliminar esta clase."
             return PopUp('Advertencia', mensaje).exec()
@@ -2988,6 +2987,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             filtros.append(panoleroSeleccionado)
 
+        tabla.setSortingEnabled(False)
         tabla.setRowCount(0)
         tabla.horizontalHeader().setVisible(True)
 

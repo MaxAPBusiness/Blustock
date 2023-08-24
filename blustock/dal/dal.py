@@ -649,6 +649,7 @@ class DAL():
         --------
             bool: si guardó exitosamente o no.
         """
+        desc = tabla.item(row, 1).text()
         iCampos = (1, 2, 7, 8, 9)
         # Por cada campo que no debe ser nulo...
         for iCampo in iCampos:
@@ -660,7 +661,7 @@ class DAL():
             if texto == "":
                 # Le pide al usuario que termine de llenar los campos
                 # y corta la función.
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {desc} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
         try:
@@ -673,7 +674,6 @@ class DAL():
             return PopUp("Error", mensaje).exec()
 
         # Se obtiene el texto de todas las celdas.
-        desc = tabla.item(row, 1).text()
         grupo = tabla.cellWidget(row, 7).text()
         subgrupo = tabla.cellWidget(row, 8).text()
         ubi = tabla.cellWidget(row, 9).text()
@@ -762,6 +762,7 @@ class DAL():
             bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 3)
+        nombre = tabla.item(row, 1).text()
 
         for iCampo in iCampos:
             if iCampo == 2:
@@ -769,7 +770,7 @@ class DAL():
             else:
                 texto = tabla.item(row, iCampo).text()
             if texto == "":
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {nombre} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
         try:
@@ -782,7 +783,6 @@ class DAL():
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        nombre = tabla.item(row, 1).text()
         clase = tabla.cellWidget(row, 2).text()
 
         idClase = bdd.cur.execute(
@@ -842,11 +842,11 @@ class DAL():
         --------
             bool: si guardó exitosamente o no.
         """
+        grupo = tabla.item(row, 1).text()
         if tabla.item(row, 1).text() == "":
-            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+            mensaje = f"El registro {grupo} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
-        grupo = tabla.item(row, 1).text()
         try:
             idd = tabla.item(row, 0).text()
             if not idd.isnumeric():
@@ -893,6 +893,7 @@ class DAL():
         --------
             bool: si guardó exitosamente o no.
         """
+        nombre = tabla.item(row, 1).text()
         iCampos = (1, 2, 3)
         for iCampo in iCampos:
             if iCampo ==2:
@@ -900,7 +901,7 @@ class DAL():
             else:
                 texto = tabla.item(row, iCampo).text()
             if texto == "":
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {nombre} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
         try:
@@ -913,7 +914,6 @@ class DAL():
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        nombre = tabla.item(row, 1).text()
         clase = tabla.cellWidget(row, 2).text()
 
         idClase = bdd.cur.execute(
@@ -975,16 +975,16 @@ class DAL():
             bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2)
+        subgrupo = tabla.item(row, 1).text()
         for iCampo in iCampos:
             if iCampo == 2:
                 texto = tabla.cellWidget(row, iCampo).text()
             else:
                 texto = tabla.item(row, iCampo).text()
             if texto == "":
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {subgrupo} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
-        subgrupo = tabla.item(row, 1).text()
         grupo = tabla.cellWidget(row, 2).text()
 
         idGrupo = bdd.cur.execute(
@@ -1048,6 +1048,7 @@ class DAL():
             bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2, 3, 4, 5)
+        nombre = tabla.item(row, 1).text()
 
         for iCampo in iCampos:
             if iCampo == 2:
@@ -1055,7 +1056,7 @@ class DAL():
             else:
                 texto = tabla.item(row, iCampo).text()
             if texto == "":
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {nombre} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
 
         try:
@@ -1068,7 +1069,6 @@ class DAL():
             mensaje = "El dni ingresado es muy largo. Por favor, reduzca los dígitos del dni ingresado."
             return PopUp("Error", mensaje).exec()
 
-        nombre = tabla.item(row, 1).text()
         clase = tabla.cellWidget(row, 2).text()
         usuario = tabla.item(row, 4).text()
         contrasena = tabla.item(row, 5).text()
@@ -1130,13 +1130,13 @@ class DAL():
         --------
             bool: si guardó exitosamente o no.
         """
+        ubicacion = tabla.item(row, 1).text()
         if tabla.item(row, 1).text() == "":
             # Le pide al usuario que termine de llenar los campos
             # y corta la función.
-            mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+            mensaje = f"El registro {ubicacion} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
             return PopUp("Error", mensaje).exec()
 
-        ubicacion = tabla.item(row, 1).text()
         try:
             idd = tabla.item(row, 0).text()
             if not idd.isnumeric():
@@ -1188,13 +1188,14 @@ class DAL():
             bool: si guardó exitosamente o no.
         """
         iCampos = (1, 2,)
+        clase = tabla.item(row, 2).text()
         for iCampo in iCampos:
             if tabla.item(row, iCampo) is not None:
                 texto = tabla.item(row, iCampo).text()
             else:
                 texto = tabla.cellWidget(row, iCampo).text()
             if texto == "":
-                mensaje = "Hay campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
+                mensaje = f"El registro {clase} tiene campos en blanco que son obligatorios. Ingreselos e intente nuevamente."
                 return PopUp("Error", mensaje).exec()
         cat = tabla.cellWidget(row, 1).text()
         idCat = bdd.cur.execute(
@@ -1206,7 +1207,6 @@ class DAL():
         info = "Esta acción no se puede deshacer. ¿Desea guardar los cambios en la base de datos?"
         popup = PopUp("Pregunta", info).exec()
         if popup == QtWidgets.QMessageBox.StandardButton.Yes:
-            clase = tabla.item(row, 2).text()
             datosNuevos = [clase, cat,]
             try:
                 idd = tabla.item(row, 0).text()

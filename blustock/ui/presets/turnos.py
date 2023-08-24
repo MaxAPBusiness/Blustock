@@ -80,7 +80,8 @@ class TerminarTurno(QDialog):
         self.usuario = usuario
         super().__init__()
         self.setFixedSize(600, 400)
-        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'finalizar_turno.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}finalizar_turno.ui'), self)
         self.setWindowTitle("Finalizar turno")
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         path = f'ui{os.sep}rsc{os.sep}icons{os.sep}mostrar.png'
@@ -131,7 +132,8 @@ class cerrarSesion(QDialog):
         self.turnFinalized = None
         self.usuario = usuario
         super().__init__()
-        uic.loadUi(os.path.join(os.path.abspath(os.pardir),"blustock","ui", 'screens_uis', 'finalizar_turno.ui'), self)
+        uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
+                   f'ui{os.sep}screens_uis{os.sep}finalizar_turno.ui'), self)
         self.setWindowTitle("Cerrar la aplicacion")
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.Contrasena.setText("Para cerrar la aplicacion, por favor ingrese su contraseña")

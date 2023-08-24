@@ -64,7 +64,7 @@ def mostrarContrasena(boton: QtWidgets.QCheckBox, entry: QtWidgets.QLineEdit):
 # tipo de valor del campo, respectivamente.
 camposStock=((2, 1, 1, 0, 0, 1, 2, 4, 3, 3), (0, 1, 0, 0, 0, 0, 0, 2, 2, 2))
 camposAlumnos=((2, 1, 3, 1), (0, 1, 2, 0))
-camposClases=((2, 1, 3), (0, 1, 2))
+camposClases=((2, 3, 1), (0, 2, 1))
 camposDeudas=((2, 2, 2, 2, 2, 2, 2), (1, 1, 0, 0, 1, 1, 0))
 camposBaja=((2, 2, 2, 2, 2, 2, 2, 2), (1, 1, 0, 0, 1, 1, 1, 0))
 camposGrupos=((2, 1), (0, 1))
