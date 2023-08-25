@@ -1045,7 +1045,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
-            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
+            self.pantallaRealizarMov.descripcionLabel.setText("Motivo:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
 
