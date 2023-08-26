@@ -1180,17 +1180,22 @@ class MainWindow(QtWidgets.QMainWindow):
                     mensaje = """Por favor ingrese un valor mayor a 0."""
                     return PopUp("Error", mensaje).exec()
                 else:
-                    if texto == "Dar De Baja" or texto == "Ingreso de Herramienta Reparada" or texto == "Envío a Reparación" or texto == "Ingreso":
-                        persona = "pass"
-                    if texto=="Envío a Reparación" and (descripcion ==" " or descripcion =="" or descripcion==None):
-                        mensaje = """Por favor ingrese la ubicacion a la que la herramienta sera enviada"""
+                    if texto in {"Dar De Baja", "Ingreso de Herramienta Reparada", "Envío a Reparación", "Ingreso"}:
+                        persona = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0]
+                    if (descripcion == " " or not descripcion) and texto in {"Envío a Reparacion", "Dar De Baja"}:
+                        if texto=="Envío a Reparación":
+                            mensaje = """Por favor ingrese la ubicacion a la que la herramienta será enviada"""
+                        else:
+                            mensaje = """Por favor ingrese el motivo por el que la herramienta se dió de baja"""
                         return PopUp("Error", mensaje).exec()
-                    if persona != "" and persona != None and persona != []:
-                        if turno == " " or turno == None or turno == []:
-                            turno = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()
+                    if persona:
+                        try:
+                            turno = turno[0][0]
+                        except:
+                            turno = None
                         if tipo[0][0] == 1:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                        (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+                                        (turno, herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                             self.sumar(cant, herramienta[0],estado[0][1])
                         elif tipo[0][0] == 2:
                             usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
@@ -1199,7 +1204,7 @@ class MainWindow(QtWidgets.QMainWindow):
                             bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
                         elif tipo[0][0] == 3:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                        (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+                                        (turno, herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                             self.restar(cant, herramienta[0],estado[0][1])
                             self.sumar(cant, herramienta[0],"prest")
                             bdd.cur.execute("INSERT INTO deudas (id_mov, cant) SELECT id, ? FROM movimientos ORDER BY id DESC LIMIT 1", (cant,))
@@ -1214,7 +1219,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 return PopUp("Error", mensaje).exec()
                         elif tipo[0][0] == 5:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
-                                        (turno[0][0], herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
+                                        (turno, herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
                             self.restar(cant, herramienta[0],estado[0][1])
                             self.sumar(cant, herramienta[0],"De baja")
                         elif tipo[0][0] == 6:
@@ -1228,6 +1233,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 return PopUp("Error", mensaje).exec()
 
                         bdd.con.commit()
+                        # Hermano que hiciste aca
                         if hasattr(self,"sopas"):
                             if self.sopas == True:
                                 self.clear()                                
@@ -2080,8 +2086,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tabla.resizeRowsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
+
 
         listaElem.setMinimumWidth(
             listaElem.minimumSizeHint().width() + 100
