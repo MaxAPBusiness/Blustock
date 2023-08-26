@@ -906,6 +906,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(
                 str(cant))
+        elif mov == 4:
+            cantRep=bdd.cur.execute('''
+            SELECT cantidad FROM reparaciones WHERE id_herramienta = (
+                SELECT id FROM stock WHERE descripcion = ?
+            ) AND fecha_regreso IS NULL ORDER BY id''', (
+                self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                )).fetchone()[0]
+            self.pantallaRealizarMov.cantidadSpinBox.setValue(cantRep)
     #El completer que esta en core pero sin convertirte todo en un line edit
     def completar(self,sugerencias):
         cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
@@ -1034,10 +1042,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
-            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
+            self.pantallaRealizarMov.descripcionLabel.hide()
+            self.pantallaRealizarMov.descripcionLineEdit.hide()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(1))
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(9999)
-            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(lambda: self.reparadas(self.pantallaRealizarMov.ubicacionComboBox.currentText()))
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(
+                lambda: self.reparadas(self.pantallaRealizarMov.ubicacionComboBox.currentText()))
+            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
+                lambda: self.cant(4)
+            )
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
@@ -1200,7 +1213,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         elif tipo[0][0] == 2:
                             usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
                             self.restar(cant, herramienta[0],estado[0][1])
-                            self.sumar(cant, herramienta[0],"En reparacion")
+                            self.sumar(cant, herramienta[0],"reparacion")
                             bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
                         elif tipo[0][0] == 3:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
@@ -1220,14 +1233,23 @@ class MainWindow(QtWidgets.QMainWindow):
                         elif tipo[0][0] == 5:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
                                         (turno, herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
-                            self.restar(cant, herramienta[0],estado[0][1])
-                            self.sumar(cant, herramienta[0],"De baja")
+                            self.restar(cant, herramienta[0], estado[0][1])
+                            self.sumar(cant, herramienta[0], "baja")
                         elif tipo[0][0] == 6:
-                            id = bdd.cur.execute("SELECT * FROM reparaciones WHERE cantidad = ? and id_herramienta = ?", (herramienta[0],cant)).fetchone()
-                            if id != "" and id != None:
+                            sql="""SELECT id
+                            FROM reparaciones
+                            WHERE id_herramienta = ?
+                            AND cantidad = ?
+                            AND fecha_regreso IS NULL
+                            ORDER BY id"""
+                            id = bdd.cur.execute(sql, (herramienta[0], cant,)).fetchone()
+                            if id:
                                 self.sumar(cant,herramienta[0],estado[0][1])
                                 self.restar(cant, herramienta[0],"En reparacion")
-                                bdd.cur.execute("DELETE FROM reparaciones WHERE cantidad = ? and id_herramienta = ?",(cant,herramienta[0]))
+                                sql="""UPDATE reparaciones
+                                SET fecha_regreso = ?
+                                WHERE cantidad = ? and id_herramienta = ?"""
+                                bdd.cur.execute(sql, (cant,herramienta[0]))
                             else:
                                 mensaje = """No se ha encontrado el movimiento"""
                                 return PopUp("Error", mensaje).exec()
