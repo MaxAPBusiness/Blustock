@@ -849,7 +849,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # la cantida de herramientas en stock.
     def cant(self, mov: int, estado=None):
         if mov == 0:
-            if estado in {" ", "", None}:
+            if not estado:
                 return
             try:
                 estado = estado[estado.index(" "):]
@@ -868,6 +868,7 @@ class MainWindow(QtWidgets.QMainWindow):
             valor = bdd.cur.execute(query,params).fetchone()
             try:
                 if not valor[0]:
+                    valor = list(valor)
                     valor[0] = 0
             except:
                 mensaje = "La herramienta que seleccionó no está registrada en el sistema. Por favor, ingrese una herramienta existente."
@@ -881,7 +882,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
         elif mov == 2:
             cant = bdd.cur.execute(
-                """SELECT sum(cantidad) FROM movimientos
+                """SELECT sum(cant) FROM movimientos
                    WHERE id_tipo=? AND id_elem=? AND id_persona=?""",
                 (3, self.pantallaRealizarMov.herramientaComboBox.currentText(),
                 self.pantallaRealizarMov.alumnoComboBox.currentText())).fetchone()[0]
@@ -912,8 +913,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 SELECT id FROM stock WHERE descripcion = ?
             ) AND fecha_regreso IS NULL ORDER BY id''', (
                 self.pantallaRealizarMov.herramientaComboBox.currentText(),
-                )).fetchone()[0]
+                )).fetchone()
+            try:
+                cantRep=cantRep[0]
+                if cantRep is None:
+                    cantRep = 0
+            except:
+                mensaje = "La herramienta que seleccionó no está registrada en el sistema. Por favor, ingrese una herramienta existente."
+                self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
             self.pantallaRealizarMov.cantidadSpinBox.setValue(cantRep)
+            self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cantRep)
+            self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(
+                str(cantRep))
     #El completer que esta en core pero sin convertirte todo en un line edit
     def completar(self,sugerencias):
         cuadroSugerencias = QtWidgets.QCompleter(sugerencias, self)
@@ -955,19 +966,22 @@ class MainWindow(QtWidgets.QMainWindow):
     def reparadas(self,ubi):
         self.pantallaRealizarMov.herramientaComboBox.clear()
         sugerencias = []
-        datos = bdd.cur.execute("SELECT s.descripcion FROM reparaciones r JOIN stock s ON s.id = r.id_herramienta JOIN ubicaciones u ON u.id = s.id_ubi WHERE s.id_ubi LIKE (SELECT id FROM ubicaciones WHERE descripcion = ?)", (ubi,)).fetchall()
+        sql="""SELECT s.descripcion FROM reparaciones r
+        JOIN stock s ON s.id = r.id_herramienta
+        JOIN ubicaciones u ON u.id = s.id_ubi
+        WHERE u.descripcion = ?
+        AND r.fecha_regreso IS NULL"""
+        datos = bdd.cur.execute(sql, (ubi,)).fetchall()
 
         if datos == []:
             self.pantallaRealizarMov.herramientaComboBox.addItem("No hay herramientas en enviadas a reparación")
             self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(0)
-
         else:
             for i in datos:
                 self.pantallaRealizarMov.herramientaComboBox.addItem(i[0])
                 sugerencias.append(i[0])
             self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
             self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
-            self.pantallaRealizarMov.ubicacionComboBox.textActivated.disconnect(self.herramientas)
 
     #Funcion que llena la combobox de alumnos en nuevo movimento
     def alumnos(self):
@@ -1003,12 +1017,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.estadoLabel.hide()
             self.pantallaRealizarMov.estadoComboBox.hide()
             self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(
-                self.pantallaRealizarMov.estadoComboBox.findData("De Baja"))
+                self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
             self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
                 lambda: self.cant(3))
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.herramientas)
        
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
@@ -1038,27 +1053,39 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
             self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoLabel.show()
+            self.pantallaRealizarMov.estadoComboBox.show()
             self.pantallaRealizarMov.cursoComboBox.hide()
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
             self.pantallaRealizarMov.descripcionLabel.hide()
             self.pantallaRealizarMov.descripcionLineEdit.hide()
-            self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(1))
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(9999)
             self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(
                 lambda: self.reparadas(self.pantallaRealizarMov.ubicacionComboBox.currentText()))
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
                 lambda: self.cant(4)
             )
+            try:
+                self.estadoComboBox.disconnect()
+            except:
+                pass
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Dar De Baja":
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
+            if self.pantallaRealizarMov.estadoComboBox.findText("En Condiciones") == -1:
+                self.pantallaRealizarMov.estadoComboBox.addItem("En Condiciones")
+            self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Condiciones"))
+            self.pantallaRealizarMov.estadoLabel.hide()
+            self.pantallaRealizarMov.estadoComboBox.hide()
             self.pantallaRealizarMov.cursoComboBox.hide()
             self.pantallaRealizarMov.alumnoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
             self.pantallaRealizarMov.alumnoLabel.hide()
             self.pantallaRealizarMov.descripcionLabel.setText("Motivo:")
+            self.pantallaRealizarMov.descripcionLabel.show()
+            self.pantallaRealizarMov.descripcionLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
 
@@ -1209,10 +1236,10 @@ class MainWindow(QtWidgets.QMainWindow):
                         if tipo[0][0] == 1:
                             bdd.cur.execute("INSERT INTO movimientos(id_turno,id_elem,id_estado,cant,id_persona,fecha_hora,id_tipo,descripcion) VALUES(?, ?, ?, ?, ?, ?, ?,?)",
                                         (turno, herramienta[0], estado[0][0], cant, persona[0], fecha, tipo[0][0], descripcion))
-                            self.sumar(cant, herramienta[0],estado[0][1])
+                            self.sumar(cant, herramienta[0], estado[0][1])
                         elif tipo[0][0] == 2:
                             usuario = bdd.cur.execute("""SELECT id FROM personal where dni= ?""" , (self.usuario,)).fetchall()[0][0]
-                            self.restar(cant, herramienta[0],estado[0][1])
+                            self.restar(cant, herramienta[0], estado[0][1])
                             self.sumar(cant, herramienta[0],"reparacion")
                             bdd.cur.execute("INSERT INTO reparaciones(id_herramienta,cantidad,id_usuario,destino,fecha_envio) VALUES(?, ?, ?, ?, ?)",(herramienta[0],cant, usuario,descripcion, fecha[:10]))
                         elif tipo[0][0] == 3:
@@ -1249,7 +1276,8 @@ class MainWindow(QtWidgets.QMainWindow):
                                 sql="""UPDATE reparaciones
                                 SET fecha_regreso = ?
                                 WHERE cantidad = ? and id_herramienta = ?"""
-                                bdd.cur.execute(sql, (cant,herramienta[0]))
+                                bdd.cur.execute(sql, (datetime.now().strftime("%Y/%m/%d %H:%M:%S"), 
+                                                      cant, herramienta[0]))
                             else:
                                 mensaje = """No se ha encontrado el movimiento"""
                                 return PopUp("Error", mensaje).exec()
