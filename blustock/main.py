@@ -966,7 +966,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def reparadas(self,ubi):
         self.pantallaRealizarMov.herramientaComboBox.clear()
         sugerencias = []
-        sql="""SELECT s.descripcion FROM reparaciones r
+        sql="""SELECT DISTINCT s.descripcion FROM reparaciones r
         JOIN stock s ON s.id = r.id_herramienta
         JOIN ubicaciones u ON u.id = s.id_ubi
         WHERE u.descripcion = ?
