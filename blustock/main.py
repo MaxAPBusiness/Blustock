@@ -1016,6 +1016,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoLabel.hide()
             self.pantallaRealizarMov.estadoLabel.hide()
             self.pantallaRealizarMov.estadoComboBox.hide()
+            try:
+                self.pantallaRealizarMov.estadoComboBox.disconnect()
+            except:
+                pass
             self.pantallaRealizarMov.estadoComboBox.setCurrentIndex(
                 self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
             self.pantallaRealizarMov.descripcionLabel.setText("Ubicacion de destino:")
@@ -1068,7 +1072,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.cant(4)
             )
             try:
-                self.estadoComboBox.disconnect()
+                self.pantallaRealizarMov.estadoComboBox.disconnect()
             except:
                 pass
 
@@ -1161,22 +1165,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Resta la cantidad de herramientas a la base de datos
     def restar(self, cant,herramienta,estado):
-        if bdd.cur.execute("select cant_condiciones from stock where id = ?",(herramienta,)).fetchall()[0][0]-cant >=0:
-            try:
-                estado = estado[estado.index(" "):]
-                estado = estado[1:]
-            except:
-                pass
-            estado = unidecode(estado)
-            estado = "cant_" + estado.lower()
-            query = f"select {estado} from stock WHERE id = ?"
-            params = (herramienta,)
-            if bdd.cur.execute(query,params) ==None:
-                query = f"UPDATE stock SET {estado} = 0 - ? WHERE id = ?"
-            else:
-                query = f"UPDATE stock SET {estado} = {estado} - ? WHERE id = ?"
-                params = (cant, herramienta)
+        try:
+            estado = estado[estado.index(" "):]
+            estado = estado[1:]
+        except:
+            pass
+        estado = unidecode(estado)
+        estado = "cant_" + estado.lower()
+        query = f"select {estado} from stock WHERE id = ?"
+        params = (herramienta,)
+        try:
+            resultado = bdd.cur.execute(query,params).fetchone()[0]
+            if resultado is None:
+                resultado = 0
+        except:
+            print("ERROR DE PROGRAMACION")
+            return
+        if resultado-cant >=0:
+            query = f"UPDATE stock SET {estado} = {estado} - ? WHERE id = ?"
+            params = (cant, herramienta)
             bdd.cur.execute(query, params)
+            bdd.con.commit()
             self.sopas = True
         else:
             self.sopas = False
