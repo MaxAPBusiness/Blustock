@@ -706,13 +706,13 @@ class DAL():
             return PopUp("Error", info).exec()
 
         datosNuevos = ["" if cell in (
-            "-", None) else cell for cell in [cond, rep, baja, prest, grupo, subgrupo, ubi]]
+            "-", None) else cell for cell in [desc, cond, baja, grupo, subgrupo, ubi]]
         try:
             idd = tabla.item(row, 0).text()
             if not idd.isnumeric():
                 bdd.cur.execute(
-                    "INSERT INTO stock VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",
-                    (desc, cond, rep, baja, prest,
+                    "INSERT INTO stock VALUES(NULL, ?, ?, 0, ?, 0, ?, ?)",
+                    (desc, cond, baja,
                         idSubgrupo[0], idUbi[0],)
                 )
                 self.insertarHistorial(
@@ -726,9 +726,9 @@ class DAL():
                 bdd.cur.execute(
                     """UPDATE stock
                     SET descripcion = ?, cant_condiciones = ?,
-                    cant_reparacion=?, cant_baja = ?, cant_prest=?, id_subgrupo = ?, id_ubi=?
+                    cant_baja = ?, id_subgrupo = ?, id_ubi=?
                     WHERE id = ?""",
-                    (desc, cond, rep, baja, prest,
+                    (desc, cond, baja,
                         idSubgrupo[0], idUbi[0], idd,)
                 )
                 datosViejos = [["" if cellData in (

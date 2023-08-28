@@ -1736,7 +1736,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dal.insertarHistorial(
                 self.usuario, "Eliminación", "Stock",
                 f'{datosEliminados[1]} {datosEliminados[9]}',
-                datosEliminados[1:])
+                datosEliminados[2:])
             # Eliminamos los datos
             dal.eliminarDatos('stock', idd)
             tabla.removeRow(row)
@@ -2917,24 +2917,20 @@ class MainWindow(QtWidgets.QMainWindow):
                         datosInsertados = rawRow[6].split(';')
                         desc = f"""                Se insertó la herramienta {rawRow[4]}, con los siguientes datos:
                         - Cantidad en condiciones: {datosInsertados[0]}
-                        - Cantidad en reparacion: {datosInsertados[1]}
-                        - Cantidad de baja: {datosInsertados[2]}
-                        - Cantidad prestadas: {datosInsertados[3]}
-                        - Grupo: {datosInsertados[4]}
-                        - Subgrupo: {datosInsertados[5]}
-                        - Ubicación: {datosInsertados[6]}"""
+                        - Cantidad de baja: {datosInsertados[1]}
+                        - Grupo: {datosInsertados[2]}
+                        - Subgrupo: {datosInsertados[3]}
+                        - Ubicación: {datosInsertados[4]}"""
                     elif rawRow[3] == 'Edición':
                         datosViejos = rawRow[5].split(';')
                         datosNuevos = rawRow[6].split(';')
                         desc = f"""                Se editó la herramienta {rawRow[4]}, y se reemplazaron los siguientes datos:
                         - Descripción: {rawRow[4]}, por {datosNuevos[0]}
                         - Cantidad en condiciones: {datosViejos[0]}, por {datosNuevos[1]}
-                        - Cantidad en reparacion: {datosViejos[1]}, por {datosNuevos[2]}
-                        - Cantidad de baja: {datosViejos[2]}, por {datosNuevos[3]}
-                        - Cantidad prestadas: {datosViejos[3]}, por {datosNuevos[4]}
-                        - Grupo: {datosViejos[4]}, por {datosNuevos[5]}
-                        - Subgrupo: {datosViejos[5]}, por {datosNuevos[6]}
-                        - Ubicación: {datosViejos[6]}, por {datosNuevos[7]}"""
+                        - Cantidad de baja: {datosViejos[1]}, por {datosNuevos[2]}
+                        - Grupo: {datosViejos[2]}, por {datosNuevos[3]}
+                        - Subgrupo: {datosViejos[3]}, por {datosNuevos[4]}
+                        - Ubicación: {datosViejos[4]}, por {datosNuevos[5]}"""
                     elif rawRow[3] == 'Eliminación':
                         datosEliminados = rawRow[5].split(';')
                         desc = f"""                Se eliminó la herramienta {rawRow[4]}, que tenía los siguientes datos:
@@ -3048,14 +3044,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             tabla.setRowHeight(rowNum, 35)
         tabla.resizeColumnsToContents()
-        tabla.resizeRowsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.resizeRowsToContents()
-        tabla.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch)
-        tabla.horizontalHeader().setSectionResizeMode(
-            5, QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         listaGestion.setMinimumWidth(
             listaGestion.minimumSizeHint().width() + 100
