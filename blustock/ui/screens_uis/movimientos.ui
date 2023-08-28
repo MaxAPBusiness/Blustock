@@ -467,6 +467,11 @@
        </column>
        <column>
         <property name="text">
+         <string>Ubicación</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Estado</string>
         </property>
        </column>
@@ -493,11 +498,6 @@
        <column>
         <property name="text">
          <string>Turno</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Ubicación</string>
         </property>
        </column>
        <column>

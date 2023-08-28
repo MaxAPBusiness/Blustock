@@ -2132,7 +2132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = []
         for rowData in datosCrudos:
             fecha = QtCore.QDateTime.fromString(
-                rowData[7], 'yyyy/MM/dd HH:mm:ss')
+                rowData[8], 'yyyy/MM/dd HH:mm:ss')
             if fecha >= desdeFecha.dateTime() and fecha <= hastaFecha.dateTime():
                 datos.append(rowData)
 
