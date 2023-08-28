@@ -882,9 +882,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
         elif mov == 2:
             cant = bdd.cur.execute(
-                """SELECT sum(cant) FROM movimientos
-                   WHERE id_tipo=? AND id_elem=? AND id_persona=?""",
-                (3, self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                """
+                SELECT sum(cant) FROM deudas WHERE id_mov = (
+                    SELECT id FROM movimientos WHERE id_elem= (
+                        SELECT id FROM stock WHERE descripcion = ?
+                        AND id_ubi = (
+                            SELECT id FROM ubicaciones WHERE descripcion = ?
+                        )
+                    ) AND id_persona IN (
+                        SELECT id FROM personal WHERE nombre_apellido = ?
+                    ))""",
+                (self.pantallaRealizarMov.herramientaComboBox.currentText(),
+                 self.pantallaRealizarMov.ubicacionComboBox.currentText(),
                 self.pantallaRealizarMov.alumnoComboBox.currentText())).fetchone()[0]
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
@@ -1103,7 +1112,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(2))
-            self.pantallaRealizarMov.alumnoComboBox.textActivated.connect(lambda: self.deudasp())
             self.pantallaRealizarMov.cursoComboBox.show()
             self.pantallaRealizarMov.cursoLabel.show()
             self.pantallaRealizarMov.alumnoLabel.show()
@@ -1128,28 +1136,49 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
         
     #carga el resto de combobox de nuevo movimiento
-    def realizarMovimiento(self):
-        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.count()==0:
+    def realizarMovimiento(self, turno = None):
+        if self.pantallaRealizarMov.tipoDeMovimientoComboBox.count()<3:
             sugerencias=[]
 
             for i in dal.obtenerDatos("tipos_mov", ""):
-                self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
+                index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
+                if index == -1:
+                    self.pantallaRealizarMov.tipoDeMovimientoComboBox.addItem(i[1])
 
             for i in dal.obtenerDatos("estados", ""):
-                self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
+                index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
+                if index == -1:
+                    self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
             for i in dal.obtenerDatos("clases", ""):
-                if i[2]!="Previas":
-                    self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
+                if i[2] not in {"Previas", "Egresado"}:
+                    index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
+                    if index == -1:
+                        self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
                 sugerencias.append(i[2])
 
             for i in dal.obtenerDatos("ubicaciones", ""):
-                self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
+                index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
+                if index == -1:
+                    self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
             self.pantallaRealizarMov.cursoComboBox.setCompleter(self.completar(sugerencias))
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
             self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
             
+        if turno:
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.removeItem(
+                self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText("Envío a Reparación")
+            )
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.removeItem(
+                self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText("Dar De Baja")
+            )
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.removeItem(
+                self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText("Ingreso")
+            )
+            self.pantallaRealizarMov.tipoDeMovimientoComboBox.removeItem(
+                self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText("Ingreso de Herramienta Reparada")
+            )
         self.stackedWidget.setCurrentIndex(13)
 
     #Suma la cantidad de herramientas a la base de datos
@@ -1266,8 +1295,12 @@ class MainWindow(QtWidgets.QMainWindow):
                             self.sumar(cant, herramienta[0],"prest")
                             bdd.cur.execute("INSERT INTO deudas (id_mov, cant) SELECT id, ? FROM movimientos ORDER BY id DESC LIMIT 1", (cant,))
                         elif tipo[0][0] == 4:
-                            id = bdd.cur.execute("SELECT id FROM movimientos where id_tipo=? and id_elem=? and id_persona=? and cant=?", (tipo,herramienta[0],persona[0],cant)).fetchone()
-                            if id != "" and id != None:
+                            sql="""SELECT d.id_mov FROM deudas d 
+                            join movimientos m on d.id_mov = m.id
+                            where m.id_elem=? and m.id_persona=?"""
+                            id = bdd.cur.execute(
+                                    sql, (herramienta[0], persona[0])).fetchone()
+                            if id:
                                 self.sumar(cant, herramienta[0],estado[0][1])
                                 self.restar(cant, herramienta[0],"prest")
                                 bdd.cur.execute("DELETE FROM deudas WHERE id_mov = ?",(id[0],))

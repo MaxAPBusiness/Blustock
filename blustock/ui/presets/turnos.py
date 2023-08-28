@@ -75,9 +75,10 @@ class NuevoTurno(QDialog):
             
 
 class TerminarTurno(QDialog):
-    def __init__(self,usuario):
+    def __init__(self,usuario, funcRefresh):
         self.turnFinalized = None
         self.usuario = usuario
+        self.funcRefresh=funcRefresh
         super().__init__()
         self.setFixedSize(600, 400)
         uic.loadUi(os.path.join(os.path.abspath(os.getcwd()),
@@ -118,6 +119,7 @@ class TerminarTurno(QDialog):
                 bdd.con.commit()
                 mensaje = """El turno se ha finalizado correctamente"""
                 PopUp("Aviso", mensaje).exec()
+                self.funcRefresh()
             else:
                 mensaje = """Contraseña incorrecta. El turno no se ha finalizado"""
                 PopUp("Error", mensaje).exec()
