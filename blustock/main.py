@@ -1009,6 +1009,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Funcion que verifica y altera nmovimientos segun cual es el tipo de movimiento que se selecciona
     def check(self):
+        for i in dal.obtenerDatos("estados", ""):
+            index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
+            if index == -1:
+                self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Envío a Reparación":
             self.pantallaRealizarMov.cursoComboBox.hide()
             self.pantallaRealizarMov.alumnoComboBox.hide()
@@ -1037,16 +1041,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.cursoComboBox.hide()
             self.pantallaRealizarMov.cursoLabel.hide()
-            for i in dal.obtenerDatos("estados", ""):
-                index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
-                if index == -1:
-                    self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
             self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(9999)
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación")
+            )
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Retiro":
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("De Baja"))
             self.pantallaRealizarMov.cursoComboBox.show()
             self.pantallaRealizarMov.cursoLabel.show()
             self.pantallaRealizarMov.alumnoLabel.show()
@@ -1056,7 +1061,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
 
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso de Herramienta Reparada":
-            self.pantallaRealizarMov.estadoComboBox.removeItem(self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
             self.pantallaRealizarMov.estadoLabel.show()
             self.pantallaRealizarMov.estadoComboBox.show()
             self.pantallaRealizarMov.cursoComboBox.hide()
@@ -1102,11 +1108,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.cursoLabel.show()
             self.pantallaRealizarMov.alumnoLabel.show()
             self.pantallaRealizarMov.alumnoComboBox.show()
-            for i in dal.obtenerDatos("estados", ""):
-                index = self.pantallaRealizarMov.estadoComboBox.findText(i[1])
-                if index == -1:
-                    self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
-            self.pantallaRealizarMov.descripcionLabel.setText("Descripcion:")
+            try:
+                self.pantallaRealizarMov.estadoComboBox.disconnect()
+            except:
+                pass
+            self.pantallaRealizarMov.estadoComboBox.removeItem(
+                self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
+            self.pantallaRealizarMov.descripcionLabel.setText("Descripción:")
 
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() not in {"Ingreso de Herramienta Reparada", "Devolución", "Envío a Reparación"}:
             self.deactA()
@@ -1502,6 +1510,8 @@ class MainWindow(QtWidgets.QMainWindow):
             item3 = QtWidgets.QTableWidgetItem()
             item3.setData(0, rowData[3])
             item3.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item3.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
+                           QtCore.Qt.ItemFlag.ItemIsEnabled)
             tabla.setItem(rowNum, 3, item3)
             item4 = QtWidgets.QTableWidgetItem()
             item4.setData(0, rowData[4])
