@@ -986,6 +986,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
 
     def alumnosDeudores(self):
+        self.pantallaRealizarMov.alumnoComboBox.clear()
         sugerencias = []
         for i in self.test:
             if self.pantallaRealizarMov.alumnoComboBox.findText(str(i[0]))==-1 and self.pantallaRealizarMov.cursoComboBox.currentText() == i[1]:
@@ -1076,6 +1077,20 @@ class MainWindow(QtWidgets.QMainWindow):
             sugerencias.append(i[1])
         self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
         self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+    
+    def herramientasBaja(self):
+        self.pantallaRealizarMov.herramientaComboBox.clear()
+        sugerencias = []
+        for i in dal.obtenerDatos("stock", self.pantallaRealizarMov.ubicacionComboBox.currentText(),):
+            if type(i[4])==int:
+                if i[4]>0:
+                    self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
+                    sugerencias.append(i[1])
+                    self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+        if len(sugerencias)<=0:
+            self.pantallaRealizarMov.herramientaComboBox.addItem("No hay herramientas en reparacion a reparación")
+            self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(0)
+        self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
 
     #Funcion que verifica y altera nmovimientos segun cual es el tipo de movimiento que se selecciona
     def check(self):
@@ -1102,7 +1117,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(
                 lambda: self.cant(3))
-            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.herramientas)
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.herramientasBaja)
        
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Ingreso":
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.hide()
