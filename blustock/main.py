@@ -1032,7 +1032,7 @@ class MainWindow(QtWidgets.QMainWindow):
         datos = bdd.cur.execute(sql, (ubi,)).fetchall()
 
         if datos == []:
-            self.pantallaRealizarMov.herramientaComboBox.addItem("No hay herramientas en enviadas a reparación")
+            self.pantallaRealizarMov.herramientaComboBox.addItem("No hay herramientas enviadas a reparación")
             self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(0)
         else:
             for i in datos:
@@ -1057,7 +1057,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def clases(self):
         self.pantallaRealizarMov.cursoComboBox.clear()
-        print("xd")
         sugerencias=[]
         for i in dal.obtenerDatos("clases", ""):
             if i[2] not in {"Previas", "Egresado"}:
@@ -1091,6 +1090,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoLabel.hide()
             self.pantallaRealizarMov.estadoLabel.hide()
             self.pantallaRealizarMov.estadoComboBox.hide()
+            self.deactB()
             try:
                 self.pantallaRealizarMov.estadoComboBox.disconnect()
             except:
