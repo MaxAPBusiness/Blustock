@@ -881,6 +881,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
         elif mov == 2:
+            print(self.pantallaRealizarMov.herramientaComboBox.currentText(),self.pantallaRealizarMov.ubicacionComboBox.currentText(),self.pantallaRealizarMov.alumnoComboBox.currentText())
             cant = bdd.cur.execute(
                 """
                 SELECT sum(cant) FROM deudas WHERE id_mov = (
@@ -895,8 +896,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 (self.pantallaRealizarMov.herramientaComboBox.currentText(),
                  self.pantallaRealizarMov.ubicacionComboBox.currentText(),
                 self.pantallaRealizarMov.alumnoComboBox.currentText())).fetchone()[0]
-            self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
-            self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
+            if cant not in {None,0}:
+                self.pantallaRealizarMov.cantidadSpinBox.setMaximum(cant)
+                self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(cant))
+            else:                
+                self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText(str(0))
         elif mov == 3:
             cant = bdd.cur.execute(
                 """SELECT cant_baja FROM stock
@@ -942,6 +946,7 @@ class MainWindow(QtWidgets.QMainWindow):
         cuadroSugerencias.setCompletionMode(
             QtWidgets.QCompleter.CompletionMode.PopupCompletion)
         cuadroSugerencias.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
+        cuadroSugerencias.model().sort(0)
         return cuadroSugerencias
     
     def deactA(self):
@@ -949,28 +954,72 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.alumnoComboBox.textActivated.disconnect()
         except:
             pass
+        
     def deactB(self):
         try:
             self.pantallaRealizarMov.herramientaComboBox.textActivated.disconnect()
         except:
             pass
+    
+    def deactC(self):
+        try:
+            self.pantallaRealizarMov.cursoComboBox.textActivated.disconnect()
+        except:
+            pass
+
+    def deactD(self):
+        try:
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.disconnect()
+        except:
+            pass
+
+    def herramientasDeudadas(self):
+        sugerencias = []
+        for i in self.test:
+            herramienta = i[2]
+            herramienta = herramienta.replace(self.pantallaRealizarMov.ubicacionComboBox.currentText(), "").strip()
+            if self.pantallaRealizarMov.herramientaComboBox.findText(str(herramienta))==-1 and self.pantallaRealizarMov.alumnoComboBox.currentText() == i[0]:
+                self.pantallaRealizarMov.herramientaComboBox.addItem(herramienta)
+                sugerencias.append(herramienta)
+            self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
+            self.pantallaRealizarMov.herramientaComboBox.model().sort(0)
+        self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+
+    def alumnosDeudores(self):
+        sugerencias = []
+        for i in self.test:
+            if self.pantallaRealizarMov.alumnoComboBox.findText(str(i[0]))==-1 and self.pantallaRealizarMov.cursoComboBox.currentText() == i[1]:
+                self.pantallaRealizarMov.alumnoComboBox.addItem(i[0])
+                sugerencias.append(i[0])
+            self.pantallaRealizarMov.alumnoComboBox.setCompleter(self.completar(sugerencias))
+            self.pantallaRealizarMov.alumnoComboBox.model().sort(0)
+        self.pantallaRealizarMov.alumnoComboBox.textActivated.connect(self.herramientasDeudadas)
+        self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
 
     def deudasp(self):
-        self.pantallaRealizarMov.herramientaComboBox.clear()
+        self.test = []
+        self.pantallaRealizarMov.cursoComboBox.clear()
         sugerencias = []
-        datos = dal.obtenerDatos("deudas", (self.pantallaRealizarMov.ubicacionComboBox.currentText(),self.pantallaRealizarMov.alumnoComboBox.currentText()))
-
+        datos = dal.obtenerDatos("deudas1",(self.pantallaRealizarMov.ubicacionComboBox.currentText(),))
         if datos == []:
-            self.pantallaRealizarMov.herramientaComboBox.addItem("No hay retiros pendientes a nombre de esta persona")
-            self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(0)
+            self.pantallaRealizarMov.cursoComboBox.addItem("No hay retiros pendientes en este momento")
+            self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(0)
 
         else:
             for i in datos:
-                self.pantallaRealizarMov.herramientaComboBox.addItem(i[1])
-                sugerencias.append(i[1])
-            self.pantallaRealizarMov.herramientaComboBox.setCompleter(self.completar(sugerencias))
-            self.pantallaRealizarMov.herramientaComboBox.setCurrentIndex(-1)
+                partes = i[2].split(' ')
+                sopas = ' '.join(partes[:-3])
+                curso = ' '.join(partes[-3:])
+                self.test.append((sopas,curso,i[0]))
+                if self.pantallaRealizarMov.cursoComboBox.findText(str(curso))==-1:
+                    self.pantallaRealizarMov.cursoComboBox.addItem(curso)
+                    sugerencias.append(curso)
+                
+            self.pantallaRealizarMov.cursoComboBox.setCompleter(self.completar(sugerencias))
+            self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
             self.pantallaRealizarMov.cursoComboBox.textActivated.disconnect(self.alumnos)
+            self.pantallaRealizarMov.cursoComboBox.textActivated.connect(self.alumnosDeudores)
+            self.pantallaRealizarMov.cursoComboBox.model().sort(0)
 
     def reparadas(self,ubi):
         self.pantallaRealizarMov.herramientaComboBox.clear()
@@ -1005,6 +1054,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.pantallaRealizarMov.alumnoComboBox.setCompleter(self.completar(sugerencias))
         self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
+
+    def clases(self):
+        self.pantallaRealizarMov.cursoComboBox.clear()
+        print("xd")
+        sugerencias=[]
+        for i in dal.obtenerDatos("clases", ""):
+            if i[2] not in {"Previas", "Egresado"}:
+                index = self.pantallaRealizarMov.cursoComboBox.findText(str(i[2]))
+                if index == -1:
+                    self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
+                    sugerencias.append(i[2])
+        self.pantallaRealizarMov.cursoComboBox.setCompleter(self.completar(sugerencias))
+        self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
 
     #Funcion que llena la combobox de herramientas en nuevo movimento
     def herramientas(self):
@@ -1111,6 +1173,8 @@ class MainWindow(QtWidgets.QMainWindow):
         elif self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() == "Devolución":
             self.pantallaRealizarMov.herramientasDisponiblesLineEdit.show()
             self.pantallaRealizarMov.herramientasDisponiblesLabel.show()
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.disconnect()
+            self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.deudasp)
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(2))
             self.pantallaRealizarMov.cursoComboBox.show()
             self.pantallaRealizarMov.cursoLabel.show()
@@ -1123,22 +1187,25 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.estadoComboBox.removeItem(
                 self.pantallaRealizarMov.estadoComboBox.findText("En Reparación"))
             self.pantallaRealizarMov.descripcionLabel.setText("Descripción:")
-
+        
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.currentText() not in {"Ingreso de Herramienta Reparada", "Devolución", "Envío a Reparación"}:
             self.deactA()
             self.deactB()
+            self.deactC()
+            self.deactD()
             self.herramientas()
+            self.clases()
             self.pantallaRealizarMov.herramientaComboBox.textActivated.connect(lambda: self.cant(0,self.pantallaRealizarMov.estadoComboBox.currentText()))
             self.pantallaRealizarMov.estadoComboBox.textActivated.connect(lambda: self.cant(0,self.pantallaRealizarMov.estadoComboBox.currentText()))
             self.pantallaRealizarMov.cursoComboBox.textActivated.connect(self.alumnos)
             self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.herramientas)
-
+            
+        self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
         self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
         
     #carga el resto de combobox de nuevo movimiento
     def realizarMovimiento(self, turno = None):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.count()<3:
-            sugerencias=[]
 
             for i in dal.obtenerDatos("tipos_mov", ""):
                 index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
@@ -1150,21 +1217,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 if index == -1:
                     self.pantallaRealizarMov.estadoComboBox.addItem(i[1])
 
-            for i in dal.obtenerDatos("clases", ""):
-                if i[2] not in {"Previas", "Egresado"}:
-                    index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
-                    if index == -1:
-                        self.pantallaRealizarMov.cursoComboBox.addItem(i[2])
-                sugerencias.append(i[2])
+            self.clases()
 
             for i in dal.obtenerDatos("ubicaciones", ""):
                 index = self.pantallaRealizarMov.tipoDeMovimientoComboBox.findText(i[1])
                 if index == -1:
                     self.pantallaRealizarMov.ubicacionComboBox.addItem(i[1])
 
-            self.pantallaRealizarMov.cursoComboBox.setCompleter(self.completar(sugerencias))
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.setCurrentIndex(-1)
-            self.pantallaRealizarMov.cursoComboBox.setCurrentIndex(-1)
             
         if turno:
             self.pantallaRealizarMov.tipoDeMovimientoComboBox.removeItem(
