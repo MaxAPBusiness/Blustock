@@ -1599,8 +1599,8 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setRowHeight(rowNum, 35)
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2006,8 +2006,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.saveOne(tabla, dal.saveAlumnos, datos),
                 lambda: self.deleteAlumnos(datos), tabla, rowNum)
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2184,11 +2184,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
-
 
         listaElem.setMinimumWidth(
             listaElem.minimumSizeHint().width() + 100
@@ -2236,8 +2235,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteGrupos(datos), tabla, rowNum)
                     
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         self.pantallaGrupos.tableWidget.horizontalHeader(
@@ -2333,8 +2332,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteOtroPersonal(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2424,8 +2423,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteSubgrupos(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2528,8 +2527,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
@@ -2597,8 +2596,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteUsuarios(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2696,8 +2695,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
@@ -2738,8 +2737,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 lambda: self.deleteUbis(datos), tabla, rowNum)
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader().setSectionResizeMode(
@@ -2839,8 +2838,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 tabla.setItem(rowNum, cellNum, item)
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.horizontalHeader(
@@ -3076,11 +3075,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 tabla.setItem(rowNum, cellNum, item)
 
             tabla.setRowHeight(rowNum, 35)
-        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.resizeRowsToContents()
-
+        tabla.resizeColumnsToContents()
         listaGestion.setMinimumWidth(
             listaGestion.minimumSizeHint().width() + 100
         )
@@ -3259,8 +3257,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable |
                               QtCore.Qt.ItemFlag.ItemIsEnabled)
                 tabla.setItem(rowNum, i, item)
-        tabla.resizeColumnsToContents()
         tabla.resizeRowsToContents()
+        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
             QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
         tabla.resizeRowsToContents()
@@ -3317,10 +3315,10 @@ class MainWindow(QtWidgets.QMainWindow):
                                   QtCore.Qt.ItemFlag.ItemIsEnabled)
                     tablaDeudas.setItem(rowNum, cellNum, item)
                 tablaDeudas.setRowHeight(rowNum, 35)
-            tablaDeudas.resizeColumnsToContents()
             tablaDeudas.resizeRowsToContents()
+            tablaDeudas.resizeColumnsToContents()
             tablaDeudas.setVerticalScrollBarPolicy(
-                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             tablaDeudas.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaDeudas.horizontalHeader(
@@ -3360,10 +3358,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     tablaBaja.setItem(rowNum, cellNum, item)
 
                 tablaBaja.setRowHeight(rowNum, 35)
-            tablaBaja.resizeColumnsToContents()
             tablaBaja.resizeRowsToContents()
+            tablaBaja.resizeColumnsToContents()
             tablaBaja.setVerticalScrollBarPolicy(
-                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+                QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             tablaBaja.horizontalHeader(
             ).setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
             tablaBaja.horizontalHeader(
