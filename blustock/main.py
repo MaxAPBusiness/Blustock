@@ -1214,10 +1214,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pantallaRealizarMov.estadoComboBox.textActivated.connect(lambda: self.cant(0,self.pantallaRealizarMov.estadoComboBox.currentText()))
             self.pantallaRealizarMov.cursoComboBox.textActivated.connect(self.alumnos)
             self.pantallaRealizarMov.ubicacionComboBox.textActivated.connect(self.herramientas)
-            
+
         self.pantallaRealizarMov.ubicacionComboBox.setCurrentIndex(-1)
         self.pantallaRealizarMov.alumnoComboBox.setCurrentIndex(-1)
-        
+        self.pantallaRealizarMov.herramientasDisponiblesLineEdit.setText("")
     #carga el resto de combobox de nuevo movimiento
     def realizarMovimiento(self, turno = None):
         if self.pantallaRealizarMov.tipoDeMovimientoComboBox.count()<3:
@@ -1674,16 +1674,18 @@ class MainWindow(QtWidgets.QMainWindow):
             tabla.setRowHeight(rowNum, 35)
         # Hacemos que las columnas no puedan ser menos anchas que sus
         # contenidos.
-        tabla.resizeRowsToContents()
-        tabla.resizeColumnsToContents()
         tabla.setVerticalScrollBarPolicy(
-            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded);
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         tabla.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             7, QtWidgets.QHeaderView.ResizeMode.Stretch)
         tabla.horizontalHeader().setSectionResizeMode(
             8, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.horizontalHeader().setSectionResizeMode(
+            9, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        tabla.resizeRowsToContents()
+#        tabla.resizeColumnsToContents()
 
         # Hacemos que cada vez que se edite una celda de una tabla, se
         # ejecuta la función.
